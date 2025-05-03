@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     # Your apps...
     "apps.authentication",
     "apps.coach",
-    "apps.messages",
+    "apps.chat_messages",
     "apps.prompts",
     "apps.users",
     # Third-party apps...

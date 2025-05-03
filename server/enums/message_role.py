@@ -22,6 +22,6 @@ class MessageRole(models.TextChoices):
 
     def __str__(self) -> str:
         """
-        Get a human-readable string representation of the question type.
+        Get a human-readable string representation of the message role.
         """
         return self.label
