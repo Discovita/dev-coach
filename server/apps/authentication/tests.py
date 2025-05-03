@@ -11,13 +11,9 @@ from django.urls import reverse
 from apps.users.models import User
 from unittest.mock import patch
 
-#                 Configure Logging
-# ★══════════════════════════════════════════════════★
-import logging
-from logs import logger
+from services.logger import configure_logging
 
-logger.configure_logging(__name__)
-log = logging.getLogger(__name__)
+log = configure_logging(__name__, log_level="INFO")
 
 
 class RegistrationTests(APITestCase):

@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import secrets
 from apps.users.models import User
 
-from cws_helpers.logger import configure_logging
+from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 

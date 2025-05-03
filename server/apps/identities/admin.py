@@ -1,3 +1,12 @@
 from django.contrib import admin
+from .models import Identity
 
-# Register your models here.
+@admin.register(Identity)
+class IdentityAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Identity model.
+    """
+    list_display = ("id", "user", "description", "state", "category", "created_at", "updated_at")
+    list_filter = ("state", "category", "created_at")
+    search_fields = ("description", "user__email")
+    readonly_fields = ("created_at", "updated_at")

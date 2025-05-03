@@ -19,109 +19,36 @@ from .models import User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """
-    Enhanced admin interface for User model management.
-
-    Features:
-    - List view with key user information
-    - Filtering by status and roles
-    - Search across multiple fields
-    - Organized fieldsets for better data management
-    - Custom actions for bulk operations
-    - Configured for email-based authentication (no username field)
+    Admin configuration for the custom User model.
     """
-
-    # Fields shown in the list view
-    list_display = (
-        "email",
-        "get_full_name",
-        "is_active",
-        "is_admin",
-        "is_superuser",
-        "is_staff",
-        "last_login",
-        "date_joined",
-    )
-
-    # Fields that can be used to filter the list
-    list_filter = (
-        "is_active",
-        "is_admin",
-        "is_superuser",
-        "is_staff",
-        "date_joined",
-        "last_login",
-        "email_verification_sent_at",
-    )
-
-    # Fields that can be searched
-    search_fields = (
-        "email",
-        "first_name",
-        "last_name",
-    )
-
-    # Fields that can be edited from the list view
-    list_editable = ("is_active",)
-
-    # How many items to show per page
-    list_per_page = 25
-
-    # Default ordering
-    ordering = ("-date_joined",)
-
-    # Organization of fields in the edit form
-    # fieldsets defines the layout of fields when editing an existing user in the admin
+    # Fields to display in the admin list view
+    list_display = ("email", "first_name", "last_name", "is_staff", "is_active", "is_superuser", "created_at")
+    # Fields to filter by in the admin list view
+    list_filter = ("is_staff", "is_active", "is_superuser")
+    # Fields to search by
+    search_fields = ("email", "first_name", "last_name")
+    # Fieldsets for the detail/edit view
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name")}),
-        (
-            _( "Permissions"),
-            {
-                "fields": (
-                    "is_active",
-                    "is_staff",
-                    "is_admin",
-                    "is_superuser",
-                    "groups",
-                    "user_permissions",
-                ),
-            },
-        ),
-        (
-            _( "Email verification"),
-            {
-                "fields": ("verification_token", "email_verification_sent_at"),
-                "classes": ("collapse",),
-            },
-        ),
-        (
-            _( "Important dates"),
-            {
-                "fields": ("last_login", "date_joined", "created_at", "updated_at"),
-            },
-        ),
+        ("Personal info", {"fields": ("first_name", "last_name")}),
+        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        ("Important dates", {"fields": ("last_login", "created_at", "updated_at")}),
+        ("Verification", {"fields": ("verification_token", "email_verification_sent_at")}),
     )
-
-    # add_fieldsets defines the layout of fields when creating a new user in the admin
     add_fieldsets = (
-        (
-            None,
-            {
-                "classes": ("wide",),
-                # Only email and password fields are required for user creation
-                "fields": ("email", "password1", "password2"),
-            },
-        ),
+        (None, {
+            "classes": ("wide",),
+            "fields": ("email", "password1", "password2", "is_staff", "is_active", "is_superuser"),
+        }),
     )
+    ordering = ("email",)
+    readonly_fields = ("created_at", "updated_at", "last_login", "email_verification_sent_at")
 
-    # Read-only fields that shouldn't be edited
-    readonly_fields = (
-        "date_joined",
-        "last_login",
-        "created_at",
-        "updated_at",
-        "email_verification_sent_at",
-    )
+    # Use email as the unique identifier
+    def get_fieldsets(self, request, obj=None):
+        if not obj:
+            return self.add_fieldsets
+        return super().get_fieldsets(request, obj)
 
     def get_full_name(self, obj):
         """Get user's full name or email if name not set."""

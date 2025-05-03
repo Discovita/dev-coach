@@ -4,13 +4,9 @@ from django.core.cache import caches
 from django.core.cache.backends.memcached import BaseMemcachedCache
 from django.conf import settings
 
-#                 Configure Logging
-# ★══════════════════════════════════════════════════★
-import logging
-from logs import logger
+from services.logger import configure_logging
 
-logger.configure_logging(__name__)
-log = logging.getLogger(__name__)
+log = configure_logging(__name__, log_level="INFO")
 
 
 class HealthCheckMiddleware(object):

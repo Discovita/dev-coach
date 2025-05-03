@@ -15,13 +15,9 @@ from .utils import (
 from rest_framework.response import Response
 from django.db import transaction
 
-#                 Configure Logging
-# ★══════════════════════════════════════════════════★
-import logging
-from logs import logger
+from services.logger import configure_logging
 
-logger.configure_logging(__name__)
-log = logging.getLogger(__name__)
+log = configure_logging(__name__, log_level="INFO")
 
 
 class AuthViewSet(viewsets.GenericViewSet):
