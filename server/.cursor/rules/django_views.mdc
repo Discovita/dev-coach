@@ -1,0 +1,551 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Creating new views, troubleshooting issues, External services
+globs:
+alwaysApply: false
+---
+
+---
+
+description: Backend endpoints and views
+globs:
+alwaysApply: false
+
+---
+
+# Django Views Standards
+
+# This document outlines the standards for implementing views in our Django backend.
+
+## Overview
+
+We use Django REST Framework (DRF) as our primary tool for building APIs.
+All new views should use DRF components for consistency and to leverage its built-in features.
+
+## View Patterns
+
+### 1. Function-Based Views with @api_view
+
+Use for simple, single-purpose endpoints.
+
+```python
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def my_endpoint(request):
+    """
+    Single-purpose endpoint for handling specific operations.
+
+    This pattern is ideal for simple, stateless operations that don't require
+    complex authentication or shared functionality.
+    """
+    try:
+        # Your logic here
+        return Response({
+            'success': True,
+            'data': result
+        })
+    except Exception as e:
+        logger.error(f"Error in my_endpoint: {str(e)}", exc_info=True)
+        return Response({
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+```
+
+When to use:
+
+- Single HTTP method handlers
+- Simple request/response processing
+- Stateless operations
+- No need for complex authentication or permission logic
+
+### 2. Class-Based APIView
+
+Use for more complex endpoints with shared functionality.
+
+```python
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+class MyComplexView(APIView):
+    """
+    Complex view handling multiple HTTP methods with shared functionality.
+
+    This pattern is suitable when you need:
+    1. Multiple HTTP methods for the same resource
+    2. Shared setup or validation logic
+    3. Custom authentication or permissions
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Handle GET requests with shared functionality."""
+        try:
+            # GET logic
+            return Response({
+                'success': True,
+                'data': data
+            })
+        except Exception as e:
+            return self.handle_exception(e)
+
+    def post(self, request):
+        """Handle POST requests with shared functionality."""
+        try:
+            # POST logic
+            return Response({
+                'success': True,
+                'data': data
+            })
+        except Exception as e:
+            return self.handle_exception(e)
+
+    def handle_exception(self, exc):
+        """Centralized exception handling for all methods."""
+        logger.error(f"Error in {self.__class__.__name__}: {str(exc)}", exc_info=True)
+        return Response({
+            'success': False,
+            'error': str(exc)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+```
+
+When to use:
+
+- Multiple HTTP methods for the same resource
+- Need for shared functionality between methods
+- Custom authentication/permission handling
+- Complex request processing
+
+### 3. ViewSets
+
+Choose the appropriate ViewSet type based on your use case:
+
+#### 3.1 Model ViewSets
+
+Use for straightforward Django model CRUD operations with minimal customization.
+
+```python
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+class MyModelViewSet(viewsets.ModelViewSet):
+    """
+    Standard ModelViewSet for CRUD operations on MyModel.
+
+    This ViewSet provides default implementations for:
+    - list()
+    - create()
+    - retrieve()
+    - update()
+    - destroy()
+
+    Use this pattern when working directly with Django models
+    and standard CRUD operations are sufficient.
+    """
+    serializer_class = MyModelSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = MyModel.objects.all()
+```
+
+When to use:
+
+- Direct Django model operations
+- Standard filtering and pagination
+- Default CRUD behavior is sufficient
+- No external service dependencies
+
+#### 3.2 Custom ViewSets
+
+Use when you need more control over endpoint behavior or complex logic.
+
+```python
+from rest_framework import viewsets, decorators
+from rest_framework.response import Response
+
+class MyCustomViewSet(viewsets.ViewSet):
+    """
+    Custom ViewSet with explicit method definitions for better control.
+
+    This pattern provides full control over:
+    1. URL routing through @action decorators
+    2. Request handling and validation
+    3. Response formatting
+    4. Error handling
+    """
+
+    @action(detail=False, methods=['get'], url_path='list')
+    def list_items(self, request):
+        """
+        List resources with custom filtering and processing.
+
+        Steps:
+        1. Validate query parameters
+        2. Apply custom filters
+        3. Process results
+        4. Format response
+        """
+        try:
+            # Custom logic here
+            return Response({
+                'success': True,
+                'data': data,
+                'metadata': metadata
+            })
+        except Exception as e:
+            logger.error(f"Error in list_items: {str(e)}", exc_info=True)
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+```
+
+When to use:
+
+- Complex business logic
+- Custom response formatting
+- Non-standard CRUD operations
+- Mixed data sources (DB + cache + external)
+
+#### 3.3 External API ViewSets
+
+Use for proxying requests to external APIs while maintaining consistent patterns.
+
+```python
+from rest_framework import viewsets, decorators
+from rest_framework.response import Response
+
+class ExternalAPIViewSet(viewsets.ViewSet):
+    """
+    ViewSet for external API interactions.
+
+    Key responsibilities:
+    1. Initialize and manage external API client
+    2. Transform requests to external API format
+    3. Handle external API errors
+    4. Transform responses to our API format
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client = self.get_api_client()
+        logger.info(f"{self.__class__.__name__} initialized with API client")
+
+    @decorators.action(detail=False, methods=['get'], url_path='list')
+    def list_resources(self, request):
+        """
+        List resources from external API with filtering.
+
+        Steps:
+        1. Extract and validate query parameters
+        2. Transform parameters to external API format
+        3. Make external API request
+        4. Transform and return response
+        """
+        try:
+            params = self.build_filter_params(request.query_params)
+            logger.info(f"Fetching resources with params: {params}")
+
+            response = self.client.list_resources(**params)
+            logger.info(f"Retrieved {len(response.get('results', []))} resources")
+
+            return Response({
+                'success': True,
+                'data': response
+            })
+        except Exception as e:
+            logger.error(f"External API error: {str(e)}", exc_info=True)
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+```
+
+Key principles for all ViewSets:
+
+1. Explicit is better than implicit
+
+   - Use `@action` decorators to make endpoints clear
+   - Define custom methods rather than relying on defaults
+   - Document expected inputs and outputs
+
+2. Consistent URL patterns:
+
+   ```
+   GET    /{resource}/list/              # List resources
+   GET    /{resource}/{id}/detail/       # Get single resource
+   POST   /{resource}/create/            # Create resource
+   PUT    /{resource}/{id}/update/       # Update resource
+   DELETE /{resource}/{id}/delete/       # Delete/mark as deleted
+   ```
+
+3. Error handling:
+
+   - Always use try/except blocks
+   - Log errors with context
+   - Return consistent error responses
+   - Include appropriate status codes
+
+4. Response formatting:
+
+   ```python
+   # Success response
+   return Response({
+       'success': True,
+       'data': result,
+       'metadata': {
+           'total': count,
+           'page': current_page
+       }
+   })
+
+   # Error response
+   return Response({
+       'success': False,
+       'error': str(error),
+       'detail': error_details
+   }, status=error_status)
+   ```
+
+5. Parameter validation:
+   - Validate parameters early
+   - Use serializers for complex validation
+   - Document parameter requirements
+   - Handle nested parameters appropriately
+
+When choosing a ViewSet type:
+
+- Start with `ViewSet` and explicit `@action` methods
+- Use `ModelViewSet` only for simple CRUD operations
+- Consider mixing ViewSet types in your app based on needs
+- Default to explicit methods over automatic routing
+
+### 4. Async Views
+
+Use for long-running operations or when true async benefits are needed.
+NOTE: Most external API interactions should use ViewSets unless you specifically need async capabilities.
+
+When to use Async Views:
+
+- Long-running background tasks
+- WebSocket connections
+- Server-sent events
+- Parallel external API calls
+- Real-time data processing
+
+When to use ViewSets instead:
+
+- Simple external API proxying
+- Standard CRUD operations
+- Request/response patterns
+- When you need DRF features (serializers, permissions, etc.)
+- When async doesn't provide meaningful benefits
+
+```python
+from django.views import View
+from django.http import JsonResponse
+from asgiref.sync import sync_to_async
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+import asyncio
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AsyncView(View):
+    """
+    Base pattern for truly async operations.
+
+    Key features:
+    1. Handles parallel API calls efficiently
+    2. Proper resource cleanup
+    3. Consistent error handling
+    4. Maintains response format compatibility
+    """
+
+    async def post(self, request):
+        """
+        Handle POST requests asynchronously.
+
+        Steps:
+        1. Validate request data
+        2. Execute parallel operations
+        3. Aggregate results
+        4. Format and return response
+        """
+        try:
+            results = await asyncio.gather(
+                self.call_api_1(),
+                self.call_api_2(),
+                self.call_api_3()
+            )
+
+            return JsonResponse({
+                'success': True,
+                'data': results
+            })
+        except Exception as e:
+            logger.error(f"Async operation error: {str(e)}", exc_info=True)
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+```
+
+Key Rules for Async Views:
+
+1. View Setup:
+
+   - Use Django's base `View` class for async views, not DRF's `APIView` or ViewSets
+   - Always add `@method_decorator(csrf_exempt, name='dispatch')` for API endpoints
+   - Use `JsonResponse` instead of DRF's `Response` in async views
+   - If replacing a DRF endpoint, maintain the exact same response format
+
+2. Database Operations:
+
+   ```python
+   # Good - Using sync_to_async or asyncio.to_thread
+   result = await asyncio.to_thread(lambda: Model.objects.filter(complex_query))
+   await asyncio.to_thread(obj.save)
+   obj = await sync_to_async(Model.objects.get)(id=id)
+
+   # Serializer operations
+   serialized = await sync_to_async(UserSerializer)(obj, many=True)
+   data = await sync_to_async(lambda: serialized.data)()
+   ```
+
+3. Error Handling:
+
+   ```python
+   try:
+       result = await asyncio.to_thread(lambda: Model.objects.get(id=id))
+   except Model.DoesNotExist:
+       logger.error(f"Object not found: {id}")
+       return JsonResponse({
+           'success': False,
+           'error': 'Not found',
+           'detail': f'No object with id {id}'
+       }, status=404)
+   except Exception as e:
+       logger.error(f"Database error: {str(e)}", exc_info=True)
+       return JsonResponse({
+           'success': False,
+           'error': 'Operation failed',
+           'detail': str(e)
+       }, status=500)
+   ```
+
+4. Response Format:
+
+   ```python
+   # Success response
+   return JsonResponse({
+       'success': True,
+       'data': {
+           'results': data,
+           'total': len(data)
+       }
+   })
+
+   # Error response
+   return JsonResponse({
+       'success': False,
+       'error': 'Operation failed',
+       'detail': str(error)
+   }, status=500)
+   ```
+
+## Standards and Best Practices
+
+1. Response Objects
+
+   - ALWAYS use DRF's Response class for ViewSets and APIViews
+   - Use JsonResponse for async views
+   - Maintain consistent response structure
+
+2. Error Handling
+
+   - Use appropriate exception types
+   - Include detailed error messages
+   - Log errors with context
+   - Use correct status codes
+
+3. Authentication
+
+   - Use DRF's authentication classes
+   - Handle async authentication properly
+   - Document authentication requirements
+
+4. Request Validation
+   - Validate parameters early
+   - Use serializers when possible
+   - Return clear validation errors
+
+## Migration Strategy
+
+1. New views should follow these patterns
+2. Existing views can be migrated gradually
+3. Document any legacy patterns
+4. Maintain backwards compatibility during migration
+
+## Questions to Ask When Creating Views
+
+1. Is this a simple, single-purpose endpoint? → Use @api_view
+2. Does it need shared functionality or multiple methods? → Use APIView
+3. Is it a full CRUD resource? → Use ViewSet
+4. Does it involve external services or long-running tasks? → Consider AsyncView
+5. Are there similar existing views? → Follow their pattern if it matches these standards
+
+# Django View Routing
+
+## Standalone API Views vs ViewSet Actions
+
+There are two main ways to add endpoints in Django REST Framework:
+
+1. ViewSet Actions:
+
+```python
+@decorators.action(detail=True, methods=['POST'])
+def my_action(self, request, pk=None):
+    # ViewSet action implementation
+```
+
+- Added to `urls.py` automatically via router registration
+- Path format: `/api/v1/users/{pk}/my-action/`
+- Requires ViewSet to be registered with router
+
+2. Standalone API Views:
+
+```python
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def my_endpoint(request, pk=None):
+    # Standalone view implementation
+```
+
+- Must be added manually to `urls.py` urlpatterns
+- Path format: Same as ViewSet but needs explicit path()
+- More flexible for async/special cases
+
+### Key Rules:
+
+1. If adding to existing ViewSet: Use `@action` decorator
+2. If standalone functionality: Use `@api_view` + manual URL pattern
+3. ALWAYS check `urls.py` after adding new view
+4. For standalone views, add pattern like:
+
+```python
+path('<str:pk>/my-endpoint/', my_endpoint, name='my-endpoint')
+```
+
+### Common Gotchas:
+
+- 404 errors often mean URL pattern is missing
+- Format suffix errors usually mean using ViewSet decorators on standalone view
+- Always check both app-specific urls.py AND main urls.py

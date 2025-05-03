@@ -1,0 +1,16 @@
+{
+  "name": "Empty State",
+  "description": "Empty state to test initial message loading",
+  "coach_state": {
+    "current_state": "introduction",
+    "user_profile": {
+      "name": "test_user",
+      "goals": []
+    },
+    "identities": [],
+    "proposed_identity": null,
+    "current_identity_id": null,
+    "conversation_history": [],
+    "metadata": {}
+  }
+}
