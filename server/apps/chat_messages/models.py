@@ -9,11 +9,17 @@ class ChatMessage(models.Model):
     Stores a single message in the conversation history for the coaching chatbot.
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(
+    primary_key=True,
+    default=uuid.uuid4,
+    editable=False,
+    unique=True,
+    help_text="Unique identifier for this object."
+)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="messages",
+        related_name="chat_messages",
         help_text="The user this message belongs to.",
         db_index=True,
     )

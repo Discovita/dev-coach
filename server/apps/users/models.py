@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.mail import send_mail
@@ -9,6 +11,13 @@ class User(AbstractUser):
     All of the fields from AbstractUser are explicitly defined here so as to make it clear what fields are available.
     """
 
+    id = models.UUIDField(
+    primary_key=True,
+    default=uuid.uuid4,
+    editable=False,
+    unique=True,
+    help_text="Unique identifier for this object."
+)
     # Remove username field as we use email
     username = None
 

@@ -6,7 +6,13 @@ from apps.users.models import User
 
 
 class Prompt(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(
+    primary_key=True,
+    default=uuid.uuid4,
+    editable=False,
+    unique=True,
+    help_text="Unique identifier for this object."
+)
     owner = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,

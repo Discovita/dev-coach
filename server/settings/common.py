@@ -142,9 +142,19 @@ WSGI_APPLICATION = "server.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# Use SQLite for local development for simplicity and zero setup.
+# The database file will be created at the project root as db.sqlite3.
 DATABASES = {
-    "default": env.db("DJANGO_DATABASE_DEV_URL", default=""),
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+    }
 }
+
+# To use a different database (e.g., Postgres), comment out the above and uncomment below:
+# DATABASES = {
+#     "default": env.db("DJANGO_DATABASE_DEV_URL", default=""),
+# }
 
 
 # Password validation
@@ -231,13 +241,5 @@ AWS_SES_REGION_ENDPOINT = env("AWS_SES_REGION_ENDPOINT")
 AWS_SES_SOURCE_EMAIL = env("AWS_SES_SOURCE_EMAIL")
 
 # Frontend URL for email links
-FRONTEND_URL = env("FRONTEND_URL", default="https://incept.school")
+FRONTEND_URL = env("FRONTEND_URL", default="")
 EMAIL_VERIFICATION_URL = f"{FRONTEND_URL}/verify-email"  # /verify-email/[token]
-
-API_BASE_URL = {
-    "production": "https://api.store.incept.school/api/v1/",
-    "local": "http://127.0.0.1:8000/api/v1/",
-}
-
-
-POWER_PATH_BASE_URL = "https://api.alpha1edtech.com"

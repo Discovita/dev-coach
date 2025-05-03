@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from enums.identity_category import IdentityCategory
 from enums.identity_state import IdentityState
@@ -13,10 +15,12 @@ class Identity(models.Model):
     """
 
     id = models.UUIDField(
-        primary_key=True,
-        editable=False,
-        unique=True,
-    )
+    primary_key=True,
+    default=uuid.uuid4,
+    editable=False,
+    unique=True,
+    help_text="Unique identifier for this object."
+)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
