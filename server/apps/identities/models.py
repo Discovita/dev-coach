@@ -1,0 +1,50 @@
+from django.db import models
+from enums.identity_category import IdentityCategory
+from enums.identity_state import IdentityState
+from apps.users.models import User
+
+
+# The Identity model stores a single identity for a user, including its state, notes, and category.
+# This model is used in the coaching system to track user identities and their progress.
+# Referenced in: CoachState, coaching logic, admin, and API serializers.
+class Identity(models.Model):
+    """
+    Represents a single identity with its state for a user in the coaching system.
+    """
+
+    id = models.UUIDField(
+        primary_key=True,
+        editable=False,
+        unique=True,
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="identities",
+        help_text="The user this identity belongs to.",
+    )
+    description = models.TextField(help_text="Description of the identity.")
+    state = models.CharField(
+        max_length=32,
+        choices=IdentityState.choices,
+        default=IdentityState.PROPOSED,
+        help_text="Current state of the identity (proposed, accepted, refinement complete).",
+    )
+    notes = models.JSONField(default=list, help_text="Notes about the identity.")
+    category = models.CharField(
+        max_length=32,
+        choices=IdentityCategory.choices,
+        help_text="Category this identity belongs to.",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True, help_text="Timestamp when the identity was created."
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True, help_text="Timestamp when the identity was last updated."
+    )
+
+    def __str__(self):
+        """
+        String representation of the identity for admin/debugging.
+        """
+        return f"{self.description[:30]} ({self.get_category_display()}) - {self.get_state_display()}"

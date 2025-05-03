@@ -4,7 +4,7 @@ from apps.users.models import User
 import uuid
 
 
-class Message(models.Model):
+class ChatMessage(models.Model):
     """
     Stores a single message in the conversation history for the coaching chatbot.
     """
