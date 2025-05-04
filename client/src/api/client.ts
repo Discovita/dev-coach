@@ -1,9 +1,9 @@
 import { CoachRequest, CoachResponse } from './types';
-import { API_BASE_URL } from '@/constants/api';
+import { COACH_BASE_URL } from '@/constants/api';
 
 export class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${COACH_BASE_URL}${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',

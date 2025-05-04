@@ -1,15 +1,17 @@
 import { Link } from "react-router-dom";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
-export default function Navbar() {
+export default function AdminNavbar() {
   const centerLinks = [
     { label: "Home", to: "/", ariaCurrent: true },
     { label: "Chat", to: "/chat" },
+    { label: "Test", to: "/test" },
+    { label: "Prompts", to: "/prompts" },
     // Add more links here as needed
   ];
 
   return (
-    <nav className="_Navbar w-full">
+    <nav className="_AdminNavbar w-full">
       <div className="flex flex-wrap justify-between items-center mx-auto p-2 bg-gold-600 border-b border-gray-200 dark:bg-neutral-800 dark:border-gray-800">
         <Link
           to="/"

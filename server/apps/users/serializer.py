@@ -27,7 +27,6 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",  # Active status
             "is_superuser",  # Django superuser flag
             "is_staff",  # Staff/admin page access
-            "is_admin",  # Admin flag
             "last_login",  # Last login timestamp
             "date_joined",  # Date joined
             "created_at",  # Created at timestamp

@@ -57,7 +57,7 @@ class User(AbstractUser):
     is_staff = models.BooleanField(
         "Can Access Admin Page",
         default=False,
-        help_text="Designates whether the user can access the admin site.",
+        help_text="Designates whether the user can access the admin site. Also designates if the user is an admin on the site.",
     )
 
     is_active = models.BooleanField(

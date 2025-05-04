@@ -1,51 +1,58 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Link } from 'react-router-dom';
-import { FaGoogle, FaApple, FaInfoCircle } from 'react-icons/fa';
-import { PASSWORD_REGEX, EMAIL_REGEX } from '@/pages/signup/constants/constants';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom";
+import { FaGoogle, FaApple } from "react-icons/fa";
+import {
+  PASSWORD_REGEX,
+  EMAIL_REGEX,
+} from "@/pages/signup/constants/constants";
+import { useAuth } from "@/hooks/use-auth";
+import { FormMessage, Message } from "@/components/FormMessage";
 
-export function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
+export function SignupForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  const {
+    register,
+    registerStatus,
+    user,
+    isLoading: isAuthLoading,
+  } = useAuth();
+  const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
-  const errorRef = useRef(null);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false); // whether the Email validates or not
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [validPassword, setValidPassword] = useState(false); // whether the password validates or not
-  const [matchPassword, setMatchPassword] = useState('');
+  const [matchPassword, setMatchPassword] = useState("");
   const [validMatch, setValidMatch] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [attemptedSubmit, setAttemptedSubmit] = useState(false); // whether the form has been submitted or not
+  const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [message, setMessage] = useState<Message | null>(null);
 
-  // This useEffect hook is used to automatically focus the email input field
-  // when the component mounts. The empty dependency array [] ensures that this
-  // effect runs only once after the initial render.
+  // automatically focus the email input field when the component mounts.
   useEffect(() => {
     emailRef.current?.focus();
   }, []);
 
-  // This useEffect hook is used to validate the email input every time it
-  // changes. The dependency array [email] ensures that this effect runs
-  // whenever the 'email' state changes. The EMAIL_REGEX.test(email) checks if
-  // the email input matches the defined regular expression. The result is then
-  // used to update the 'validEmail' state.
+  // validate the email input every time it changes.
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
     setValidEmail(result);
   }, [email]);
 
-  // This useEffect hook is used to validate the password and its confirmation
-  // every time they change. The dependency array [password, matchPassword]
-  // ensures that this effect runs whenever either 'password' or 'matchPassword'
-  // state changes. The PASSWORD_REGEX.test(password) checks if the password
-  // input matches the defined regular expression. The result is then used to
-  // update the 'validPassword' state. The password === matchPassword checks if
-  // the password and its confirmation match. The result is then used to update
-  // the 'validMatch' state.
+  // validate the password and its confirmation every time they change.
   useEffect(() => {
     const result = PASSWORD_REGEX.test(password);
     setValidPassword(result);
@@ -53,29 +60,65 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
     setValidMatch(match);
   }, [password, matchPassword]);
 
-  // This useEffect hook is used to clear the error message every time the email
-  // input, password, or its confirmation changes. The dependency array [email,
-  // password, matchPassword] ensures that this effect runs whenever either
-  // 'email', 'password', or 'matchPassword' state changes. The
-  // setErrorMessage('') clears the error message.
+  // Redirect if user is logged in and registration was successful
   useEffect(() => {
-    setErrorMessage('');
-  }, [email, password, matchPassword]);
+    if (!isAuthLoading && user && registerSuccess) {
+      navigate("/");
+    }
+  }, [user, isAuthLoading, navigate, registerSuccess]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setAttemptedSubmit(true);
-    const v1 = EMAIL_REGEX.test(email);
-    const v2 = PASSWORD_REGEX.test(password);
-    if (!v1 || !v2) {
-      // setErrorMessage('Invalid Entry');
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setMessage(null);
+
+    // Client-side validation
+    if (!validEmail) {
+      setMessage({ error: "Please enter a valid email address." });
       return;
     }
-    // Implement Create User Logic
+    if (!validPassword) {
+      setMessage({ error: "Password does not meet requirements." });
+      return;
+    }
+    if (!validMatch) {
+      setMessage({ error: "Passwords do not match." });
+      return;
+    }
+
+    try {
+      const response = await register({ email, password });
+      if (response.success) {
+        setRegisterSuccess(true);
+        setMessage({ success: "Registration successful!" });
+      } else {
+        let errorMsg = response.error;
+        if (typeof errorMsg === "object" && errorMsg !== null) {
+          // Convert error object to a readable string
+          errorMsg = Object.entries(errorMsg)
+            .map(
+              ([field, msgs]) =>
+                `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`
+            )
+            .join("; ");
+        }
+        setMessage({
+          error: errorMsg || "Registration failed. Please try again.",
+        });
+      }
+    } catch {
+      setMessage({ error: "An unexpected error occurred. Please try again." });
+    }
   };
 
   return (
-    <div className={cn('_SignupForm flex flex-col gap-6 mx-auto w-[450px]', className)} {...props}>
+    <div
+      className={cn(
+        "_SignupForm flex flex-col gap-6 mx-auto w-[450px]",
+        className
+      )}
+      {...props}
+    >
       {/* Card container with adaptive background and shadow for dark mode */}
       <Card className="w-full bg-card dark:bg-gold-400 shadow-gold-sm dark:shadow-gold-md border border-border dark:border-gold-700">
         <CardHeader className="text-center">
@@ -109,10 +152,13 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                   or create an account with
                 </span>
               </div>
-              {/* Email/password fields with gold highlights in dark mode */}
+              {/* Email/password fields with gold highlights in dark mode */}{" "}
               <div className="grid gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="email" className="text-gold-900 dark:text-gold-100">
+                  <Label
+                    htmlFor="email"
+                    className="text-gold-900 dark:text-gold-100"
+                  >
                     Email
                   </Label>
                   <Input
@@ -121,40 +167,43 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                     placeholder="m@example.com"
                     required
                     ref={emailRef}
-                    aria-invalid={validEmail ? 'false' : 'true'}
-                    aria-describedby="emailnote"
-                    onChange={e => setEmail(e.target.value)}
+                    aria-invalid={validEmail ? "false" : "true"}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="bg-background dark:bg-gold-700/40 border border-border dark:border-gold-600 text-foreground dark:text-gold-50 placeholder:text-muted-foreground dark:placeholder:text-gold-300 focus:ring-2 focus:ring-gold-500"
                   />
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="password" className="text-gold-900 dark:text-gold-100">
+                  <Label
+                    htmlFor="password"
+                    className="text-gold-900 dark:text-gold-100"
+                  >
                     Password
                   </Label>
                   <Input
                     name="password"
-                    type={'password'}
+                    type={"password"}
                     id="password"
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
-                    aria-invalid={validPassword ? 'false' : 'true'}
-                    aria-describedby="passwordnote"
+                    aria-invalid={validPassword ? "false" : "true"}
                     showPasswordToggle
                     className="bg-background dark:bg-gold-700/40 border border-border dark:border-gold-600 text-foreground dark:text-gold-50 placeholder:text-muted-foreground dark:placeholder:text-gold-300 focus:ring-2 focus:ring-gold-500"
                   />
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="confirm_password" className="text-gold-900 dark:text-gold-100">
+                  <Label
+                    htmlFor="confirm_password"
+                    className="text-gold-900 dark:text-gold-100"
+                  >
                     Confirm Password
                   </Label>
                   <Input
                     name="confirm_password"
-                    type={'password'}
+                    type={"password"}
                     id="confirm_password"
-                    onChange={e => setMatchPassword(e.target.value)}
+                    onChange={(e) => setMatchPassword(e.target.value)}
                     required
-                    aria-invalid={validMatch ? 'false' : 'true'}
-                    aria-describedby="confirmnote"
+                    aria-invalid={validMatch ? "false" : "true"}
                     showPasswordToggle
                     className="bg-background dark:bg-gold-700/40 border border-border dark:border-gold-600 text-foreground dark:text-gold-50 placeholder:text-muted-foreground dark:placeholder:text-gold-300 focus:ring-2 focus:ring-gold-500"
                   />
@@ -163,12 +212,17 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                   type="submit"
                   className="w-full bg-gold-500 hover:bg-gold-600 text-white dark:bg-gold-700 dark:hover:bg-gold-600 dark:text-gold-50 font-semibold shadow-gold-md"
                 >
-                  Signup
+                  {registerStatus === "pending" ? "Signing Up..." : "Sign up"}
                 </Button>
               </div>
+              {message && (
+                <div className="w-full">
+                  <FormMessage message={message} />
+                </div>
+              )}
               {/* Login link with gold hover in dark mode */}
               <div className="text-center text-sm text-muted-foreground dark:text-gold-200">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <Link
                   to="/login"
                   className="underline underline-offset-4 hover:text-gold-700 dark:hover:text-gold-300"
@@ -176,79 +230,14 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                   Log in
                 </Link>
               </div>
-              {/* Error message and info notes styled for both themes */}
-              <p
-                ref={errorRef}
-                className={errorMessage ? 'errmsg' : 'offscreen'}
-                aria-live="assertive"
-              >
-                {errorMessage}
-              </p>
-              <div
-                id="emailnote"
-                className={`mt-3 flex gap-5 rounded-lg bg-neutral-100 p-3 text-left text-sm dark:bg-neutral-950 ${
-                  attemptedSubmit && !validEmail ? '' : 'hidden'
-                }`}
-              >
-                <FaInfoCircle className="mt-1 text-gold-600" aria-hidden="true" size={15} />
-                <p>
-                  Must start with alphanumeric, <span aria-label="dot">.</span> ,{' '}
-                  <span aria-label="underscore">_</span> , <span aria-label="percent sign">%</span>{' '}
-                  , <span aria-label="plus sign">+</span> , or <span aria-label="hyphen">-</span> .
-                  <br />
-                  Must contain @ symbol.
-                  <br />
-                  Must have alphanumeric, dot, or hyphen after @.
-                  <br />
-                  Must contain a dot after @.
-                  <br />
-                  Must end with two or more alphabets.
-                </p>
-              </div>
-              <div
-                id="passwordnote"
-                className={`mt-3 flex items-start gap-4 rounded-lg border-l-4 border-gold-400 bg-gold-50 p-4 text-left text-sm shadow-sm dark:border-gold-600 dark:bg-gold-950 dark:text-gold-100 ${
-                  attemptedSubmit && !validPassword ? '' : 'hidden'
-                }`}
-              >
-                <FaInfoCircle className="mt-1 text-gold-600" aria-hidden="true" size={15} />
-                <p>
-                  Must be at 8 to 24 characters long.
-                  <br />
-                  Must contain at least one uppercase letter.
-                  <br />
-                  Must contain at least one lowercase letter.
-                  <br />
-                  Must contain at least one number.
-                  <br />
-                  Must contain at least one special character.
-                  <br />
-                  Allowed special characters are: <span aria-label="exclamation mark">!</span>
-                  <span aria-label="at symbol">@</span>
-                  <span aria-label="pound sign">#</span>
-                  <span aria-label="dollar sign">$</span>
-                  <span aria-label="percent sign">%</span>
-                  <span aria-label="caret">^</span>
-                  <span aria-label="ampersand">&</span>
-                  <span aria-label="asterisk">*</span>
-                </p>
-              </div>
-              <div
-                id="confirmnote"
-                className={`mt-3 flex items-start gap-4 rounded-lg border-l-4 border-gold-400 bg-gold-50 p-4 text-left text-sm shadow-sm dark:border-gold-600 dark:bg-gold-950 dark:text-gold-100 ${
-                  attemptedSubmit && !validMatch ? '' : 'hidden'
-                }`}
-              >
-                <FaInfoCircle className="mt-1 text-gold-600" aria-hidden="true" size={15} />
-                <p>Passwords must match.</p>
-              </div>
             </div>
           </form>
         </CardContent>
       </Card>
       {/* Terms and privacy links with gold hover in dark mode */}
       <div className="text-muted-foreground dark:text-gold-300 *:[a]:hover:text-gold-500 dark:*:[a]:hover:text-gold-200 text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <Link to="#">Terms of Service</Link> and{' '}
+        By clicking continue, you agree to our{" "}
+        <Link to="#">Terms of Service</Link> and{" "}
         <Link to="#">Privacy Policy</Link>.
       </div>
     </div>

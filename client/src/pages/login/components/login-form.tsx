@@ -1,24 +1,81 @@
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Link } from 'react-router-dom';
-import { FaGoogle, FaApple } from 'react-icons/fa';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Link, useNavigate } from "react-router-dom";
+import { FaGoogle, FaApple } from "react-icons/fa";
 
-export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { FormMessage, Message } from "@/components/FormMessage";
+
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  const { login, loginStatus } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  // Message state for displaying errors or info via FormMessage
+  const [message, setMessage] = useState<Message | null>(null);
+  // Initialize navigate for programmatic navigation
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setMessage(null);
+
+    try {
+      const response = await login({ email, password });
+      if (response.success) {
+        // Login successful, navigate to chat
+        console.log("Navigating to chat");
+        navigate("/chat");
+      } else {
+        let errorMsg = response.error;
+        if (typeof errorMsg === "object" && errorMsg !== null) {
+          // Convert error object to a readable string
+          errorMsg = Object.entries(errorMsg)
+            .map(
+              ([field, msgs]) =>
+                `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`
+            )
+            .join("; ");
+        }
+        setMessage({ error: errorMsg || "Login failed. Please try again." });
+      }
+    } catch {
+      setMessage({ error: "An unexpected error occurred. Please try again." });
+    }
+  };
+
   return (
-    <div className={cn('_LoginForm flex flex-col gap-6 mx-auto w-[450px]', className)} {...props}>
+    <div
+      className={cn(
+        "_LoginForm flex flex-col gap-6 mx-auto w-[450px]",
+        className
+      )}
+      {...props}
+    >
       {/* Card container with adaptive background and shadow for dark mode */}
       <Card className="w-full bg-card dark:bg-gold-400 shadow-gold-sm dark:shadow-gold-md border border-border dark:border-gold-700">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl text-gold-900 dark:text-gold-100">Welcome back</CardTitle>
+          <CardTitle className="text-xl text-gold-900 dark:text-gold-100">
+            Welcome back
+          </CardTitle>
           <CardDescription className="text-muted-foreground dark:text-gold-200">
             Login with your Apple or Google account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               <div className="flex flex-col gap-4">
                 <Button
@@ -45,20 +102,27 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
               {/* Email/password fields with gold highlights in dark mode */}
               <div className="grid gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="email" className="text-gold-900 dark:text-gold-100">
+                  <Label
+                    htmlFor="email"
+                    className="text-gold-900 dark:text-gold-100"
+                  >
                     Email
                   </Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="m@example.com"
-                    required
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loginStatus === "pending"}
                     className="bg-background dark:bg-gold-700/40 border border-border dark:border-gold-600 text-foreground dark:text-gold-50 placeholder:text-muted-foreground dark:placeholder:text-gold-300 focus:ring-2 focus:ring-gold-500"
                   />
                 </div>
                 <div className="grid gap-3">
                   <div className="flex items-center">
-                    <Label htmlFor="password" className="text-gold-900 dark:text-gold-100">
+                    <Label
+                      htmlFor="password"
+                      className="text-gold-900 dark:text-gold-100"
+                    >
                       Password
                     </Label>
                     <a
@@ -71,7 +135,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                   <Input
                     id="password"
                     type="password"
-                    required
+                    disabled={loginStatus === "pending"}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="bg-background dark:bg-gold-700/40 border border-border dark:border-gold-600 text-foreground dark:text-gold-50 placeholder:text-muted-foreground dark:placeholder:text-gold-300 focus:ring-2 focus:ring-gold-500"
                   />
                 </div>
@@ -79,12 +144,14 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                   type="submit"
                   className="w-full bg-gold-500 hover:bg-gold-600 text-white dark:bg-gold-700 dark:hover:bg-gold-600 dark:text-gold-50 font-semibold shadow-gold-md"
                 >
-                  Login
+                  Log in
                 </Button>
               </div>
+              {/* Display error/info messages using FormMessage */}
+              {message && <FormMessage message={message} />}
               {/* Signup link with gold hover in dark mode */}
               <div className="text-center text-sm text-muted-foreground dark:text-gold-200">
-                Don&apos;t have an account?{' '}
+                Don&apos;t have an account?{" "}
                 <Link
                   to="/signup"
                   className="underline underline-offset-4 hover:text-gold-700 dark:hover:text-gold-300"
@@ -98,7 +165,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
       </Card>
       {/* Terms and privacy links with gold hover in dark mode */}
       <div className="text-muted-foreground dark:text-gold-300 *:[a]:hover:text-gold-500 dark:*:[a]:hover:text-gold-200 text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <Link to="#">Terms of Service</Link> and{' '}
+        By clicking continue, you agree to our{" "}
+        <Link to="#">Terms of Service</Link> and{" "}
         <Link to="#">Privacy Policy</Link>.
       </div>
     </div>
