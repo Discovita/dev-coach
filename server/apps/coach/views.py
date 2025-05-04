@@ -66,3 +66,13 @@ class CoachView(APIView):
         # add the coach response to the chat history (async)
         await add_chat_message_async(request.user, response.message, MessageRole.COACH)
         new_state = apply_actions(coach_state, response.actions)
+
+        response_data = {
+            "message": response.message,
+            "state": new_state,
+            "actions": response.,
+        }
+        # Serialize the response
+        serializer = CoachResponseSerializer(data=response_data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

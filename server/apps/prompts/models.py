@@ -29,7 +29,7 @@ class Prompt(models.Model):
         default=list,
         help_text="List of required context keys for this prompt",
     )
-    allowed_action_types = JSONField(
+    allowed_actions = JSONField(
         models.CharField(max_length=64, choices=ActionType.choices),
         default=list,
         help_text="List of allowed action types for this prompt",

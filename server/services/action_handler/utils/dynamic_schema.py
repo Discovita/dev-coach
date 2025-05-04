@@ -23,7 +23,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
 
 
 def build_dynamic_response_format(
-    allowed_action_types: List[ActionType],
+    allowed_actions: List[ActionType],
 ) -> Type[BaseModel]:
     """
     Dynamically build a Pydantic model for the response, where each allowed action is an
@@ -34,7 +34,7 @@ def build_dynamic_response_format(
         # Always include the message field
         "message": (str, Field(..., description="Coach's response message")),
     }
-    for action_type in allowed_action_types:
+    for action_type in allowed_actions:
         action_model = ACTION_TYPE_TO_MODEL[action_type]
         fields[action_type.value] = (
             Optional[action_model],

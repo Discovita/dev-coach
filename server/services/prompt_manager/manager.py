@@ -8,8 +8,12 @@ from enums.ai import AIModel, AIProvider
 from apps.coach_states.models import CoachState
 from apps.prompts.models import Prompt
 from apps.users.models import User
+from enums.action_type import ActionType
 from services.prompt_manager import gather_prompt_context, format_for_provider
 from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
+from services.prompt_manager.utils.append_action_instructions import (
+    append_action_instructions,
+)
 
 # Import utilities (to be implemented next)
 # from .collect_chat_context import collect_chat_context
@@ -55,10 +59,20 @@ class PromptManager:
         prompt_context = await gather_prompt_context(prompt, coach_state)
         provider = AIModel.get_provider(model)
         response_format_model = await build_dynamic_response_format(
-            prompt.allowed_action_types
+            prompt.allowed_actions
         )
         coach_prompt, response_format = await format_for_provider(
             prompt, prompt_context, provider, response_format=response_format_model
         )
+
+        # Append action instructions to the system message
+        if prompt.allowed_actions:
+            coach_prompt = append_action_instructions(
+                coach_prompt, prompt.allowed_actions
+            )
+        else:
+            coach_prompt = append_action_instructions(
+                coach_prompt, ActionType.get_all_actions()
+            )
 
         return coach_prompt, response_format
