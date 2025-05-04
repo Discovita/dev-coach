@@ -46,6 +46,7 @@ class CoachState(models.Model):
         related_name="proposed_coach_states",
         help_text="The currently proposed identity.",
     )
+    goals = models.JSONField(default=list, help_text="Goals for the coaching session.")
     metadata = models.JSONField(
         default=dict, help_text="Additional metadata for the coaching session."
     )

@@ -19,10 +19,10 @@ Usage:
 
     # Get the appropriate token parameter name for a model
     token_param = AIModel.get_token_param_name("o3-mini")  # Returns "max_completion_tokens"
-    
+
     # Generate images using DALL-E models
     from openai_service import OpenAIService, ImageSize, ImageQuality, ImageStyle, ImageModel
-    
+
     helper = OpenAIService(api_key="your_api_key")
     images = helper.generate_image(
         prompt="A futuristic city with flying cars",
@@ -33,17 +33,18 @@ Usage:
     )
 """
 
-from .core import OpenAIService
+from .core import OpenAIService, OpenAIServiceCoachPlugin
 from .enums import AIModel, AIProvider
 from .models import ImageSize, ImageQuality, ImageResponseFormat, ImageModel, ImageStyle
 
 __all__ = [
-    "OpenAIService", 
-    "AIModel", 
+    "OpenAIServiceCoachPlugin",
+    "OpenAIService",
+    "AIModel",
     "AIProvider",
     "ImageSize",
     "ImageQuality",
     "ImageResponseFormat",
     "ImageModel",
-    "ImageStyle"
+    "ImageStyle",
 ]

@@ -3,7 +3,8 @@ from enums.message_role import MessageRole
 from apps.users.models import User
 import uuid
 
-
+# TODO: add some flag to keep track of what coach state this message belongs to and what version of
+# the prompt was used
 class ChatMessage(models.Model):
     """
     Stores a single message in the conversation history for the coaching chatbot.

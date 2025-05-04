@@ -8,7 +8,6 @@ class PromptSerializer(serializers.ModelSerializer):
     Fields:
         - id: UUID of the prompt
         - owner: User who owns the prompt
-        - prompt_key: Logical group for all versions of a prompt
         - version: Version number of the prompt
         - name: Name of the prompt
         - description: Description of the prompt

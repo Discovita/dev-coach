@@ -1,6 +1,7 @@
 from django.db import transaction
 from enums.action_type import ActionType
 from apps.coach_states.models import CoachState
+from server.pydantic.CoachChatResponse import CoachChatResponse
 from services.action_handler.actions import (
     create_identity,
     update_identity,
@@ -10,6 +11,7 @@ from services.action_handler.actions import (
     transition_state,
     select_identity_focus,
 )
+from services.logger import configure_logging
 
 # Mapping of ActionType to handler function
 ACTION_HANDLERS = {
@@ -22,23 +24,46 @@ ACTION_HANDLERS = {
     ActionType.SELECT_IDENTITY_FOCUS: select_identity_focus,
 }
 
+log = configure_logging(__name__, log_level="INFO")
 
-def apply_actions(coach_state: CoachState, actions: list) -> CoachState:
+def apply_actions(coach_state: CoachState, response: CoachChatResponse) -> CoachState:
     """
-    Apply a list of actions to the given CoachState instance.
-    Each action is a dict with at least a 'type' key and a 'params' dict.
-    All changes are persisted to the database.
+    Applies all non-None actions from a CoachChatResponse to a CoachState object and returns the updated state.
+    Each action is represented as an optional field on the response model.
+    Uses the expected type for each action field for runtime type safety.
+    Supported actions are defined in services.action_handler.actions and enums.action_type.
     """
-    with transaction.atomic():
-        for action in actions:
-            action_type = ActionType.from_string(action["type"])
-            params = action.get("params", {})
-            handler = ACTION_HANDLERS.get(action_type)
-            if handler:
-                handler(coach_state, params)
-            else:
-                # Optionally: log or raise for unknown action
-                pass
+    for action_name, value in response.model_dump(exclude_none=True).items():
+        action = getattr(response, action_name, None)
+        if action is None:
+            log.warning(f"Action '{action_name}' is None, skipping.")
+            continue
+
+        # Example: handle each action type explicitly
+        if action_name == ActionType.CREATE_IDENTITY.value:
+            log.info("ACTION: Creating identity")
+            create_identity(coach_state, action.params)
+        elif action_name == ActionType.UPDATE_IDENTITY.value:
+            log.info("ACTION: Updating identity")
+            update_identity(coach_state, action.params)
+        elif action_name == ActionType.ACCEPT_IDENTITY.value:
+            log.info("ACTION: Accepting identity")
+            accept_identity(coach_state, action.params)
+        elif action_name == ActionType.ACCEPT_IDENTITY_REFINEMENT.value:
+            log.info("ACTION: Accepting identity refinement")
+            accept_identity_refinement(coach_state, action.params)
+        elif action_name == ActionType.ADD_IDENTITY_NOTE.value:
+            log.info("ACTION: Adding identity note")
+            add_identity_note(coach_state, action.params)
+        elif action_name == ActionType.TRANSITION_STATE.value:
+            log.info("ACTION: Transitioning state")
+            transition_state(coach_state, action.params)
+        elif action_name == ActionType.SELECT_IDENTITY_FOCUS.value:
+            log.info("ACTION: Selecting identity focus")
+            select_identity_focus(coach_state, action.params)
+        else:
+            log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
+            continue
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()

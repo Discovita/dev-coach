@@ -6,60 +6,63 @@ from rest_framework import status
 from rest_framework.request import Request
 from apps.coach.serializers import CoachRequestSerializer, CoachResponseSerializer
 from apps.coach_states.models import CoachState
+from apps.chat_messages.utils import add_chat_message_async
+from enums.message_role import MessageRole
 from services.action_handler.handler import apply_actions
-# from your_openai_service import OpenAIService  # TODO: Implement or import your OpenAI service
+from services.prompt_manager.manager import PromptManager
+from services.ai import AIServiceFactory
+from apps.chat_messages.models import ChatMessage
 
-# Create your views here.
 
-class CoachUserInputView(APIView):
+class CoachView(APIView):
     """
     Handle user input and get coach response for the chatbot.
     Step-by-step:
     1. Require authentication (JWT or session)
     2. Parse and validate the incoming request (CoachRequestSerializer)
     3. Retrieve the user's CoachState from the database
-    4. Build the prompt and call the OpenAI service (stub for now)
+    4. Build the prompt and call the OpenAI service
     5. Parse the LLM response (Pydantic model), extract actions
     6. Apply actions to update the CoachState and related models
     7. Return the response using CoachResponseSerializer
     """
+
     permission_classes = [IsAuthenticated]
 
     async def post(self, request: Request):
-        # 1. Parse and validate the incoming request
+        # Parse and validate the incoming request
         serializer = CoachRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message = serializer.validated_data["message"]
+        model = serializer.get_model()
 
-        # 2. Retrieve the user's CoachState
+        # Add the user message to the chat history (async)
+        await add_chat_message_async(request.user, message, MessageRole.USER)
+
+        # Retrieve the user's CoachState
         try:
             coach_state = await CoachState.objects.aget(user=request.user)
         except CoachState.DoesNotExist:
-            return Response({"detail": "Coach state not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Coach state not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
-        # 3. Build the prompt and call the OpenAI service (stub for now)
-        # TODO: Replace this stub with actual OpenAI service call
-        # Example: result = await openai_service.process_message(message, coach_state)
-        # For now, we'll mock a response:
-        result = {
-            "message": f"Echo: {message}",
-            "coach_state": {},  # Should be the updated state as dict
-            "final_prompt": "...",
-            "actions": [],
-        }
+        # Build the prompt using the PromptManager
+        prompt_manager = PromptManager()
+        coach_prompt, response_format = await prompt_manager.create_chat_prompt(
+            user=request.user, model=model
+        )
+        # Get the last 5 messages from the chat history
+        chat_history = (
+            await ChatMessage.objects.filter(user=request.user)
+            .order_by("-timestamp")[:5]
+            .aall()
+        )
+        ai_service = AIServiceFactory.create(model)
 
-        # 4. Parse the LLM response and extract actions (stub: empty list)
-        actions = result.get("actions", [])
-
-        # 5. Apply actions to update the CoachState and related models
-        apply_actions(coach_state, actions)
-
-        # 6. Prepare the response
-        response_data = {
-            "message": result["message"],
-            "coach_state": {},  # TODO: serialize the updated CoachState
-            "final_prompt": result["final_prompt"],
-            "actions": actions,
-        }
-        response_serializer = CoachResponseSerializer(response_data)
-        return Response(response_serializer.data, status=status.HTTP_200_OK)
+        response = await ai_service.generate(
+            coach_prompt, chat_history, response_format, model
+        )
+        # add the coach response to the chat history (async)
+        await add_chat_message_async(request.user, response.message, MessageRole.COACH)
+        new_state = apply_actions(coach_state, response.actions)
