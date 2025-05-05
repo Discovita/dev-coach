@@ -1,15 +1,17 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Footer from "@/components/Footer";
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import LoadingAnimation from "@/components/LoadingAnimation";
 
 const AdminLayout = () => {
+  const navigate = useNavigate();
   const { user, isAdmin, isLoading } = useAuth();
 
   // Redirect if not admin
   if (!user || !isAdmin) {
-    return <Navigate to="/" replace />;
+    console.log("User is not admin or not logged in");
+    navigate("/");
   }
   return (
     <div className="_AdminLayout flex h-screen w-full flex-col overflow-clip">

@@ -20,7 +20,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { login, loginStatus, user } = useAuth();
+  const { login, loginStatus, user, isAdmin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<Message | null>(null);
@@ -54,15 +54,14 @@ export function LoginForm({
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && isAdmin) {
+      console.log("Admin logged in successfully. Redirecting to test...");
+      navigate("/test");
+    } else if (user) {
       console.log("User logged in successfully. Redirecting to chat...");
       navigate("/chat");
     }
-  }, [loginAttempted, user, navigate]);
-
-  useEffect(() => {
-    console.log("loginAttempted", loginAttempted);
-  }, [loginAttempted]);
+  }, [loginAttempted, user, navigate, isAdmin]);
 
   return (
     <div

@@ -24,12 +24,7 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const {
-    register,
-    registerStatus,
-    user,
-    isLoading: isAuthLoading,
-  } = useAuth();
+  const { register, registerStatus, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
@@ -58,13 +53,15 @@ export function SignupForm({
     setValidMatch(match);
   }, [password, matchPassword]);
 
-  // Redirect if user is logged in and registration was successful
   useEffect(() => {
-    if (user) {
+    if (user && isAdmin) {
+      console.log("Admin registered successfully. Redirecting to test...");
+      navigate("/test");
+    } else if (user) {
       console.log("User registered successfully. Redirecting to chat...");
       navigate("/chat");
     }
-  }, [user, isAuthLoading, navigate, registerSuccess]);
+  }, [user, isAdmin, navigate, registerSuccess]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

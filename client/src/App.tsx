@@ -17,27 +17,51 @@ import LoadingAnimation from "@/components/LoadingAnimation";
  * Each route is associated with a specific tool or feature
  */
 const App = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
   console.log("App component - user:", user);
   if (isLoading) {
     return <LoadingAnimation />;
   }
+  if (user && isAdmin) {
+    console.log("User is admin");
+    return (
+      <Routes>
+        <Route element={<AdminLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/test" element={<Test />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Route>
+      </Routes>
+    );
+  }
+  if (user) {
+    console.log("User is not admin");
+    return (
+      <Routes>
+        <Route element={<AuthLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Route>
+      </Routes>
+    );
+  }
   return (
-    <Routes>
-      <Route element={user ? <AuthLayout /> : <Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/demo" element={<Demo />} />
-      </Route>
-      <Route element={<AuthLayout />}>
-        <Route path="/chat" element={<Chat />} />
-      </Route>
-      <Route element={<AdminLayout />}>
-        <Route path="/test" element={<Test />} />
-        <Route path="/demo" element={<Demo />} />
-      </Route>
-    </Routes>
+    console.log("User is not logged in"),
+    (
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/demo" element={<Demo />} />
+        </Route>
+      </Routes>
+    )
   );
 };
 
