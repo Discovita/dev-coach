@@ -16,7 +16,7 @@ export default function Footer() {
     <footer className="relative z-[1000] flex-none dark:bg-neutral-800 dark:border-gray-800">
       <div className="container mx-auto px-4 py-4 text-center">
         <p className="text-sm text-gold-600 dark:text-gold-700">
-          &copy; {new Date().getFullYear()} Discovitas. All rights reserved.
+          &copy; {new Date().getFullYear()} Discovita. All rights reserved.
         </p>
       </div>
     </footer>

@@ -1,11 +1,15 @@
-import React from 'react';
-import { ChatInterface } from '@/pages/chat/components/ChatInterface';
-import { CoachState } from '@/types/apiTypes';
+import React from "react";
+import { ChatInterface } from "@/pages/chat/components/ChatInterface";
+import { CoachState } from "@/types/apiTypes";
+import { motion } from "framer-motion";
 
 const Chat = () => {
-  const userId = React.useMemo(() => Math.random().toString(36).substring(2, 15), []);
+  const userId = React.useMemo(
+    () => Math.random().toString(36).substring(2, 15),
+    []
+  );
   const initialState: CoachState = {
-    current_state: 'introduction',
+    current_state: "introduction",
     user_profile: {
       name: userId,
       goals: [],
@@ -18,13 +22,17 @@ const Chat = () => {
   };
 
   return (
-    <div className="relative z-10 flex flex-col h-full _TestChat">
+    <motion.div className="_Chat relative z-10 flex flex-col h-full">
       <div className="flex flex-col xl:flex-row items-start flex-1 min-h-0">
         <div className="flex flex-col w-full xl:flex-1 min-w-0 overflow-hidden h-full min-h-0 xl:mr-4">
-          <ChatInterface userId={userId} initialCoachState={initialState} initialMessages={[]} />
+          <ChatInterface
+            userId={userId}
+            initialCoachState={initialState}
+            initialMessages={[]}
+          />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

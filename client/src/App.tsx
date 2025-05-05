@@ -18,6 +18,7 @@ import LoadingAnimation from "@/components/LoadingAnimation";
  */
 const App = () => {
   const { user, isLoading } = useAuth();
+  console.log("App component - user:", user);
   if (isLoading) {
     return <LoadingAnimation />;
   }

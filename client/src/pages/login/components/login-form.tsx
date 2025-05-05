@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle, FaApple } from "react-icons/fa";
 
-import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { FormMessage, Message } from "@/components/FormMessage";
 
@@ -20,12 +20,11 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { login, loginStatus } = useAuth();
+  const { login, loginStatus, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // Message state for displaying errors or info via FormMessage
   const [message, setMessage] = useState<Message | null>(null);
-  // Initialize navigate for programmatic navigation
+  const [loginAttempted, setLoginAttempted] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,9 +34,7 @@ export function LoginForm({
     try {
       const response = await login({ email, password });
       if (response.success) {
-        // Login successful, navigate to chat
-        console.log("Navigating to chat");
-        navigate("/chat");
+        setLoginAttempted(true);
       } else {
         let errorMsg = response.error;
         if (typeof errorMsg === "object" && errorMsg !== null) {
@@ -55,6 +52,17 @@ export function LoginForm({
       setMessage({ error: "An unexpected error occurred. Please try again." });
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      console.log("User logged in successfully. Redirecting to chat...");
+      navigate("/chat");
+    }
+  }, [loginAttempted, user, navigate]);
+
+  useEffect(() => {
+    console.log("loginAttempted", loginAttempted);
+  }, [loginAttempted]);
 
   return (
     <div
