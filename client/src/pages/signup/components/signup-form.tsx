@@ -33,9 +33,9 @@ export function SignupForm({
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
-  const [validEmail, setValidEmail] = useState(false); // whether the Email validates or not
+  const [validEmail, setValidEmail] = useState(false);
   const [password, setPassword] = useState("");
-  const [validPassword, setValidPassword] = useState(false); // whether the password validates or not
+  const [validPassword, setValidPassword] = useState(false);
   const [matchPassword, setMatchPassword] = useState("");
   const [validMatch, setValidMatch] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState(false);
@@ -46,13 +46,11 @@ export function SignupForm({
     emailRef.current?.focus();
   }, []);
 
-  // validate the email input every time it changes.
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
     setValidEmail(result);
   }, [email]);
 
-  // validate the password and its confirmation every time they change.
   useEffect(() => {
     const result = PASSWORD_REGEX.test(password);
     setValidPassword(result);
@@ -62,8 +60,9 @@ export function SignupForm({
 
   // Redirect if user is logged in and registration was successful
   useEffect(() => {
-    if (!isAuthLoading && user && registerSuccess) {
-      navigate("/");
+    if (user) {
+      console.log("User registered successfully. Redirecting to chat...");
+      navigate("/chat");
     }
   }, [user, isAuthLoading, navigate, registerSuccess]);
 
