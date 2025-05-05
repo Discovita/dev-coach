@@ -8,6 +8,7 @@ import Login from "@/pages/login/Login";
 import Signup from "@/pages/signup/Signup";
 import Test from "@/pages/test/Test";
 import Chat from "@/pages/chat/Chat";
+import Prompts from "@/pages/prompts/Prompts";
 import { useAuth } from "@/hooks/use-auth";
 import LoadingAnimation from "@/components/LoadingAnimation";
 
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/prompts" element={<Prompts />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
