@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
-import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 /**
  * Button component
@@ -21,51 +21,51 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: cn(
-          'bg-gold-500',
-          'text-black',
-          'border-0',
-          'rounded-md',
-          'px-2 py-4',
-          'font-medium',
-          'transition-colors transition-shadow',
-          'hover:bg-gold-600 hover:shadow-gold-sm',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-600',
-          'dark:bg-gold-600 dark:text-white dark:hover:bg-gold-700'
+          "bg-gold-500",
+          "text-black",
+          "border-0",
+          "rounded-md",
+          "px-2 py-4",
+          "font-medium",
+          "transition-colors transition-shadow",
+          "hover:bg-gold-600 hover:shadow-gold-sm",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-600",
+          "dark:bg-gold-600 dark:text-white dark:hover:bg-gold-700"
         ),
         destructive:
-          'bg-red-600 text-white shadow-xs hover:bg-red-600/70 focus-visible:ring-red-600/20 dark:focus-visible:ring-red-600/40 dark:bg-red-600/60 dark:hover:bg-red-500/60',
+          "bg-red-600/90 text-white shadow-xs hover:bg-red-600/70 focus-visible:ring-red-600/20 dark:focus-visible:ring-red-600/40 dark:bg-red-600/60 dark:hover:bg-red-500/60",
         outline: cn(
-          'border border-gold-400',
-          'bg-background',
-          'text-gold-700',
-          'hover:bg-gold-50 hover:text-gold-900',
-          'dark:bg-gold-950 dark:text-gold-100 dark:border-gold-700',
-          'dark:hover:bg-gold-900/50 dark:hover:text-gold-100'
+          "border border-gold-400",
+          "bg-background",
+          "text-gold-700",
+          "hover:bg-gold-50 hover:text-gold-900",
+          "dark:bg-gold-950 dark:text-gold-100 dark:border-gold-700",
+          "dark:hover:bg-gold-900/50 dark:hover:text-gold-100"
         ),
         secondary: cn(
-          'bg-gold-100',
-          'text-gold-900',
-          'border border-gold-200',
-          'hover:bg-gold-200 hover:text-gold-950',
-          'dark:bg-gold-800 dark:text-gold-100 dark:border-gold-700',
-          'dark:hover:bg-gold-700 dark:hover:text-gold-200'
+          "bg-gold-100",
+          "text-gold-900",
+          "border border-gold-200",
+          "hover:bg-gold-200 hover:text-gold-950",
+          "dark:bg-gold-800 dark:text-gold-100 dark:border-gold-700",
+          "dark:hover:bg-gold-700 dark:hover:text-gold-200"
         ),
         ghost: cn(
-          'hover:bg-gold-50 hover:text-gold-900',
-          'dark:hover:bg-gold-900/50 dark:hover:text-gold-100'
+          "hover:bg-gold-50 hover:text-gold-900",
+          "dark:hover:bg-gold-900/50 dark:hover:text-gold-100"
         ),
-        link: 'text-gold-700 underline-offset-4 hover:underline dark:text-gold-200',
+        link: "text-gold-700 underline-offset-4 hover:underline dark:text-gold-200",
       },
       size: {
-        default: 'px-6 py-2',
-        sm: 'h-9 rounded-md gap-1.5 px-4 text-xs',
-        lg: 'h-12 rounded-md px-8 text-lg',
-        icon: 'size-8',
+        default: "px-6 py-2",
+        sm: "h-9 rounded-md gap-1.5 px-4 text-xs",
+        lg: "h-12 rounded-md px-8 text-lg",
+        icon: "size-8",
       },
     },
     defaultVariants: {
-      variant: 'default',
-      size: 'default',
+      variant: "default",
+      size: "default",
     },
   }
 );
@@ -76,11 +76,11 @@ function Button({
   size,
   asChild = false,
   ...props
-}: React.ComponentProps<'button'> &
+}: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) {
-  const Comp = asChild ? Slot : 'button';
+  const Comp = asChild ? Slot : "button";
 
   return (
     <Comp

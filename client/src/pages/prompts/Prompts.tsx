@@ -3,7 +3,7 @@ import { useCoreEnums } from "@/hooks/use-core";
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePrompts } from "@/hooks/use-prompts";
-import { createPrompt, partialUpdatePrompt } from "@/api/prompts";
+import { createPrompt, partialUpdatePrompt, softDeletePrompt } from "@/api/prompts";
 import {
   Select,
   SelectTrigger,
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { Button } from "@/components/ui/button";
+import { DeletePromptDialog } from "./components/DeletePromptDialog";
 
 /**
  * PromptsTabs
@@ -33,6 +35,7 @@ export function PromptsTabs() {
     data: allPrompts,
     isLoading: promptsLoading,
     isError: promptsError,
+    refetch: refetchPrompts,
   } = usePrompts();
   // Track the active coach state tab (default to first coach state or 'new')
   const [activeCoachState, setActiveCoachState] = useState<string | null>(null);
@@ -53,6 +56,10 @@ export function PromptsTabs() {
   const [editIsActive, setEditIsActive] = useState<boolean>(true);
   // Track if we are submitting changes
   const [submittingEdit, setSubmittingEdit] = useState<boolean>(false);
+
+  // State for delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Set default tab to first coach state (or 'new') when enums load
   useEffect(() => {
@@ -91,8 +98,11 @@ export function PromptsTabs() {
     // (safe: setSelectedVersion is a no-op if already correct)
   }, [activeCoachState, versions, selectedVersion]);
 
-  // When selectedPrompt changes, initialize edit state
-  useEffect(() => {
+  /**
+   * Resets all editable fields to their original values from selectedPrompt.
+   * Called on mount, when selectedPrompt changes, and when the user clicks Restore.
+   */
+  function resetEditState() {
     if (selectedPrompt) {
       setEditName(selectedPrompt.name ?? "");
       setEditDescription(selectedPrompt.description ?? "");
@@ -101,6 +111,12 @@ export function PromptsTabs() {
       setEditContextKeys(selectedPrompt.required_context_keys ?? []);
       setEditIsActive(selectedPrompt.is_active);
     }
+  }
+
+  // When selectedPrompt changes, initialize edit state
+  useEffect(() => {
+    resetEditState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPrompt]);
 
   // Handler to adapt createPrompt (which returns Promise<Prompt>) to Promise<void> for NewPromptForm
@@ -108,6 +124,7 @@ export function PromptsTabs() {
     data: Parameters<typeof createPrompt>[0]
   ) => {
     await createPrompt(data);
+    await refetchPrompts();
   };
 
   /**
@@ -131,12 +148,125 @@ export function PromptsTabs() {
         is_active: editIsActive,
         // coach_state is not editable here, so we do not send it unless required by backend
       });
+      // Refetch prompts after successful edit
+      await refetchPrompts();
       // Optionally show a toast or refetch prompts
       // toast.success("Prompt updated successfully!");
     } catch {
       // toast.error("Failed to update prompt");
     } finally {
       setSubmittingEdit(false);
+    }
+  };
+
+  /**
+   * Handler for saving the current edits as a new version (new prompt).
+   * 1. Calls createPrompt API with the current form state (omitting id/version).
+   * 2. Refetches prompts and auto-selects the new version in the UI.
+   */
+  const handleSaveAsNewVersion = async () => {
+    if (!selectedPrompt) return;
+    setSubmittingEdit(true);
+    try {
+      // Create a new prompt with the current form state (omit id/version)
+      await createPrompt({
+        coach_state: selectedPrompt.coach_state,
+        name: editName,
+        description: editDescription,
+        body: editBody,
+        allowed_actions: editAllowedActions,
+        required_context_keys: editContextKeys,
+        is_active: editIsActive,
+      });
+      // Refetch prompts
+      await refetchPrompts();
+      // After refetch, auto-select the new version (highest version for this coach_state)
+      const updatedPrompts = allPrompts
+        ? [
+            ...allPrompts,
+            {
+              ...selectedPrompt,
+              name: editName,
+              description: editDescription,
+              body: editBody,
+              allowed_actions: editAllowedActions,
+              required_context_keys: editContextKeys,
+              is_active: editIsActive,
+              version:
+                Math.max(
+                  ...allPrompts
+                    .filter((p) => p.coach_state === selectedPrompt.coach_state)
+                    .map((p) => p.version),
+                  0
+                ) + 1,
+            },
+          ]
+        : [];
+      const newVersion = Math.max(
+        ...updatedPrompts
+          .filter((p) => p.coach_state === selectedPrompt.coach_state)
+          .map((p) => p.version),
+        0
+      );
+      setSelectedVersion(newVersion);
+    } catch {
+      // toast.error("Failed to create new version");
+    } finally {
+      setSubmittingEdit(false);
+    }
+  };
+
+  /**
+   * Returns true if any editable field differs from the original selectedPrompt values.
+   * Used to determine if the Restore button should be shown.
+   */
+  function hasUnsavedChanges() {
+    if (!selectedPrompt) return false;
+    return (
+      editName !== (selectedPrompt.name ?? "") ||
+      editDescription !== (selectedPrompt.description ?? "") ||
+      editBody !== (selectedPrompt.body ?? "") ||
+      editIsActive !== selectedPrompt.is_active ||
+      // Compare arrays by stringifying (safe for small arrays of primitives)
+      JSON.stringify(editAllowedActions) !==
+        JSON.stringify(selectedPrompt.allowed_actions ?? []) ||
+      JSON.stringify(editContextKeys) !==
+        JSON.stringify(selectedPrompt.required_context_keys ?? [])
+    );
+  }
+
+  // Handler for Delete button (opens dialog)
+  const handleOpenDeleteDialog = () => setDeleteDialogOpen(true);
+  // Handler for closing dialog
+  const handleCloseDeleteDialog = () => setDeleteDialogOpen(false);
+  // Handler for confirming delete in dialog (soft delete)
+  const handleConfirmDelete = async () => {
+    if (!selectedPrompt) return;
+    setIsDeleting(true);
+    try {
+      await softDeletePrompt(selectedPrompt.id);
+      await refetchPrompts();
+      // After deletion, select the next available version (or clear selection)
+      const remainingPrompts = allPrompts
+        ? allPrompts.filter((p) =>
+            !(p.id === selectedPrompt.id)
+          )
+        : [];
+      const sameStatePrompts = remainingPrompts.filter(
+        (p) => p.coach_state === selectedPrompt.coach_state
+      );
+      if (sameStatePrompts.length > 0) {
+        // Select the highest version remaining for this coach_state
+        const nextVersion = Math.max(...sameStatePrompts.map((p) => p.version));
+        setSelectedVersion(nextVersion);
+      } else {
+        setSelectedVersion(null);
+      }
+      setDeleteDialogOpen(false);
+    } catch {
+      // toast.error("Failed to delete prompt");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -211,7 +341,9 @@ export function PromptsTabs() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">Required Context Keys:</span>
+                    <span className="font-semibold">
+                      Required Context Keys:
+                    </span>
                     <div className="gap-2 flex flex-wrap">
                       <MultiSelect
                         options={enums?.context_keys || []}
@@ -286,15 +418,43 @@ export function PromptsTabs() {
                     className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
                   />
                 </div>
-                {/* Save Changes button */}
-                <div className="flex justify-end mt-4">
-                  <button
+                <div className="flex justify-end gap-2 mt-4">
+                  {/* Save as New Version button: creates a new prompt with the next version */}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleSaveAsNewVersion}
+                    disabled={submittingEdit}
+                  >
+                    Save as New Version
+                  </Button>
+                  {/* Show Restore button only if there are unsaved changes */}
+                  {hasUnsavedChanges() && (
+                    <Button
+                      type="button"
+                      variant={"outline"}
+                      onClick={resetEditState}
+                      disabled={submittingEdit}
+                    >
+                      Restore
+                    </Button>
+                  )}
+                  {/* Delete button: opens confirmation dialog */}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleOpenDeleteDialog}
+                    disabled={submittingEdit}
+                  >
+                    Delete
+                  </Button>
+                  <Button
                     type="submit"
-                    className="bg-gold-600 text-white px-4 py-2 rounded hover:bg-gold-700 disabled:opacity-50"
+                    variant={"default"}
                     disabled={submittingEdit}
                   >
                     {submittingEdit ? "Saving..." : "Save Changes"}
-                  </button>
+                  </Button>
                 </div>
               </form>
             ) : (
@@ -308,6 +468,14 @@ export function PromptsTabs() {
           <NewPromptForm onSubmit={handleCreatePrompt} />
         </TabsContent>
       </Tabs>
+      {/* Delete confirmation dialog */}
+      <DeletePromptDialog
+        isOpen={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        prompt={selectedPrompt}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

@@ -129,3 +129,21 @@ export async function deletePrompt(id: string): Promise<void> {
     throw new Error(`Failed to delete prompt with id ${id}`);
   }
 }
+
+/**
+ * Soft delete a prompt (set is_active to false).
+ * POST /api/prompts/{id}/soft_delete/
+ * @param id - The UUID of the prompt to soft delete.
+ * Returns: Updated Prompt object with is_active: false.
+ */
+export async function softDeletePrompt(id: string): Promise<Prompt> {
+  const url = `${COACH_BASE_URL}/prompts/${id}/soft_delete`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to soft delete prompt with id ${id}`);
+  }
+  return response.json();
+}

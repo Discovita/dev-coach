@@ -70,6 +70,19 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
   );
 
   /**
+   * Resets all form fields to their initial (empty) state.
+   * Called after a successful submit.
+   */
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setSelectedCoachState("");
+    setSelectedActions([]);
+    setSelectedContextKeys([]);
+    setPrompt("");
+  }
+
+  /**
    * Handles form submission:
    * 1. Prevents default form submit.
    * 2. Calls onSubmit prop with form data.
@@ -88,8 +101,8 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
         description: description || undefined,
       });
       toast.success("Prompt submitted successfully!");
-      // Optionally reset form here
-      // setSelectedCoachState(""); setSelectedActions([]); setSelectedContextKeys([]); setPrompt(""); setName(""); setDescription("");
+      // Reset form after successful submit
+      resetForm();
     } catch (err: unknown) {
       toast.error("Failed to submit prompt", {
         description: err instanceof Error ? err.message : undefined,
