@@ -5,15 +5,18 @@ from .serializers import PromptSerializer
 
 # Create your views here.
 
-class PromptViewSet(mixins.ListModelMixin,
-                    mixins.RetrieveModelMixin,
-                    mixins.CreateModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    viewsets.GenericViewSet):
+
+class PromptViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     """
     API endpoint for managing Prompts.
-    
+
     Supported operations:
     - list:    GET    /api/prompts/         List all prompts
     - retrieve:GET    /api/prompts/{id}/    Retrieve a single prompt by ID
@@ -21,9 +24,10 @@ class PromptViewSet(mixins.ListModelMixin,
     - update:  PUT    /api/prompts/{id}/    Update a prompt (full update)
     - partial_update:PATCH /api/prompts/{id}/ Partial update of a prompt
     - destroy: DELETE /api/prompts/{id}/    Delete a prompt
-    
+
     Returns all fields of the Prompt model. See PromptSerializer for details.
     """
+
     queryset = Prompt.objects.all()
     serializer_class = PromptSerializer
 

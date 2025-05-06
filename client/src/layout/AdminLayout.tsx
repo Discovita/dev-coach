@@ -14,13 +14,16 @@ const AdminLayout = () => {
     navigate("/");
   }
   return (
-    <div className="_AdminLayout flex h-screen w-full flex-col overflow-clip">
+    <div className="_AdminLayout flex h-screen max-h-screen w-full flex-col overflow-clip">
       <nav className="relative z-[40] flex-none">
         <AdminNavbar />
       </nav>
-      {/* Main content area - scrollable container */}
-      <main className="_Main flex flex-col grow-1 justify-center overflow-auto dark:bg-[#333333]">
-        {isLoading ? <LoadingAnimation /> : <Outlet />}
+      {/* Main content area - scrollable container, never exceeds 100vh. Only the Outlet scrolls. */}
+      <main className="_Main flex flex-col flex-1 min-h-0 max-h-screen justify-center bg-transparent dark:bg-[#333333]">
+        {/* Only the Outlet (page content) scrolls if needed */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {isLoading ? <LoadingAnimation /> : <Outlet />}
+        </div>
       </main>
       <Footer />
     </div>
