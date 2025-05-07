@@ -7,7 +7,7 @@ from services.prompt_manager.models.prompt_context import PromptContext, Identit
 # Add imports for other models as needed
 
 
-async def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> PromptContext:
+def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> PromptContext:
     """
     Gather all required context values for a given prompt and coach state.
     Returns a PromptContext Pydantic model instance.
@@ -20,7 +20,7 @@ async def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> Prom
     user = coach_state.user
     context_data = {}
     for key in prompt.required_context_keys:
-        context_data[key] = await get_context_value(key, coach_state)
+        context_data[key] = get_context_value(key, coach_state)
     # Map context_data to PromptContext fields
     return PromptContext(
         user_name=context_data.get(ContextKey.USER_NAME, user.get_full_name() or user.email),
@@ -32,7 +32,7 @@ async def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> Prom
     )
 
 
-async def get_context_value(key: ContextKey, coach_state: CoachState):
+def get_context_value(key: ContextKey, coach_state: CoachState):
     """
     Given a ContextKey, gather the required value from the DB/models using coach_state.
     Returns a value suitable for the PromptContext field.

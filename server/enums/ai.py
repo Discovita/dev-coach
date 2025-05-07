@@ -54,45 +54,6 @@ class AIModel(models.TextChoices):
     GPT_4 = "gpt-4", "GPT 4"
     GPT_3_5_TURBO = "gpt-3.5-turbo", "GPT 3.5 Turbo"
 
-    # Models that support structured outputs
-    STRUCTURED_OUTPUT_MODELS: Set[str] = {
-        "gpt-4.1",
-        "gpt-4.5-preview",
-        "o3-mini",
-        "o1",
-        "gpt-4o-mini",
-        "gpt-4o",
-    }
-
-    # Models that require max_completion_tokens
-    COMPLETION_TOKEN_MODELS: Set[str] = {
-        "gpt-4.1",
-        "o3-mini",
-        "o1",
-        "o1-mini",
-        "gpt-4o",
-        "gpt-4o-mini",
-    }
-
-    # Default token limits for each model
-    # These are conservative estimates for completion tokens
-    DEFAULT_TOKEN_LIMITS: Dict[str, int] = {
-        "gpt-4.1": 32768,
-        "gpt-4.5-preview": 16384,
-        "o3-mini": 100000,
-        "o1": 100000,
-        "o1-mini": 65536,
-        "gpt-4o": 16384,
-        "gpt-4o-mini": 16384,
-        "gpt-4-turbo": 4096,
-        "gpt-4": 8192,
-        "gpt-3.5-turbo": 4096,
-        # Claude models
-        "claude-3-7-sonnet-latest": 8192,
-        "claude-3-5-sonnet-latest": 8192,
-        "claude-3-5-haiku-latest": 8192,
-    }
-
     @classmethod
     def get_provider(cls, model: "AIModel") -> AIProvider:
         """
@@ -162,13 +123,15 @@ class AIModel(models.TextChoices):
         Since we only use predefined models from the enum and the API automatically
         uses the latest version, we can simply check if the model is in our list
         of supported models.
+        See: STRUCTURED_OUTPUT_MODELS (module-level constant)
         """
-        return model_name in cls.STRUCTURED_OUTPUT_MODELS
+        return model_name in STRUCTURED_OUTPUT_MODELS
 
     @classmethod
     def get_token_param_name(cls, model_name: Union[str, "AIModel"]) -> str:
         """
         Determine which token parameter name to use based on the model.
+        See: COMPLETION_TOKEN_MODELS (module-level constant)
         """
         if isinstance(model_name, models.TextChoices):
             try:
@@ -181,7 +144,7 @@ class AIModel(models.TextChoices):
         # Explicit check for 'o' series models
         if any(
             o_model in model_str
-            for o_model in ["o3-mini", "o1", "o1-mini", "gpt-4o", "gpt-4o-mini"]
+            for o_model in COMPLETION_TOKEN_MODELS
         ):
             return "max_completion_tokens"
         else:
@@ -191,6 +154,7 @@ class AIModel(models.TextChoices):
     def get_default_token_limit(cls, model_name: Union[str, "AIModel"]) -> int:
         """
         Get the default token limit for a specific model.
+        See: DEFAULT_TOKEN_LIMITS (module-level constant)
         """
         # Force conversion to string to avoid any type issues
         try:
@@ -254,3 +218,48 @@ class AIModel(models.TextChoices):
         if not model_name:
             return cls.GPT_4O
         return cls.from_string(model_name)
+
+# -----------------------------------------------------------------------------
+# Module-level constants for model capabilities and limits
+# -----------------------------------------------------------------------------
+
+# Set of model names that support structured outputs.
+# Used in: AIModel.supports_structured_outputs
+STRUCTURED_OUTPUT_MODELS: Set[str] = {
+    "gpt-4.1",
+    "gpt-4.5-preview",
+    "o3-mini",
+    "o1",
+    "gpt-4o-mini",
+    "gpt-4o",
+}
+
+# Set of model names that require max_completion_tokens parameter.
+# Used in: AIModel.get_token_param_name
+COMPLETION_TOKEN_MODELS: Set[str] = {
+    "gpt-4.1",
+    "o3-mini",
+    "o1",
+    "o1-mini",
+    "gpt-4o",
+    "gpt-4o-mini",
+}
+
+# Default token limits for each model.
+# Used in: AIModel.get_default_token_limit
+DEFAULT_TOKEN_LIMITS: Dict[str, int] = {
+    "gpt-4.1": 32768,
+    "gpt-4.5-preview": 16384,
+    "o3-mini": 100000,
+    "o1": 100000,
+    "o1-mini": 65536,
+    "gpt-4o": 16384,
+    "gpt-4o-mini": 16384,
+    "gpt-4-turbo": 4096,
+    "gpt-4": 8192,
+    "gpt-3.5-turbo": 4096,
+    # Claude models
+    "claude-3-7-sonnet-latest": 8192,
+    "claude-3-5-sonnet-latest": 8192,
+    "claude-3-5-haiku-latest": 8192,
+}

@@ -28,7 +28,7 @@ class PromptManager:
     Uses AIProvider enum for provider selection.
     """
 
-    async def create_chat_prompt(
+    def create_chat_prompt(
         self, user: User, model: AIModel, version_override: int = None
     ) -> str:
         """
@@ -41,7 +41,7 @@ class PromptManager:
             str: prompt for the chat endpoint.
         """
         # 1. Retrieve the user's CoachState
-        coach_state = await CoachState.objects.aget(user=user)
+        coach_state = CoachState.objects.get(user=user)
         state_value = coach_state.current_state
 
         # 2. Select the newest active prompt for this state (or override)
@@ -56,12 +56,12 @@ class PromptManager:
             raise ValueError(f"No prompt found for state {state_value}")
 
         # 3. Gather context for the prompt
-        prompt_context = await gather_prompt_context(prompt, coach_state)
+        prompt_context = gather_prompt_context(prompt, coach_state)
         provider = AIModel.get_provider(model)
-        response_format_model = await build_dynamic_response_format(
+        response_format_model = build_dynamic_response_format(
             prompt.allowed_actions
         )
-        coach_prompt, response_format = await format_for_provider(
+        coach_prompt, response_format = format_for_provider(
             prompt, prompt_context, provider, response_format=response_format_model
         )
 

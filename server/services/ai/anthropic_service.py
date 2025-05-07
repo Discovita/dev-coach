@@ -61,7 +61,7 @@ class AnthropicService(AIService):
         #     log.error(f"Failed to initialize Anthropic service: {e}")
         #     raise
 
-    async def generate(
+    def generate(
         self,
         prompt: str,
         system_message: Optional[str] = None,

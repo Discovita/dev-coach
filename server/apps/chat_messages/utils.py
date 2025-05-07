@@ -3,7 +3,7 @@ from enums.message_role import MessageRole
 from apps.users.models import User
 
 
-async def add_chat_message_async(user: User, content: str, role: MessageRole) -> ChatMessage:
+def add_chat_message(user: User, content: str, role: MessageRole) -> ChatMessage:
     """
     Async: Add a new message to the chat history for the given user.
     Args:
@@ -13,7 +13,7 @@ async def add_chat_message_async(user: User, content: str, role: MessageRole) ->
     Returns:
         The created ChatMessage instance.
     """
-    return await ChatMessage.objects.acreate(
+    return ChatMessage.objects.create(
         user=user,
         content=content,
         role=role,

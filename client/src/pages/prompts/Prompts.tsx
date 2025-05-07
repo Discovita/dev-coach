@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
 import { DeletePromptDialog } from "./components/DeletePromptDialog";
+import { toast } from "sonner";
 
 /**
  * PromptsTabs
@@ -123,8 +124,16 @@ export function PromptsTabs() {
   const handleCreatePrompt = async (
     data: Parameters<typeof createPrompt>[0]
   ) => {
-    await createPrompt(data);
-    await refetchPrompts();
+    try {
+      await createPrompt(data);
+      await refetchPrompts();
+      toast.success("Prompt created successfully!");
+    } catch (err) {
+      toast.error("Failed to create prompt", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+      throw err;
+    }
   };
 
   /**
@@ -150,10 +159,11 @@ export function PromptsTabs() {
       });
       // Refetch prompts after successful edit
       await refetchPrompts();
-      // Optionally show a toast or refetch prompts
-      // toast.success("Prompt updated successfully!");
-    } catch {
-      // toast.error("Failed to update prompt");
+      toast.success("Prompt updated successfully!");
+    } catch (err) {
+      toast.error("Failed to update prompt", {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setSubmittingEdit(false);
     }
@@ -192,13 +202,12 @@ export function PromptsTabs() {
               allowed_actions: editAllowedActions,
               required_context_keys: editContextKeys,
               is_active: editIsActive,
-              version:
-                Math.max(
-                  ...allPrompts
-                    .filter((p) => p.coach_state === selectedPrompt.coach_state)
-                    .map((p) => p.version),
-                  0
-                ) + 1,
+              version: Math.max(
+                ...allPrompts
+                  .filter((p) => p.coach_state === selectedPrompt.coach_state)
+                  .map((p) => p.version),
+                0
+              ) + 1,
             },
           ]
         : [];
@@ -209,8 +218,11 @@ export function PromptsTabs() {
         0
       );
       setSelectedVersion(newVersion);
-    } catch {
-      // toast.error("Failed to create new version");
+      toast.success("Prompt saved as new version!");
+    } catch (err) {
+      toast.error("Failed to save as new version", {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setSubmittingEdit(false);
     }
@@ -263,8 +275,11 @@ export function PromptsTabs() {
         setSelectedVersion(null);
       }
       setDeleteDialogOpen(false);
-    } catch {
-      // toast.error("Failed to delete prompt");
+      toast.success("Prompt deleted (archived) successfully!");
+    } catch (err) {
+      toast.error("Failed to delete prompt", {
+        description: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setIsDeleting(false);
     }

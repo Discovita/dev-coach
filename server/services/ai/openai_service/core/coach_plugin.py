@@ -38,7 +38,7 @@ class OpenAIServicePlugin(AIService):
         """
         self.service = service
 
-    async def generate(
+    def generate(
         self,
         coach_prompt: str,
         chat_history: list[ChatMessage],

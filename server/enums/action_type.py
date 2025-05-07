@@ -17,6 +17,10 @@ class ActionType(models.TextChoices):
     TRANSITION_STATE = "transition_state", "Transition State"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"
 
+    def get_all_actions() -> list:
+        """Get all action types as a list."""
+        return list(ActionType)
+
     @classmethod
     def from_string(cls, value: str) -> "ActionType":
         """

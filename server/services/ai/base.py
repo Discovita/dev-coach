@@ -33,7 +33,7 @@ class AIService(ABC):
         pass
 
     @abstractmethod
-    async def generate(
+    def generate(
         self,
         coach_prompt: Optional[str],
         chat_history: list[ChatMessage],

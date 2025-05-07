@@ -33,12 +33,12 @@ Usage:
     )
 """
 
-from .core import OpenAIService, OpenAIServiceCoachPlugin
+from .core import OpenAIService, OpenAIServicePlugin
 from .enums import AIModel, AIProvider
 from .models import ImageSize, ImageQuality, ImageResponseFormat, ImageModel, ImageStyle
 
 __all__ = [
-    "OpenAIServiceCoachPlugin",
+    "OpenAIServicePlugin",
     "OpenAIService",
     "AIModel",
     "AIProvider",

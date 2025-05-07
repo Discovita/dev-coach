@@ -13,7 +13,7 @@ createRoot(document.getElementById("root")!).render(
       <QueryProvider>
         <ThemeProvider>
           <App />
-          <Toaster closeButton richColors />
+          <Toaster closeButton />
         </ThemeProvider>
       </QueryProvider>
     </BrowserRouter>

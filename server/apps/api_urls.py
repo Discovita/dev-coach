@@ -11,6 +11,7 @@ from rest_framework_simplejwt.views import (
 from apps.authentication.views import AuthViewSet
 from apps.prompts.views import PromptViewSet
 from apps.core.views import CoreViewSet
+from apps.coach.views import CoachViewSet
 
 # Local Modules
 
@@ -23,6 +24,7 @@ brand_web_router = DefaultRouter(trailing_slash=False)  # brand web
 default_router.register(r"auth", AuthViewSet, basename="auth")
 default_router.register(r"prompts", PromptViewSet, basename="prompts")
 default_router.register(r"core", CoreViewSet, basename="core")
+default_router.register(r"coach", CoachViewSet, basename="coach")
 
 # JWT token URLs
 jwt_patterns = [
