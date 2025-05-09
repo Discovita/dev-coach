@@ -1,5 +1,5 @@
 import { COACH_BASE_URL, REFRESH } from "@/constants/api";
-import { RequestOptions } from "@/types/Auth";
+import { RequestOptions } from "@/types/auth";
 
 let refreshPromise: Promise<string> | null = null;
 

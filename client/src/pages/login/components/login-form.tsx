@@ -145,6 +145,7 @@ export function LoginForm({
                     disabled={loginStatus === "pending"}
                     onChange={(e) => setPassword(e.target.value)}
                     className="bg-background dark:bg-gold-700/40 border border-border dark:border-gold-600 text-foreground dark:text-gold-50 placeholder:text-muted-foreground dark:placeholder:text-gold-300 focus:ring-2 focus:ring-gold-500"
+                    showPasswordToggle={true}
                   />
                 </div>
                 <Button

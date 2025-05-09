@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+// import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export default function Navbar() {
   const centerLinks = [
@@ -50,11 +50,11 @@ export default function Navbar() {
               </Link>
             </div>
           </div>
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <div className="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
               <ThemeSwitcher />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </nav>
