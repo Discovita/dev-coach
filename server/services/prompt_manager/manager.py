@@ -14,11 +14,9 @@ from services.action_handler.utils.dynamic_schema import build_dynamic_response_
 from services.prompt_manager.utils.append_action_instructions import (
     append_action_instructions,
 )
+from services.logger import configure_logging
 
-# Import utilities (to be implemented next)
-# from .collect_chat_context import collect_chat_context
-# from .format_chat_prompt_for_provider import format_chat_prompt_for_provider
-# from .action_instructions import append_action_instructions
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 class PromptManager:
@@ -43,6 +41,7 @@ class PromptManager:
         # 1. Retrieve the user's CoachState
         coach_state = CoachState.objects.get(user=user)
         state_value = coach_state.current_state
+        log.debug(coach_state)
 
         # 2. Select the newest active prompt for this state (or override)
         prompt_qs = Prompt.objects.filter(
@@ -58,9 +57,7 @@ class PromptManager:
         # 3. Gather context for the prompt
         prompt_context = gather_prompt_context(prompt, coach_state)
         provider = AIModel.get_provider(model)
-        response_format_model = build_dynamic_response_format(
-            prompt.allowed_actions
-        )
+        response_format_model = build_dynamic_response_format(prompt.allowed_actions)
         coach_prompt, response_format = format_for_provider(
             prompt, prompt_context, provider, response_format=response_format_model
         )

@@ -3,6 +3,7 @@ from enums.message_role import MessageRole
 from apps.users.models import User
 import uuid
 
+
 # TODO: add some flag to keep track of what coach state this message belongs to and what version of
 # the prompt was used
 class ChatMessage(models.Model):
@@ -11,12 +12,12 @@ class ChatMessage(models.Model):
     """
 
     id = models.UUIDField(
-    primary_key=True,
-    default=uuid.uuid4,
-    editable=False,
-    unique=True,
-    help_text="Unique identifier for this object."
-)
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        help_text="Unique identifier for this object.",
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

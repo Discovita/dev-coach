@@ -10,7 +10,7 @@ from typing import Optional, Union, Type
 
 from pydantic import BaseModel
 from enums.ai import AIModel, AIProvider
-from server.pydantic.CoachChatResponse import CoachChatResponse
+from models.CoachChatResponse import CoachChatResponse
 import json
 import re
 
@@ -40,11 +40,6 @@ class AIService(ABC):
         **kwargs,
     ) -> CoachChatResponse:
         """Run a generation prompt."""
-        pass
-
-    @abstractmethod
-    def get_model_name(self) -> AIModel:
-        """Get the name of the model being used."""
         pass
 
     @abstractmethod

@@ -23,10 +23,14 @@ def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> PromptCont
         context_data[key] = get_context_value(key, coach_state)
     # Map context_data to PromptContext fields
     return PromptContext(
-        user_name=context_data.get(ContextKey.USER_NAME, user.get_full_name() or user.email),
+        user_name=context_data.get(
+            ContextKey.USER_NAME, user.get_full_name() or user.email
+        ),
         user_goals=context_data.get(ContextKey.USER_GOALS, []),
         num_identities=context_data.get(ContextKey.NUMBER_OF_IDENTITIES, 0),
-        current_identity_description=context_data.get(ContextKey.CURRENT_IDENTITY_DESCRIPTION),
+        current_identity_description=context_data.get(
+            ContextKey.CURRENT_IDENTITY_DESCRIPTION
+        ),
         identities_summary=context_data.get(ContextKey.IDENTITIES_SUMMARY, []),
         phase=context_data.get(ContextKey.PHASE, str(coach_state.current_state)),
     )
@@ -43,7 +47,6 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
     elif key == ContextKey.USER_GOALS:
         # Example: get goals from coach_state metadata or a goals field
         return coach_state.goals
-    # TODO: Implement other context keys as needed
     elif key == ContextKey.NUMBER_OF_IDENTITIES:
         return user.identities.count()
     elif key == ContextKey.CURRENT_IDENTITY_DESCRIPTION:

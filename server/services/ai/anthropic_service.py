@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from enums.ai import AIModel, AIProvider
 
 # from cws_helpers.anthropic_helper import AnthropicHelper
-from server.pydantic.CoachChatResponse import CoachChatResponse
+from server.models.CoachChatResponse import CoachChatResponse
 from services.ai.base import AIService
 
 
@@ -86,10 +86,6 @@ class AnthropicService(AIService):
         except Exception as e:
             log.error(f"Error generating text with Anthropic: {e}")
             raise
-
-    def get_model_name(self) -> AIModel:
-        """Get the name of the model being used."""
-        return AIModel.from_string(self.model_name)
 
     def get_provider_name(self) -> AIProvider:
         """Get the name of the provider being used."""

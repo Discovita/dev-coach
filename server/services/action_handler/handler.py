@@ -1,7 +1,8 @@
+from typing import List, Tuple
 from django.db import transaction
 from enums.action_type import ActionType
 from apps.coach_states.models import CoachState
-from server.pydantic.CoachChatResponse import CoachChatResponse
+from server.models.CoachChatResponse import CoachChatResponse
 from services.action_handler.actions import (
     create_identity,
     update_identity,
@@ -26,19 +27,27 @@ ACTION_HANDLERS = {
 
 log = configure_logging(__name__, log_level="INFO")
 
-def apply_actions(coach_state: CoachState, response: CoachChatResponse) -> CoachState:
+
+def apply_actions(
+    coach_state: CoachState, response: CoachChatResponse
+) -> Tuple[CoachState, List[str]]:
     """
     Applies all non-None actions from a CoachChatResponse to a CoachState object and returns the updated state.
     Each action is represented as an optional field on the response model.
     Uses the expected type for each action field for runtime type safety.
     Supported actions are defined in services.action_handler.actions and enums.action_type.
     """
+    log.fine(f"Applying actions to coach state: {coach_state.id}")
+    actions = []
     for action_name, value in response.model_dump(exclude_none=True).items():
+        # Skip the 'message' field, as it is not an action
+        if action_name == "message":
+            continue
         action = getattr(response, action_name, None)
         if action is None:
             log.warning(f"Action '{action_name}' is None, skipping.")
             continue
-
+        actions.append({"type": action_name, "params": getattr(action, "params", None)})
         # Example: handle each action type explicitly
         if action_name == ActionType.CREATE_IDENTITY.value:
             log.info("ACTION: Creating identity")
@@ -67,4 +76,4 @@ def apply_actions(coach_state: CoachState, response: CoachChatResponse) -> Coach
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()
-    return coach_state
+    return coach_state, actions

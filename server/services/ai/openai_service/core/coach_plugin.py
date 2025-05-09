@@ -14,7 +14,7 @@ Usage:
 from typing import Optional, Type
 from pydantic import BaseModel
 from apps.chat_messages.models import ChatMessage
-from server.pydantic.CoachChatResponse import CoachChatResponse
+from server.models.CoachChatResponse import CoachChatResponse
 from services.ai.openai_service.core.base import OpenAIService
 from enums.ai import AIModel
 from services.ai.base import AIService
@@ -29,7 +29,7 @@ class OpenAIServicePlugin(AIService):
     """
     Plugin/adapter for OpenAIService, providing a legacy-compatible interface for the Coach.
     Inherits from AIService to ensure compatibility with the AI service interface expected by the application.
-    Implements the required abstract methods: generate, get_model_name, get_provider_name.
+    Implements the required abstract methods: generate, get_provider_name.
     """
 
     def __init__(self, service: OpenAIService):
@@ -78,7 +78,7 @@ class OpenAIServicePlugin(AIService):
 
         # 4. Prepare params
         completion_params = {
-            "model": model.name,
+            "model": model.value,
             "temperature": temperature,
             token_param: max_tokens,
         }
