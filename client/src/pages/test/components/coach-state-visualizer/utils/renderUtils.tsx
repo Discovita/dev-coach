@@ -1,7 +1,17 @@
-import { CoachResponse, Action } from '@/types/apiTypes';
-import MarkdownRenderer from '@/utils/MarkdownRenderer';
-import { copyToClipboard } from './dataUtils';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { CoachResponse } from "@/types/coachResponse";
+import MarkdownRenderer from "@/utils/MarkdownRenderer";
+import { copyToClipboard } from "./dataUtils";
+import { Button } from "@/components/ui/button";
+
+/**
+ * Minimal Action type for rendering actions in the visualizer.
+ * If a more complete type is available, import it instead.
+ */
+type Action = {
+  type: string;
+  params?: { name: string; value: unknown }[];
+};
 
 export const renderJsonSection = (
   title: string,
@@ -9,7 +19,7 @@ export const renderJsonSection = (
   sectionKey: string,
   isExpanded: boolean,
   toggleSection: (section: string) => void
-): JSX.Element | null => {
+): React.ReactElement | null => {
   if (!data || (Array.isArray(data) && data.length === 0)) return null;
 
   return (
@@ -18,18 +28,24 @@ export const renderJsonSection = (
         className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
       >
-        <h3 className="m-0 text-base font-semibold text-gold-900 dark:text-gold-200">{title}</h3>
+        <h3 className="m-0 text-base font-semibold text-gold-900 dark:text-gold-200">
+          {title}
+        </h3>
         <div className="flex items-center gap-2">
           <Button
             className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-600"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(data);
             }}
           >
             Copy
           </Button>
-          <span className={`text-xs transition-transform ${isExpanded ? '' : 'rotate-[-90deg]'}`}>
+          <span
+            className={`text-xs transition-transform ${
+              isExpanded ? "" : "rotate-[-90deg]"
+            }`}
+          >
             ▼
           </span>
         </div>
@@ -49,7 +65,7 @@ export const renderActionsSection = (
   sectionKey: string,
   isExpanded: boolean,
   toggleSection: (section: string) => void
-): JSX.Element | null => {
+): React.ReactElement | null => {
   if (!actions || actions.length === 0) return null;
 
   return (
@@ -58,25 +74,31 @@ export const renderActionsSection = (
         className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
       >
-        <h3 className="m-0 text-base font-semibold text-gold-700 dark:text-gold-200">{title}</h3>
+        <h3 className="m-0 text-base font-semibold text-gold-700 dark:text-gold-200">
+          {title}
+        </h3>
         <div className="flex items-center gap-2">
           <Button
             className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-600"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(actions);
             }}
           >
             Copy
           </Button>
-          <span className={`text-xs transition-transform ${isExpanded ? '' : 'rotate-[-90deg]'}`}>
+          <span
+            className={`text-xs transition-transform ${
+              isExpanded ? "" : "rotate-[-90deg]"
+            }`}
+          >
             ▼
           </span>
         </div>
       </div>
       {isExpanded && (
         <div className="flex flex-col gap-3 p-4 max-h-[500px] overflow-y-auto bg-gold-50 dark:bg-neutral-700">
-          {actions.map((action, index) => (
+          {actions.map((action: Action, index: number) => (
             <div
               key={index}
               className="rounded-md border overflow-hidden bg-white dark:bg-neutral-800 shadow transition-transform hover:-translate-y-0.5 hover:shadow-lg"
@@ -98,7 +120,7 @@ export const renderActionsSection = (
                       </tr>
                     </thead>
                     <tbody>
-                      {action.params.map((param, pIndex) => (
+                      {action.params.map((param: { name: string; value: unknown }, pIndex: number) => (
                         <tr key={pIndex}>
                           <td className="font-medium text-[#555] dark:text-gold-100 w-2/5 p-2">
                             {param.name}
@@ -128,14 +150,14 @@ export const renderFinalPrompt = (
   lastResponse: CoachResponse | undefined,
   isExpanded: boolean,
   toggleSection: (section: string) => void
-): JSX.Element | null => {
+): React.ReactElement | null => {
   if (!lastResponse?.final_prompt) return null;
 
   return (
     <div className="mb-4 border rounded-md overflow-hidden border-gold-600">
       <div
         className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
-        onClick={() => toggleSection('prompt')}
+        onClick={() => toggleSection("prompt")}
       >
         <h3 className="m-0 text-base font-semibold text-gold-900 dark:text-gold-200">
           Final Prompt
@@ -143,14 +165,18 @@ export const renderFinalPrompt = (
         <div className="flex items-center gap-2">
           <Button
             className="bg-gold-500 dark:bg-gold-600 rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-700 dark:hover:bg-gold-700"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(lastResponse.final_prompt);
             }}
           >
             Copy
           </Button>
-          <span className={`text-xs transition-transform ${isExpanded ? '' : 'rotate-[-90deg]'}`}>
+          <span
+            className={`text-xs transition-transform ${
+              isExpanded ? "" : "rotate-[-90deg]"
+            }`}
+          >
             ▼
           </span>
         </div>
@@ -167,7 +193,10 @@ export const renderFinalPrompt = (
   );
 };
 
-export const renderEmptyState = (primaryText: string, secondaryText?: string): JSX.Element => {
+export const renderEmptyState = (
+  primaryText: string,
+  secondaryText?: string
+): React.ReactElement => {
   return (
     <div className="p-6 text-center bg-gold-50 dark:bg-neutral-800 border border-dashed rounded-md text-neutral-400 dark:border-gold-500">
       <p className="font-medium mb-2">{primaryText}</p>

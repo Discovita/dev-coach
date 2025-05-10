@@ -20,12 +20,7 @@ export function useChatMessages() {
   const queryClient = useQueryClient();
 
   // Fetch the user's chat messages
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["user", "chatMessages"],
     queryFn: fetchChatMessages,
   });
@@ -37,13 +32,27 @@ export function useChatMessages() {
    */
   const updateMutation = useMutation({
     // mutationFn sends the message to the backend
-    mutationFn: async ({ content, model }: { content: string; model?: string }) => {
+    mutationFn: async ({
+      content,
+      model,
+    }: {
+      content: string;
+      model?: string;
+    }) => {
       return apiClient.sendMessage(content, model ?? "");
     },
     // On success, update all relevant caches with the response
     onSuccess: (response: CoachResponse) => {
+      console.log("Chat message sent successfully:", response);
       if (response.chat_history) {
-        queryClient.setQueryData(["user", "chatMessages"], response.chat_history);
+        console.log(
+          "Updating chat messages in cache with response:",
+          response.chat_history
+        );
+        queryClient.setQueryData(
+          ["user", "chatMessages"],
+          response.chat_history
+        );
       }
       if (response.identities) {
         queryClient.setQueryData(["user", "identities"], response.identities);
@@ -77,6 +86,10 @@ export function useChatMessages() {
     refetchChatMessages: refetch,
     updateChatMessages: updateMutation.mutateAsync,
     updateStatus: updateMutation.status,
+    // Expose mutation state for optimistic UI
+    pendingMessage: updateMutation.variables, // The message being sent (if any)
+    isPending: updateMutation.status === "pending",
+    isUpdateError: updateMutation.isError,
     /**
      * Reset all chat messages for the user.
      * Use: await resetChatMessagesFn();
@@ -85,4 +98,4 @@ export function useChatMessages() {
     resetChatMessages: resetMutation.mutateAsync,
     resetStatus: resetMutation.status,
   };
-} 
+}

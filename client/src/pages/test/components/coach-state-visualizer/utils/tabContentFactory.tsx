@@ -1,12 +1,14 @@
-import { CoachResponse, CoachState } from '@/types/apiTypes';
-import { TabName, ExpandedSectionsConfig, ExtractedActions } from '../types';
+import React from "react";
+import { CoachResponse } from "@/types/coachResponse";
+import { CoachState } from "@/types/coachState";
+import { TabName, ExpandedSectionsConfig, ExtractedActions } from "../types";
 import {
   renderJsonSection,
   renderFinalPrompt,
   renderEmptyState,
   renderActionsSection,
-} from './renderUtils';
-import { getCurrentStateInfo } from './dataUtils';
+} from "./renderUtils";
+import { getCurrentStateInfo } from "./dataUtils";
 
 export const renderTabContent = (
   tabName: TabName,
@@ -14,17 +16,22 @@ export const renderTabContent = (
   lastResponse: CoachResponse | undefined,
   expandedSections: ExpandedSectionsConfig,
   toggleSection: (section: string) => void,
-  extractedActions: ExtractedActions
-): JSX.Element => {
+  extractedActions: ExtractedActions,
+  conversationHistory?: import("@/types/message").Message[],
+  identitiesList?: import("@/types/identity").Identity[],
+  proposedIdentity?: import("@/types/identity").Identity | null
+): React.ReactElement => {
   const { availableActions, actionsTaken } = extractedActions;
 
   // Filter actions for history - exclude current response actions
   const currentResponseActions = lastResponse?.actions || [];
-  const currentResponseActionStrings = currentResponseActions.map(a => JSON.stringify(a));
+  const currentResponseActionStrings = currentResponseActions.map((a) =>
+    JSON.stringify(a)
+  );
 
   // Only show actions in history that aren't in the current response
   const actionHistory = (actionsTaken || []).filter(
-    action => !currentResponseActionStrings.includes(JSON.stringify(action))
+    (action) => !currentResponseActionStrings.includes(JSON.stringify(action))
   );
 
   switch (tabName) {
@@ -32,26 +39,18 @@ export const renderTabContent = (
       return (
         <>
           {renderJsonSection(
-            'Current State',
+            "Current State",
             getCurrentStateInfo(coachState),
-            'state',
-            expandedSections['state'],
+            "state",
+            expandedSections["state"],
             toggleSection
           )}
 
           {renderJsonSection(
-            'User Profile',
-            coachState.user_profile,
-            'userProfile',
-            expandedSections['userProfile'],
-            toggleSection
-          )}
-
-          {renderJsonSection(
-            'Metadata',
+            "Metadata",
             coachState.metadata,
-            'metadata',
-            expandedSections['metadata'],
+            "metadata",
+            expandedSections["metadata"],
             toggleSection
           )}
         </>
@@ -60,12 +59,16 @@ export const renderTabContent = (
     case TabName.PROMPT:
       return (
         <>
-          {renderFinalPrompt(lastResponse, expandedSections['prompt'], toggleSection)}
+          {renderFinalPrompt(
+            lastResponse,
+            expandedSections["prompt"],
+            toggleSection
+          )}
 
           {!lastResponse?.final_prompt &&
             renderEmptyState(
-              'No prompt information available yet.',
-              'Send a message to see the prompt used to generate a response.'
+              "No prompt information available yet.",
+              "Send a message to see the prompt used to generate a response."
             )}
         </>
       );
@@ -76,28 +79,29 @@ export const renderTabContent = (
           {lastResponse?.actions &&
             lastResponse.actions.length > 0 &&
             renderActionsSection(
-              'Current Response Actions',
+              "Current Response Actions",
               lastResponse.actions,
-              'currentActions',
-              expandedSections['currentActions'] ?? true, // Default to expanded
+              "currentActions",
+              expandedSections["currentActions"] ?? true, // Default to expanded
               toggleSection
             )}
 
           {actionHistory &&
             actionHistory.length > 0 &&
             renderActionsSection(
-              'Action History',
+              "Action History",
               actionHistory,
-              'actionHistory',
-              expandedSections['actionHistory'] ?? true, // Default to expanded
+              "actionHistory",
+              expandedSections["actionHistory"] ?? true, // Default to expanded
               toggleSection
             )}
 
+          {/* Available Actions is a string[]; render as JSON, not as actions */}
           {renderJsonSection(
-            'Available Actions',
+            "Available Actions",
             availableActions,
-            'availableActions',
-            expandedSections['availableActions'],
+            "availableActions",
+            expandedSections["availableActions"],
             toggleSection
           )}
 
@@ -105,8 +109,8 @@ export const renderTabContent = (
             (!availableActions || availableActions.length === 0) &&
             (!lastResponse?.actions || lastResponse.actions.length === 0) &&
             renderEmptyState(
-              'No action information available yet.',
-              'Actions will appear here when the coach performs them or lists available ones.'
+              "No action information available yet.",
+              "Actions will appear here when the coach performs them or lists available ones."
             )}
         </>
       );
@@ -115,24 +119,29 @@ export const renderTabContent = (
       return (
         <>
           {renderJsonSection(
-            'Confirmed Identities',
-            coachState.identities,
-            'identities',
-            expandedSections['identities'],
+            "Confirmed Identities",
+            identitiesList || [],
+            "identities",
+            expandedSections["identities"],
             toggleSection
           )}
 
           {renderJsonSection(
-            'Proposed Identity',
-            coachState.proposed_identity,
-            'proposedIdentity',
-            expandedSections['proposedIdentity'],
+            "Proposed Identity",
+            coachState.proposed_identity
+              ? (coachState.proposed_identity as unknown as Record<
+                  string,
+                  unknown
+                >)
+              : null,
+            "proposedIdentity",
+            expandedSections["proposedIdentity"],
             toggleSection
           )}
 
-          {(!coachState.identities || coachState.identities.length === 0) &&
-            !coachState.proposed_identity &&
-            renderEmptyState('No identities created yet.')}
+          {(!identitiesList || identitiesList.length === 0) &&
+            !proposedIdentity &&
+            renderEmptyState("No identities created yet.")}
         </>
       );
 
@@ -140,15 +149,15 @@ export const renderTabContent = (
       return (
         <>
           {renderJsonSection(
-            'Conversation History',
-            coachState.conversation_history,
-            'history',
-            expandedSections['history'],
+            "Conversation History",
+            conversationHistory || [],
+            "history",
+            expandedSections["history"],
             toggleSection
           )}
 
-          {(!coachState.conversation_history || coachState.conversation_history.length === 0) &&
-            renderEmptyState('No conversation history available.')}
+          {(!conversationHistory || conversationHistory.length === 0) &&
+            renderEmptyState("No conversation history available.")}
         </>
       );
 

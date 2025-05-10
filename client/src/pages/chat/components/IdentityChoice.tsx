@@ -1,5 +1,5 @@
-import React from 'react';
-import { Identity } from '@/types/apiTypes';
+import React from "react";
+import { Identity } from "@/types/identity";
 
 export interface IdentityChoiceProps {
   identity: Identity;
@@ -20,7 +20,11 @@ export const IdentityChoice: React.FC<IdentityChoiceProps> = ({
   return (
     <div className="identity-choice-buttons">
       <button
-        onClick={() => onChoiceSelected(`Yes, I like the "${identity.description}" identity.`)}
+        onClick={() =>
+          onChoiceSelected(
+            `Yes, I like the "${identity.description}" identity.`
+          )
+        }
         disabled={disabled}
         className="identity-button accept-button"
         aria-label="Accept this identity"
@@ -28,7 +32,11 @@ export const IdentityChoice: React.FC<IdentityChoiceProps> = ({
         I love it!
       </button>
       <button
-        onClick={() => onChoiceSelected(`I like this identity but can we adjust it slightly?`)}
+        onClick={() =>
+          onChoiceSelected(
+            `I like this identity but can we adjust it slightly?`
+          )
+        }
         disabled={disabled}
         className="identity-button refine-button"
         aria-label="Refine this identity"
@@ -37,7 +45,9 @@ export const IdentityChoice: React.FC<IdentityChoiceProps> = ({
       </button>
       <button
         onClick={() =>
-          onChoiceSelected(`This isn't really what I'm looking for. What are some other options?`)
+          onChoiceSelected(
+            `This isn't really what I'm looking for. What are some other options?`
+          )
         }
         disabled={disabled}
         className="identity-button reject-button"

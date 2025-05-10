@@ -1,37 +1,30 @@
-import { CoachResponse, CoachState } from '@/types/apiTypes';
-import { TabName, TabUpdateStatus, ExtractedActions } from '../types';
+import { CoachResponse } from "@/types/coachResponse";
+import { CoachState } from "@/types/coachState";
+import { TabName, TabUpdateStatus, ExtractedActions } from "../types";
 
 /**
- * Performs a deep comparison between two objects to detect changes
+ * Performs a deep comparison between two values to detect changes
  *
  * @param prev - Previous value
  * @param current - Current value
  * @returns True if values are different
  */
-export const hasChanged = (prev: any, current: any): boolean => {
+export const hasChanged = (prev: unknown, current: unknown): boolean => {
   try {
     // Handle null/undefined cases
     if (prev === current) return false;
-    if (prev === null || prev === undefined || current === null || current === undefined) {
+    if (
+      prev === null ||
+      prev === undefined ||
+      current === null ||
+      current === undefined
+    ) {
       return prev !== current;
     }
 
     // Handle arrays
     if (Array.isArray(prev) && Array.isArray(current)) {
       if (prev.length !== current.length) return true;
-
-      // For conversation history, only check last message to avoid
-      // excessive re-renders for long conversations
-      if (
-        prev.length > 0 &&
-        typeof prev[0] === 'object' &&
-        prev[0] &&
-        'role' in prev[0] &&
-        'content' in prev[0]
-      ) {
-        if (prev.length !== current.length) return true;
-        return hasChanged(prev[prev.length - 1], current[current.length - 1]);
-      }
 
       // For other arrays, check length first for quick comparison
       if (prev.length !== current.length) return true;
@@ -40,7 +33,8 @@ export const hasChanged = (prev: any, current: any): boolean => {
       if (prev.length > 0) {
         // Check first and last elements as a quick test
         if (hasChanged(prev[0], current[0])) return true;
-        if (hasChanged(prev[prev.length - 1], current[current.length - 1])) return true;
+        if (hasChanged(prev[prev.length - 1], current[current.length - 1]))
+          return true;
       }
 
       // Finally, do a full comparison if needed
@@ -50,7 +44,7 @@ export const hasChanged = (prev: any, current: any): boolean => {
     }
 
     // Handle primitive values
-    if (typeof prev !== 'object' || typeof current !== 'object') {
+    if (typeof prev !== "object" || typeof current !== "object") {
       return prev !== current;
     }
 
@@ -60,13 +54,17 @@ export const hasChanged = (prev: any, current: any): boolean => {
     return prevStr !== currStr;
   } catch (error) {
     // If we encounter errors (like circular references), do simple comparison
-    console.warn('Error in change detection, falling back to reference check:', error);
+    console.warn(
+      "Error in change detection, falling back to reference check:",
+      error
+    );
     return prev !== current;
   }
 };
 
 /**
  * Detects changes in STATE tab data
+ * Compares current_state, current_identity, proposed_identity, goals, and metadata.
  */
 export const detectStateTabChanges = (
   prevState: CoachState | null,
@@ -76,8 +74,9 @@ export const detectStateTabChanges = (
 
   return (
     hasChanged(prevState.current_state, currentState.current_state) ||
-    hasChanged(prevState.current_identity_id, currentState.current_identity_id) ||
-    hasChanged(prevState.user_profile, currentState.user_profile) ||
+    hasChanged(prevState.current_identity, currentState.current_identity) ||
+    hasChanged(prevState.proposed_identity, currentState.proposed_identity) ||
+    hasChanged(prevState.goals, currentState.goals) ||
     hasChanged(prevState.metadata, currentState.metadata)
   );
 };
@@ -125,6 +124,7 @@ export const detectActionsTabChanges = (
 
 /**
  * Detects changes in IDENTITIES tab data
+ * Compares current_identity and proposed_identity.
  */
 export const detectIdentitiesTabChanges = (
   prevState: CoachState | null,
@@ -132,41 +132,20 @@ export const detectIdentitiesTabChanges = (
 ): boolean => {
   if (!prevState) return false;
 
-  // Check for changes in lengths first for quick comparison
-  const prevIdentitiesLength = prevState.identities?.length || 0;
-  const currentIdentitiesLength = currentState.identities?.length || 0;
-
-  if (prevIdentitiesLength !== currentIdentitiesLength) return true;
-
   return (
-    hasChanged(prevState.identities, currentState.identities) ||
+    hasChanged(prevState.current_identity, currentState.current_identity) ||
     hasChanged(prevState.proposed_identity, currentState.proposed_identity)
   );
 };
 
 /**
  * Detects changes in CONVERSATION tab data
+ *
+ * NOTE: With the new model, conversation history is not on CoachState.
+ * This should be handled by the conversationHistory array in the visualizer, not here.
+ * This function is now a no-op and always returns false.
  */
-export const detectConversationTabChanges = (
-  prevState: CoachState | null,
-  currentState: CoachState
-): boolean => {
-  if (!prevState) return false;
-
-  // Quick check for conversation length change
-  const prevLength = prevState.conversation_history?.length || 0;
-  const currentLength = currentState.conversation_history?.length || 0;
-
-  if (prevLength !== currentLength) return true;
-
-  // If same length, check if last message changed
-  if (prevLength > 0 && currentLength > 0) {
-    const prevLast = prevState.conversation_history?.[prevLength - 1];
-    const currentLast = currentState.conversation_history?.[currentLength - 1];
-
-    return hasChanged(prevLast, currentLast);
-  }
-
+export const detectConversationTabChanges = (): boolean => {
   return false;
 };
 
@@ -190,7 +169,10 @@ export const detectAllTabChanges = (
   }
 
   if (currentTab !== TabName.PROMPT) {
-    updates[TabName.PROMPT] = detectPromptTabChanges(prevResponse, currentResponse);
+    updates[TabName.PROMPT] = detectPromptTabChanges(
+      prevResponse,
+      currentResponse
+    );
   }
 
   if (currentTab !== TabName.ACTIONS) {
@@ -203,11 +185,14 @@ export const detectAllTabChanges = (
   }
 
   if (currentTab !== TabName.IDENTITIES) {
-    updates[TabName.IDENTITIES] = detectIdentitiesTabChanges(prevState, currentState);
+    updates[TabName.IDENTITIES] = detectIdentitiesTabChanges(
+      prevState,
+      currentState
+    );
   }
 
   if (currentTab !== TabName.CONVERSATION) {
-    updates[TabName.CONVERSATION] = detectConversationTabChanges(prevState, currentState);
+    updates[TabName.CONVERSATION] = detectConversationTabChanges();
   }
 
   return updates;

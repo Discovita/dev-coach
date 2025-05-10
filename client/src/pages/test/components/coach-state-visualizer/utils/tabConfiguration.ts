@@ -2,12 +2,13 @@ import { TabName, ExpandedSectionsConfig } from '../types';
 
 /**
  * Default configuration for expanded sections
- * All sections are expanded by default for better visibility
+ * All sections are expanded by default for better visibility.
+ * 'userProfile' removed as it is not used in the new model.
+ * Ensure all keys match the actual sections rendered in the visualizer.
  */
 export const getDefaultExpandedSections = (): ExpandedSectionsConfig => ({
   state: true,
   metadata: true,
-  userProfile: true,
   identities: true,
   proposedIdentity: true,
   prompt: true,

@@ -12,15 +12,19 @@ import { User } from "@/types/user";
 
 export function SessionRestorer() {
   const queryClient = useQueryClient();
+  console.log("[SessionRestorer] Rendering...");
 
   useEffect(() => {
-    // Only run if there is no user profile in cache
     const profile = queryClient.getQueryData<User>(["user", "profile"]);
     if (!profile) {
-      // Check for tokens
+      console.log(
+        "[SessionRestorer] No user profile in cache, checking cookies..."
+      );
       const accessToken = getCookie("discovita-access-token");
       if (accessToken) {
-        // Fetch user data and set cache
+        console.log(
+          "[SessionRestorer] Access token found in cookies, fetching user data..."
+        );
         fetchUserComplete().then((user) => {
           if (user) {
             // Set all cache keys as in setUserDataInCache
@@ -49,8 +53,10 @@ export function SessionRestorer() {
           }
         });
       }
+    } else {
+      console.log("[SessionRestorer] User profile already in cache.");
     }
   }, [queryClient]);
 
-  return null; // This component does not render anything
+  return null;
 }

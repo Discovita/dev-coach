@@ -1,8 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import { Message } from "@/types/message";
 import { ChatControls } from "@/pages/chat/components/ChatControls";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
-import { initialMessage } from "@/constants/initialMessage";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useCoachState } from "@/hooks/use-coach-state";
 
@@ -19,10 +17,37 @@ export const ChatInterface: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Get chat messages and updateChatMessages mutation from the custom hook
-  const { chatMessages, isLoading, isError, updateChatMessages, updateStatus } =
-    useChatMessages();
+  const {
+    chatMessages,
+    isLoading,
+    isError,
+    updateChatMessages,
+    updateStatus,
+    pendingMessage, // The message being sent (if any)
+    isPending,      // Whether a message is being sent
+  } = useChatMessages();
 
   const { coachState } = useCoachState();
+
+  useEffect(() => {
+    console.log("Chat messages updated:", chatMessages);
+  }, [chatMessages]);
+
+  // Compose the messages to display, including the pending message if any
+  // This enables optimistic UI: the user's message appears immediately while sending
+  const displayedMessages = React.useMemo(() => {
+    if (isPending && pendingMessage?.content) {
+      return [
+        ...(chatMessages || []),
+        {
+          role: "user",
+          content: pendingMessage.content,
+          timestamp: new Date().toISOString(), // Temporary timestamp
+        },
+      ];
+    }
+    return chatMessages || [];
+  }, [chatMessages, isPending, pendingMessage]);
 
   // Scroll to bottom when messages change
   const scrollToBottom = useCallback(() => {
@@ -35,6 +60,12 @@ export const ChatInterface: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages, scrollToBottom]);
+
+  // Scroll to bottom when optimistic user message is added
+  // This ensures the UI scrolls for both server and optimistic updates
+  useEffect(() => {
+    scrollToBottom();
+  }, [displayedMessages, scrollToBottom]);
 
   // Handler for sending a message
   const handleSendMessage = useCallback(
@@ -70,22 +101,10 @@ export const ChatInterface: React.FC = () => {
     );
   }
 
-  // If there are no messages, show the initial message
-  const messagesToShow: Message[] =
-    chatMessages && chatMessages.length > 0
-      ? chatMessages
-      : [
-          {
-            role: "coach",
-            content: initialMessage,
-            timestamp: new Date().toISOString(),
-          },
-        ];
-
   return (
     <div className="_ChatInterface flex flex-col h-[100vh] rounded-md overflow-hidden shadow-gold-md bg-gold-50 transition-shadow hover:shadow-gold-lg dark:rounded-none">
       <ChatMessages
-        messages={messagesToShow}
+        messages={displayedMessages}
         isProcessingMessage={updateStatus === "pending"}
         handleIdentityChoice={handleIdentityChoice}
         messagesEndRef={messagesEndRef}

@@ -1,8 +1,8 @@
-import { CoachState } from '../types/apiTypes';
+import { CoachState } from "@/types/coachState";
 
 // Import test state JSON files
-import emptyStateJson from './states/empty_state.json';
-import refinementTestCaseJson from './states/refinement_test_case.json';
+import emptyStateJson from "./states/empty_state.json";
+import refinementTestCaseJson from "./states/refinement_test_case.json";
 
 export interface TestState {
   name: string;

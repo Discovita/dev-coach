@@ -133,5 +133,7 @@ class UserViewSet(viewsets.GenericViewSet):
             add_chat_message(request.user, initial_message, MessageRole.COACH)
 
         # 3. Return the new chat history
-        chat_messages = ChatMessage.objects.filter(user=request.user).order_by("-timestamp")
+        chat_messages = ChatMessage.objects.filter(user=request.user).order_by(
+            "-timestamp"
+        )
         return Response(ChatMessageSerializer(chat_messages, many=True).data)

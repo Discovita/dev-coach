@@ -1,4 +1,5 @@
-import { CoachResponse, CoachState, Action } from '@/types/apiTypes';
+import { CoachResponse } from "@/types/coachResponse";
+import { CoachState } from "@/types/coachState";
 
 /**
  * CoachStateVisualizer Component Props
@@ -23,11 +24,11 @@ export interface ExtractedActions {
  * Tab names for the state visualizer
  */
 export enum TabName {
-  STATE = 'state',
-  PROMPT = 'prompt',
-  ACTIONS = 'actions',
-  IDENTITIES = 'identities',
-  CONVERSATION = 'conversation',
+  STATE = "state",
+  PROMPT = "prompt",
+  ACTIONS = "actions",
+  IDENTITIES = "identities",
+  CONVERSATION = "conversation",
 }
 
 /**

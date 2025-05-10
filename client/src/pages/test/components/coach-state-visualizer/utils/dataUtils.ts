@@ -1,29 +1,12 @@
-import { CoachState, CoachResponse, Action } from '@/types/apiTypes';
-import { ExtractedActions } from '../types';
-
-// Map to track actions by user session
-// Key is user name + first message timestamp (as a unique session identifier)
-const actionsBySession: Record<string, Action[]> = {};
-
-/**
- * Gets a unique identifier for the current user session
- *
- * @param state - The coach state containing user information
- * @returns A string identifier unique to this session
- */
-const getSessionKey = (state: CoachState): string => {
-  const userName = state.user_profile?.name || 'unknown';
-  const firstMsgTime =
-    state.conversation_history && state.conversation_history.length > 0
-      ? JSON.stringify(state.conversation_history[0])
-      : Date.now().toString();
-
-  return `${userName}-${firstMsgTime}`;
-};
+import { CoachResponse } from "@/types/coachResponse";
+import { CoachState } from "@/types/coachState";
+import { ExtractedActions } from "../types";
 
 /**
  * Extracts available actions and actions taken from the coach state metadata
- * and direct actions from the response, maintaining a history of all actions seen
+ * and direct actions from the response, maintaining a history of all actions seen.
+ *
+ * With the new model, there is only a single session per user, so we do not track by session.
  *
  * @param coachState - The current state of the coach
  * @param lastResponse - The last API response which may contain actions
@@ -34,34 +17,16 @@ export const extractActions = (
   lastResponse?: CoachResponse
 ): ExtractedActions => {
   const metadata = coachState.metadata || {};
-  const sessionKey = getSessionKey(coachState);
 
-  // Initialize session entry if needed
-  if (!actionsBySession[sessionKey]) {
-    actionsBySession[sessionKey] = [];
-  }
+  // Available actions from metadata (if present)
+  const availableActions = (metadata.available_actions as string[]) || [];
 
-  // Get new explicit actions from response
-  const responseActions = lastResponse?.actions || [];
+  // Actions taken: if the last response has actions, use those; otherwise, empty array
+  const actionsTaken = lastResponse?.actions || [];
 
-  // Add response actions to our session history if they're new
-  if (responseActions.length > 0) {
-    responseActions.forEach(responseAction => {
-      const actionAsString = JSON.stringify(responseAction);
-      const isDuplicate = actionsBySession[sessionKey].some(
-        existingAction => JSON.stringify(existingAction) === actionAsString
-      );
-
-      if (!isDuplicate) {
-        actionsBySession[sessionKey].push(responseAction);
-      }
-    });
-  }
-
-  // Return both metadata actions and our accumulated history for this session
   return {
-    availableActions: (metadata.available_actions as string[]) || [],
-    actionsTaken: actionsBySession[sessionKey],
+    availableActions,
+    actionsTaken,
   };
 };
 
@@ -70,7 +35,7 @@ export const extractActions = (
  *
  * @param data - Data to copy to clipboard
  */
-export const copyToClipboard = (data: any): void => {
+export const copyToClipboard = (data: unknown): void => {
   navigator.clipboard.writeText(JSON.stringify(data, null, 2));
 };
 
@@ -80,9 +45,14 @@ export const copyToClipboard = (data: any): void => {
  * @param coachState - The current state of the coach
  * @returns Object containing essential state information
  */
-export const getCurrentStateInfo = (coachState: CoachState): object => {
+export const getCurrentStateInfo = (coachState: CoachState): Record<string, unknown> => {
   return {
+    id: coachState.id,
+    user: coachState.user,
     current_state: coachState.current_state,
-    current_identity_id: coachState.current_identity_id,
+    current_identity: coachState.current_identity,
+    proposed_identity: coachState.proposed_identity,
+    goals: coachState.goals,
+    updated_at: coachState.updated_at,
   };
 };

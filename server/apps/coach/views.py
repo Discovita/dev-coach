@@ -72,8 +72,11 @@ class CoachViewSet(
         # Get the last 5 messages from the chat history
         chat_history_for_prompt = (
             ChatMessage.objects.filter(user=request.user)
-            .order_by("-timestamp")[:5]
+            .order_by("timestamp")[:5]
             .all()
+        )
+        log.debug(
+            f"Chat history for prompt: {[message.content for message in chat_history_for_prompt]}"
         )
         ai_service = AIServiceFactory.create(model)
 
@@ -85,15 +88,18 @@ class CoachViewSet(
         new_state, actions = apply_actions(coach_state, response)
         coach_state_serializer = CoachStateSerializer(new_state)
 
-        # Step 7: Serialize the latest chat history (last 20 messages, most recent last)
+        # Step 7: Serialize the latest chat history (last 20 messages)
         large_chat_history = (
             ChatMessage.objects.filter(user=request.user)
-            .order_by("-timestamp")[:20]
+            .order_by("timestamp")[:20]
             .all()
         )
         chat_history_serialized = ChatMessageSerializer(
             large_chat_history, many=True
         ).data
+        log.debug(
+            f"Serialized chat history: {[message['content'] for message in chat_history_serialized]}"
+        )
 
         # Step 8: Serialize all identities for the user
         from apps.identities.models import Identity
