@@ -15,8 +15,6 @@ const TestChat: React.FC<TestChatProps> = ({
   setHasStarted,
   testStates,
 }) => {
-  const initialState = testStates[selectedState].coach_state;
-
   return (
     <div className="relative z-10 flex flex-col h-full _TestChat">
       <div className="sticky top-0 left-0 w-full flex justify-between items-center px-5 py-3 shadow-gold-sm z-50 border-b-2 border-primary-color h-[62px]">

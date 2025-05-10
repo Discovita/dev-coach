@@ -1,5 +1,4 @@
 from enums.context_keys import ContextKey
-from apps.chat_messages.models import ChatMessage
 from apps.prompts.models import Prompt
 from apps.coach_states.models import CoachState
 from services.prompt_manager.models.prompt_context import PromptContext, IdentitySummary
@@ -10,12 +9,6 @@ from services.prompt_manager.models.prompt_context import PromptContext, Identit
 def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> PromptContext:
     """
     Gather all required context values for a given prompt and coach state.
-    Returns a PromptContext Pydantic model instance.
-    Args:
-        prompt: The Prompt instance specifying required context keys.
-        coach_state: The CoachState instance for the user.
-    Returns:
-        PromptContext: Context object for prompt formatting.
     """
     user = coach_state.user
     context_data = {}
@@ -45,7 +38,6 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
     if key == ContextKey.USER_NAME:
         return user.get_full_name() or user.email
     elif key == ContextKey.USER_GOALS:
-        # Example: get goals from coach_state metadata or a goals field
         return coach_state.goals
     elif key == ContextKey.NUMBER_OF_IDENTITIES:
         return user.identities.count()
@@ -54,7 +46,6 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
             return coach_state.current_identity.description
         return None
     elif key == ContextKey.IDENTITIES_SUMMARY:
-        # Return a list of IdentitySummary models
         return [
             IdentitySummary(
                 id=str(identity.id),

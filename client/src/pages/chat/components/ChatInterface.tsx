@@ -24,14 +24,10 @@ export const ChatInterface: React.FC = () => {
     updateChatMessages,
     updateStatus,
     pendingMessage, // The message being sent (if any)
-    isPending,      // Whether a message is being sent
+    isPending, // Whether a message is being sent
   } = useChatMessages();
 
   const { coachState } = useCoachState();
-
-  useEffect(() => {
-    console.log("Chat messages updated:", chatMessages);
-  }, [chatMessages]);
 
   // Compose the messages to display, including the pending message if any
   // This enables optimistic UI: the user's message appears immediately while sending

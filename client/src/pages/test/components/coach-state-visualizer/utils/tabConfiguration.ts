@@ -1,4 +1,4 @@
-import { TabName, ExpandedSectionsConfig } from '../types';
+import { TabName, ExpandedSectionsConfig } from "../types";
 
 /**
  * Default configuration for expanded sections
@@ -30,9 +30,9 @@ interface TabConfig {
  * Gets the configuration for all tabs
  */
 export const getTabsConfig = (): TabConfig[] => [
-  { name: TabName.STATE, label: 'State & Metadata' },
-  { name: TabName.PROMPT, label: 'Prompt Info' },
-  { name: TabName.ACTIONS, label: 'Actions' },
-  { name: TabName.IDENTITIES, label: 'Identities' },
-  { name: TabName.CONVERSATION, label: 'Conversation' },
+  { name: TabName.STATE, label: "Coach State" },
+  { name: TabName.PROMPT, label: "Prompt Info" },
+  { name: TabName.ACTIONS, label: "Actions" },
+  { name: TabName.IDENTITIES, label: "Identities" },
+  { name: TabName.CONVERSATION, label: "Conversation" },
 ];

@@ -45,10 +45,6 @@ export function useChatMessages() {
     onSuccess: (response: CoachResponse) => {
       console.log("Chat message sent successfully:", response);
       if (response.chat_history) {
-        console.log(
-          "Updating chat messages in cache with response:",
-          response.chat_history
-        );
         queryClient.setQueryData(
           ["user", "chatMessages"],
           response.chat_history
@@ -59,6 +55,22 @@ export function useChatMessages() {
       }
       if (response.coach_state) {
         queryClient.setQueryData(["user", "coachState"], response.coach_state);
+      }
+      // Cache the latest final_prompt for use in components
+      if (response.final_prompt !== undefined) {
+        queryClient.setQueryData(
+          ["user", "finalPrompt"],
+          response.final_prompt
+        );
+      }
+      // Cache a running list of all actions received so far
+      if (response.actions && response.actions.length > 0) {
+        // Get the current actions history from the cache (default to empty array)
+        const prevActions: string[] =
+          queryClient.getQueryData(["user", "actionsHistory"]) || [];
+        // Append new actions to the history (optionally filter duplicates)
+        const updatedActions = [...prevActions, ...response.actions];
+        queryClient.setQueryData(["user", "actionsHistory"], updatedActions);
       }
     },
   });

@@ -12,12 +12,6 @@ def append_action_instructions(
     system_message: str,
     allowed_actions: Optional[List[ActionType]] = ActionType.get_all_actions(),
 ) -> str:
-    """Append filtered action instructions to a system message.
-    Args:
-        system_message: The base system message string.
-        allowed_actions: List of allowed ActionType enums (default: all actions).
-    Returns:
-        The system message with appended action instructions.
-    """
+    """Append filtered action instructions to a system message."""
     action_instructions = get_action_instructions(allowed_actions)
     return f"{system_message}\n\n{action_instructions}"

@@ -3,15 +3,8 @@ import { CoachResponse } from "@/types/coachResponse";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { copyToClipboard } from "./dataUtils";
 import { Button } from "@/components/ui/button";
+import { Action } from "@/types/action";
 
-/**
- * Minimal Action type for rendering actions in the visualizer.
- * If a more complete type is available, import it instead.
- */
-type Action = {
-  type: string;
-  params?: { name: string; value: unknown }[];
-};
 
 export const renderJsonSection = (
   title: string,
@@ -107,7 +100,8 @@ export const renderActionsSection = (
                 {action.type}
               </div>
               <div className="p-3">
-                {action.params && action.params.length > 0 ? (
+                {/* Render params as a key-value table if present and not null */}
+                {action.params && typeof action.params === "object" && !Array.isArray(action.params) && Object.keys(action.params).length > 0 ? (
                   <table className="w-full border-collapse text-sm">
                     <thead>
                       <tr>
@@ -120,13 +114,13 @@ export const renderActionsSection = (
                       </tr>
                     </thead>
                     <tbody>
-                      {action.params.map((param: { name: string; value: unknown }, pIndex: number) => (
+                      {Object.entries(action.params).map(([name, value], pIndex) => (
                         <tr key={pIndex}>
                           <td className="font-medium text-[#555] dark:text-gold-100 w-2/5 p-2">
-                            {param.name}
+                            {name}
                           </td>
                           <td className="font-mono bg-[#f9f9f9] dark:bg-neutral-900 p-2 rounded break-words max-w-[60%] text-[#333] dark:text-gold-50">
-                            {JSON.stringify(param.value)}
+                            {JSON.stringify(value)}
                           </td>
                         </tr>
                       ))}

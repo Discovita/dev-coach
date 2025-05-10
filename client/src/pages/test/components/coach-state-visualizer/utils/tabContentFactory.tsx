@@ -1,38 +1,36 @@
 import React from "react";
-import { CoachResponse } from "@/types/coachResponse";
-import { CoachState } from "@/types/coachState";
-import { TabName, ExpandedSectionsConfig, ExtractedActions } from "../types";
+import { TabName, ExpandedSectionsConfig } from "../types";
 import {
   renderJsonSection,
-  renderFinalPrompt,
   renderEmptyState,
   renderActionsSection,
+  renderFinalPrompt,
 } from "./renderUtils";
 import { getCurrentStateInfo } from "./dataUtils";
+import { useCoachState } from "@/hooks/use-coach-state";
+import { useFinalPrompt } from "@/hooks/use-final-prompt";
+import { useActions } from "@/hooks/use-actions";
+import { useIdentities } from "@/hooks/use-identities";
+import { useChatMessages } from "@/hooks/use-chat-messages";
+import { Action } from "@/types/action";
 
-export const renderTabContent = (
-  tabName: TabName,
-  coachState: CoachState,
-  lastResponse: CoachResponse | undefined,
-  expandedSections: ExpandedSectionsConfig,
-  toggleSection: (section: string) => void,
-  extractedActions: ExtractedActions,
-  conversationHistory?: import("@/types/message").Message[],
-  identitiesList?: import("@/types/identity").Identity[],
-  proposedIdentity?: import("@/types/identity").Identity | null
-): React.ReactElement => {
-  const { availableActions, actionsTaken } = extractedActions;
-
-  // Filter actions for history - exclude current response actions
-  const currentResponseActions = lastResponse?.actions || [];
-  const currentResponseActionStrings = currentResponseActions.map((a) =>
-    JSON.stringify(a)
-  );
-
-  // Only show actions in history that aren't in the current response
-  const actionHistory = (actionsTaken || []).filter(
-    (action) => !currentResponseActionStrings.includes(JSON.stringify(action))
-  );
+/**
+ * TabContent component
+ * Renders the content for each tab in the CoachStateVisualizer.
+ * Fetches all required data using hooks directly.
+ * Only UI state (expandedSections, toggleSection) is passed as props.
+ */
+export const TabContent: React.FC<{
+  tabName: TabName;
+  expandedSections: ExpandedSectionsConfig;
+  toggleSection: (section: string) => void;
+}> = ({ tabName, expandedSections, toggleSection }) => {
+  // Fetch all required data using hooks
+  const { coachState } = useCoachState();
+  const finalPrompt = useFinalPrompt();
+  const actionsHistory: Action[] = useActions();
+  const { identities } = useIdentities();
+  const { chatMessages } = useChatMessages();
 
   switch (tabName) {
     case TabName.STATE:
@@ -45,27 +43,26 @@ export const renderTabContent = (
             expandedSections["state"],
             toggleSection
           )}
-
-          {renderJsonSection(
-            "Metadata",
-            coachState.metadata,
-            "metadata",
-            expandedSections["metadata"],
-            toggleSection
-          )}
         </>
       );
 
     case TabName.PROMPT:
       return (
         <>
-          {renderFinalPrompt(
-            lastResponse,
-            expandedSections["prompt"],
-            toggleSection
-          )}
+          {/* Render the final prompt using renderFinalPrompt for consistent UI */}
+          {finalPrompt &&
+            renderFinalPrompt(
+              // Pass a full CoachResponse object with required fields
+              {
+                message: '',
+                coach_state: { id: '', user: '', current_state: 'introduction', updated_at: '' },
+                final_prompt: finalPrompt,
+              },
+              expandedSections["prompt"],
+              toggleSection
+            )}
 
-          {!lastResponse?.final_prompt &&
+          {!finalPrompt &&
             renderEmptyState(
               "No prompt information available yet.",
               "Send a message to see the prompt used to generate a response."
@@ -76,21 +73,12 @@ export const renderTabContent = (
     case TabName.ACTIONS:
       return (
         <>
-          {lastResponse?.actions &&
-            lastResponse.actions.length > 0 &&
+          {/* Render the running list of actions from the cache using the new renderer */}
+          {actionsHistory &&
+            actionsHistory.length > 0 &&
             renderActionsSection(
-              "Current Response Actions",
-              lastResponse.actions,
-              "currentActions",
-              expandedSections["currentActions"] ?? true, // Default to expanded
-              toggleSection
-            )}
-
-          {actionHistory &&
-            actionHistory.length > 0 &&
-            renderActionsSection(
-              "Action History",
-              actionHistory,
+              "Actions History",
+              actionsHistory,
               "actionHistory",
               expandedSections["actionHistory"] ?? true, // Default to expanded
               toggleSection
@@ -99,15 +87,13 @@ export const renderTabContent = (
           {/* Available Actions is a string[]; render as JSON, not as actions */}
           {renderJsonSection(
             "Available Actions",
-            availableActions,
+            undefined, // You can fetch available actions from coachState if needed
             "availableActions",
             expandedSections["availableActions"],
             toggleSection
           )}
 
-          {(!actionHistory || actionHistory.length === 0) &&
-            (!availableActions || availableActions.length === 0) &&
-            (!lastResponse?.actions || lastResponse.actions.length === 0) &&
+          {(!actionsHistory || actionsHistory.length === 0) &&
             renderEmptyState(
               "No action information available yet.",
               "Actions will appear here when the coach performs them or lists available ones."
@@ -120,7 +106,7 @@ export const renderTabContent = (
         <>
           {renderJsonSection(
             "Confirmed Identities",
-            identitiesList || [],
+            identities || [],
             "identities",
             expandedSections["identities"],
             toggleSection
@@ -128,7 +114,7 @@ export const renderTabContent = (
 
           {renderJsonSection(
             "Proposed Identity",
-            coachState.proposed_identity
+            coachState?.proposed_identity
               ? (coachState.proposed_identity as unknown as Record<
                   string,
                   unknown
@@ -139,8 +125,8 @@ export const renderTabContent = (
             toggleSection
           )}
 
-          {(!identitiesList || identitiesList.length === 0) &&
-            !proposedIdentity &&
+          {(!identities || identities.length === 0) &&
+            !coachState?.proposed_identity &&
             renderEmptyState("No identities created yet.")}
         </>
       );
@@ -150,13 +136,13 @@ export const renderTabContent = (
         <>
           {renderJsonSection(
             "Conversation History",
-            conversationHistory || [],
+            chatMessages || [],
             "history",
             expandedSections["history"],
             toggleSection
           )}
 
-          {(!conversationHistory || conversationHistory.length === 0) &&
+          {(!chatMessages || chatMessages.length === 0) &&
             renderEmptyState("No conversation history available.")}
         </>
       );

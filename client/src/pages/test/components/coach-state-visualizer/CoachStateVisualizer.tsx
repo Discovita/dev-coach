@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { TabName, TabUpdateStatus, ExtractedActions } from "./types";
 import {
   extractActions,
-  renderTabContent,
   getDefaultExpandedSections,
   getTabsConfig,
   detectAllTabChanges,
@@ -13,10 +12,12 @@ import { useCoachState } from "@/hooks/use-coach-state";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useIdentities } from "@/hooks/use-identities";
 import { CoachResponse } from "@/types/coachResponse";
+import { TabContent } from "./utils/tabContentFactory";
 
 /**
  * CoachStateVisualizer component (self-fetching version)
  * Fetches all required data using hooks and visualizes the coach state.
+ * Now uses TabContent component for tab rendering.
  *
  * Step-by-step:
  * 1. Fetch coach state using useCoachState.
@@ -35,7 +36,8 @@ export const CoachStateVisualizer: React.FC = () => {
   } = useCoachState();
   // 2. Fetch chat messages (and last response)
   // chatMessages is not used directly yet, but hook is called for future extensibility
-  const { isLoading: isChatLoading, isError: isChatError } = useChatMessages();
+  const { isLoading: isMessagesLoading, isError: isMessagesError } =
+    useChatMessages();
   // 3. Fetch identities (optional, for extensibility)
   // identities is not used directly yet, but hook is called for future extensibility
   const { isLoading: isIdentitiesLoading, isError: isIdentitiesError } =
@@ -103,8 +105,9 @@ export const CoachStateVisualizer: React.FC = () => {
   }, [coachState, lastResponse, activeTab]);
 
   // 4. Handle loading and error states
-  const isLoading = isCoachStateLoading || isChatLoading || isIdentitiesLoading;
-  const isError = isCoachStateError || isChatError || isIdentitiesError;
+  const isLoading =
+    isCoachStateLoading || isMessagesLoading || isIdentitiesLoading;
+  const isError = isCoachStateError || isMessagesError || isIdentitiesError;
   if (isLoading) {
     return <div className="p-4">Loading coach state...</div>;
   }
@@ -132,7 +135,6 @@ export const CoachStateVisualizer: React.FC = () => {
   // Handle tab click - change active tab and clear update indicator
   const handleTabClick = (tabName: TabName) => {
     setActiveTab(tabName);
-    // Clear update indicator for this tab
     if (tabUpdates[tabName]) {
       setTabUpdates((prev) => {
         const newUpdates = { ...prev };
@@ -192,15 +194,13 @@ export const CoachStateVisualizer: React.FC = () => {
             value={tab.name}
             className="flex-1 overflow-y-auto p-4 scrollbar"
           >
-            {activeTab === tab.name &&
-              renderTabContent(
-                tab.name as TabName,
-                coachState,
-                lastResponse,
-                expandedSections,
-                toggleSection,
-                extractedActionsRef.current
-              )}
+            {activeTab === tab.name && (
+              <TabContent
+                tabName={tab.name as TabName}
+                expandedSections={expandedSections}
+                toggleSection={toggleSection}
+              />
+            )}
           </TabsContent>
         ))}
       </Tabs>

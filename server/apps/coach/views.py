@@ -75,9 +75,6 @@ class CoachViewSet(
             .order_by("timestamp")[:5]
             .all()
         )
-        log.debug(
-            f"Chat history for prompt: {[message.content for message in chat_history_for_prompt]}"
-        )
         ai_service = AIServiceFactory.create(model)
 
         response: CoachChatResponse = ai_service.generate(
@@ -97,15 +94,14 @@ class CoachViewSet(
         chat_history_serialized = ChatMessageSerializer(
             large_chat_history, many=True
         ).data
-        log.debug(
-            f"Serialized chat history: {[message['content'] for message in chat_history_serialized]}"
-        )
 
         # Step 8: Serialize all identities for the user
         from apps.identities.models import Identity
 
         identities = Identity.objects.filter(user=request.user)
         identities_serialized = IdentitySerializer(identities, many=True).data
+
+        log.debug(coach_prompt)
 
         response_data = {
             "message": response.message,
