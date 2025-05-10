@@ -1,6 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  fetchUser,
   login as loginApi,
   register as registerApi,
   forgotPassword as forgotPasswordApi,
@@ -13,39 +12,50 @@ import {
   AuthResponse,
   ResetPasswordCredentials,
 } from "@/types/auth";
-import { User } from "@/types/User";
+import { User } from "@/types/user";
 
 /**
  * useAuth hook
- * Handles all authentication state and actions using TanStack Query.
- * - Provides user, profile, isAdmin, isLoading, and all auth actions.
+ * Handles only authentication state and actions using TanStack Query.
+ * - Provides login, register, forgot/reset password, and logout actions.
+ * - After login/register, sets user data in TanStack Query cache for instant access.
+ * - Also sets isAdmin as its own query key for easy access across the app.
  * - No context/provider required.
  */
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  // Query for current user and profile
-  const {
-    data: userData,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery<AuthResponse>({
-    queryKey: ["auth", "user"],
-    queryFn: fetchUser,
-    retry: false,
-  });
-
-  // Helper to extract user and profile from response
-  const user: User | null = userData?.user ?? null;
-  const isAdmin: boolean = !!user?.is_staff;
+  // Helper to set user data in TanStack Query cache after login/register
+  function setUserDataInCache(user: User) {
+    // Set each piece of user data under its own query key
+    queryClient.setQueryData(["user", "profile"], {
+      id: user.id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      is_active: user.is_active,
+      is_superuser: user.is_superuser,
+      is_staff: user.is_staff,
+      last_login: user.last_login,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+      groups: user.groups,
+      user_permissions: user.user_permissions,
+    });
+    queryClient.setQueryData(["user", "coachState"], user.coach_state);
+    queryClient.setQueryData(["user", "identities"], user.identities);
+    queryClient.setQueryData(["user", "chatMessages"], user.chat_messages);
+    queryClient.setQueryData(["user", "complete"], user);
+    queryClient.setQueryData(["user", "isAdmin"], !!user.is_staff);
+  }
 
   // Login mutation
   const loginMutation = useMutation<AuthResponse, unknown, LoginCredentials>({
     mutationFn: loginApi,
     onSuccess: (data) => {
-      if (data.success) {
-        queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+      // If user data is returned, set it in the cache
+      if (data && data.user) {
+        setUserDataInCache(data.user);
       }
     },
   });
@@ -58,8 +68,9 @@ export function useAuth() {
   >({
     mutationFn: registerApi,
     onSuccess: (data) => {
-      if (data.success) {
-        queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+      // If user data is returned, set it in the cache
+      if (data && data.user) {
+        setUserDataInCache(data.user);
       }
     },
   });
@@ -82,17 +93,12 @@ export function useAuth() {
   const logoutMutation = useMutation<void, unknown, void>({
     mutationFn: logoutApi,
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["auth", "user"] });
-      // Optionally, redirect to login page here
+      // Optionally, invalidate user/profile queries here if needed
       window.location.href = "/";
     },
   });
 
   return {
-    user,
-    isAdmin,
-    isLoading,
-    isError,
     login: loginMutation.mutateAsync,
     loginStatus: loginMutation.status,
     register: registerMutation.mutateAsync,
@@ -103,6 +109,5 @@ export function useAuth() {
     resetPasswordStatus: resetPasswordMutation.status,
     logout: logoutMutation.mutateAsync,
     logoutStatus: logoutMutation.status,
-    refetchUser: refetch,
   };
 }

@@ -9,7 +9,9 @@ const Layout = () => {
         <Navbar />
       </nav>
       <main className="_Main flex flex-col grow-1 justify-center overflow-auto dark:bg-[#333333]">
-        <Outlet />
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <Outlet />
+        </div>
       </main>
       <Footer />
     </div>

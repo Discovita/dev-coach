@@ -36,6 +36,8 @@ class CoachResponseSerializer(serializers.Serializer):
     - coach_state: The updated state of the coaching session (as dict for now).
     - final_prompt: The final prompt used to generate the coach's response.
     - actions: List of actions performed (list of dicts, can be empty).
+    - chat_history: The latest chat history (list of messages, most recent last).
+    - identities: The user's current identities (list of identity dicts).
     """
 
     message = serializers.CharField(help_text="Coach's response message.")
@@ -49,4 +51,12 @@ class CoachResponseSerializer(serializers.Serializer):
         child=serializers.DictField(),
         default=list,
         help_text="Actions performed (list of dicts, can be empty).",
+    )
+    chat_history = serializers.ListField(
+        child=serializers.DictField(),
+        help_text="The latest chat history (list of messages, most recent last)."
+    )
+    identities = serializers.ListField(
+        child=serializers.DictField(),
+        help_text="The user's current identities (list of identity dicts)."
     )

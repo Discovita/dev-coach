@@ -1,18 +1,17 @@
 import {
   COACH_BASE_URL,
-  USER,
   REGISTER,
   LOGIN,
   FORGOT_PASSWORD,
   RESET_PASSWORD,
 } from "@/constants/api";
-import { authFetch } from "@/utils/authFetch";
 import {
   RegisterCredentials,
   LoginCredentials,
   AuthResponse,
   ResetPasswordCredentials,
 } from "@/types/auth";
+import { fetchUserComplete } from "@/api/user";
 
 /**
  * Helper to get a cookie value by name.
@@ -52,27 +51,8 @@ export function removeCookie(name: string) {
 }
 
 /**
- * Fetch the current authenticated user and profile.
- * Returns AuthResponse with user and profile if authenticated.
- */
-export async function fetchUser(): Promise<AuthResponse> {
-  const accessToken = getCookie("discovita-access-token");
-  if (!accessToken) {
-    return { success: false, error: "No access token" };
-  }
-  const fetchUserUrl = `${COACH_BASE_URL}${USER}`;
-  const response = await authFetch(fetchUserUrl, {});
-  if (!response.ok) {
-    removeCookie("discovita-access-token");
-    removeCookie("discovita-refresh-token");
-    return { success: false, error: "Not authenticated" };
-  }
-  return response.json();
-}
-
-/**
  * Login with credentials.
- * Sets cookies if successful.
+ * Sets cookies if successful, then fetches complete user data.
  */
 export async function login(userData: LoginCredentials): Promise<AuthResponse> {
   const loginUrl = `${COACH_BASE_URL}${LOGIN}`;
@@ -89,13 +69,16 @@ export async function login(userData: LoginCredentials): Promise<AuthResponse> {
       data.tokens.refresh,
       60 * 60 * 24 * 30
     );
+    // Fetch complete user data after setting cookies
+    const user = await fetchUserComplete();
+    return { ...data, user };
   }
   return data;
 }
 
 /**
  * Register a new user.
- * Sets cookies if successful.
+ * Sets cookies if successful, then fetches complete user data.
  */
 export async function register(
   userData: RegisterCredentials
@@ -114,6 +97,9 @@ export async function register(
       data.tokens.refresh,
       60 * 60 * 24 * 30
     );
+    // Fetch complete user data after setting cookies
+    const user = await fetchUserComplete();
+    return { ...data, user };
   }
   return data;
 }

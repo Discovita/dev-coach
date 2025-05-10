@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import User
+from apps.users.models import User
+from apps.identities.serializer import IdentitySerializer
+from apps.coach_states.serializer import CoachStateSerializer
+from apps.chat_messages.serializer import ChatMessageSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -10,6 +13,56 @@ class UserSerializer(serializers.ModelSerializer):
     - Profile data serialization
     - User data in responses
     - About Me page (frontend)
+    """
+
+    # Groups and permissions as lists of IDs
+    groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    user_permissions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    # Include identities as a nested serializer
+    identities = IdentitySerializer(many=True, read_only=True)
+    # Include coach state as a nested serializer
+    coach_state = CoachStateSerializer(read_only=True)
+    # Include chat messages as a nested serializer
+    chat_messages = ChatMessageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        # Expose all safe fields for the frontend
+        fields = (
+            "id",  # User ID
+            "email",  # Email address
+            "first_name",  # First name
+            "last_name",  # Last name
+            "is_active",  # Active status
+            "is_superuser",  # Django superuser flag
+            "is_staff",  # Staff/admin page access
+            "last_login",  # Last login timestamp
+            "created_at",  # Created at timestamp
+            "updated_at",  # Updated at timestamp
+            "groups",  # Group memberships (IDs)
+            "user_permissions",  # User permissions (IDs)
+            "identities",  # User's identities
+            "coach_state",  # User's coach state
+            "chat_messages",  # User's chat messages
+        )
+        read_only_fields = (
+            "created_at",
+            "updated_at",
+            "groups",
+            "user_permissions",
+            "date_joined",
+            "last_login",
+            "email_verification_sent_at",
+            "identities",
+            "coach_state",
+            "chat_messages",
+        )
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model for profile data.
+    Used for: Profile data serialization
     """
 
     # Groups and permissions as lists of IDs
@@ -28,7 +81,6 @@ class UserSerializer(serializers.ModelSerializer):
             "is_superuser",  # Django superuser flag
             "is_staff",  # Staff/admin page access
             "last_login",  # Last login timestamp
-            "date_joined",  # Date joined
             "created_at",  # Created at timestamp
             "updated_at",  # Updated at timestamp
             "groups",  # Group memberships (IDs)

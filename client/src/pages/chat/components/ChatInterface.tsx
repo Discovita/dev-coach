@@ -1,118 +1,99 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CoachState, UserProfile, Message, CoachResponse } from '@/types/apiTypes';
-import { CoachingState } from '@/types/enums';
-import { apiClient } from '@/api/client';
-import { ChatControls } from '@/pages/chat/components/ChatControls';
-import { ChatMessages } from '@/pages/chat/components/ChatMessages';
-import { initialMessage } from '@/constants/initialMessage';
+import React, { useRef, useEffect, useCallback } from "react";
+import { Message } from "@/types/message";
+import { ChatControls } from "@/pages/chat/components/ChatControls";
+import { ChatMessages } from "@/pages/chat/components/ChatMessages";
+import { initialMessage } from "@/constants/initialMessage";
+import { useChatMessages } from "@/hooks/use-chat-messages";
+import { useCoachState } from "@/hooks/use-coach-state";
 
-interface Props {
-  userId: string;
-  initialMessages?: Message[];
-  initialCoachState?: CoachState;
-  onStateUpdate?: (newState: CoachState, response: CoachResponse) => void;
-}
+/**
+ * ChatInterface component
+ * Handles the chat UI, message sending, and scrolling.
+ * - Uses useChatMessages for chat history and sending messages.
+ * - Optimistically updates the UI when sending messages.
+ * - Always fetches fresh chat history on mount.
+ * - Keeps 100% comment coverage for clarity.
+ */
+export const ChatInterface: React.FC = () => {
+  // Reference to the end of the messages list for auto-scrolling
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-export const ChatInterface: React.FC<Props> = ({
-  userId,
-  initialMessages = [],
-  initialCoachState,
-  onStateUpdate,
-}) => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
+  // Get chat messages and updateChatMessages mutation from the custom hook
+  const { chatMessages, isLoading, isError, updateChatMessages, updateStatus } =
+    useChatMessages();
 
-  // Initialize coach state
-  const [coachState, setCoachState] = useState<CoachState>(
-    initialCoachState || {
-      current_state: CoachingState.INTRODUCTION,
-      user_profile: {
-        name: userId,
-        goals: [],
-      } as UserProfile,
-      identities: [],
-      proposed_identity: null,
-      current_identity_id: null,
-      conversation_history: initialMessages,
-      metadata: {},
-    }
-  );
+  const { coachState } = useCoachState();
 
-  // Add initial message on mount if no messages exist
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([{ role: 'coach', content: initialMessage }]);
-    }
-  }, [messages.length]); // Include messages.length as dependency
-
+  // Scroll to bottom when messages change
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   }, []);
 
-  // Scroll when messages change
-  useEffect(scrollToBottom, [messages, scrollToBottom]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages, scrollToBottom]);
 
-  const sendMessage = useCallback(
+  // Handler for sending a message
+  const handleSendMessage = useCallback(
     async (content: string) => {
-      if (!content.trim() || isLoading) return;
-
-      const userMessage: Message = { role: 'user', content: content.trim() };
-      setMessages(prev => [...prev, userMessage]);
-      setIsLoading(true);
-
-      try {
-        // Send message without adding to conversation_history (backend will add it)
-        const response = await apiClient.sendMessage(content, coachState);
-        setMessages(prev => [...prev, { role: 'coach', content: response.message }]);
-        setCoachState(response.coach_state);
-
-        // Notify parent component about state update if callback provided
-        if (onStateUpdate) {
-          onStateUpdate(response.coach_state, response);
-        }
-      } catch (error) {
-        console.error('Failed to send message:', error);
-        setMessages(prev => [
-          ...prev,
-          { role: 'system', content: 'Error sending message. Please try again.' },
-        ]);
-      } finally {
-        setIsLoading(false);
-      }
+      if (!content.trim() || updateStatus === "pending") return;
+      // Call updateChatMessages with the new argument structure
+      await updateChatMessages({ content });
     },
-    [isLoading, coachState, onStateUpdate]
+    [updateChatMessages, updateStatus]
   );
 
+  // Handler for identity choice (if used)
   const handleIdentityChoice = useCallback(
     (response: string) => {
-      sendMessage(response);
+      handleSendMessage(response);
     },
-    [sendMessage]
+    [handleSendMessage]
   );
 
-  const handleSendMessage = useCallback(
-    (content: string) => {
-      sendMessage(content);
-    },
-    [sendMessage]
-  );
+  // If loading, show a loading state (optional)
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        Loading chat...
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-red-500">
+        Error loading chat messages.
+      </div>
+    );
+  }
+
+  // If there are no messages, show the initial message
+  const messagesToShow: Message[] =
+    chatMessages && chatMessages.length > 0
+      ? chatMessages
+      : [
+          {
+            role: "coach",
+            content: initialMessage,
+            timestamp: new Date().toISOString(),
+          },
+        ];
 
   return (
     <div className="_ChatInterface flex flex-col h-[100vh] rounded-md overflow-hidden shadow-gold-md bg-gold-50 transition-shadow hover:shadow-gold-lg dark:rounded-none">
       <ChatMessages
-        messages={messages}
-        isLoading={isLoading}
-        coachState={coachState}
+        messages={messagesToShow}
+        isProcessingMessage={updateStatus === "pending"}
         handleIdentityChoice={handleIdentityChoice}
         messagesEndRef={messagesEndRef}
+        coachState={coachState}
       />
       <ChatControls
-        isLoading={isLoading}
+        isProcessingMessage={updateStatus === "pending"}
         onSendMessage={handleSendMessage}
-        messages={messages}
-        userId={userId}
-        coachState={coachState}
       />
     </div>
   );

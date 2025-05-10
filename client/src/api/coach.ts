@@ -1,4 +1,4 @@
-import { CoachRequest, CoachResponse } from "./types";
+import { CoachResponse } from "@/types/coachResponse";
 import { COACH_BASE_URL } from "@/constants/api";
 import { authFetch } from "@/utils/authFetch";
 
@@ -7,21 +7,17 @@ export class ApiClient {
    * Send a message to the coach API using authFetch for authentication and token refresh.
    * Calls the /coach/process-message endpoint.
    * @param message - The user's message to the coach
-   * @param coach_state - The current coach state (optional, depending on backend)
+   * @param model - The model to use when chatting (optional)
    * @returns CoachResponse from the API
    */
-  async sendMessage(
-    message: string,
-    coach_state: CoachRequest["coach_state"]
-  ): Promise<CoachResponse> {
-    // Use authFetch to ensure the request is authenticated and tokens are refreshed if needed
+  async sendMessage(message: string, model: string): Promise<CoachResponse> {
     const response = await authFetch(
       `${COACH_BASE_URL}/coach/process-message`,
       {
         method: "POST",
         body: JSON.stringify({
           message,
-          coach_state,
+          model,
         }),
       }
     );

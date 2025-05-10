@@ -15,10 +15,10 @@ load_dotenv(Path(__file__).parents[3] / ".env")
 from services.logger import configure_logging
 
 
-log = configure_logging(__name__)
+log = configure_logging(__name__, log_level="INFO")
 
 # Import the AIService interface and implementations
-from services.ai import AIService, AnthropicService
+from services.ai import AIService
 from enums.ai import AIModel, AIProvider
 
 # Import the new OpenAIService and the plugin/adapter for legacy compatibility
@@ -46,7 +46,7 @@ class AIServiceFactory:
         4. Wrap the service in OpenAIServicePlugin to provide the generate() interface.
         5. Return the plugin instance.
         """
-        log.info(f"Creating AI service for model: {model}")
+        log.debug(f"Creating AI service for model: {model}")
         try:
             provider = AIModel.get_provider(model)
             if provider == AIProvider.ANTHROPIC:

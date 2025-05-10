@@ -66,16 +66,12 @@ class AuthViewSet(viewsets.GenericViewSet):
         try:
             with transaction.atomic():
                 user = User.objects.create_user(email=email, password=password)
-                # Check if the email ends with '@trilogy.com' and set is_admin accordingly
-                if email.lower().endswith("@trilogy.com"):
-                    user.is_admin = True
-                    user.save(update_fields=["is_admin"])
                 refresh = RefreshToken.for_user(user)
 
             return Response(
                 {
                     "success": True,
-                    "user": UserSerializer(user).data,
+                    "user_id": user.id,
                     "tokens": {
                         "refresh": str(refresh),
                         "access": str(refresh.access_token),
@@ -125,7 +121,7 @@ class AuthViewSet(viewsets.GenericViewSet):
         return Response(
             {
                 "success": True,
-                "user": UserSerializer(user).data,
+                "user_id": user.id,
                 "tokens": {
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
@@ -241,15 +237,3 @@ class AuthViewSet(viewsets.GenericViewSet):
                 f"[AuthViewSet.reset_password] Unexpected error during password reset: {e}"
             )
             return error_response("An unexpected error occurred")
-
-    @decorators.action(
-        detail=False,
-        methods=["get"],
-        permission_classes=[IsAuthenticated],
-        url_path="user",
-    )
-    def user(self, request: Request):
-        """
-        Get current user data.
-        """
-        return Response({"success": True, "user": UserSerializer(request.user).data})

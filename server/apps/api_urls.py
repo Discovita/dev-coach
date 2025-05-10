@@ -12,6 +12,7 @@ from apps.authentication.views import AuthViewSet
 from apps.prompts.views import PromptViewSet
 from apps.core.views import CoreViewSet
 from apps.coach.views import CoachViewSet
+from apps.users.views import UserViewSet
 
 # Local Modules
 
@@ -25,6 +26,7 @@ default_router.register(r"auth", AuthViewSet, basename="auth")
 default_router.register(r"prompts", PromptViewSet, basename="prompts")
 default_router.register(r"core", CoreViewSet, basename="core")
 default_router.register(r"coach", CoachViewSet, basename="coach")
+default_router.register(r"user", UserViewSet, basename="user")
 
 # JWT token URLs
 jwt_patterns = [

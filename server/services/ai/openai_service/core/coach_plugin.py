@@ -22,7 +22,7 @@ from enums.ai import AIProvider
 
 from services.logger import configure_logging
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
 
 class OpenAIServicePlugin(AIService):
@@ -108,6 +108,8 @@ class OpenAIServicePlugin(AIService):
                 response=response.choices[0].message.parsed,
                 dynamic_model=response_format,
             )
+            log.debug(f"OenAI response: {parsed}")
+            log.debug(f"OpenAI response: {type(parsed)}")
             return parsed
 
     def get_provider_name(self) -> AIProvider:

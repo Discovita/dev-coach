@@ -14,18 +14,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle, FaApple } from "react-icons/fa";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
+import { User } from "@/types/user";
 import { FormMessage, Message } from "@/components/FormMessage";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { login, loginStatus, user, isAdmin } = useAuth();
+  const { login, loginStatus } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<Message | null>(null);
-  const [loginAttempted, setLoginAttempted] = useState(false);
   const navigate = useNavigate();
+
+  // Use custom hook to reactively get profile and isAdmin from the cache
+  const profile = useReactiveQueryData<User>(["user", "profile"]);
+  const isAdmin = useReactiveQueryData<boolean>(["user", "isAdmin"]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,7 +39,8 @@ export function LoginForm({
     try {
       const response = await login({ email, password });
       if (response.success) {
-        setLoginAttempted(true);
+        console.log("Login successful:", response);
+        // No redirect here; let the effect below handle it when cache updates
       } else {
         let errorMsg = response.error;
         if (typeof errorMsg === "object" && errorMsg !== null) {
@@ -53,15 +59,16 @@ export function LoginForm({
     }
   };
 
+  // Redirect after successful login based on user role, as soon as cache updates
   useEffect(() => {
-    if (user && isAdmin) {
+    if (profile && isAdmin) {
       console.log("Admin logged in successfully. Redirecting to test...");
       navigate("/test");
-    } else if (user) {
+    } else if (profile) {
       console.log("User logged in successfully. Redirecting to chat...");
       navigate("/chat");
     }
-  }, [loginAttempted, user, navigate, isAdmin]);
+  }, [profile, isAdmin, navigate]);
 
   return (
     <div
