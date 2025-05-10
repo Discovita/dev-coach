@@ -53,3 +53,17 @@ export async function fetchChatMessages() {
   if (!response.ok) throw new Error("Failed to fetch chat messages");
   return response.json();
 }
+
+/**
+ * Reset (delete) all chat messages for the current authenticated user.
+ * Calls /user/me/reset-chat-messages/ (POST)
+ * Returns the new chat history (should contain only the initial message, or be empty if none).
+ */
+export async function resetChatMessages() {
+  const response = await authFetch(
+    `${COACH_BASE_URL}/user/me/reset-chat-messages`,
+    { method: "POST" }
+  );
+  if (!response.ok) throw new Error("Failed to reset chat messages");
+  return response.json();
+}

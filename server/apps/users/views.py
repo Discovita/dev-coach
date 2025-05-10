@@ -104,3 +104,34 @@ class UserViewSet(viewsets.GenericViewSet):
                 )
 
         return Response(ChatMessageSerializer(chat_messages, many=True).data)
+
+    @decorators.action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[IsAuthenticated],
+        url_path="me/reset-chat-messages",
+    )
+    def reset_chat_messages(self, request: Request):
+        """
+        Reset (delete) all chat messages for the authenticated user.
+        Step-by-step:
+        1. Delete all ChatMessage objects for the user.
+        2. Add the initial bot message (if any) to the chat history.
+        3. Return the new chat history (should contain only the initial message, or be empty if none).
+        """
+        from apps.chat_messages.models import ChatMessage
+        from apps.chat_messages.serializer import ChatMessageSerializer
+        from apps.chat_messages.utils import get_initial_message, add_chat_message
+        from enums.message_role import MessageRole
+
+        # 1. Delete all chat messages for the user
+        ChatMessage.objects.filter(user=request.user).delete()
+
+        # 2. Add the initial bot message (if any)
+        initial_message = get_initial_message()
+        if initial_message:
+            add_chat_message(request.user, initial_message, MessageRole.COACH)
+
+        # 3. Return the new chat history
+        chat_messages = ChatMessage.objects.filter(user=request.user).order_by("-timestamp")
+        return Response(ChatMessageSerializer(chat_messages, many=True).data)

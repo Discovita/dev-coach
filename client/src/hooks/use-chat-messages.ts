@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchChatMessages } from "@/api/user";
+import { fetchChatMessages, resetChatMessages } from "@/api/user";
 import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
 
@@ -54,6 +54,22 @@ export function useChatMessages() {
     },
   });
 
+  /**
+   * Mutation for resetting (deleting) all chat messages for the user.
+   * Step-by-step:
+   * 1. Calls the resetChatMessages API function (POST /user/me/reset-chat-messages/).
+   * 2. On success, updates the chatMessages cache with the new (empty or re-initialized) history.
+   * 3. Expose mutation function and status for UI consumption.
+   */
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      return resetChatMessages();
+    },
+    onSuccess: (newHistory) => {
+      queryClient.setQueryData(["user", "chatMessages"], newHistory);
+    },
+  });
+
   return {
     chatMessages: data,
     isLoading,
@@ -61,5 +77,12 @@ export function useChatMessages() {
     refetchChatMessages: refetch,
     updateChatMessages: updateMutation.mutateAsync,
     updateStatus: updateMutation.status,
+    /**
+     * Reset all chat messages for the user.
+     * Use: await resetChatMessagesFn();
+     * Status: resetStatus
+     */
+    resetChatMessages: resetMutation.mutateAsync,
+    resetStatus: resetMutation.status,
   };
 } 

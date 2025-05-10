@@ -1,7 +1,8 @@
 import React, { useCallback, useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ConversationExporter } from "@/pages/test/components/ConversationExporter";
+import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
+import { ConversationResetter } from "./ConversationResetter";
 
 interface ChatControlsProps {
   isProcessingMessage: boolean;
@@ -90,7 +91,8 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
           {isProcessingMessage ? "Sending..." : "Send"}
         </Button>
       </form>
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center gap-6">
+        <ConversationResetter />
         <ConversationExporter />
       </div>
     </div>

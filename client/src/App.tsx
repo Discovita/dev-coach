@@ -24,7 +24,7 @@ const App = () => {
   const isAdmin = useReactiveQueryData<boolean>(["user", "isAdmin"]);
 
   if (profile && isAdmin) {
-    // User is admin
+    console.log("Showing admin routes", profile, isAdmin);
     return (
       <>
         <SessionRestorer />
@@ -43,7 +43,7 @@ const App = () => {
     );
   }
   if (profile) {
-    // User is authenticated but not admin
+    console.log("Showing auth routes", profile, isAdmin);
     return (
       <>
         <SessionRestorer />
@@ -58,7 +58,7 @@ const App = () => {
       </>
     );
   }
-  // User is not logged in
+  console.log("Showing public routes", profile, isAdmin);
   return (
     <>
       <SessionRestorer />
