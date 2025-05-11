@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/api/v1/core`
+`/core`
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1. Get All Enum Values
 
-- **URL:** `/api/v1/core/enums/`
+- **URL:** `/core/enums/`
 - **Method:** `GET`
 - **Description:** Returns all enum values for coach_state, allowed_actions, and context_keys. Used for populating dropdowns/selects in the frontend prompt management UI.
 - **Response:**

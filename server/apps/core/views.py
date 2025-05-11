@@ -8,7 +8,7 @@ from rest_framework import decorators, viewsets
 # CoreView: Class-based view for core utility endpoints
 #
 # Step-by-step for enums endpoint:
-# 1. Handle GET requests to /api/enums/.
+# 1. Handle GET requests to /api/enums.
 # 2. Collect all possible values for each enum (coach_state, allowed_actions, context_keys).
 # 3. Return them in a single JSON response for use in frontend dropdowns/selects.
 # 4. Each enum is returned as a list of objects with 'value' and 'label' for display and value use.
@@ -21,7 +21,7 @@ class CoreViewSet(viewsets.GenericViewSet):
     @decorators.action(detail=False, methods=["get"], url_path="enums")
     def enums(self, request, *args, **kwargs):
         """
-        GET /api/enums/
+        GET /api/enums
         Returns all enum values for coach_state, allowed_actions, and context_keys.
         """
         coach_states = [{"value": c.value, "label": c.label} for c in CoachingState]

@@ -67,11 +67,11 @@ for action_type, params_info in ACTION_PARAMS.items():
 
     # Format the complete instruction for this action type
     ACTION_INSTRUCTIONS[action_type] = (
-        f"""**{action_type.value}**: {description}\n\n```json\n{schema}\n```"""
+        f"""**{action_type.value}**: {description}\n```json\n{schema}\n```"""
     )
 
 
-# TODO: The current implementation has the prompt spelling out what the action guidelines are. Maybe we can proceduralize this and hard code them and add them here based on what the actions are.
+# TODO: The current implementation has the prompt spelling out what the "action guidelines" are. Maybe we can proceduralize this and hard code them and add them here based on what the actions are.
 def get_action_instructions(action_types: List[ActionType]) -> str:
     """
     Generate action instructions for the specified action types.
@@ -94,8 +94,8 @@ def get_action_instructions(action_types: List[ActionType]) -> str:
         return ""
 
     # Format the instructions with a header and footer
-    header = "# Available Actions\n\nYou can perform the following actions:\n\n"
-    action_content = "\n\n".join(filtered_instructions)
-    footer = "\n\n> For each action, the params field must match the schema shown in the example, including all nested objects."
+    header = "# Available Actions\nYou can perform the following actions:\n"
+    action_content = "\n".join(filtered_instructions)
+    footer = "\n> For each action, the params field must match the schema shown in the example, including all nested objects."
 
     return f"{header}{action_content}{footer}"

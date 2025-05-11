@@ -11,6 +11,10 @@ from services.action_handler.models.actions import (
     AddIdentityNoteAction,
 )
 
+from services.logger import configure_logging
+
+log = configure_logging(__name__, log_level="INFO")
+
 ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.SELECT_IDENTITY_FOCUS: SelectIdentityFocusAction,
     ActionType.CREATE_IDENTITY: CreateIdentityAction,
@@ -20,10 +24,6 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.TRANSITION_STATE: TransitionStateAction,
     ActionType.ADD_IDENTITY_NOTE: AddIdentityNoteAction,
 }
-
-from services.logger import configure_logging
-
-log = configure_logging(__name__, log_level="INFO")
 
 
 def build_dynamic_response_format(

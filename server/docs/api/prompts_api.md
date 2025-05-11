@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/api/prompts/`
+`/prompts/`
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1. List All Prompts
 
-- **URL:** `/api/prompts/`
+- **URL:** `/prompts`
 - **Method:** `GET`
 - **Description:** Returns a list of all prompts.
 - **Response:**
@@ -40,7 +40,7 @@
 
 ### 2. Retrieve a Single Prompt
 
-- **URL:** `/api/prompts/{id}/`
+- **URL:** `/prompts/{id}`
 - **Method:** `GET`
 - **Description:** Returns a single prompt by its ID.
 - **Response:**
@@ -51,7 +51,7 @@
 
 ### 3. Create a New Prompt
 
-- **URL:** `/api/prompts/`
+- **URL:** `/prompts/`
 - **Method:** `POST`
 - **Description:** Creates a new prompt.
 - **Body Parameters:**
@@ -80,7 +80,7 @@
 
 ### 4. Update a Prompt (Full Update)
 
-- **URL:** `/api/prompts/{id}/`
+- **URL:** `/prompts/{id}`
 - **Method:** `PUT`
 - **Description:** Updates all fields of a prompt.
 - **Body Parameters:**
@@ -94,7 +94,7 @@
 
 ### 5. Partial Update a Prompt
 
-- **URL:** `/api/prompts/{id}/`
+- **URL:** `/prompts/{id}`
 - **Method:** `PATCH`
 - **Description:** Updates one or more fields of a prompt.
 - **Body Parameters:**
@@ -108,7 +108,7 @@
 
 ### 6. Delete a Prompt
 
-- **URL:** `/api/prompts/{id}/`
+- **URL:** `/prompts/{id}`
 - **Method:** `DELETE`
 - **Description:** Deletes a prompt by its ID.
 - **Response:**

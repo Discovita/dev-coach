@@ -20,27 +20,16 @@
  * Used by: API calls (fetching, creating, updating prompts), form state, etc.
  */
 export interface Prompt {
-  /** UUID string, unique identifier for the prompt. */
   id: string;
-  /** The state of the coach this prompt is associated with. */
   coach_state: string;
-  /** Version number of the prompt. */
   version: number;
-  /** Name of the prompt (optional). */
   name?: string | null;
-  /** Description of the prompt (optional). */
   description?: string | null;
-  /** The prompt body. */
   body: string;
-  /** List of required context keys for this prompt. */
   required_context_keys: string[];
-  /** List of allowed action types for this prompt. */
   allowed_actions: string[];
-  /** Whether the prompt is active. */
   is_active: boolean;
-  /** Timestamp when created (ISO string). */
   created_at: string;
-  /** Timestamp when last updated (ISO string). */
   updated_at: string;
 }
 
