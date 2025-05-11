@@ -40,7 +40,7 @@ ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://coach-ybqq.onrender.com",
+    "https://dev-coach-frontend.onrender.com",
 ]
 
 # Application definition
@@ -119,7 +119,7 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://coach-ybqq.onrender.com",
+    "https://dev-coach-frontend.onrender.com",
 ]
 
 TEMPLATES = [

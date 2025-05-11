@@ -2,7 +2,7 @@ from typing import List, Tuple
 from django.db import transaction
 from enums.action_type import ActionType
 from apps.coach_states.models import CoachState
-from server.models.CoachChatResponse import CoachChatResponse
+from models.CoachChatResponse import CoachChatResponse
 from services.action_handler.actions import (
     create_identity,
     update_identity,

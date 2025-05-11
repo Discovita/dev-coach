@@ -14,7 +14,7 @@ Usage:
 from typing import Optional, Type
 from pydantic import BaseModel
 from apps.chat_messages.models import ChatMessage
-from server.models.CoachChatResponse import CoachChatResponse
+from models.CoachChatResponse import CoachChatResponse
 from services.ai.openai_service.core.base import OpenAIService
 from enums.ai import AIModel
 from services.ai.base import AIService

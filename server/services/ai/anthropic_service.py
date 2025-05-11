@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from enums.ai import AIModel, AIProvider
 
 # from cws_helpers.anthropic_helper import AnthropicHelper
-from server.models.CoachChatResponse import CoachChatResponse
+from models.CoachChatResponse import CoachChatResponse
 from services.ai.base import AIService
 
 
