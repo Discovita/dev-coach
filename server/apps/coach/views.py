@@ -84,6 +84,7 @@ class CoachViewSet(
         add_chat_message(request.user, response.message, MessageRole.COACH)
         new_state, actions = apply_actions(coach_state, response)
         coach_state_serializer = CoachStateSerializer(new_state)
+        log.debug(f"Actions: {actions}")
 
         # Step 7: Serialize the latest chat history (last 20 messages)
         large_chat_history = (
@@ -100,8 +101,6 @@ class CoachViewSet(
 
         identities = Identity.objects.filter(user=request.user)
         identities_serialized = IdentitySerializer(identities, many=True).data
-
-        log.debug(coach_prompt)
 
         response_data = {
             "message": response.message,

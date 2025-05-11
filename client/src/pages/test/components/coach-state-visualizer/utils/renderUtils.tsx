@@ -1,5 +1,4 @@
 import React from "react";
-import { CoachResponse } from "@/types/coachResponse";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { copyToClipboard } from "./dataUtils";
 import { Button } from "@/components/ui/button";
@@ -141,12 +140,10 @@ export const renderActionsSection = (
 };
 
 export const renderFinalPrompt = (
-  lastResponse: CoachResponse | undefined,
+  prompt: string,
   isExpanded: boolean,
   toggleSection: (section: string) => void
 ): React.ReactElement | null => {
-  if (!lastResponse?.final_prompt) return null;
-
   return (
     <div className="mb-4 border rounded-md overflow-hidden border-gold-600">
       <div
@@ -161,7 +158,7 @@ export const renderFinalPrompt = (
             className="bg-gold-500 dark:bg-gold-600 rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-700 dark:hover:bg-gold-700"
             onClick={(e) => {
               e.stopPropagation();
-              copyToClipboard(lastResponse.final_prompt);
+              copyToClipboard(prompt);
             }}
           >
             Copy
@@ -178,7 +175,7 @@ export const renderFinalPrompt = (
       {isExpanded && (
         <div className="flex flex-col flex-1 min-h-0">
           <MarkdownRenderer
-            content={lastResponse.final_prompt}
+            content={prompt}
             className="flex-1 min-h-0 p-4 bg-gold-50 dark:bg-neutral-700 overflow-y-auto text-sm leading-[1.5] text-[#333] dark:text-gold-50 scrollbar w-full max-w-full break-words whitespace-pre-wrap box-border"
           />
         </div>

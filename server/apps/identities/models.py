@@ -15,19 +15,34 @@ class Identity(models.Model):
     """
 
     id = models.UUIDField(
-    primary_key=True,
-    default=uuid.uuid4,
-    editable=False,
-    unique=True,
-    help_text="Unique identifier for this object."
-)
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        help_text="Unique identifier for this object.",
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="identities",
         help_text="The user this identity belongs to.",
     )
-    description = models.TextField(help_text="Description of the identity.")
+    name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="A concise label for the identity (e.g., 'Creative Visionary')",
+    )
+    affirmation = models.TextField(
+        help_text="An 'I am' statement with a brief description",
+        null=True,
+        blank=True,
+    )
+    visualization = models.TextField(
+        help_text="(Added in the visualization stage) A vivid mental image",
+        null=True,
+        blank=True,
+    )
     state = models.CharField(
         max_length=32,
         choices=IdentityState.choices,

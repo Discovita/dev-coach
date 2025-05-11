@@ -6,8 +6,13 @@ class ContextKey(models.TextChoices):
     Enumeration of context keys.
     """
 
+    # TODO: Need to add remaining keys to this list for the other prompts
+    # TODO: Talk to Leigh Ann about what other context variables are needed
     USER_NAME = "user_name", "User Name"
     USER_GOALS = "user_goals", "User Goals"
+    USER_SUMMARY = "user_summary", "User Summary"
+    RECENT_MESSAGES = "recent_messages", "Recent Messages"
+    IDENTITIES = "identities", "Identities"
     NUMBER_OF_IDENTITIES = "number_of_identities", "Number of Identities"
     CURRENT_IDENTITY_DESCRIPTION = (
         "current_identity_description",

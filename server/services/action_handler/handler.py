@@ -47,8 +47,11 @@ def apply_actions(
         if action is None:
             log.warning(f"Action '{action_name}' is None, skipping.")
             continue
+        params = getattr(action, "params", None)
+        if params is not None and hasattr(params, "model_dump"):
+            params = params.model_dump()
         # NOTE: the front end "Action" interface is dependent on this structure
-        actions.append({"type": action_name, "params": getattr(action, "params", None)})
+        actions.append({"type": action_name, "params": params})
         # Example: handle each action type explicitly
         if action_name == ActionType.CREATE_IDENTITY.value:
             log.info("ACTION: Creating identity")

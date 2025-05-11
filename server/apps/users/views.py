@@ -116,9 +116,10 @@ class UserViewSet(viewsets.GenericViewSet):
         Reset (delete) all chat messages for the authenticated user.
         Step-by-step:
         1. Delete all ChatMessage objects for the user.
-        2. Reset the user's CoachState to 'introduction'.
-        3. Add the initial bot message (if any) to the chat history.
-        4. Return the new chat history (should contain only the initial message, or be empty if none).
+        2. Delete all Identity objects for the user.
+        3. Reset the user's CoachState to 'introduction'.
+        4. Add the initial bot message (if any) to the chat history.
+        5. Return the new chat history (should contain only the initial message, or be empty if none).
         """
         from apps.chat_messages.models import ChatMessage
         from apps.chat_messages.serializer import ChatMessageSerializer
@@ -126,9 +127,13 @@ class UserViewSet(viewsets.GenericViewSet):
         from enums.message_role import MessageRole
         from apps.coach_states.models import CoachState
         from enums.coaching_state import CoachingState
+        from apps.identities.models import Identity
 
         # 1. Delete all chat messages for the user
         ChatMessage.objects.filter(user=request.user).delete()
+
+        # 1a. Delete all identities for the user
+        Identity.objects.filter(user=request.user).delete()
 
         # 1b. Reset the user's CoachState to 'introduction'
         try:

@@ -9,6 +9,7 @@ from typing import Dict, List
 
 # Import the ActionType enum for all available coaching actions
 from enums.action_type import ActionType
+
 # Import the action models for each action type
 from services.action_handler.models.actions import (
     SelectIdentityFocusAction,
@@ -65,11 +66,12 @@ for action_type, params_info in ACTION_PARAMS.items():
     schema = params_model.model_json_schema()
 
     # Format the complete instruction for this action type
-    ACTION_INSTRUCTIONS[
-        action_type
-    ] = f"""**{action_type.value}**: {description}\n\n```json\n{schema}\n```"""
+    ACTION_INSTRUCTIONS[action_type] = (
+        f"""**{action_type.value}**: {description}\n\n```json\n{schema}\n```"""
+    )
 
 
+# TODO: The current implementation has the prompt spelling out what the action guidelines are. Maybe we can proceduralize this and hard code them and add them here based on what the actions are.
 def get_action_instructions(action_types: List[ActionType]) -> str:
     """
     Generate action instructions for the specified action types.

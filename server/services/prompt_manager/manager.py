@@ -11,10 +11,10 @@ from apps.users.models import User
 from enums.action_type import ActionType
 from services.prompt_manager import gather_prompt_context, format_for_provider
 from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
-from services.prompt_manager.utils.append_action_instructions import (
+from services.prompt_manager.utils import (
     append_action_instructions,
+    prepend_system_context,
 )
-from apps.prompts.serializers import PromptSerializer
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -27,6 +27,8 @@ class PromptManager:
     Uses AIProvider enum for provider selection.
     """
 
+    # TODO: Need to add system_context to the prompt
+    # TODO: Need to add identity_instructions to the prompt
     def create_chat_prompt(
         self, user: User, model: AIModel, version_override: int = None
     ) -> str:
@@ -70,12 +72,17 @@ class PromptManager:
         log.debug(f"coach_prompt: {coach_prompt}")
         log.debug(f"response_format: {response_format}")
 
+        # Prepend system_context to the prompt
+        coach_prompt = prepend_system_context(coach_prompt)
         # Append action instructions to the system message
         if prompt.allowed_actions:
             coach_prompt = append_action_instructions(
                 coach_prompt, prompt.allowed_actions
             )
         else:
+            log.warning(
+                f"Prompt {prompt.id} has no allowed actions. Using all action instructions."
+            )
             coach_prompt = append_action_instructions(
                 coach_prompt, ActionType.get_all_actions()
             )

@@ -49,6 +49,9 @@ export function ConversationResetterDialog({
           <DialogDescription>
             Are you sure you want to reset your conversation history?
             <br />
+            This will reset your entire chat history, remove all created
+            identites, and start your coach experience over,
+            <br />
             <span className="font-semibold text-red-700">
               This action cannot be undone.
             </span>
@@ -77,4 +80,4 @@ export function ConversationResetterDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

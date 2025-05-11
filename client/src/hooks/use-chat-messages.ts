@@ -67,10 +67,10 @@ export function useChatMessages() {
       if (response.actions && response.actions.length > 0) {
         // Get the current actions history from the cache (default to empty array)
         const prevActions: string[] =
-          queryClient.getQueryData(["user", "actionsHistory"]) || [];
+          queryClient.getQueryData(["user", "actions"]) || [];
         // Append new actions to the history (optionally filter duplicates)
         const updatedActions = [...prevActions, ...response.actions];
-        queryClient.setQueryData(["user", "actionsHistory"], updatedActions);
+        queryClient.setQueryData(["user", "actions"], updatedActions);
       }
     },
   });
@@ -80,14 +80,24 @@ export function useChatMessages() {
    * Step-by-step:
    * 1. Calls the resetChatMessages API function (POST /user/me/reset-chat-messages/).
    * 2. On success, updates the chatMessages cache with the new (empty or re-initialized) history.
-   * 3. Expose mutation function and status for UI consumption.
+   * 3. Invalidates coachState, finalPrompt, actions, and identities queries to ensure all related state is reset in the UI.
+   * 4. Expose mutation function and status for UI consumption.
    */
   const resetMutation = useMutation({
     mutationFn: async () => {
       return resetChatMessages();
     },
     onSuccess: (newHistory) => {
+      // 1. Update the chatMessages cache with the new (empty or re-initialized) history
       queryClient.setQueryData(["user", "chatMessages"], newHistory);
+      // 2. Invalidate coachState so it is refetched/reset in the UI
+      queryClient.invalidateQueries({ queryKey: ["user", "coachState"] });
+      // 3. Invalidate finalPrompt so it is cleared or refetched
+      queryClient.invalidateQueries({ queryKey: ["user", "finalPrompt"] });
+      // 4. Invalidate actions so the actions history is cleared or refetched
+      queryClient.invalidateQueries({ queryKey: ["user", "actions"] });
+      // 5. Invalidate identities so the identities list is cleared or refetched
+      queryClient.invalidateQueries({ queryKey: ["user", "identities"] });
     },
   });
 

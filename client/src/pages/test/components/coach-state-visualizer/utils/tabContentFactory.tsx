@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TabName, ExpandedSectionsConfig } from "../types";
 import {
   renderJsonSection,
@@ -28,9 +28,13 @@ export const TabContent: React.FC<{
   // Fetch all required data using hooks
   const { coachState } = useCoachState();
   const finalPrompt = useFinalPrompt();
-  const actionsHistory: Action[] = useActions();
+  const actions: Action[] = useActions();
   const { identities } = useIdentities();
   const { chatMessages } = useChatMessages();
+
+  useEffect(() => {
+    console.log("Actions:", actions);
+  }, [actions]);
 
   switch (tabName) {
     case TabName.STATE:
@@ -52,12 +56,7 @@ export const TabContent: React.FC<{
           {/* Render the final prompt using renderFinalPrompt for consistent UI */}
           {finalPrompt &&
             renderFinalPrompt(
-              // Pass a full CoachResponse object with required fields
-              {
-                message: '',
-                coach_state: { id: '', user: '', current_state: 'introduction', updated_at: '' },
-                final_prompt: finalPrompt,
-              },
+              finalPrompt,
               expandedSections["prompt"],
               toggleSection
             )}
@@ -74,11 +73,11 @@ export const TabContent: React.FC<{
       return (
         <>
           {/* Render the running list of actions from the cache using the new renderer */}
-          {actionsHistory &&
-            actionsHistory.length > 0 &&
+          {actions &&
+            actions.length > 0 &&
             renderActionsSection(
               "Actions History",
-              actionsHistory,
+              actions,
               "actionHistory",
               expandedSections["actionHistory"] ?? true, // Default to expanded
               toggleSection
@@ -93,7 +92,7 @@ export const TabContent: React.FC<{
             toggleSection
           )}
 
-          {(!actionsHistory || actionsHistory.length === 0) &&
+          {(!actions || actions.length === 0) &&
             renderEmptyState(
               "No action information available yet.",
               "Actions will appear here when the coach performs them or lists available ones."

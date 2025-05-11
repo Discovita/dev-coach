@@ -10,8 +10,9 @@ export function useFinalPrompt(): string | undefined {
   // Use useQuery to subscribe to changes in the finalPrompt cache
   const { data } = useQuery<string | undefined>({
     queryKey: ["user", "finalPrompt"],
-    // No fetcher: this is only set by mutation, so return undefined if not present
-    queryFn: () => undefined,
+    // TanStack Query does not allow undefined as a return value from queryFn.
+    // Return an empty string if not present to avoid errors.
+    queryFn: () => "",
   });
   return data;
 }
