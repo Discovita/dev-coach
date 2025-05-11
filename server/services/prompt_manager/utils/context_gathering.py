@@ -39,23 +39,16 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return user.get_full_name() or user.email
     elif key == ContextKey.USER_GOALS:
         return coach_state.goals
+    elif key == ContextKey.RECENT_MESSAGES:
+        return user.chat_messages.all().order_by("-created_at")[:5]
+    elif key == ContextKey.IDENTITIES:
+        return user.identities.all()
     elif key == ContextKey.NUMBER_OF_IDENTITIES:
         return user.identities.count()
     elif key == ContextKey.CURRENT_IDENTITY_DESCRIPTION:
         if coach_state.current_identity:
             return coach_state.current_identity.description
         return None
-    elif key == ContextKey.IDENTITIES_SUMMARY:
-        return [
-            IdentitySummary(
-                id=str(identity.id),
-                description=identity.description,
-                state=identity.state,
-            )
-            for identity in user.identities.all()
-        ]
-    elif key == ContextKey.PHASE:
-        return str(coach_state.current_state)
     # Add more context key handlers as needed
     else:
         # Handle unknown context keys

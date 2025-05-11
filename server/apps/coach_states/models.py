@@ -5,6 +5,7 @@ from apps.identities.models import Identity
 from apps.users.models import User
 
 from enums.coaching_state import CoachingState
+from enums.identity_category import IdentityCategory
 
 
 class CoachState(models.Model):
@@ -45,6 +46,12 @@ class CoachState(models.Model):
         on_delete=models.SET_NULL,
         related_name="proposed_coach_states",
         help_text="The currently proposed identity.",
+    )
+    identity_focus = models.CharField(
+        max_length=255,
+        choices=IdentityCategory.choices,
+        default=IdentityCategory.PASSIONS,
+        help_text="The identity focus for the coaching session.",
     )
     goals = models.JSONField(
         default=list, null=True, blank=True, help_text="Goals for the coaching session."

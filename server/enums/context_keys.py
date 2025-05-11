@@ -10,7 +10,6 @@ class ContextKey(models.TextChoices):
     # TODO: Talk to Leigh Ann about what other context variables are needed
     USER_NAME = "user_name", "User Name"
     USER_GOALS = "user_goals", "User Goals"
-    USER_SUMMARY = "user_summary", "User Summary"
     RECENT_MESSAGES = "recent_messages", "Recent Messages"
     IDENTITIES = "identities", "Identities"
     NUMBER_OF_IDENTITIES = "number_of_identities", "Number of Identities"
@@ -18,8 +17,7 @@ class ContextKey(models.TextChoices):
         "current_identity_description",
         "Current Identity Description",
     )
-    IDENTITIES_SUMMARY = "identities_summary", "Identities Summary"
-    PHASE = "phase", "Phase"
+    CURRENT_FOCUS = "current_focus", "Current Focus"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":

@@ -4,7 +4,9 @@ from enums.coaching_state import CoachingState
 
 
 class SelectIdentityFocusParams(BaseModel):
-    id: str = Field(..., description="ID of identity to focus on")
+    new_focus: IdentityCategory = Field(
+        ..., description="The new identity category to focus on"
+    )
 
     class Config:
         extra = "forbid"

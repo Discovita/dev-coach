@@ -20,6 +20,8 @@ from services.logger import configure_logging
 log = configure_logging(__name__, log_level="DEBUG")
 
 
+# TODO: Consider adding recent messages for every prompt
+# NOTE: There might be other things we want to add in every time as well: user info (name, gender, age, etc.)
 class PromptManager:
     """
     Manages prompt templates and generates formatted prompts with context for the coach chatbot.
