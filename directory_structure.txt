@@ -1,0 +1,371 @@
+.
+├── client
+│   ├── README.md
+│   ├── components.json
+│   ├── docs
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── api
+│   │   │   ├── auth.ts
+│   │   │   ├── coach.ts
+│   │   │   ├── core.ts
+│   │   │   ├── prompts.ts
+│   │   │   └── user.ts
+│   │   ├── assets
+│   │   │   └── react.svg
+│   │   ├── components
+│   │   │   ├── AdminNavbar.tsx
+│   │   │   ├── AuthNavbar.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── FormMessage.tsx
+│   │   │   ├── LoadingAnimation.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── SessionRestorer.tsx
+│   │   │   ├── ThemeSwitcher.tsx
+│   │   │   └── ui
+│   │   │       ├── badge.tsx
+│   │   │       ├── button.tsx
+│   │   │       ├── card.tsx
+│   │   │       ├── command.tsx
+│   │   │       ├── dialog.tsx
+│   │   │       ├── dropdown-menu.tsx
+│   │   │       ├── input.tsx
+│   │   │       ├── label.tsx
+│   │   │       ├── multi-select.tsx
+│   │   │       ├── popover.tsx
+│   │   │       ├── select.tsx
+│   │   │       ├── separator.tsx
+│   │   │       ├── sonner.tsx
+│   │   │       ├── tabs.tsx
+│   │   │       └── textarea.tsx
+│   │   ├── constants
+│   │   │   └── api.ts
+│   │   ├── context
+│   │   │   └── ThemeContext.ts
+│   │   ├── enums
+│   │   │   ├── actionType.ts
+│   │   │   ├── coachingState.ts
+│   │   │   ├── identityCategory.ts
+│   │   │   └── identityState.ts
+│   │   ├── hooks
+│   │   │   ├── use-actions.ts
+│   │   │   ├── use-auth.ts
+│   │   │   ├── use-chat-messages.ts
+│   │   │   ├── use-coach-state.ts
+│   │   │   ├── use-core.ts
+│   │   │   ├── use-final-prompt.ts
+│   │   │   ├── use-identities.ts
+│   │   │   ├── use-prompts.ts
+│   │   │   ├── use-theme.ts
+│   │   │   └── useReactiveQueryData.ts
+│   │   ├── index.css
+│   │   ├── layout
+│   │   │   ├── AdminLayout.tsx
+│   │   │   ├── AuthLayout.tsx
+│   │   │   └── Layout.tsx
+│   │   ├── lib
+│   │   │   └── utils.ts
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   │   ├── chat
+│   │   │   │   ├── Chat.tsx
+│   │   │   │   └── components
+│   │   │   │       ├── ChatControls.tsx
+│   │   │   │       ├── ChatInterface.tsx
+│   │   │   │       ├── ChatMessages.tsx
+│   │   │   │       ├── CoachMessage.tsx
+│   │   │   │       ├── ConversationExporter.tsx
+│   │   │   │       ├── ConversationResetter.tsx
+│   │   │   │       ├── ConversationResetterDialog.tsx
+│   │   │   │       ├── IdentityChoice.tsx
+│   │   │   │       ├── LoadingBubbles.tsx
+│   │   │   │       └── UserMessage.tsx
+│   │   │   ├── demo
+│   │   │   │   └── Demo.tsx
+│   │   │   ├── home
+│   │   │   │   └── Home.tsx
+│   │   │   ├── login
+│   │   │   │   ├── Login.tsx
+│   │   │   │   └── components
+│   │   │   │       └── login-form.tsx
+│   │   │   ├── prompts
+│   │   │   │   ├── Prompts.tsx
+│   │   │   │   └── components
+│   │   │   │       ├── DeletePromptDialog.tsx
+│   │   │   │       └── NewPromptForm.tsx
+│   │   │   ├── signup
+│   │   │   │   ├── Signup.tsx
+│   │   │   │   ├── components
+│   │   │   │   │   └── signup-form.tsx
+│   │   │   │   └── constants
+│   │   │   │       └── constants.ts
+│   │   │   └── test
+│   │   │       ├── Test.tsx
+│   │   │       └── components
+│   │   │           ├── TestChat.tsx
+│   │   │           ├── TestStateSelector.tsx
+│   │   │           └── coach-state-visualizer
+│   │   │               ├── CoachStateVisualizer.tsx
+│   │   │               ├── README.md
+│   │   │               ├── index.ts
+│   │   │               ├── types.ts
+│   │   │               └── utils
+│   │   │                   ├── dataUtils.ts
+│   │   │                   ├── index.ts
+│   │   │                   ├── renderUtils.tsx
+│   │   │                   ├── tabConfiguration.ts
+│   │   │                   └── tabContentFactory.tsx
+│   │   ├── providers
+│   │   │   └── ThemeProvider.tsx
+│   │   ├── tests
+│   │   │   ├── states
+│   │   │   │   ├── empty_state.json
+│   │   │   │   └── refinement_test_case.json
+│   │   │   └── testStates.ts
+│   │   ├── types
+│   │   │   ├── action.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── coachRequest.ts
+│   │   │   ├── coachResponse.ts
+│   │   │   ├── coachState.ts
+│   │   │   ├── coachingState.ts
+│   │   │   ├── enums.ts
+│   │   │   ├── identity.ts
+│   │   │   ├── message.ts
+│   │   │   ├── prompt.ts
+│   │   │   └── user.ts
+│   │   ├── utils
+│   │   │   ├── MarkdownRenderer.tsx
+│   │   │   ├── authFetch.ts
+│   │   │   └── xmlExport.ts
+│   │   └── vite-env.d.ts
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+├── directory_structure.txt
+├── docs
+│   └── user-data-access.md
+└── server
+    ├── Dockerfile
+    ├── VERSIONS.md
+    ├── __init__.py
+    ├── apps
+    │   ├── api_urls.py
+    │   ├── authentication
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── apps.py
+    │   │   ├── email_service.py
+    │   │   ├── models.py
+    │   │   ├── serializer.py
+    │   │   ├── templates
+    │   │   │   ├── password_reset_email.html
+    │   │   │   ├── password_reset_email.txt
+    │   │   │   ├── verification_email.html
+    │   │   │   └── verification_email.txt
+    │   │   ├── tests.py
+    │   │   ├── utils.py
+    │   │   └── views.py
+    │   ├── chat_messages
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── apps.py
+    │   │   ├── initial_message.md
+    │   │   ├── models.py
+    │   │   ├── serializer.py
+    │   │   ├── tests.py
+    │   │   ├── utils.py
+    │   │   └── views.py
+    │   ├── coach
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── apps.py
+    │   │   ├── models.py
+    │   │   ├── serializers.py
+    │   │   ├── tests.py
+    │   │   └── views.py
+    │   ├── coach_states
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── apps.py
+    │   │   ├── models.py
+    │   │   ├── serializer.py
+    │   │   ├── signals.py
+    │   │   ├── tests.py
+    │   │   └── views.py
+    │   ├── core
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── apps.py
+    │   │   ├── custom_pagination.py
+    │   │   ├── management
+    │   │   │   └── commands
+    │   │   ├── middleware
+    │   │   │   └── health_check_middleware.py
+    │   │   ├── models.py
+    │   │   ├── tests.py
+    │   │   └── views.py
+    │   ├── identities
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── apps.py
+    │   │   ├── models.py
+    │   │   ├── serializer.py
+    │   │   ├── tests.py
+    │   │   └── views.py
+    │   ├── prompts
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── apps.py
+    │   │   ├── models.py
+    │   │   ├── serializers.py
+    │   │   ├── tests.py
+    │   │   └── views.py
+    │   └── users
+    │       ├── __init__.py
+    │       ├── admin.py
+    │       ├── apps.py
+    │       ├── models.py
+    │       ├── serializer.py
+    │       ├── tests.py
+    │       └── views.py
+    ├── archive
+    │   └── actions
+    │       ├── definitions.py
+    │       ├── handler.py
+    │       ├── models.py
+    │       └── service.py
+    ├── asgi.py
+    ├── db.sqlite3
+    ├── docs
+    │   ├── admin_setup.md
+    │   ├── api
+    │   │   ├── auth_api.md
+    │   │   ├── core_api.md
+    │   │   └── prompts_api.md
+    │   └── prompt_manager_and_action_handler.md
+    ├── enums
+    │   ├── action_type.py
+    │   ├── ai.py
+    │   ├── coaching_state.py
+    │   ├── context_keys.py
+    │   ├── identity_category.py
+    │   ├── identity_state.py
+    │   └── message_role.py
+    ├── load_env.py
+    ├── manage.py
+    ├── models
+    │   ├── CoachChatResponse.py
+    │   └── __init__.py
+    ├── requirements.txt
+    ├── services
+    │   ├── action_handler
+    │   │   ├── actions
+    │   │   │   ├── __init__.py
+    │   │   │   ├── accept_identity.py
+    │   │   │   ├── accept_identity_refinement.py
+    │   │   │   ├── add_identity_note.py
+    │   │   │   ├── create_identity.py
+    │   │   │   ├── select_identity_focus.py
+    │   │   │   ├── transition_state.py
+    │   │   │   └── update_identity.py
+    │   │   ├── handler.py
+    │   │   ├── models
+    │   │   │   ├── __init__.py
+    │   │   │   ├── actions.py
+    │   │   │   └── params.py
+    │   │   └── utils
+    │   │       ├── action_instructions.py
+    │   │       └── dynamic_schema.py
+    │   ├── ai
+    │   │   ├── __init__.py
+    │   │   ├── ai_service_factory.py
+    │   │   ├── anthropic_service.py
+    │   │   ├── base.py
+    │   │   └── openai_service
+    │   │       ├── README.md
+    │   │       ├── __init__.py
+    │   │       ├── core
+    │   │       │   ├── __init__.py
+    │   │       │   ├── base.py
+    │   │       │   ├── chat
+    │   │       │   │   ├── generic
+    │   │       │   │   │   ├── __init__.py
+    │   │       │   │   │   ├── error_handlers.py
+    │   │       │   │   │   ├── generic_completion.py
+    │   │       │   │   │   └── mixin.py
+    │   │       │   │   └── structured
+    │   │       │   │       ├── __init__.py
+    │   │       │   │       ├── mixin.py
+    │   │       │   │       ├── stream_completion.py
+    │   │       │   │       ├── stream_with_final.py
+    │   │       │   │       ├── streaming.py
+    │   │       │   │       └── structured_completion.py
+    │   │       │   ├── coach_plugin.py
+    │   │       │   ├── image
+    │   │       │   │   ├── __init__.py
+    │   │       │   │   ├── mixin.py
+    │   │       │   │   ├── response.py
+    │   │       │   │   ├── utils.py
+    │   │       │   │   └── validation.py
+    │   │       │   ├── messages
+    │   │       │   │   ├── __init__.py
+    │   │       │   │   ├── mixin.py
+    │   │       │   │   └── utils.py
+    │   │       │   └── responses
+    │   │       │       └── Readme.md
+    │   │       ├── enums
+    │   │       │   ├── __init__.py
+    │   │       │   ├── ai_models.py
+    │   │       │   ├── ai_providers.py
+    │   │       │   └── model_features.py
+    │   │       ├── models
+    │   │       │   ├── __init__.py
+    │   │       │   ├── image.py
+    │   │       │   ├── openai_compatibility.py
+    │   │       │   └── response_types.py
+    │   │       └── utils
+    │   │           ├── __init__.py
+    │   │           ├── image.py
+    │   │           └── model_utils.py
+    │   ├── logger
+    │   │   ├── README.md
+    │   │   ├── __init__.py
+    │   │   └── logger.py
+    │   └── prompt_manager
+    │       ├── __init__.py
+    │       ├── directory_structure.txt
+    │       ├── manager.py
+    │       ├── models
+    │       │   ├── __init__.py
+    │       │   └── prompt_context.py
+    │       ├── prompts
+    │       │   ├── identity_instructions.md
+    │       │   ├── states
+    │       │   │   ├── identity_brainstorming.md
+    │       │   │   ├── identity_refinement.md
+    │       │   │   └── introduction.md
+    │       │   └── system_context.md
+    │       └── utils
+    │           ├── __init__.py
+    │           ├── append_action_instructions.py
+    │           ├── context_gathering.py
+    │           ├── context_logging.py
+    │           ├── format_for_provider.py
+    │           └── prepend_system_context.py
+    ├── settings
+    │   ├── common.py
+    │   ├── development.py
+    │   └── production.py
+    ├── tests
+    │   └── api
+    │       └── local.http
+    ├── urls.py
+    └── wsgi.py
+
+82 directories, 287 files

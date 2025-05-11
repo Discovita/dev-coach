@@ -19,12 +19,16 @@ import {
 } from "@/pages/signup/constants/constants";
 import { useAuth } from "@/hooks/use-auth";
 import { FormMessage, Message } from "@/components/FormMessage";
+import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
+import { User } from "@/types/user";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { register, registerStatus, user, isAdmin } = useAuth();
+  const { register, registerStatus } = useAuth();
+  const profile = useReactiveQueryData<User>(["user", "profile"]);
+  const isAdmin = useReactiveQueryData<boolean>(["user", "isAdmin"]);
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
@@ -54,14 +58,14 @@ export function SignupForm({
   }, [password, matchPassword]);
 
   useEffect(() => {
-    if (user && isAdmin) {
+    if (profile && isAdmin) {
       console.log("Admin registered successfully. Redirecting to test...");
       navigate("/test");
-    } else if (user) {
+    } else if (profile) {
       console.log("User registered successfully. Redirecting to chat...");
       navigate("/chat");
     }
-  }, [user, isAdmin, navigate, registerSuccess]);
+  }, [profile, isAdmin, navigate, registerSuccess]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

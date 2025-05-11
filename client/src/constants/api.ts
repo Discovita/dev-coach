@@ -1,4 +1,5 @@
-export const COACH_BASE_URL = "http://localhost:8000/api/v1";
+// Use the VITE_COACH_BASE_URL environment variable if it exists, otherwise default to localhost
+export const COACH_BASE_URL = import.meta.env.VITE_COACH_BASE_URL || "http://localhost:8000/api/v1";
 
 export const REGISTER = "/auth/register";
 export const LOGIN = "/auth/login";
