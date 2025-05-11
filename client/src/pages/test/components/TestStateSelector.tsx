@@ -1,15 +1,15 @@
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { TestState } from '@/tests/testStates';
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { TestState } from "@/tests/testStates";
 
 interface TestStateSelectorProps {
   selectedState: string;
@@ -67,26 +67,21 @@ const TestStateSelector: React.FC<TestStateSelectorProps> = ({
           </form>
           {selectedState && (
             <div className="mt-8 bg-gold-50 border border-gold-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gold-700 mb-2">Selected State Details:</h3>
+              <h3 className="text-lg font-semibold text-gold-700 mb-2">
+                Selected State Details:
+              </h3>
               <div className="space-y-1 text-gold-900">
                 <p>
-                  <span className="font-semibold">Name:</span> {testStates[selectedState].name}
+                  <span className="font-semibold">Name:</span>{" "}
+                  {testStates[selectedState].name}
                 </p>
                 <p>
-                  <span className="font-semibold">Description:</span>{' '}
+                  <span className="font-semibold">Description:</span>{" "}
                   {testStates[selectedState].description}
                 </p>
                 <p>
-                  <span className="font-semibold">Current State:</span>{' '}
+                  <span className="font-semibold">Current State:</span>{" "}
                   {testStates[selectedState].coach_state.current_state}
-                </p>
-                <p>
-                  <span className="font-semibold">Identities:</span>{' '}
-                  {testStates[selectedState].coach_state.identities?.length || 0}
-                </p>
-                <p>
-                  <span className="font-semibold">Conversation History:</span>{' '}
-                  {testStates[selectedState].coach_state.conversation_history?.length || 0} messages
                 </p>
               </div>
             </div>

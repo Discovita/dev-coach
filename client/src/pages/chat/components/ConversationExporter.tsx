@@ -10,12 +10,11 @@ export const ConversationExporter = () => {
   const userId = profile?.id;
   const messages =
     useReactiveQueryData<Message[]>(["user", "chatMessages"]) || [];
-  const coachState =
-    useReactiveQueryData<CoachState>(["user", "coachState"]) || {};
+  const coachState = useReactiveQueryData<CoachState>(["user", "coachState"]);
 
   // Handler for exporting conversation as XML
   const handleExport = () => {
-    if (!userId) return;
+    if (!userId || !coachState) return;
     const xmlContent = convertToXml(messages, userId, coachState);
     downloadXml(xmlContent);
   };

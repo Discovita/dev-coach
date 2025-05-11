@@ -1,5 +1,6 @@
 import { CoachResponse } from "@/types/coachResponse";
 import { CoachState } from "@/types/coachState";
+import { Action } from "@/types/action";
 
 /**
  * CoachStateVisualizer Component Props
