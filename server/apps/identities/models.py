@@ -4,6 +4,7 @@ from django.db import models
 from enums.identity_category import IdentityCategory
 from enums.identity_state import IdentityState
 from apps.users.models import User
+from django.contrib.postgres.fields import ArrayField
 
 
 # The Identity model stores a single identity for a user, including its state, notes, and category.
@@ -49,7 +50,12 @@ class Identity(models.Model):
         default=IdentityState.PROPOSED,
         help_text="Current state of the identity (proposed, accepted, refinement complete).",
     )
-    notes = models.JSONField(default=list, help_text="Notes about the identity.")
+    notes = ArrayField(
+        models.TextField(),
+        default=list,
+        help_text="List of notes about the identity.",
+        blank=True,
+    )
     category = models.CharField(
         max_length=32,
         choices=IdentityCategory.choices,

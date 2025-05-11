@@ -6,6 +6,7 @@ from apps.users.models import User
 
 from enums.coaching_state import CoachingState
 from enums.identity_category import IdentityCategory
+from django.contrib.postgres.fields import ArrayField
 
 
 class CoachState(models.Model):
@@ -53,8 +54,12 @@ class CoachState(models.Model):
         default=IdentityCategory.PASSIONS,
         help_text="The identity focus for the coaching session.",
     )
-    goals = models.JSONField(
-        default=list, null=True, blank=True, help_text="Goals for the coaching session."
+    goals = ArrayField(
+        models.CharField(max_length=255),
+        default=list,
+        null=True,
+        blank=True,
+        help_text="List of goals for the coaching session. Postgres only.",
     )
     metadata = models.JSONField(
         default=dict,

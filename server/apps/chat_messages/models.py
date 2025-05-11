@@ -38,5 +38,6 @@ class ChatMessage(models.Model):
         db_index=True,
     )
 
+    # NOTE: This is used when formatting the messages for prompts.
     def __str__(self):
         return f"{self.role}:\n{self.content}"
