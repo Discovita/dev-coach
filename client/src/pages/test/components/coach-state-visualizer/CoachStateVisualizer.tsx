@@ -76,44 +76,26 @@ export const CoachStateVisualizer: React.FC = () => {
 
   // On every cache change, compare the current value to the last seen value for each tab
   useEffect(() => {
-    // Debug logging: log current and last seen values for each tab
-    console.log("[TabUpdate] Current values:", {
-      state: coachState,
-      prompt: finalPrompt,
-      actions: actions,
-      identities: coachState,
-      conversation: chatMessages,
-    });
-    console.log("[TabUpdate] Last seen values:", {
-      state: lastSeen.current[TabName.STATE],
-      prompt: lastSeen.current[TabName.PROMPT],
-      actions: lastSeen.current[TabName.ACTIONS],
-      identities: lastSeen.current[TabName.IDENTITIES],
-      conversation: lastSeen.current[TabName.CONVERSATION],
-    });
-
     // Compute change detection for each tab and log the result
     const stateChanged = !!(
       lastSeen.current[TabName.STATE] &&
       coachState &&
-      JSON.stringify(lastSeen.current[TabName.STATE]) !== JSON.stringify(coachState)
+      JSON.stringify(lastSeen.current[TabName.STATE]) !==
+        JSON.stringify(coachState)
     );
     const promptChanged = lastSeen.current[TabName.PROMPT] !== finalPrompt;
-    const actionsChanged = JSON.stringify(lastSeen.current[TabName.ACTIONS]) !== JSON.stringify(actions);
+    const actionsChanged =
+      JSON.stringify(lastSeen.current[TabName.ACTIONS]) !==
+      JSON.stringify(actions);
     const identitiesChanged = !!(
       lastSeen.current[TabName.IDENTITIES] &&
       coachState &&
-      JSON.stringify(lastSeen.current[TabName.IDENTITIES]) !== JSON.stringify(coachState)
+      JSON.stringify(lastSeen.current[TabName.IDENTITIES]) !==
+        JSON.stringify(coachState)
     );
-    const conversationChanged = JSON.stringify(lastSeen.current[TabName.CONVERSATION]) !== JSON.stringify(chatMessages);
-
-    console.log("[TabUpdate] Change detection results:", {
-      stateChanged,
-      promptChanged,
-      actionsChanged,
-      identitiesChanged,
-      conversationChanged,
-    });
+    const conversationChanged =
+      JSON.stringify(lastSeen.current[TabName.CONVERSATION]) !==
+      JSON.stringify(chatMessages);
 
     setTabUpdates((prev) => ({
       ...prev,
@@ -123,18 +105,6 @@ export const CoachStateVisualizer: React.FC = () => {
       [TabName.IDENTITIES]: identitiesChanged,
       [TabName.CONVERSATION]: conversationChanged,
     }));
-
-    // Log the computed tabUpdates object after each cache change
-    setTimeout(() => {
-      // Use setTimeout to ensure this logs after state update
-      console.log("[TabUpdate] tabUpdates (after setState):", {
-        state: stateChanged,
-        prompt: promptChanged,
-        actions: actionsChanged,
-        identities: identitiesChanged,
-        conversation: conversationChanged,
-      });
-    }, 0);
   }, [coachState, finalPrompt, actions, chatMessages]);
 
   // When the user visits a tab, update the last seen value for that tab and clear the update flag

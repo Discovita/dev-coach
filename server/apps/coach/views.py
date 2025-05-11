@@ -18,7 +18,7 @@ from services.logger import configure_logging
 from apps.chat_messages.serializer import ChatMessageSerializer
 from apps.identities.serializer import IdentitySerializer
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
 
 class CoachViewSet(

@@ -34,8 +34,17 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     def complete(self, request: Request):
         """
-        Get current user data.
+        Get current user data, ensuring the chat history contains the initial bot message if empty.
         """
+        from apps.chat_messages.models import ChatMessage
+        from apps.chat_messages.utils import get_initial_message, add_chat_message
+        from enums.message_role import MessageRole
+
+        chat_messages = ChatMessage.objects.filter(user=request.user)
+        if not chat_messages.exists():
+            initial_message = get_initial_message()
+            if initial_message:
+                add_chat_message(request.user, initial_message, MessageRole.COACH)
         return Response(UserSerializer(request.user).data)
 
     @decorators.action(
@@ -93,12 +102,10 @@ class UserViewSet(viewsets.GenericViewSet):
             "-timestamp"
         )
 
-        # If no messages exist, add the initial bot message
         if not chat_messages.exists():
             initial_message = get_initial_message()
             if initial_message:
                 add_chat_message(request.user, initial_message, MessageRole.COACH)
-                # Re-fetch chat messages after adding the initial message
                 chat_messages = ChatMessage.objects.filter(user=request.user).order_by(
                     "-timestamp"
                 )

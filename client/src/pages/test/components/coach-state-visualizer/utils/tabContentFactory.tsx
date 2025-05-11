@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { TabName, ExpandedSectionsConfig } from "../types";
 import {
   renderJsonSection,
@@ -31,10 +31,6 @@ export const TabContent: React.FC<{
   const actions: Action[] = useActions();
   const { identities } = useIdentities();
   const { chatMessages } = useChatMessages();
-
-  useEffect(() => {
-    console.log("Actions:", actions);
-  }, [actions]);
 
   switch (tabName) {
     case TabName.STATE:
