@@ -13,7 +13,7 @@ DATABASES = {
 # Static files configuration
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATIC_URL = "/static/"
-STATIC_ROOT = "/server/.staticfiles"
+STATIC_ROOT = ".staticfiles"
 
 
 # S3 Configuration
