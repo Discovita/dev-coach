@@ -1,6 +1,3 @@
-from .prompt_context import PromptContext, IdentitySummary
+from .prompt_context import PromptContext
 
-__all__ = [
-    "PromptContext",
-    "IdentitySummary",
-]
+__all__ = ["PromptContext"]

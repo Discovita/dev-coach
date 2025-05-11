@@ -6,7 +6,7 @@ import uuid
 
 # TODO: add some flag to keep track of what coach state this message belongs to and what version of
 # the prompt was used
-# TODO: keep track of which coaching state the user was in when this message was sent. 
+# TODO: keep track of which coaching state the user was in when this message was sent.
 class ChatMessage(models.Model):
     """
     Stores a single message in the conversation history for the coaching chatbot.
@@ -39,4 +39,4 @@ class ChatMessage(models.Model):
     )
 
     def __str__(self):
-        return f"{self.role} ({self.user.email}): {self.content[:30]}"
+        return f"{self.role}:\n{self.content}"
