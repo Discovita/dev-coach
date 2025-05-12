@@ -12,7 +12,10 @@ class IdentitySerializer(serializers.ModelSerializer):
         model = Identity
         fields = (
             "id",
-            "description",
+            "user",
+            "name",
+            "affirmation",
+            "visualization",
             "state",
             "notes",
             "category",

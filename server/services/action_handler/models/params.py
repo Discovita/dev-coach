@@ -28,23 +28,23 @@ class CreateIdentityParams(BaseModel):
 
 class UpdateIdentityParams(BaseModel):
     id: str = Field(..., description="ID of identity to update")
-    name: Optional[str] = Field(None, description="New name for the identity")
-    affirmation: Optional[str] = Field(
-        None, description="An 'I am' statement with a brief description"
+    name: str = Field(..., description="New name for the identity")
+    affirmation: str = Field(
+        ..., description="An 'I am' statement with a brief description"
     )
-    visualization: Optional[str] = Field(
-        None, description="(Added in the visualization stage) A vivid mental image"
+    visualization: str = Field(
+        ..., description="(Added in the visualization stage) A vivid mental image"
     )
-    state: Optional[IdentityState] = Field(
-        None,
+    state: IdentityState = Field(
+        ...,
         description="Current state of the identity (proposed, accepted, refinement complete)",
     )
-    notes: Optional[list[str]] = Field(
-        None,
+    notes: list[str] = Field(
+        ...,
         description="List of notes about the identity. These will get added to the existing notes",
     )
-    category: Optional[IdentityCategory] = Field(
-        None, description="Category this identity belongs to"
+    category: IdentityCategory = Field(
+        ..., description="Category this identity belongs to"
     )
 
     class Config:
@@ -71,7 +71,8 @@ class TransitionStateParams(BaseModel):
     class Config:
         extra = "forbid"
 
-# TODO: remove this as UpdateIdentityParams covers this already. 
+
+# TODO: remove this as UpdateIdentityParams covers this already.
 class AddIdentityNoteParams(BaseModel):
     id: str = Field(..., description="ID of identity to add a note to")
     note: str = Field(..., description="Note to add to the identity")
