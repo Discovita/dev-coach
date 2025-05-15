@@ -70,11 +70,14 @@ class CoachViewSet(
             user=request.user, model=model
         )
         # Get the last 5 messages from the chat history
-        chat_history_for_prompt = (
-            ChatMessage.objects.filter(user=request.user)
-            .order_by("timestamp")[:5]
-            .all()
-        )
+        chat_history_for_prompt_query_set = ChatMessage.objects.filter(
+            user=request.user
+        ).order_by("-timestamp")[
+            :5
+        ]  # Get the 5 newest messages
+        # Convert queryset to list in chronological order (oldest to newest)
+        chat_history_for_prompt = list(reversed(chat_history_for_prompt_query_set))
+
         ai_service = AIServiceFactory.create(model)
 
         response: CoachChatResponse = ai_service.generate(
@@ -87,11 +90,11 @@ class CoachViewSet(
         log.debug(f"Actions: {actions}")
 
         # Step 7: Serialize the latest chat history (last 20 messages)
-        large_chat_history = (
-            ChatMessage.objects.filter(user=request.user)
-            .order_by("timestamp")[:20]
-            .all()
-        )
+        large_chat_history_qquery_set = ChatMessage.objects.filter(
+            user=request.user
+        ).order_by("-timestamp")[:20]
+        # Convert queryset to list in chronological order
+        large_chat_history = list(reversed(large_chat_history_qquery_set))
         chat_history_serialized = ChatMessageSerializer(
             large_chat_history, many=True
         ).data
