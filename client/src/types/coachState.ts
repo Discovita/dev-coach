@@ -1,4 +1,4 @@
-import { CoachingState } from "@/enums/coachingState";
+import { CoachingPhase } from "@/enums/coachingPhase";
 import { Identity } from "./identity";
 
 /**
@@ -7,7 +7,7 @@ import { Identity } from "./identity";
 export interface CoachState {
   id: string;
   user: string; // User ID
-  current_state: CoachingState;
+  current_state: CoachingPhase;
   current_identity?: Identity | null;
   proposed_identity?: Identity | null;
   goals?: string[];
