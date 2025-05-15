@@ -99,19 +99,22 @@ class UserViewSet(viewsets.GenericViewSet):
         from apps.chat_messages.utils import get_initial_message, add_chat_message
         from enums.message_role import MessageRole
 
-        chat_messages = ChatMessage.objects.filter(user=request.user).order_by(
+        chat_messages_qs = ChatMessage.objects.filter(user=request.user).order_by(
             "-timestamp"
         )
 
-        if not chat_messages.exists():
+        if not chat_messages_qs.exists():
             initial_message = get_initial_message()
             if initial_message:
                 add_chat_message(request.user, initial_message, MessageRole.COACH)
-                chat_messages = ChatMessage.objects.filter(user=request.user).order_by(
+                chat_messages_qs = ChatMessage.objects.filter(user=request.user).order_by(
                     "-timestamp"
                 )
+        
+        latest_messages_qs = chat_messages_qs[:20]
+        ordered_messages = list(reversed(latest_messages_qs))
 
-        return Response(ChatMessageSerializer(chat_messages, many=True).data)
+        return Response(ChatMessageSerializer(ordered_messages, many=True).data)
 
     @decorators.action(
         detail=False,
