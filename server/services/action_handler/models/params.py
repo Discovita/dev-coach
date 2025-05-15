@@ -17,6 +17,9 @@ class SelectIdentityFocusParams(BaseModel):
 
 
 class CreateIdentityParams(BaseModel):
+    name: str = Field(
+        ..., description="A concise label for the identity (e.g., 'Creative Visionary')"
+    )
     note: str = Field(
         ..., description="Initial note about why this identity was created"
     )

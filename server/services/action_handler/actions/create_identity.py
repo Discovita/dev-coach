@@ -9,6 +9,7 @@ def create_identity(coach_state: CoachState, params: CreateIdentityParams):
     """
     return Identity.objects.create(
         user=coach_state.user,
+        name=params.name,
         state="proposed",
         notes=[params.note],
         category=params.category,
