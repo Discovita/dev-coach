@@ -15,7 +15,6 @@ class PromptContext(BaseModel):
     identities: Optional[List[str]] = Field(default_factory=list)
     number_of_identities: Optional[int]
     current_identity_description: Optional[str] = None
-    current_focus: Optional[IdentityCategory] = None
 
     def format_goals(self) -> str:
         """

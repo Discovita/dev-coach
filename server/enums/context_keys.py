@@ -17,7 +17,6 @@ class ContextKey(models.TextChoices):
         "current_identity_description",
         "Current Identity Description",
     )
-    CURRENT_FOCUS = "current_focus", "Current Focus"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":

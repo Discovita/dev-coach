@@ -27,6 +27,7 @@ class CoachState(models.Model):
         related_name="coach_state",
         help_text="The user this coach state belongs to.",
     )
+    # TODO: need to rename this to current_phase
     current_state = models.CharField(
         max_length=32,
         choices=CoachingPhase.choices,
@@ -60,6 +61,12 @@ class CoachState(models.Model):
         null=True,
         blank=True,
         help_text="List of goals for the coaching session. Postgres only.",
+    )
+    skipped_identity_categories = ArrayField(
+        models.CharField(max_length=64, choices=IdentityCategory.choices),
+        default=list,
+        blank=True,
+        help_text="List of identity categories that the user has chosen to skip.",
     )
     metadata = models.JSONField(
         default=dict,
