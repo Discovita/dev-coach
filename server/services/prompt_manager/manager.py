@@ -29,7 +29,6 @@ class PromptManager:
     Uses AIProvider enum for provider selection.
     """
 
-    # TODO: Need to add system_context to the prompt
     # TODO: Need to add identity_instructions to the prompt
     def create_chat_prompt(
         self, user: User, model: AIModel, version_override: int = None
@@ -49,13 +48,13 @@ class PromptManager:
         state_value = coach_state.current_state
 
         # 2. Select the newest active prompt for this state (or override)
-        prompt_qs = Prompt.objects.filter(
-            coach_state=state_value,
+        prompt_queryset = Prompt.objects.filter(
+            coaching_phase=state_value,
             is_active=True,
         )
         if version_override is not None:
-            prompt_qs = prompt_qs.filter(version=version_override)
-        prompt = prompt_qs.order_by("-version").first()
+            prompt_queryset = prompt_queryset.filter(version=version_override)
+        prompt = prompt_queryset.order_by("-version").first()
         if not prompt:
             raise ValueError(f"No prompt found for state {state_value}")
         # 3. Gather context for the prompt
@@ -74,7 +73,6 @@ class PromptManager:
         log.debug(f"coach_prompt: {coach_prompt}")
         log.debug(f"response_format: {response_format}")
 
-        # Prepend system_context to the prompt
         coach_prompt = prepend_system_context(coach_prompt)
         # Append action instructions to the system message
         if prompt.allowed_actions:
