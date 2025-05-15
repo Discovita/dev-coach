@@ -1,4 +1,4 @@
-from .context_gathering import gather_prompt_context
+from .context import gather_prompt_context
 from .context_logging import log_context_stats
 from .format_for_provider import format_for_provider
 from .prepend_system_context import prepend_system_context
