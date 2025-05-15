@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel, Field
 from enums.identity_category import IdentityCategory
 from enums.coaching_phase import CoachingPhase
@@ -6,6 +5,7 @@ from enums.identity_state import IdentityState
 
 
 # NOTE: Cannot use the following pydantic model features on structured outputs from Open AI: Dict, Optional, Field(None)
+
 
 class SelectIdentityFocusParams(BaseModel):
     new_focus: IdentityCategory = Field(
@@ -78,6 +78,15 @@ class TransitionStateParams(BaseModel):
 class AddIdentityNoteParams(BaseModel):
     id: str = Field(..., description="ID of identity to add a note to")
     note: str = Field(..., description="Note to add to the identity")
+
+    class Config:
+        extra = "forbid"
+
+
+class SkipIdentityCategoryParams(BaseModel):
+    category: IdentityCategory = Field(
+        ..., description="Category to skip in the identity brainstorming phase"
+    )
 
     class Config:
         extra = "forbid"

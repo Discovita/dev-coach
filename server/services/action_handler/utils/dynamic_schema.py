@@ -9,6 +9,7 @@ from services.action_handler.models.actions import (
     AcceptIdentityRefinementAction,
     TransitionStateAction,
     AddIdentityNoteAction,
+    SkipIdentityCategoryAction,
 )
 
 from services.logger import configure_logging
@@ -23,6 +24,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.ACCEPT_IDENTITY_REFINEMENT: AcceptIdentityRefinementAction,
     ActionType.TRANSITION_STATE: TransitionStateAction,
     ActionType.ADD_IDENTITY_NOTE: AddIdentityNoteAction,
+    ActionType.SKIP_IDENTITY_CATEGORY: SkipIdentityCategoryAction,
 }
 
 

@@ -19,6 +19,7 @@ from services.action_handler.models.actions import (
     AcceptIdentityRefinementAction,
     TransitionStateAction,
     AddIdentityNoteAction,
+    SkipIdentityCategoryAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -51,6 +52,10 @@ ACTION_PARAMS = {
     ActionType.ADD_IDENTITY_NOTE: {
         "description": "Add a note to an identity.",
         "model": AddIdentityNoteAction,
+    },
+    ActionType.SKIP_IDENTITY_CATEGORY: {
+        "description": "Add this identity category to the list of skipped categories.",
+        "model": SkipIdentityCategoryAction,
     },
 }
 

@@ -16,6 +16,7 @@ class ActionType(models.TextChoices):
     ADD_IDENTITY_NOTE = "add_identity_note", "Add Identity Note"
     TRANSITION_STATE = "transition_state", "Transition State"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"
+    SKIP_IDENTITY_CATEGORY = "skip_identity_category", "Skip Identity Category"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""

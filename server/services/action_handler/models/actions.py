@@ -7,6 +7,7 @@ from .params import (
     AcceptIdentityRefinementParams,
     TransitionStateParams,
     AddIdentityNoteParams,
+    SkipIdentityCategoryParams,
 )
 
 
@@ -68,6 +69,15 @@ class TransitionStateAction(BaseModel):
 class AddIdentityNoteAction(BaseModel):
     params: AddIdentityNoteParams = Field(
         ..., description="Parameters for adding a note to an identity."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class SkipIdentityCategoryAction(BaseModel):
+    params: SkipIdentityCategoryParams = Field(
+        ..., description="Parameters for skipping an identity category."
     )
 
     class Config:

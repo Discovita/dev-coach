@@ -1,5 +1,4 @@
 from typing import List, Tuple
-from django.db import transaction
 from enums.action_type import ActionType
 from apps.coach_states.models import CoachState
 from models.CoachChatResponse import CoachChatResponse
@@ -11,6 +10,7 @@ from services.action_handler.actions import (
     add_identity_note,
     transition_state,
     select_identity_focus,
+    skip_identity_category,
 )
 from services.logger import configure_logging
 
@@ -23,6 +23,7 @@ ACTION_HANDLERS = {
     ActionType.ADD_IDENTITY_NOTE: add_identity_note,
     ActionType.TRANSITION_STATE: transition_state,
     ActionType.SELECT_IDENTITY_FOCUS: select_identity_focus,
+    ActionType.SKIP_IDENTITY_CATEGORY: skip_identity_category,
 }
 
 log = configure_logging(__name__, log_level="INFO")
@@ -54,6 +55,7 @@ def apply_actions(
         actions.append({"type": action_name, "params": params})
         # Example: handle each action type explicitly
         if action_name == ActionType.CREATE_IDENTITY.value:
+            # log.info("\033[94mACTION:\t  Creating identity\033[0m")
             log.info("ACTION: Creating identity")
             create_identity(coach_state, action.params)
         elif action_name == ActionType.UPDATE_IDENTITY.value:
