@@ -40,12 +40,7 @@
   "context_keys": [
     { "value": "user_name", "label": "User Name" },
     { "value": "number_of_identities", "label": "Number of Identities" },
-    {
-      "value": "current_identity_description",
-      "label": "Current Identity Description"
-    },
     { "value": "identities_summary", "label": "Identities Summary" },
-    { "value": "phase", "label": "Phase" }
   ]
 }
 ```

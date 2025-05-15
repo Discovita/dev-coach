@@ -25,8 +25,4 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_identities_context(coach_state)
     elif key == ContextKey.NUMBER_OF_IDENTITIES:
         return get_number_of_identites_context(coach_state)
-    elif key == ContextKey.CURRENT_IDENTITY_DESCRIPTION:
-        if coach_state.current_identity:
-            return coach_state.current_identity.description
-        return None
     # Add more context key handlers as needed

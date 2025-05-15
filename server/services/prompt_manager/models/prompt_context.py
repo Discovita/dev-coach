@@ -11,4 +11,3 @@ class PromptContext(BaseModel):
     recent_messages: Optional[str]  # this is a formatted list.
     identities: Optional[List[str]] = Field(default_factory=list)
     number_of_identities: Optional[int]
-    current_identity_description: Optional[str] = None

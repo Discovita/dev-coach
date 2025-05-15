@@ -16,15 +16,10 @@ def log_context_stats(prompt_context: PromptContext):
     Step-by-step:
     1. Log user_name
     3. Log number_of_identities
-    4. Log current_identity_description
     """
     # 1. Log user_name
     log.debug(f"USER_NAME: {getattr(prompt_context, 'user_name', None)}")
     # 3. Log number_of_identities
     log.debug(
         f"NUMBER_OF_IDENTITIES: {getattr(prompt_context, 'number_of_identities', None)}"
-    )
-    # 4. Log current_identity_description
-    log.debug(
-        f"CURRENT_IDENTITY_DESCRIPTION: {getattr(prompt_context, 'current_identity_description', None)}"
     )
