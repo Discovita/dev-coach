@@ -1,4 +1,4 @@
-from server.enums.coaching_phase import CoachingPhase
+from enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
 from enums.action_type import ActionType
 from rest_framework.response import Response

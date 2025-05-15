@@ -4,7 +4,7 @@ from django.db import models
 from apps.identities.models import Identity
 from apps.users.models import User
 
-from server.enums.coaching_phase import CoachingPhase
+from enums.coaching_phase import CoachingPhase
 from enums.identity_category import IdentityCategory
 from django.contrib.postgres.fields import ArrayField
 

@@ -133,7 +133,7 @@ class UserViewSet(viewsets.GenericViewSet):
         from apps.chat_messages.utils import get_initial_message, add_chat_message
         from enums.message_role import MessageRole
         from apps.coach_states.models import CoachState
-        from server.enums.coaching_phase import CoachingPhase
+        from enums.coaching_phase import CoachingPhase
         from apps.identities.models import Identity
 
         # 1. Delete all chat messages for the user

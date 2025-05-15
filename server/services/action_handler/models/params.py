@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 from enums.identity_category import IdentityCategory
-from server.enums.coaching_phase import CoachingPhase
+from enums.coaching_phase import CoachingPhase
 from enums.identity_state import IdentityState
 
 

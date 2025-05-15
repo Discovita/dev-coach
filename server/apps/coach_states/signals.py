@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from apps.users.models import User
 from apps.coach_states.models import CoachState
-from server.enums.coaching_phase import CoachingPhase
+from enums.coaching_phase import CoachingPhase
 
 
 @receiver(post_save, sender=User)

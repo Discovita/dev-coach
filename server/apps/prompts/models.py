@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 
 from django.contrib.postgres.fields import ArrayField
-from server.enums.coaching_phase import CoachingPhase
+from enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
 from enums.action_type import ActionType
 
