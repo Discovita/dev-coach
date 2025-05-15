@@ -3,7 +3,11 @@ import { useCoreEnums } from "@/hooks/use-core";
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePrompts } from "@/hooks/use-prompts";
-import { createPrompt, partialUpdatePrompt, softDeletePrompt } from "@/api/prompts";
+import {
+  createPrompt,
+  partialUpdatePrompt,
+  softDeletePrompt,
+} from "@/api/prompts";
 import {
   Select,
   SelectTrigger,
@@ -74,7 +78,7 @@ export function PromptsTabs() {
   // Filter prompts for the selected coach state (in memory)
   const prompts =
     allPrompts && activeCoachState && activeCoachState !== "new"
-      ? allPrompts.filter((p) => p.coach_state === activeCoachState)
+      ? allPrompts.filter((p) => p.coaching_phase === activeCoachState)
       : [];
 
   // Extract available versions for the dropdown
@@ -155,7 +159,7 @@ export function PromptsTabs() {
         allowed_actions: editAllowedActions,
         required_context_keys: editContextKeys,
         is_active: editIsActive,
-        // coach_state is not editable here, so we do not send it unless required by backend
+        // coaching_phase is not editable here, so we do not send it unless required by backend
       });
       // Refetch prompts after successful edit
       await refetchPrompts();
@@ -180,7 +184,7 @@ export function PromptsTabs() {
     try {
       // Create a new prompt with the current form state (omit id/version)
       await createPrompt({
-        coach_state: selectedPrompt.coach_state,
+        coaching_phase: selectedPrompt.coaching_phase,
         name: editName,
         description: editDescription,
         body: editBody,
@@ -190,7 +194,7 @@ export function PromptsTabs() {
       });
       // Refetch prompts
       await refetchPrompts();
-      // After refetch, auto-select the new version (highest version for this coach_state)
+      // After refetch, auto-select the new version (highest version for this coaching_phase)
       const updatedPrompts = allPrompts
         ? [
             ...allPrompts,
@@ -202,18 +206,21 @@ export function PromptsTabs() {
               allowed_actions: editAllowedActions,
               required_context_keys: editContextKeys,
               is_active: editIsActive,
-              version: Math.max(
-                ...allPrompts
-                  .filter((p) => p.coach_state === selectedPrompt.coach_state)
-                  .map((p) => p.version),
-                0
-              ) + 1,
+              version:
+                Math.max(
+                  ...allPrompts
+                    .filter(
+                      (p) => p.coaching_phase === selectedPrompt.coaching_phase
+                    )
+                    .map((p) => p.version),
+                  0
+                ) + 1,
             },
           ]
         : [];
       const newVersion = Math.max(
         ...updatedPrompts
-          .filter((p) => p.coach_state === selectedPrompt.coach_state)
+          .filter((p) => p.coaching_phase === selectedPrompt.coaching_phase)
           .map((p) => p.version),
         0
       );
@@ -260,15 +267,13 @@ export function PromptsTabs() {
       await refetchPrompts();
       // After deletion, select the next available version (or clear selection)
       const remainingPrompts = allPrompts
-        ? allPrompts.filter((p) =>
-            !(p.id === selectedPrompt.id)
-          )
+        ? allPrompts.filter((p) => !(p.id === selectedPrompt.id))
         : [];
       const sameStatePrompts = remainingPrompts.filter(
-        (p) => p.coach_state === selectedPrompt.coach_state
+        (p) => p.coaching_phase === selectedPrompt.coaching_phase
       );
       if (sameStatePrompts.length > 0) {
-        // Select the highest version remaining for this coach_state
+        // Select the highest version remaining for this coaching_phase
         const nextVersion = Math.max(...sameStatePrompts.map((p) => p.version));
         setSelectedVersion(nextVersion);
       } else {
@@ -315,170 +320,177 @@ export function PromptsTabs() {
           ))}
         </TabsList>
         {/* Render a tab panel for each coach state */}
-        {enums.coaching_phases.map((state: { value: string; label: string }) => (
-          <TabsContent
-            key={state.value}
-            value={state.value}
-            className="flex-1 flex flex-col min-h-0 h-full"
-          >
-            {" "}
-            {/* Show prompt details */}
-            {selectedPrompt ? (
-              <form
-                onSubmit={handleEditSubmit}
-                className="border rounded p-4 bg-gold-50 dark:bg-gold-900 flex flex-col flex-1 min-h-0 h-full"
-                style={{ height: "100%" }}
-              >
-                {/* Name and Description (editable) */}
-                <input
-                  type="text"
-                  className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Prompt name (optional)"
-                />
-                <Textarea
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  placeholder="Prompt description (optional)"
-                />
-                {/* Actions and Context Keys (editable) */}
-                <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">Allowed Actions:</span>
-                    <div className="gap-2 flex flex-wrap">
-                      <MultiSelect
-                        options={enums?.allowed_actions || []}
-                        value={editAllowedActions}
-                        onValueChange={setEditAllowedActions}
-                        placeholder="Choose Allowed Actions"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">
-                      Required Context Keys:
-                    </span>
-                    <div className="gap-2 flex flex-wrap">
-                      <MultiSelect
-                        options={enums?.context_keys || []}
-                        value={editContextKeys}
-                        onValueChange={setEditContextKeys}
-                        placeholder="Choose Context Keys"
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* Status toggle (optional) */}
-                <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 justify-between py-2">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <span className="font-semibold">Status:</span>{" "}
-                      <button
-                        type="button"
-                        className={`ml-2 px-2 py-1 rounded ${
-                          editIsActive
-                            ? "bg-green-600 text-white"
-                            : "bg-red-600 text-white"
-                        }`}
-                        onClick={() => setEditIsActive((v) => !v)}
-                      >
-                        {editIsActive ? "Active" : "Inactive"}
-                      </button>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Created:</span>{" "}
-                      {selectedPrompt.created_at}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Updated:</span>{" "}
-                      {selectedPrompt.updated_at}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-end">
-                    <label htmlFor="version-select" className="font-bold mr-2">
-                      Version:
-                    </label>
-                    <Select
-                      value={
-                        selectedVersion !== null ? String(selectedVersion) : ""
-                      }
-                      onValueChange={(val) =>
-                        setSelectedVersion(val ? Number(val) : null)
-                      }
-                      name="version-select"
-                    >
-                      <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
-                        <SelectValue placeholder="Select version" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Versions</SelectLabel>
-                          {versions.map((v) => (
-                            <SelectItem key={v} value={String(v)}>
-                              Version {v}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                {/* Prompt Body (editable) */}
-                <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
-                  <Textarea
-                    value={editBody}
-                    onChange={(e) => setEditBody(e.target.value)}
-                    name="body"
-                    className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
+        {enums.coaching_phases.map(
+          (state: { value: string; label: string }) => (
+            <TabsContent
+              key={state.value}
+              value={state.value}
+              className="flex-1 flex flex-col min-h-0 h-full"
+            >
+              {" "}
+              {/* Show prompt details */}
+              {selectedPrompt ? (
+                <form
+                  onSubmit={handleEditSubmit}
+                  className="border rounded p-4 bg-gold-50 dark:bg-gold-900 flex flex-col flex-1 min-h-0 h-full"
+                  style={{ height: "100%" }}
+                >
+                  {/* Name and Description (editable) */}
+                  <input
+                    type="text"
+                    className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Prompt name (optional)"
                   />
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  {/* Save as New Version button: creates a new prompt with the next version */}
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={handleSaveAsNewVersion}
-                    disabled={submittingEdit}
-                  >
-                    Save as New Version
-                  </Button>
-                  {/* Show Restore button only if there are unsaved changes */}
-                  {hasUnsavedChanges() && (
+                  <Textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="Prompt description (optional)"
+                  />
+                  {/* Actions and Context Keys (editable) */}
+                  <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">Allowed Actions:</span>
+                      <div className="gap-2 flex flex-wrap">
+                        <MultiSelect
+                          options={enums?.allowed_actions || []}
+                          value={editAllowedActions}
+                          onValueChange={setEditAllowedActions}
+                          placeholder="Choose Allowed Actions"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">
+                        Required Context Keys:
+                      </span>
+                      <div className="gap-2 flex flex-wrap">
+                        <MultiSelect
+                          options={enums?.context_keys || []}
+                          value={editContextKeys}
+                          onValueChange={setEditContextKeys}
+                          placeholder="Choose Context Keys"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Status toggle (optional) */}
+                  <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 justify-between py-2">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <span className="font-semibold">Status:</span>{" "}
+                        <button
+                          type="button"
+                          className={`ml-2 px-2 py-1 rounded ${
+                            editIsActive
+                              ? "bg-green-600 text-white"
+                              : "bg-red-600 text-white"
+                          }`}
+                          onClick={() => setEditIsActive((v) => !v)}
+                        >
+                          {editIsActive ? "Active" : "Inactive"}
+                        </button>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Created:</span>{" "}
+                        {selectedPrompt.created_at}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Updated:</span>{" "}
+                        {selectedPrompt.updated_at}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-end">
+                      <label
+                        htmlFor="version-select"
+                        className="font-bold mr-2"
+                      >
+                        Version:
+                      </label>
+                      <Select
+                        value={
+                          selectedVersion !== null
+                            ? String(selectedVersion)
+                            : ""
+                        }
+                        onValueChange={(val) =>
+                          setSelectedVersion(val ? Number(val) : null)
+                        }
+                        name="version-select"
+                      >
+                        <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
+                          <SelectValue placeholder="Select version" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Versions</SelectLabel>
+                            {versions.map((v) => (
+                              <SelectItem key={v} value={String(v)}>
+                                Version {v}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {/* Prompt Body (editable) */}
+                  <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
+                    <Textarea
+                      value={editBody}
+                      onChange={(e) => setEditBody(e.target.value)}
+                      name="body"
+                      className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    {/* Save as New Version button: creates a new prompt with the next version */}
                     <Button
                       type="button"
-                      variant={"outline"}
-                      onClick={resetEditState}
+                      variant="secondary"
+                      onClick={handleSaveAsNewVersion}
                       disabled={submittingEdit}
                     >
-                      Restore
+                      Save as New Version
                     </Button>
-                  )}
-                  {/* Delete button: opens confirmation dialog */}
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={handleOpenDeleteDialog}
-                    disabled={submittingEdit}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant={"default"}
-                    disabled={submittingEdit}
-                  >
-                    {submittingEdit ? "Saving..." : "Save Changes"}
-                  </Button>
+                    {/* Show Restore button only if there are unsaved changes */}
+                    {hasUnsavedChanges() && (
+                      <Button
+                        type="button"
+                        variant={"outline"}
+                        onClick={resetEditState}
+                        disabled={submittingEdit}
+                      >
+                        Restore
+                      </Button>
+                    )}
+                    {/* Delete button: opens confirmation dialog */}
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={handleOpenDeleteDialog}
+                      disabled={submittingEdit}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant={"default"}
+                      disabled={submittingEdit}
+                    >
+                      {submittingEdit ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="text-neutral-500">
+                  No prompt found for this version.
                 </div>
-              </form>
-            ) : (
-              <div className="text-neutral-500">
-                No prompt found for this version.
-              </div>
-            )}
-          </TabsContent>
-        ))}
+              )}
+            </TabsContent>
+          )
+        )}
         <TabsContent key="new" value="new">
           <NewPromptForm onSubmit={handleCreatePrompt} />
         </TabsContent>

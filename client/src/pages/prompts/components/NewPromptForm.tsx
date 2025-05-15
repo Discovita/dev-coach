@@ -28,7 +28,7 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
     PromptCreate["required_context_keys"]
   >([]);
   const [selectedCoachState, setSelectedCoachState] =
-    useState<PromptCreate["coach_state"]>("");
+    useState<PromptCreate["coaching_phase"]>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState<PromptCreate["body"]>("");
   const [name, setName] = useState<PromptCreate["name"]>("");
@@ -57,7 +57,7 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
     setSubmitting(true);
     try {
       await onSubmit({
-        coach_state: selectedCoachState,
+        coaching_phase: selectedCoachState,
         allowed_actions: selectedActions,
         required_context_keys: selectedContextKeys,
         body: prompt,
@@ -114,7 +114,7 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
             <Select
               value={selectedCoachState}
               onValueChange={setSelectedCoachState}
-              name="coach_state"
+              name="coaching_phase"
             >
               <SelectTrigger className="min-w-[200px]">
                 <SelectValue placeholder="Choose Coach State" />

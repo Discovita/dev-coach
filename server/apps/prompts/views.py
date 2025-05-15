@@ -56,17 +56,17 @@ class PromptViewSet(
         POST /api/prompts
         Body: Prompt fields (see PromptSerializer)
         Returns: 201 Created, created prompt object.
-        Automatically assigns the next version number for the given coach_state.
+        Automatically assigns the next version number for the given coaching_phase.
         Ignores any version sent from the frontend.
         """
         data = request.data.copy()
-        coach_state = data.get("coach_state")
-        if coach_state:
-            # Find the latest version for this coach_state
-            latest = Prompt.objects.filter(coach_state=coach_state).order_by("-version").first()
+        coaching_phase = data.get("coaching_phase")
+        if coaching_phase:
+            # Find the latest version for this coaching_phase
+            latest = Prompt.objects.filter(coaching_phase=coaching_phase).order_by("-version").first()
             data["version"] = (latest.version + 1) if latest else 1
         else:
-            data["version"] = 1  # fallback, should not happen if coach_state is required
+            data["version"] = 1  # fallback, should not happen if coaching_phase is required
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

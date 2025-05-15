@@ -6,7 +6,7 @@
  *
  * Fields:
  *  - id: Unique identifier (UUID string)
- *  - coach_state: The state of the coach this prompt is associated with
+ *  - coaching_phase: The state of the coach this prompt is associated with
  *  - version: Version number of the prompt
  *  - name: Name of the prompt (optional)
  *  - description: Description of the prompt (optional)
@@ -21,7 +21,7 @@
  */
 export interface Prompt {
   id: string;
-  coach_state: string;
+  coaching_phase: string;
   version: number;
   name?: string | null;
   description?: string | null;
@@ -41,7 +41,7 @@ export interface Prompt {
  * Used by: NewPromptForm, API calls to create prompts.
  */
 export interface PromptCreate {
-  coach_state: string;
+  coaching_phase: string;
   name?: string | null;
   description?: string | null;
   body: string;
