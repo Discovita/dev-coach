@@ -5,6 +5,8 @@ from enums.coaching_state import CoachingState
 from enums.identity_state import IdentityState
 
 
+# NOTE: Cannot use the following pydantic model features on structured outputs from Open AI: Dict, Optional, Field(None)
+
 class SelectIdentityFocusParams(BaseModel):
     new_focus: IdentityCategory = Field(
         ..., description="The new identity category to focus on"
