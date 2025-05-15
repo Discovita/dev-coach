@@ -26,7 +26,7 @@ ACTION_HANDLERS = {
     ActionType.SKIP_IDENTITY_CATEGORY: skip_identity_category,
 }
 
-log = configure_logging(__name__, log_level="INFO")
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 def apply_actions(
@@ -39,6 +39,7 @@ def apply_actions(
     Supported actions are defined in services.action_handler.actions and enums.action_type.
     """
     log.fine(f"Applying actions to coach state: {coach_state.id}")
+    log.debug(f"Response: {response}")
     actions = []
     for action_name, value in response.model_dump(exclude_none=True).items():
         # Skip the 'message' field, as it is not an action
@@ -76,6 +77,9 @@ def apply_actions(
         elif action_name == ActionType.SELECT_IDENTITY_FOCUS.value:
             log.info("ACTION: Selecting identity focus")
             select_identity_focus(coach_state, action.params)
+        elif action_name == ActionType.SKIP_IDENTITY_CATEGORY.value:
+            log.info("ACTION: Skipping identity category")
+            skip_identity_category(coach_state, action.params)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue

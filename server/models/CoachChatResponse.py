@@ -8,6 +8,7 @@ from services.action_handler.models.actions import (
     AcceptIdentityRefinementAction,
     TransitionStateAction,
     AddIdentityNoteAction,
+    SkipIdentityCategoryAction,
 )
 
 
@@ -40,4 +41,7 @@ class CoachChatResponse(BaseModel):
     )
     add_identity_note: Optional[AddIdentityNoteAction] = Field(
         default=None, description="Perform the add_identity_note action."
+    )
+    skip_identity_category: Optional[SkipIdentityCategoryAction] = Field(
+        default=None, description="Perform the skip_identity_category action."
     )

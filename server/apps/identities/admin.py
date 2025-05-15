@@ -21,5 +21,5 @@ class IdentityAdmin(admin.ModelAdmin):
         "updated_at",
     )
     list_filter = ("state", "category", "created_at")
-    search_fields = ("description", "user__email")
+    search_fields = ("user__email",)
     readonly_fields = ("created_at", "updated_at")

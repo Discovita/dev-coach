@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.users.serializer import UserSerializer, UserProfileSerializer
 from rest_framework.response import Response
 
+from enums.identity_category import IdentityCategory
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -146,6 +147,10 @@ class UserViewSet(viewsets.GenericViewSet):
         try:
             coach_state = CoachState.objects.get(user=request.user)
             coach_state.current_state = CoachingPhase.INTRODUCTION
+            coach_state.current_identity = None
+            coach_state.proposed_identity = None
+            coach_state.identity_focus = IdentityCategory.PASSIONS
+            coach_state.skipped_identity_categories = []
             coach_state.save()
         except CoachState.DoesNotExist:
             pass  # Optionally, handle if the user does not have a CoachState

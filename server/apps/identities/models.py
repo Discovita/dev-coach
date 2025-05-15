@@ -72,4 +72,4 @@ class Identity(models.Model):
         """
         String representation of the identity for admin/debugging.
         """
-        return f"{self.description[:30]} ({self.get_category_display()}) - {self.get_state_display()}"
+        return f"{self.name[:30]} ({self.get_category_display()}) - {self.get_state_display()}"
