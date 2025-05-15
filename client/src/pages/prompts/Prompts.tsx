@@ -64,12 +64,12 @@ export function PromptsTabs() {
 
   // Set default tab to first coach state (or 'new') when enums load
   useEffect(() => {
-    if (enums?.coach_states && enums.coach_states.length > 0) {
-      setActiveCoachState((prev) => prev ?? enums.coach_states[0].value);
-    } else if (enums?.coach_states && enums.coach_states.length === 0) {
+    if (enums?.coaching_phases && enums.coaching_phases.length > 0) {
+      setActiveCoachState((prev) => prev ?? enums.coaching_phases[0].value);
+    } else if (enums?.coaching_phases && enums.coaching_phases.length === 0) {
       setActiveCoachState("new");
     }
-  }, [enums?.coach_states]);
+  }, [enums?.coaching_phases]);
 
   // Filter prompts for the selected coach state (in memory)
   const prompts =
@@ -287,12 +287,12 @@ export function PromptsTabs() {
 
   if (enumsLoading || promptsLoading)
     return <div>Loading coach states and prompts...</div>;
-  if (!enums?.coach_states) return <div>No coach states found.</div>;
+  if (!enums?.coaching_phases) return <div>No coach states found.</div>;
   if (promptsError) return <div>Error loading prompts.</div>;
 
   // Add a special tab for creating a new prompt
   const allTabs = [
-    ...enums.coach_states.map((state: { value: string; label: string }) => ({
+    ...enums.coaching_phases.map((state: { value: string; label: string }) => ({
       value: state.value,
       label: state.label,
     })),
@@ -315,7 +315,7 @@ export function PromptsTabs() {
           ))}
         </TabsList>
         {/* Render a tab panel for each coach state */}
-        {enums.coach_states.map((state: { value: string; label: string }) => (
+        {enums.coaching_phases.map((state: { value: string; label: string }) => (
           <TabsContent
             key={state.value}
             value={state.value}

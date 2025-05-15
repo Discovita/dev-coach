@@ -4,7 +4,7 @@ from django.db import models
 from apps.identities.models import Identity
 from apps.users.models import User
 
-from enums.coaching_state import CoachingState
+from server.enums.coaching_phase import CoachingPhase
 from enums.identity_category import IdentityCategory
 from django.contrib.postgres.fields import ArrayField
 
@@ -29,7 +29,7 @@ class CoachState(models.Model):
     )
     current_state = models.CharField(
         max_length=32,
-        choices=CoachingState.choices,
+        choices=CoachingPhase.choices,
         help_text="Current state of the coaching session.",
     )
     current_identity = models.ForeignKey(

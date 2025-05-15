@@ -1,4 +1,4 @@
-from enums.coaching_state import CoachingState
+from server.enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
 from enums.action_type import ActionType
 from rest_framework.response import Response
@@ -24,12 +24,12 @@ class CoreViewSet(viewsets.GenericViewSet):
         GET /api/enums
         Returns all enum values for coach_state, allowed_actions, and context_keys.
         """
-        coach_states = [{"value": c.value, "label": c.label} for c in CoachingState]
+        coaching_phases = [{"value": c.value, "label": c.label} for c in CoachingPhase]
         allowed_actions = [{"value": a.value, "label": a.label} for a in ActionType]
         context_keys = [{"value": k.value, "label": k.label} for k in ContextKey]
         return Response(
             {
-                "coach_states": coach_states,
+                "coaching_phases": coaching_phases,
                 "allowed_actions": allowed_actions,
                 "context_keys": context_keys,
             }

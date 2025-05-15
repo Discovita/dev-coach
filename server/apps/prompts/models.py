@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 
 from django.contrib.postgres.fields import ArrayField
-from enums.coaching_state import CoachingState
+from server.enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
 from enums.action_type import ActionType
 
@@ -17,7 +17,7 @@ class Prompt(models.Model):
     )
     coach_state = models.CharField(
         max_length=32,
-        choices=CoachingState.choices,
+        choices=CoachingPhase.choices,
         help_text="The state of the coach this prompt is associated with.",
     )
     version = models.IntegerField(default=1, help_text="Version number of the prompt")

@@ -133,7 +133,7 @@ class UserViewSet(viewsets.GenericViewSet):
         from apps.chat_messages.utils import get_initial_message, add_chat_message
         from enums.message_role import MessageRole
         from apps.coach_states.models import CoachState
-        from enums.coaching_state import CoachingState
+        from server.enums.coaching_phase import CoachingPhase
         from apps.identities.models import Identity
 
         # 1. Delete all chat messages for the user
@@ -145,7 +145,7 @@ class UserViewSet(viewsets.GenericViewSet):
         # 1b. Reset the user's CoachState to 'introduction'
         try:
             coach_state = CoachState.objects.get(user=request.user)
-            coach_state.current_state = CoachingState.INTRODUCTION
+            coach_state.current_state = CoachingPhase.INTRODUCTION
             coach_state.save()
         except CoachState.DoesNotExist:
             pass  # Optionally, handle if the user does not have a CoachState

@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class CoachingState(models.TextChoices):
+class CoachingPhase(models.TextChoices):
     """
     Enum for the possible coaching state in the coaching system.
     """
@@ -11,7 +11,7 @@ class CoachingState(models.TextChoices):
     IDENTITY_REFINEMENT = "identity_refinement", "Identity Refinement"
 
     @classmethod
-    def from_string(cls, value: str) -> "CoachingState":
+    def from_string(cls, value: str) -> "CoachingPhase":
         """
         Convert a string to an CoachingState enum value, accepting flexible input.
         """

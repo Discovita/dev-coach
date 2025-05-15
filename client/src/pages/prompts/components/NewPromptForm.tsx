@@ -122,7 +122,7 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Coach States</SelectLabel>
-                  {enums?.coach_states?.map(
+                  {enums?.coaching_phases?.map(
                     (state: { value: string; label: string }) => (
                       <SelectItem key={state.value} value={state.value}>
                         {state.label}

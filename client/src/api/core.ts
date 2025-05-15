@@ -1,7 +1,7 @@
 import { COACH_BASE_URL } from "@/constants/api";
 
 /**
- * Fetch all enums for coach_states, allowed_actions, and context_keys.
+ * Fetch all enums for coaching_phases, allowed_actions, and context_keys.
  * Used for populating dropdowns/selects in the frontend prompt management UI.
  * Returns an object with arrays for each enum type.
  */

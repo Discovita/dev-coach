@@ -20,7 +20,7 @@
 
 ```json
 {
-  "coach_states": [
+  "coaching_phases": [
     { "value": "introduction", "label": "Introduction" },
     { "value": "identity_brainstorming", "label": "Identity Brainstorming" },
     { "value": "identity_refinement", "label": "Identity Refinement" }

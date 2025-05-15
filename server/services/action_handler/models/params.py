@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 from enums.identity_category import IdentityCategory
-from enums.coaching_state import CoachingState
+from server.enums.coaching_phase import CoachingPhase
 from enums.identity_state import IdentityState
 
 
@@ -68,7 +68,7 @@ class AcceptIdentityRefinementParams(BaseModel):
 
 
 class TransitionStateParams(BaseModel):
-    to_state: CoachingState = Field(..., description="State to transition to")
+    to_state: CoachingPhase = Field(..., description="State to transition to")
 
     class Config:
         extra = "forbid"
