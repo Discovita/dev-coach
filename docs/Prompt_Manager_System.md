@@ -47,7 +47,7 @@ The prompt manager system is responsible for constructing, formatting, and manag
 
 #### a. **PromptContext (`prompt_context.py`)**
 - **Purpose:** Encapsulates all context data used to format prompt templates for the coach chatbot.
-- **Fields:** Includes user name, goals, recent messages, identities, current focus, and more.
+- **Fields:** Includes user name, recent messages, identities, current focus, and more.
 - **Usage:** Used by the prompt manager and context gathering utilities to ensure all required context is available for prompt construction.
 
 #### b. **Exports (`__init__.py`)**

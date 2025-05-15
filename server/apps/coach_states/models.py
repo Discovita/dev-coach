@@ -55,13 +55,6 @@ class CoachState(models.Model):
         default=IdentityCategory.PASSIONS,
         help_text="The identity focus for the coaching session.",
     )
-    goals = ArrayField(
-        models.CharField(max_length=255),
-        default=list,
-        null=True,
-        blank=True,
-        help_text="List of goals for the coaching session. Postgres only.",
-    )
     skipped_identity_categories = ArrayField(
         models.CharField(max_length=64, choices=IdentityCategory.choices),
         default=list,

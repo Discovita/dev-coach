@@ -10,14 +10,7 @@ class PromptContext(BaseModel):
     """
 
     user_name: Optional[str]
-    user_goals: Optional[List[str]]
     recent_messages: Optional[str]  # this is a formatted list.
     identities: Optional[List[str]] = Field(default_factory=list)
     number_of_identities: Optional[int]
     current_identity_description: Optional[str] = None
-
-    def format_goals(self) -> str:
-        """
-        Format goals as comma-separated string.
-        """
-        return ", ".join(self.user_goals)

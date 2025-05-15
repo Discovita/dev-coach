@@ -22,8 +22,6 @@ def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> PromptCont
             prompt_context_fields[field_name] = value
     if prompt_context_fields["user_name"] is None:
         prompt_context_fields["user_name"] = user.get_full_name() or user.email
-    if prompt_context_fields["user_goals"] is None:
-        prompt_context_fields["user_goals"] = []
     if prompt_context_fields["number_of_identities"] is None:
         prompt_context_fields["number_of_identities"] = 0
     return PromptContext(**prompt_context_fields)
@@ -37,8 +35,6 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
     user = coach_state.user
     if key == ContextKey.USER_NAME:
         return user.get_full_name() or user.email
-    elif key == ContextKey.USER_GOALS:
-        return coach_state.goals
     elif key == ContextKey.RECENT_MESSAGES:
         messages = [
             str(msg) for msg in user.chat_messages.all().order_by("timestamp")[:5]

@@ -1,6 +1,6 @@
 ---
 required_context_keys:
-["user_name", "recent_messages", "identities", "user_goals"]
+["user_name", "recent_messages", "identities"]
 allowed_actions:
 ["create_identity", "update_identity", "accept_identity", "add_identity_note", "transition_state"]
 ---
@@ -51,8 +51,7 @@ Focus on these key identity categories:
 
 Current user information:
 
-- Name: {user_name)
-- Goals: {user_goals}
+- Name: {user_name}
 
 ## Recent conversation
 

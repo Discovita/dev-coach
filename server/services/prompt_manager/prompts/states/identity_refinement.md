@@ -57,8 +57,7 @@ Guide the client through:
 
 Current user information:
 
-- Name: {user_name)
-- Goals: {user_goals}
+- Name: {user_name}
 
 ## Recent conversation
 

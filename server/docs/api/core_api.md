@@ -39,7 +39,6 @@
   ],
   "context_keys": [
     { "value": "user_name", "label": "User Name" },
-    { "value": "user_goals", "label": "User Goals" },
     { "value": "number_of_identities", "label": "Number of Identities" },
     {
       "value": "current_identity_description",

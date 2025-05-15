@@ -18,7 +18,6 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "current_state",  # Current state of the coaching session
             "current_identity",  # The identity currently being refined
             "proposed_identity",  # The currently proposed identity
-            "goals",  # Goals for the coaching session
             "metadata",  # Additional metadata for the coaching session
             "updated_at",  # Timestamp of last update
         )

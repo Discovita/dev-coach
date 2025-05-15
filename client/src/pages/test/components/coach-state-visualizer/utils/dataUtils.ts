@@ -24,7 +24,6 @@ export const getCurrentStateInfo = (
     current_state: coachState.current_state,
     current_identity: coachState.current_identity,
     proposed_identity: coachState.proposed_identity,
-    goals: coachState.goals,
     updated_at: coachState.updated_at,
   };
 };

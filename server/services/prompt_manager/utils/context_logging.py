@@ -15,16 +15,11 @@ def log_context_stats(prompt_context: PromptContext):
     Logs all fields from PromptContext, matching the context keys in ContextKey.
     Step-by-step:
     1. Log user_name
-    2. Log user_goals (as list and formatted)
     3. Log number_of_identities
     4. Log current_identity_description
     """
     # 1. Log user_name
     log.debug(f"USER_NAME: {getattr(prompt_context, 'user_name', None)}")
-    # 2. Log user_goals
-    log.debug(f"USER_GOALS: {getattr(prompt_context, 'user_goals', None)}")
-    if hasattr(prompt_context, "format_goals"):
-        log.debug(f"USER_GOALS (formatted): {prompt_context.format_goals()}")
     # 3. Log number_of_identities
     log.debug(
         f"NUMBER_OF_IDENTITIES: {getattr(prompt_context, 'number_of_identities', None)}"

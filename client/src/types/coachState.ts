@@ -10,7 +10,6 @@ export interface CoachState {
   current_state: CoachingPhase;
   current_identity?: Identity | null;
   proposed_identity?: Identity | null;
-  goals?: string[];
   metadata?: {
     [k: string]: unknown;
   };
