@@ -12,6 +12,7 @@ class ContextKey(models.TextChoices):
     RECENT_MESSAGES = "recent_messages", "Recent Messages"
     IDENTITIES = "identities", "Identities"
     NUMBER_OF_IDENTITIES = "number_of_identities", "Number of Identities"
+    IDENTITY_FOCUS = "identity_focus", "Identity Focus"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":

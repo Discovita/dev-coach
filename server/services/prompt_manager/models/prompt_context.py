@@ -11,3 +11,4 @@ class PromptContext(BaseModel):
     recent_messages: Optional[str]  # this is a formatted list.
     identities: Optional[str]
     number_of_identities: Optional[int]
+    identity_focus: Optional[str]
