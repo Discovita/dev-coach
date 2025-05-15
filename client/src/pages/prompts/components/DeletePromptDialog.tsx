@@ -54,7 +54,7 @@ export function DeletePromptDialog({
           </div>
           <div className="text-xs text-neutral-500 mb-2">
             Coach State:{" "}
-            <span className="font-semibold">{prompt?.coach_state}</span>
+            <span className="font-semibold">{prompt?.coaching_phase}</span>
             {prompt?.version !== undefined && (
               <>
                 {" | "}Version:{" "}
