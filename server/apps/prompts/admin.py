@@ -12,15 +12,15 @@ class PromptAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
-        "coach_state",
+        "coaching_phase",
         "version",
         "name",
         "is_active",
         "created_at",
         "updated_at",
     )
-    search_fields = ("id", "coach_state", "name", "description", "body")
-    list_filter = ("coach_state", "is_active", "created_at", "updated_at")
+    search_fields = ("id", "coaching_phase", "name", "description", "body")
+    list_filter = ("coaching_phase", "is_active", "created_at", "updated_at")
     ordering = ("-created_at",)
 
 

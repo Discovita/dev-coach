@@ -13,6 +13,7 @@ class PromptSerializer(serializers.ModelSerializer):
         - description: Description of the prompt
         - body: The prompt body
         - required_context_keys: List of required context keys
+        - allowed_actions: List of allowed action types
         - is_active: Whether the prompt is active
         - created_at: Timestamp when created
         - updated_at: Timestamp when last updated

@@ -45,7 +45,7 @@ export interface PromptCreate {
   name?: string | null;
   description?: string | null;
   body: string;
-  required_context_keys: string[];
-  allowed_actions: string[];
+  required_context_keys?: string[];
+  allowed_actions?: string[];
   is_active?: boolean; // Optional, defaults to true on backend
 }

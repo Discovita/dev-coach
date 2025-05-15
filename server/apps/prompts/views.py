@@ -36,7 +36,7 @@ class PromptViewSet(
     def list(self, request, *args, **kwargs):
         """
         List all prompts (only those with is_active=True).
-        GET /api/prompts/
+        GET /api/prompts
         Returns: 200 OK, list of active prompts.
         """
         self.queryset = Prompt.objects.filter(is_active=True)
@@ -45,7 +45,7 @@ class PromptViewSet(
     def retrieve(self, request, *args, **kwargs):
         """
         Retrieve a single prompt by ID.
-        GET /api/prompts/{id}/
+        GET /api/prompts/{id}
         Returns: 200 OK, prompt object.
         """
         return super().retrieve(request, *args, **kwargs)
@@ -53,7 +53,7 @@ class PromptViewSet(
     def create(self, request, *args, **kwargs):
         """
         Create a new prompt.
-        POST /api/prompts/
+        POST /api/prompts
         Body: Prompt fields (see PromptSerializer)
         Returns: 201 Created, created prompt object.
         Automatically assigns the next version number for the given coach_state.
@@ -75,7 +75,7 @@ class PromptViewSet(
     def update(self, request, *args, **kwargs):
         """
         Update a prompt (full update).
-        PUT /api/prompts/{id}/
+        PUT /api/prompts/{id}
         Body: All prompt fields (see PromptSerializer)
         Returns: 200 OK, updated prompt object.
         """
@@ -84,7 +84,7 @@ class PromptViewSet(
     def partial_update(self, request, *args, **kwargs):
         """
         Partially update a prompt.
-        PATCH /api/prompts/{id}/
+        PATCH /api/prompts/{id}
         Body: Partial prompt fields (see PromptSerializer)
         Returns: 200 OK, updated prompt object.
         """
@@ -93,7 +93,7 @@ class PromptViewSet(
     def destroy(self, request, *args, **kwargs):
         """
         Delete a prompt.
-        DELETE /api/prompts/{id}/
+        DELETE /api/prompts/{id}
         Returns: 204 No Content.
         """
         return super().destroy(request, *args, **kwargs)
@@ -102,7 +102,7 @@ class PromptViewSet(
     def soft_delete(self, request, pk=None):
         """
         Soft delete a prompt: set is_active to False instead of deleting.
-        POST /api/prompts/{id}/soft_delete/
+        POST /api/prompts/{id}/soft_delete
         Returns: 200 OK, updated prompt object with is_active=False.
         """
         instance = self.get_object()

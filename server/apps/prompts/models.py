@@ -15,10 +15,10 @@ class Prompt(models.Model):
         unique=True,
         help_text="Unique identifier for this object.",
     )
-    coach_state = models.CharField(
+    coaching_phase = models.CharField(
         max_length=32,
         choices=CoachingPhase.choices,
-        help_text="The state of the coach this prompt is associated with.",
+        help_text="The phase of the coach this prompt is associated with.",
     )
     version = models.IntegerField(default=1, help_text="Version number of the prompt")
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -27,11 +27,13 @@ class Prompt(models.Model):
     required_context_keys = ArrayField(
         models.CharField(max_length=64, choices=ContextKey.choices),
         default=list,
+        blank=True,
         help_text="List of required context keys for this prompt.",
     )
     allowed_actions = ArrayField(
         models.CharField(max_length=64, choices=ActionType.choices),
         default=list,
+        blank=True,
         help_text="List of allowed action types for this prompt.",
     )
     is_active = models.BooleanField(default=True, help_text="Is this prompt active?")
@@ -39,4 +41,4 @@ class Prompt(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("coach_state", "version")
+        unique_together = ("coaching_phase", "version")
