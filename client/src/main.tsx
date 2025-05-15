@@ -11,8 +11,8 @@ import { Toaster } from "@/components/ui/sonner";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 3000 * 60 * 60, // 3 hours
-      staleTime: 1000 * 60 * 10, // 10 minutes
+      gcTime: 48000 * 60 * 60, // 48 hours
+      staleTime: 1000 * 60 * 60, // 1 hour
     },
   },
 });
