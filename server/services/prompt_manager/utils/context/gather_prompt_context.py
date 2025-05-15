@@ -1,7 +1,7 @@
 from apps.prompts.models import Prompt
 from apps.coach_states.models import CoachState
 from services.prompt_manager.models.prompt_context import PromptContext
-from services.prompt_manager.utils.context import get_context_value
+from services.prompt_manager.utils.context.get_context_value import get_context_value
 
 
 def gather_prompt_context(prompt: Prompt, coach_state: CoachState) -> PromptContext:

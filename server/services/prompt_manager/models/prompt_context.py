@@ -9,5 +9,5 @@ class PromptContext(BaseModel):
     """
     user_name: Optional[str]
     recent_messages: Optional[str]  # this is a formatted list.
-    identities: Optional[List[str]] = Field(default_factory=list)
+    identities: Optional[str]
     number_of_identities: Optional[int]
