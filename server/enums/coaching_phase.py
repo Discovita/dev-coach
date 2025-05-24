@@ -5,9 +5,11 @@ class CoachingPhase(models.TextChoices):
     """
     Enum for the possible coaching state in the coaching system.
     """
+
     # This was added so that we could control the content of the system_context sent to the LLM via the web interface. SYSTEM_CONTEXT is not a phase in the coaching process, but a context that is always sent to the LLM.
     SYSTEM_CONTEXT = "system_context", "System Context"
     INTRODUCTION = "introduction", "Introduction"
+    IDENTITY_WARMUP = "identity_warm_up", "Identity Warm-Up"
     IDENTITY_BRAINSTORMING = "identity_brainstorming", "Identity Brainstorming"
     IDENTITY_REFINEMENT = "identity_refinement", "Identity Refinement"
 
