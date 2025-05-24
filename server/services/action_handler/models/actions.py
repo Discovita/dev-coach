@@ -8,6 +8,8 @@ from .params import (
     TransitionStateParams,
     AddIdentityNoteParams,
     SkipIdentityCategoryParams,
+    UpdateWhoYouAreParams,
+    UpdateWhoYouWantToBeParams,
 )
 
 
@@ -78,6 +80,24 @@ class AddIdentityNoteAction(BaseModel):
 class SkipIdentityCategoryAction(BaseModel):
     params: SkipIdentityCategoryParams = Field(
         ..., description="Parameters for skipping an identity category."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateWhoYouAreAction(BaseModel):
+    params: UpdateWhoYouAreParams = Field(
+        ..., description="Parameters for updating 'who you are' identities."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateWhoYouWantToBeAction(BaseModel):
+    params: UpdateWhoYouWantToBeParams = Field(
+        ..., description="Parameters for updating 'who you want to be' identities."
     )
 
     class Config:

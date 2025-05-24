@@ -7,6 +7,8 @@ from .params import (
     TransitionStateParams,
     AddIdentityNoteParams,
     SkipIdentityCategoryParams,
+    UpdateWhoYouAreParams,
+    UpdateWhoYouWantToBeParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -16,7 +18,9 @@ from .actions import (
     AcceptIdentityRefinementAction,
     TransitionStateAction,
     AddIdentityNoteAction,
-    SkipIdentityCategoryParams,
+    SkipIdentityCategoryAction,
+    UpdateWhoYouAreAction,
+    UpdateWhoYouWantToBeAction,
 )
 
 __all__ = [
@@ -28,6 +32,8 @@ __all__ = [
     "TransitionStateParams",
     "AddIdentityNoteParams",
     "SkipIdentityCategoryParams",
+    "UpdateWhoYouAreParams",
+    "UpdateWhoYouWantToBeParams",
     "SelectIdentityFocusAction",
     "CreateIdentityAction",
     "UpdateIdentityAction",
@@ -36,4 +42,6 @@ __all__ = [
     "TransitionStateAction",
     "AddIdentityNoteAction",
     "SkipIdentityCategoryAction",
+    "UpdateWhoYouAreAction",
+    "UpdateWhoYouWantToBeAction",
 ]

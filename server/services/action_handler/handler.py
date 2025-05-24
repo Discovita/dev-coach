@@ -11,6 +11,8 @@ from services.action_handler.actions import (
     transition_state,
     select_identity_focus,
     skip_identity_category,
+    update_who_you_are,
+    update_who_you_want_to_be,
 )
 from services.logger import configure_logging
 
@@ -24,6 +26,8 @@ ACTION_HANDLERS = {
     ActionType.TRANSITION_STATE: transition_state,
     ActionType.SELECT_IDENTITY_FOCUS: select_identity_focus,
     ActionType.SKIP_IDENTITY_CATEGORY: skip_identity_category,
+    ActionType.UPDATE_WHO_YOU_ARE: update_who_you_are,
+    ActionType.UPDATE_WHO_YOU_WANT_TO_BE: update_who_you_want_to_be,
 }
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -80,6 +84,12 @@ def apply_actions(
         elif action_name == ActionType.SKIP_IDENTITY_CATEGORY.value:
             log.info("ACTION: Skipping identity category")
             skip_identity_category(coach_state, action.params)
+        elif action_name == ActionType.UPDATE_WHO_YOU_ARE.value:
+            log.info("ACTION: Updating who you are")
+            update_who_you_are(coach_state, action.params)
+        elif action_name == ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value:
+            log.info("ACTION: Updating who you want to be")
+            update_who_you_want_to_be(coach_state, action.params)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue

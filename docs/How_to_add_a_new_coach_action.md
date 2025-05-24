@@ -8,12 +8,14 @@
    - Should consist of key/value pairs
    - Cannot use `List` or `Dict` as a type. OpenAI will throw an error if you do.
    - You can limit string choices to a set of values using Django TextChoices (see `server/enums/` for an example).
+   - Ensure you update the `__init__.py` file in the `server/models/params.py` directory to export your new model.
 
 3. **Create the Pydantic model for the action in `server/models/actions.py`.**
 
    - The model should inherit from `BaseModel`.
    - The model should only have `params` for the only parameter which should be of the type of the model created in step 2.
    - Ensure you add the same class config as the other models in this file. OpenAI will throw an error if you do not.
+   - Ensure you update the `__init__.py` file in the `server/models/actions.py` directory to export your new model.
 
 4. **Add your new action to the list of `ACTION_PARAMS` in `server/services/action_handler/utils/action_instructions.py`.**
 

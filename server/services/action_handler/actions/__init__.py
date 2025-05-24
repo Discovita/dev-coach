@@ -6,3 +6,5 @@ from .add_identity_note import add_identity_note
 from .transition_state import transition_state
 from .select_identity_focus import select_identity_focus 
 from .skip_identity_category import skip_identity_category
+from .update_who_you_are import update_who_you_are
+from .update_who_you_want_to_be import update_who_you_want_to_be
