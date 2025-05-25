@@ -4,6 +4,13 @@ from rest_framework.response import Response
 from .models import Prompt
 from .serializers import PromptSerializer
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework import status
+
+from services.logger import configure_logging
+
+log = configure_logging(__name__, log_level="INFO")
 
 # Create your views here.
 
@@ -63,10 +70,16 @@ class PromptViewSet(
         coaching_phase = data.get("coaching_phase")
         if coaching_phase:
             # Find the latest version for this coaching_phase
-            latest = Prompt.objects.filter(coaching_phase=coaching_phase).order_by("-version").first()
+            latest = (
+                Prompt.objects.filter(coaching_phase=coaching_phase)
+                .order_by("-version")
+                .first()
+            )
             data["version"] = (latest.version + 1) if latest else 1
         else:
-            data["version"] = 1  # fallback, should not happen if coaching_phase is required
+            data["version"] = (
+                1  # fallback, should not happen if coaching_phase is required
+            )
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -87,8 +100,28 @@ class PromptViewSet(
         PATCH /api/prompts/{id}
         Body: Partial prompt fields (see PromptSerializer)
         Returns: 200 OK, updated prompt object.
+        If an error occurs, returns a 400 or 500 with details.
         """
-        return super().partial_update(request, *args, **kwargs)
+        try:
+            return super().partial_update(request, *args, **kwargs)
+        except Exception as exc:
+            # If it's a DRF ValidationError, return 400 with details
+            if isinstance(exc, ValidationError):
+                log.error(f"Validation error during partial update: {exc.detail}")
+                return Response(
+                    {
+                        "success": False,
+                        "error": "Validation error",
+                        "detail": exc.detail if hasattr(exc, "detail") else str(exc),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # For other exceptions, return 500 with the error message
+            log.error(f"Server error during partial update: {str(exc)}")
+            return Response(
+                {"success": False, "error": "Server error", "detail": str(exc)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def destroy(self, request, *args, **kwargs):
         """
