@@ -154,6 +154,8 @@ class UserViewSet(viewsets.GenericViewSet):
             coach_state.proposed_identity = None
             coach_state.identity_focus = IdentityCategory.PASSIONS
             coach_state.skipped_identity_categories = []
+            coach_state.who_you_are = []
+            coach_state.who_you_want_to_be = []
             coach_state.save()
         except CoachState.DoesNotExist:
             pass  # Optionally, handle if the user does not have a CoachState
