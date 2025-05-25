@@ -94,6 +94,7 @@ class PromptViewSet(
         """
         return super().update(request, *args, **kwargs)
 
+    # TODO: figure out how to get EVERY endpoint to do this with the errors. Maybe a decorator? Some sort of OOTB DRF feature?
     def partial_update(self, request, *args, **kwargs):
         """
         Partially update a prompt.
