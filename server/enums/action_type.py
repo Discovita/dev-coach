@@ -3,7 +3,7 @@ from django.db import models
 
 class ActionType(models.TextChoices):
     """
-    Enum for the possible coaching state in the coaching system.
+    Enum for the possible coach actions in the coaching system.
     """
 
     CREATE_IDENTITY = "create_identity", "Create Identity"
@@ -17,6 +17,8 @@ class ActionType(models.TextChoices):
     TRANSITION_STATE = "transition_state", "Transition State"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"
     SKIP_IDENTITY_CATEGORY = "skip_identity_category", "Skip Identity Category"
+    UPDATE_WHO_YOU_ARE = "update_who_you_are", "Update Who You Are"
+    UPDATE_WHO_YOU_WANT_TO_BE = "update_who_you_want_to_be", "Update Who You Want to Be"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""

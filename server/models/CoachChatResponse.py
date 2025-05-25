@@ -9,6 +9,8 @@ from services.action_handler.models.actions import (
     TransitionStateAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
+    UpdateWhoYouAreAction,
+    UpdateWhoYouWantToBeAction,
 )
 
 
@@ -44,4 +46,10 @@ class CoachChatResponse(BaseModel):
     )
     skip_identity_category: Optional[SkipIdentityCategoryAction] = Field(
         default=None, description="Perform the skip_identity_category action."
+    )
+    update_who_you_are: Optional[UpdateWhoYouAreAction] = Field(
+        default=None, description="Perform the update_who_you_are action."
+    )
+    update_who_you_want_to_be: Optional[UpdateWhoYouWantToBeAction] = Field(
+        default=None, description="Perform the update_who_you_want_to_be action."
     )

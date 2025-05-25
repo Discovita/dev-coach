@@ -6,13 +6,13 @@ class ContextKey(models.TextChoices):
     Enumeration of context keys.
     """
 
-    # TODO: Need to add remaining keys to this list for the other prompts
-    # TODO: Talk to Leigh Ann about what other context variables are needed
     USER_NAME = "user_name", "User Name"
     RECENT_MESSAGES = "recent_messages", "Recent Messages"
     IDENTITIES = "identities", "Identities"
     NUMBER_OF_IDENTITIES = "number_of_identities", "Number of Identities"
     IDENTITY_FOCUS = "identity_focus", "Identity Focus"
+    WHO_YOU_ARE = "who_you_are", "Who You Are"
+    WHO_YOU_WANT_TO_BE = "who_you_want_to_be", "Who You Want to Be"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":

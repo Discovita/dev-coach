@@ -61,6 +61,18 @@ class CoachState(models.Model):
         blank=True,
         help_text="List of identity categories that the user has chosen to skip.",
     )
+    who_you_are = ArrayField(
+        models.CharField(max_length=255),
+        default=list,
+        blank=True,
+        help_text="List of 'who you are' identities provided by the user.",
+    )
+    who_you_want_to_be = ArrayField(
+        models.CharField(max_length=255),
+        default=list,
+        blank=True,
+        help_text="List of 'who you want to be' identities provided by the user.",
+    )
     metadata = models.JSONField(
         default=dict,
         null=True,

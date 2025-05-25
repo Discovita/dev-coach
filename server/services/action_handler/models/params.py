@@ -93,3 +93,23 @@ class SkipIdentityCategoryParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class UpdateWhoYouAreParams(BaseModel):
+    who_you_are: list[str] = Field(
+        ...,
+        description="List of 'who you are' identities provided by the user",
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateWhoYouWantToBeParams(BaseModel):
+    who_you_want_to_be: list[str] = Field(
+        ...,
+        description="List of 'who you want to be' identities provided by the user",
+    )
+
+    class Config:
+        extra = "forbid"

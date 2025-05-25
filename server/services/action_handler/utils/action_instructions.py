@@ -20,6 +20,8 @@ from services.action_handler.models.actions import (
     TransitionStateAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
+    UpdateWhoYouAreAction,
+    UpdateWhoYouWantToBeAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -56,6 +58,14 @@ ACTION_PARAMS = {
     ActionType.SKIP_IDENTITY_CATEGORY: {
         "description": "Add this identity category to the list of skipped categories.",
         "model": SkipIdentityCategoryAction,
+    },
+    ActionType.UPDATE_WHO_YOU_ARE: {
+        "description": "Update the list of the user's current identities. You must pass the complete list of all identities that will go in the final list, not just the ones that have changed.",
+        "model": UpdateWhoYouAreAction,
+    },
+    ActionType.UPDATE_WHO_YOU_WANT_TO_BE: {
+        "description": "Update the list of the user's aspirational identities. You must pass the complete list of all identities that will go in the final list, not just the ones that have changed.",
+        "model": UpdateWhoYouWantToBeAction,
     },
 }
 

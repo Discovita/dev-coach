@@ -89,7 +89,7 @@ export const renderActionsSection = (
         </div>
       </div>
       {isExpanded && (
-        <div className="flex flex-col gap-3 p-4 max-h-[500px] overflow-y-auto bg-gold-50 dark:bg-neutral-700">
+        <div className="flex flex-col gap-3 p-4 max-h-full overflow-y-auto bg-gold-50 dark:bg-neutral-700">
           {actions.map((action: Action, index: number) => (
             <div
               key={index}
