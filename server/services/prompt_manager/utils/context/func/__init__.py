@@ -3,3 +3,5 @@ from .get_identities_context import get_identities_context
 from .get_number_of_identites_context import get_number_of_identites_context
 from .get_identity_focus_context import get_identity_focus_context
 from .get_recent_messages_context import get_recent_messages_context
+from .get_who_you_are import get_who_you_are
+from .get_who_you_want_to_be import get_who_you_want_to_be

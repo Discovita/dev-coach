@@ -6,7 +6,9 @@ from services.prompt_manager.utils.context.func import (
     get_identities_context,
     get_number_of_identites_context,
     get_identity_focus_context,
-    get_recent_messages_context
+    get_recent_messages_context,
+    get_who_you_are,
+    get_who_you_want_to_be,
 )
 
 
@@ -25,4 +27,8 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_number_of_identites_context(coach_state)
     elif key == ContextKey.IDENTITY_FOCUS:
         return get_identity_focus_context(coach_state)
+    elif key == ContextKey.WHO_YOU_ARE:
+        return get_who_you_are(coach_state)
+    elif key == ContextKey.WHO_YOU_WANT_TO_BE:
+        return get_who_you_want_to_be(coach_state)
     # Add more context key handlers as needed
