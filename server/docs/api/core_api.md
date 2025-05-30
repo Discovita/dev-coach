@@ -34,7 +34,7 @@
       "label": "Accept Identity Refinement"
     },
     { "value": "add_identity_note", "label": "Add Identity Note" },
-    { "value": "transition_state", "label": "Transition State" },
+    { "value": "transition_phase", "label": "Transition Phase" },
     { "value": "select_identity_focus", "label": "Select Identity Focus" }
   ],
   "context_keys": [

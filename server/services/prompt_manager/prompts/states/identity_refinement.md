@@ -2,7 +2,7 @@
 required_context_keys:
 ["user_summary", "recent_messages", "identities", "current_focus"]
 allowed_actions:
-["update_identity", "accept_identity", "accept_identity_refinement", "add_identity_note", "select_identity_focus", "transition_state"]
+["update_identity", "accept_identity", "accept_identity_refinement", "add_identity_note", "select_identity_focus", "transition_phase"]
 ---
 
 # Identity Refinement State
@@ -133,7 +133,7 @@ Current focus identity: {current_focus}
   - You notice patterns in how they talk about or relate to this identity
   - Include the identity_id and a detailed note capturing the insight
 
-- Use transition_state action when:
+- Use transition_phase action when:
   - All identities have been refined and marked as REFINEMENT_COMPLETE
   - The user is ready to move to the conclusion
   - Set to_phase to "CONCLUSION"

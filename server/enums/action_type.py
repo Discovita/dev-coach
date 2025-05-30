@@ -14,7 +14,7 @@ class ActionType(models.TextChoices):
         "Accept Identity Refinement",
     )
     ADD_IDENTITY_NOTE = "add_identity_note", "Add Identity Note"
-    TRANSITION_STATE = "transition_state", "Transition State"
+    TRANSITION_PHASE = "transition_phase", "Transition Phase"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"
     SKIP_IDENTITY_CATEGORY = "skip_identity_category", "Skip Identity Category"
     UPDATE_WHO_YOU_ARE = "update_who_you_are", "Update Who You Are"

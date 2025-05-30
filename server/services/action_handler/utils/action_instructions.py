@@ -17,7 +17,7 @@ from services.action_handler.models.actions import (
     UpdateIdentityAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
-    TransitionStateAction,
+    TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
     UpdateWhoYouAreAction,
@@ -49,7 +49,7 @@ ACTION_PARAMS = {
     },
     ActionType.TRANSITION_STATE: {
         "description": "Transition the coaching state to a new state.",
-        "model": TransitionStateAction,
+        "model": TransitionPhaseAction,
     },
     ActionType.ADD_IDENTITY_NOTE: {
         "description": "Add a note to an identity.",

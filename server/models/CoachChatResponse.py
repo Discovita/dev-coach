@@ -6,7 +6,7 @@ from services.action_handler.models.actions import (
     UpdateIdentityAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
-    TransitionStateAction,
+    TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
     UpdateWhoYouAreAction,
@@ -38,8 +38,8 @@ class CoachChatResponse(BaseModel):
     accept_identity_refinement: Optional[AcceptIdentityRefinementAction] = Field(
         default=None, description="Perform the accept_identity_refinement action."
     )
-    transition_state: Optional[TransitionStateAction] = Field(
-        default=None, description="Perform the transition_state action."
+    transition_phase: Optional[TransitionPhaseAction] = Field(
+        default=None, description="Perform the transition_phase action."
     )
     add_identity_note: Optional[AddIdentityNoteAction] = Field(
         default=None, description="Perform the add_identity_note action."

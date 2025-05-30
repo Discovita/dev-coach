@@ -3,7 +3,7 @@ from .update_identity import update_identity
 from .accept_identity import accept_identity
 from .accept_identity_refinement import accept_identity_refinement
 from .add_identity_note import add_identity_note
-from .transition_state import transition_state
+from .transition_phase import transition_phase
 from .select_identity_focus import select_identity_focus 
 from .skip_identity_category import skip_identity_category
 from .update_who_you_are import update_who_you_are

@@ -59,9 +59,9 @@ class AcceptIdentityRefinementAction(BaseModel):
         extra = "forbid"
 
 
-class TransitionStateAction(BaseModel):
+class TransitionPhaseAction(BaseModel):
     params: TransitionPhaseParams = Field(
-        ..., description="Parameters for transitioning state."
+        ..., description="Parameters for transitioning the coaching phase."
     )
 
     class Config:

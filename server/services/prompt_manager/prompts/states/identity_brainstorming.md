@@ -2,7 +2,7 @@
 required_context_keys:
 ["user_name", "recent_messages", "identities"]
 allowed_actions:
-["create_identity", "update_identity", "accept_identity", "add_identity_note", "transition_state"]
+["create_identity", "update_identity", "accept_identity", "add_identity_note", "transition_phase"]
 ---
 
 # Identity Brainstorming State
@@ -135,7 +135,7 @@ When preparing to transition to refinement:
   - You notice patterns in how they talk about or relate to this identity
   - Include the identity_id and a detailed note capturing the insight
 
-- Use transition_state action when:
+- Use transition_phase action when:
   - You have collected at least 3 strong identities
   - The user is ready to move to refinement
   - Set to_phase to "IDENTITY_REFINEMENT"

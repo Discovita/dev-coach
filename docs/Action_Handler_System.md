@@ -73,7 +73,7 @@ Each file in this directory implements a single action as a function. All functi
 - `update_identity`: Updates the description of an existing identity.
 - `accept_identity`: Marks an identity as accepted.
 - `add_identity_note`: Appends a note to an identity's notes list.
-- `transition_state`: Changes the current coaching state.
+- `transition_phase`: Changes the current coaching phase.
 - `select_identity_focus`: Updates the focus category for the coach state.
 
 ---
