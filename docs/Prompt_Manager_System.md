@@ -11,7 +11,7 @@ The prompt manager system is responsible for constructing, formatting, and manag
 - `manager.py`: Main entry point for prompt construction and formatting.
 - `models/`: Contains Pydantic models for prompt context.
 - `utils/`: Utility modules for context gathering, logging, formatting, and instruction management.
-- `prompts/`: Markdown files containing reusable system and identity instructions.
+- `prompts/`: Markdown files containing reusable identity instructions and legacy/reference system context (not authoritative).
 
 ---
 
@@ -27,7 +27,7 @@ The prompt manager system is responsible for constructing, formatting, and manag
     - Gathers all required context for the prompt.
     - Determines the LLM provider and builds the response format schema.
     - Formats the prompt for the provider, including context and response format.
-    - Prepends system context and appends action instructions.
+    - Prepends system context (retrieved from the Prompt table) and appends action instructions.
     - Returns the fully constructed prompt and response format.
 
 #### Step-by-step in `create_chat_prompt`:
@@ -37,7 +37,7 @@ The prompt manager system is responsible for constructing, formatting, and manag
 4. Determine the LLM provider.
 5. Build the dynamic response format model for allowed actions.
 6. Format the prompt for the provider, including context and response format.
-7. Prepend system context from markdown.
+7. Prepend system context by retrieving the latest active prompt with the `SYSTEM_CONTEXT` coaching phase from the database.
 8. Append action instructions for allowed actions.
 9. Return the constructed prompt and response format.
 
@@ -76,14 +76,14 @@ The prompt manager system is responsible for constructing, formatting, and manag
 - **Key Function:** `append_action_instructions(system_message, allowed_actions)`
 
 #### e. **System Context (`prepend_system_context.py`)**
-- **Purpose:** Prepends system context from a markdown file to the system message for prompt generation.
+- **Purpose:** Prepends system context to the system message for prompt generation by retrieving the latest active prompt with the `SYSTEM_CONTEXT` coaching phase from the database. (Does not read from a markdown file.)
 - **Key Function:** `prepend_system_context(system_message)`
 
 ---
 
 ### 4. **Prompt Templates (`prompts/`)**
 
-- **system_context.md:** Contains the core coaching philosophy, process, communication guidelines, and state transition rules. Prepended to every prompt.
+- **system_context.md:** Reference file containing the core coaching philosophy, process, communication guidelines, and state transition rules. Not authoritative; the system context is managed in the database as a prompt with the `SYSTEM_CONTEXT` phase.
 - **identity_instructions.md:** Contains guidelines for identity creation and category definitions. Used to guide identity-related prompt construction.
 
 ---
@@ -101,11 +101,13 @@ The prompt manager system is responsible for constructing, formatting, and manag
 To add new context or prompt features:
 1. **Add new fields** to `PromptContext` as needed.
 2. **Update context gathering logic** in `utils/context_gathering.py` to fetch and populate new fields.
-3. **Update prompt templates** in `prompts/` to utilize new context fields.
+3. **Update prompt templates** in `prompts/` to utilize new context fields (for identity instructions) or update the relevant prompt in the database (for system context).
 4. **Add or update utility functions** in `utils/` for new formatting or instruction requirements.
+
+To update the system context, edit the prompt in the database with the `SYSTEM_CONTEXT` coaching phase.
 
 ---
 
 ## Summary
 
-The prompt manager system is modular, extensible, and designed for robust prompt engineering. It centralizes context gathering, instruction management, and provider-specific formatting, ensuring that all prompts are constructed with the necessary context and guidance for high-quality LLM responses. 
+The prompt manager system is modular, extensible, and designed for robust prompt engineering. It centralizes context gathering, instruction management, and provider-specific formatting, ensuring that all prompts are constructed with the necessary context and guidance for high-quality LLM responses. The system context is managed alongside other prompts, providing flexibility and control. 

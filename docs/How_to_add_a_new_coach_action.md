@@ -33,9 +33,13 @@
 7. **Update the `server/services/action_handler/actions/__init__.py` file to export your new action function from the directory.**
 
 8. **Add your new action function to the Action Handler in `server/services/action_handler/handler.py`.**
+
    - Import it at the top
    - Add an entry to the `ACTION_HANDLERS` map for your new action
    - Add a case in the `apply_actions` function to handle your new action.
+
 9. **Update the CoachChatResponse model to contain your new action.**
+
 10. **Update the `client/src/enums/actionType.ts` file on the front end to reflect this addition.**
+
 11. **Finally, ensure that one of the Coaching State prompts actually calls this action.**

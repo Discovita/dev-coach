@@ -47,3 +47,6 @@ backend/public/*
 *.swp
 *.swo
 .DS_Store
+
+
+.cursor
