@@ -28,7 +28,7 @@ class CoachState(models.Model):
         help_text="The user this coach state belongs to.",
     )
     # TODO: need to rename this to current_phase
-    current_state = models.CharField(
+    current_phase = models.CharField(
         max_length=32,
         choices=CoachingPhase.choices,
         help_text="Current state of the coaching session.",
@@ -84,4 +84,4 @@ class CoachState(models.Model):
     )
 
     def __str__(self):
-        return f"CoachState for {self.user.email} ({self.current_state})"
+        return f"CoachState for {self.user.email} ({self.current_phase})"

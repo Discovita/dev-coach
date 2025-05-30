@@ -2,7 +2,7 @@
   "name": "Identity Refinement Test Case",
   "description": "Test case for identity refinement phase with multiple identities",
   "coach_state": {
-    "current_state": "identity_brainstorming",
+    "current_phase": "identity_brainstorming",
     "user_profile": {
       "name": "s15xbv8xfn",
       "goals": []

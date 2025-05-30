@@ -70,8 +70,8 @@ class AcceptIdentityRefinementParams(BaseModel):
         extra = "forbid"
 
 
-class TransitionStateParams(BaseModel):
-    to_state: CoachingPhase = Field(..., description="State to transition to")
+class TransitionPhaseParams(BaseModel):
+    to_phase: CoachingPhase = Field(..., description="State to transition to")
 
     class Config:
         extra = "forbid"

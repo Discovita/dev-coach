@@ -15,7 +15,7 @@ class CoachStateSerializer(serializers.ModelSerializer):
         fields = (
             "id",  # Unique identifier for the coach state
             "user",  # User ID this coach state belongs to
-            "current_state",  # Current state of the coaching session
+            "current_phase",  # Current phase of the coaching session
             "current_identity",  # The identity currently being refined
             "proposed_identity",  # The currently proposed identity
             "metadata",  # Additional metadata for the coaching session

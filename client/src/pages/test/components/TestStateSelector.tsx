@@ -81,7 +81,7 @@ const TestStateSelector: React.FC<TestStateSelectorProps> = ({
                 </p>
                 <p>
                   <span className="font-semibold">Current State:</span>{" "}
-                  {testStates[selectedState].coach_state.current_state}
+                  {testStates[selectedState].coach_state.current_phase}
                 </p>
               </div>
             </div>

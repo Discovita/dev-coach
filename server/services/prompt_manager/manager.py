@@ -45,7 +45,7 @@ class PromptManager:
         # 1. Retrieve the user's CoachState
         coach_state = CoachState.objects.get(user=user)
         log.debug(f"coach_state: {coach_state}")
-        state_value = coach_state.current_state
+        state_value = coach_state.current_phase
 
         # 2. Select the newest active prompt for this state (or override)
         prompt_queryset = Prompt.objects.filter(

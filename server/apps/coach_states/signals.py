@@ -12,5 +12,5 @@ def create_coach_state_for_new_user(sender, instance, created, **kwargs):
     """
     if created:
         CoachState.objects.create(
-            user=instance, current_state=CoachingPhase.INTRODUCTION
+            user=instance, current_phase=CoachingPhase.INTRODUCTION
         )

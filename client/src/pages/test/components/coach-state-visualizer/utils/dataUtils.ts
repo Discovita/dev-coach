@@ -21,7 +21,7 @@ export const getCurrentStateInfo = (
   return {
     id: coachState.id,
     user: coachState.user,
-    current_state: coachState.current_state,
+    current_phase: coachState.current_phase,
     current_identity: coachState.current_identity,
     proposed_identity: coachState.proposed_identity,
     updated_at: coachState.updated_at,

@@ -4,7 +4,7 @@
   "coach_state": {
     "id": "test-id",
     "user": "user-id",
-    "current_state": "introduction",
+    "current_phase": "introduction",
     "updated_at": "2024-01-01T00:00:00Z",
     "user_profile": {
       "name": "test_user"

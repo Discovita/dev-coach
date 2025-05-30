@@ -71,7 +71,7 @@ If {user_name} expresses an answer to the "Who do you want to be?" question (e.g
 
 **If the user has entries in both `who_you_are` and `who_you_want_to_be` and the user has expressed they are done adding identites:**
         *   Use the `transition_state` action.
-        *   **`to_state`**: "identity_brainstorming".
+        *   **`to_phase`**: "identity_brainstorming".
         *   Your message to the user should then prepare them for the brainstorming phase.
 
 **General Principles for Action-Taking:**

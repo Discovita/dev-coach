@@ -5,7 +5,7 @@ from .params import (
     UpdateIdentityParams,
     AcceptIdentityParams,
     AcceptIdentityRefinementParams,
-    TransitionStateParams,
+    TransitionPhaseParams,
     AddIdentityNoteParams,
     SkipIdentityCategoryParams,
     UpdateWhoYouAreParams,
@@ -60,7 +60,7 @@ class AcceptIdentityRefinementAction(BaseModel):
 
 
 class TransitionStateAction(BaseModel):
-    params: TransitionStateParams = Field(
+    params: TransitionPhaseParams = Field(
         ..., description="Parameters for transitioning state."
     )
 

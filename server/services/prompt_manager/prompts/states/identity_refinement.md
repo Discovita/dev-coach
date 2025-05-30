@@ -136,6 +136,6 @@ Current focus identity: {current_focus}
 - Use transition_state action when:
   - All identities have been refined and marked as REFINEMENT_COMPLETE
   - The user is ready to move to the conclusion
-  - Set to_state to "CONCLUSION"
+  - Set to_phase to "CONCLUSION"
 
 Remember: Always follow the response format specified in the response format instructions, providing both a message to the user and any actions in the correct JSON structure.

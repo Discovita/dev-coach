@@ -7,7 +7,7 @@ import { Identity } from "./identity";
 export interface CoachState {
   id: string;
   user: string; // User ID
-  current_state: CoachingPhase;
+  current_phase: CoachingPhase;
   current_identity?: Identity | null;
   proposed_identity?: Identity | null;
   metadata?: {

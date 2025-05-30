@@ -149,7 +149,7 @@ class UserViewSet(viewsets.GenericViewSet):
         # 1b. Reset the user's CoachState to 'introduction'
         try:
             coach_state = CoachState.objects.get(user=request.user)
-            coach_state.current_state = CoachingPhase.INTRODUCTION
+            coach_state.current_phase = CoachingPhase.INTRODUCTION
             coach_state.current_identity = None
             coach_state.proposed_identity = None
             coach_state.identity_focus = IdentityCategory.PASSIONS

@@ -48,6 +48,6 @@ Current user information:
   - The user has confirmed they understand the process
   - The user expresses readiness to begin
   - The user asks to start or proceed
-  - Set to_state to "IDENTITY_BRAINSTORMING"
+  - Set to_phase to "IDENTITY_BRAINSTORMING"
 
 Remember: Always follow the response format specified in the response format instructions, providing both a message to the user and any actions in the correct JSON structure.Ï
