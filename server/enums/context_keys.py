@@ -7,7 +7,6 @@ class ContextKey(models.TextChoices):
     """
 
     USER_NAME = "user_name", "User Name"
-    RECENT_MESSAGES = "recent_messages", "Recent Messages"
     IDENTITIES = "identities", "Identities"
     NUMBER_OF_IDENTITIES = "number_of_identities", "Number of Identities"
     IDENTITY_FOCUS = "identity_focus", "Identity Focus"

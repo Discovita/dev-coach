@@ -9,7 +9,7 @@ class PromptContext(BaseModel):
     """
 
     user_name: Optional[str]
-    recent_messages: Optional[str]  # this is a formatted list.
+    recent_messages: Optional[str]
     identities: Optional[str]
     number_of_identities: Optional[int]
     identity_focus: Optional[str]

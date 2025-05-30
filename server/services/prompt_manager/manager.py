@@ -14,13 +14,13 @@ from services.action_handler.utils.dynamic_schema import build_dynamic_response_
 from services.prompt_manager.utils import (
     append_action_instructions,
     prepend_system_context,
+    append_recent_messages,
 )
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
 
 
-# TODO: Consider adding recent messages for every prompt
 # NOTE: There might be other things we want to add in every time as well: user info (name, gender, age, etc.)
 class PromptManager:
     """
@@ -87,5 +87,8 @@ class PromptManager:
                 coach_prompt, ActionType.get_all_actions()
             )
         log.debug(f"coach_prompt with actions: {coach_prompt}")
+
+        # add the recent messages
+        coach_prompt = append_recent_messages(coach_prompt, coach_state)
 
         return coach_prompt, response_format

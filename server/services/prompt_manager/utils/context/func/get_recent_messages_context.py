@@ -3,19 +3,23 @@ from apps.coach_states.models import CoachState
 from apps.chat_messages.models import ChatMessage
 
 
-def get_recent_messages_context(coach_state: CoachState) -> str:
+def get_recent_messages_context(coach_state: CoachState, num_messages: int = 5) -> str:
     """
-    Retrieves the 5 most recent chat messages for the user associated with the given coach_state.
-    Formats these messages into a markdown-friendly string.
+    Retrieves the most recent chat messages for the user associated with the given coach_state.
+    Formats these messages into a markdown-friendly string, with a heading.
 
-    Each message is formatted as:
+    Output format:
+    ## Recent conversation
     **Role:**
     Content
+    ...
     """
     user = coach_state.user
-    recent_messages: List[ChatMessage] = user.chat_messages.all().order_by("-timestamp")[:5]
+    recent_messages: List[ChatMessage] = user.chat_messages.all().order_by(
+        "-timestamp"
+    )[:num_messages]
     formatted_messages = []
     for msg in reversed(recent_messages):
         formatted_messages.append(f"**{msg.role.capitalize()}:**\n{msg.content}")
-    return "\n".join(formatted_messages)
-
+    messages_block = "\n".join(formatted_messages)
+    return f"## Recent conversation\n\n{messages_block}\n"
