@@ -24,7 +24,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.UPDATE_IDENTITY: UpdateIdentityAction,
     ActionType.ACCEPT_IDENTITY: AcceptIdentityAction,
     ActionType.ACCEPT_IDENTITY_REFINEMENT: AcceptIdentityRefinementAction,
-    ActionType.TRANSITION_STATE: TransitionPhaseAction,
+    ActionType.TRANSITION_PHASE: TransitionPhaseAction,
     ActionType.ADD_IDENTITY_NOTE: AddIdentityNoteAction,
     ActionType.SKIP_IDENTITY_CATEGORY: SkipIdentityCategoryAction,
     ActionType.UPDATE_WHO_YOU_ARE: UpdateWhoYouAreAction,

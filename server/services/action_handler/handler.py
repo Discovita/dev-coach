@@ -23,7 +23,7 @@ ACTION_HANDLERS = {
     ActionType.ACCEPT_IDENTITY: accept_identity,
     ActionType.ACCEPT_IDENTITY_REFINEMENT: accept_identity_refinement,
     ActionType.ADD_IDENTITY_NOTE: add_identity_note,
-    ActionType.TRANSITION_STATE: transition_phase,
+    ActionType.TRANSITION_PHASE: transition_phase,
     ActionType.SELECT_IDENTITY_FOCUS: select_identity_focus,
     ActionType.SKIP_IDENTITY_CATEGORY: skip_identity_category,
     ActionType.UPDATE_WHO_YOU_ARE: update_who_you_are,
@@ -75,7 +75,7 @@ def apply_actions(
         elif action_name == ActionType.ADD_IDENTITY_NOTE.value:
             log.info("ACTION: Adding identity note")
             add_identity_note(coach_state, action.params)
-        elif action_name == ActionType.TRANSITION_STATE.value:
+        elif action_name == ActionType.TRANSITION_PHASE.value:
             log.info("ACTION: Transitioning state")
             transition_phase(coach_state, action.params)
         elif action_name == ActionType.SELECT_IDENTITY_FOCUS.value:

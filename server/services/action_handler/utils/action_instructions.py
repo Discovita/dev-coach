@@ -47,7 +47,7 @@ ACTION_PARAMS = {
         "description": "Mark an identity as refinement complete.",
         "model": AcceptIdentityRefinementAction,
     },
-    ActionType.TRANSITION_STATE: {
+    ActionType.TRANSITION_PHASE: {
         "description": "Transition the coaching state to a new state.",
         "model": TransitionPhaseAction,
     },
