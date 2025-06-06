@@ -15,3 +15,4 @@ class PromptContext(BaseModel):
     identity_focus: Optional[str]
     who_you_are: Optional[str]
     who_you_want_to_be: Optional[str]
+    focused_identities: Optional[str]
