@@ -1,0 +1,41 @@
+# ----------------------------------------------------------------------------
+# Dockerfile for Django app (server)
+#
+# This Dockerfile is designed for deployment on AWS ECS via CDK. It does NOT run
+# 'python manage.py collectstatic' at build time, because environment variables
+# like DJANGO_SETTINGS_MODULE are only available at runtime (injected by ECS).
+#
+# Instead, static file collection is handled by an entrypoint script at container
+# startup, after ECS injects the necessary environment variables. This is the
+# recommended pattern for Django on AWS ECS/Fargate:
+#   - https://docs.djangoproject.com/en/5.0/ref/django-admin/#collectstatic
+#   - https://aws.amazon.com/blogs/containers/deploy-django-applications-on-amazon-ecs-using-aws-fargate/
+# ----------------------------------------------------------------------------
+# Use an official Python runtime as a parent image
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /server
+
+# Copy the dependencies file from the project root to the working directory
+COPY requirements.txt ./
+
+# Install any dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the content of the local src directory to the working directory
+COPY . .
+
+# Create static files directory
+RUN mkdir -p .staticfiles
+
+ENV DJANGO_SETTINGS_MODULE=settings.local
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
+
+# Use Django's built-in dev server with autoreload
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
