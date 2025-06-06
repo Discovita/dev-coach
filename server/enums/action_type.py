@@ -17,6 +17,7 @@ class ActionType(models.TextChoices):
     TRANSITION_PHASE = "transition_phase", "Transition Phase"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"
     SKIP_IDENTITY_CATEGORY = "skip_identity_category", "Skip Identity Category"
+    UNSKIP_IDENTITY_CATEGORY = "unskip_identity_category", "Unskip Identity Category"
     UPDATE_WHO_YOU_ARE = "update_who_you_are", "Update Who You Are"
     UPDATE_WHO_YOU_WANT_TO_BE = "update_who_you_want_to_be", "Update Who You Want to Be"
 

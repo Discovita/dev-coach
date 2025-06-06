@@ -12,6 +12,7 @@ from services.action_handler.models.actions import (
     SkipIdentityCategoryAction,
     UpdateWhoYouAreAction,
     UpdateWhoYouWantToBeAction,
+    UnskipIdentityCategoryAction,
 )
 
 from services.logger import configure_logging
@@ -27,6 +28,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.TRANSITION_PHASE: TransitionPhaseAction,
     ActionType.ADD_IDENTITY_NOTE: AddIdentityNoteAction,
     ActionType.SKIP_IDENTITY_CATEGORY: SkipIdentityCategoryAction,
+    ActionType.UNSKIP_IDENTITY_CATEGORY: UnskipIdentityCategoryAction,
     ActionType.UPDATE_WHO_YOU_ARE: UpdateWhoYouAreAction,
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE: UpdateWhoYouWantToBeAction,
 }

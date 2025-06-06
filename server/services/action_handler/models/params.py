@@ -95,6 +95,15 @@ class SkipIdentityCategoryParams(BaseModel):
         extra = "forbid"
 
 
+class UnskipIdentityCategoryParams(BaseModel):
+    category: IdentityCategory = Field(
+        ..., description="Category to unskip in the identity brainstorming phase"
+    )
+
+    class Config:
+        extra = "forbid"
+
+
 class UpdateWhoYouAreParams(BaseModel):
     who_you_are: list[str] = Field(
         ...,

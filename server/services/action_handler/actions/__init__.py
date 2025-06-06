@@ -8,3 +8,4 @@ from .select_identity_focus import select_identity_focus
 from .skip_identity_category import skip_identity_category
 from .update_who_you_are import update_who_you_are
 from .update_who_you_want_to_be import update_who_you_want_to_be
+from .unskip_identity_category import unskip_identity_category

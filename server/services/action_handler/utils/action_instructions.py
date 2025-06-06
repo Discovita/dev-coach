@@ -20,6 +20,7 @@ from services.action_handler.models.actions import (
     TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
+    UnskipIdentityCategoryAction,
     UpdateWhoYouAreAction,
     UpdateWhoYouWantToBeAction,
 )
@@ -58,6 +59,10 @@ ACTION_PARAMS = {
     ActionType.SKIP_IDENTITY_CATEGORY: {
         "description": "Add this identity category to the list of skipped categories.",
         "model": SkipIdentityCategoryAction,
+    },
+    ActionType.UNSKIP_IDENTITY_CATEGORY: {
+        "description": "Remove this identity category from the list of skipped categories.",
+        "model": UnskipIdentityCategoryAction,
     },
     ActionType.UPDATE_WHO_YOU_ARE: {
         "description": "Update the list of the user's current identities. You must pass the complete list of all identities that will go in the final list, not just the ones that have changed.",
