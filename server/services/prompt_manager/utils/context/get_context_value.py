@@ -28,4 +28,7 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_who_you_are(coach_state)
     elif key == ContextKey.WHO_YOU_WANT_TO_BE:
         return get_who_you_want_to_be(coach_state)
+    elif key == ContextKey.FOCUSED_IDENTITIES:
+        from services.prompt_manager.utils.context.func.get_focused_identities_context import get_focused_identities_context
+        return get_focused_identities_context(coach_state)
     # Add more context key handlers as needed
