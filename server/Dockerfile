@@ -16,6 +16,8 @@ COPY . .
 # Create static files directory
 RUN mkdir -p .staticfiles
 
+ENV DJANGO_SETTINGS_MODULE=settings.development
+
 # Collect static files
 RUN python manage.py collectstatic --noinput
 

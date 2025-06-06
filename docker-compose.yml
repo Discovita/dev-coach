@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.local
+    environment:
+      - DJANGO_SETTINGS_MODULE=settings.local
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./server:/server
+    ports:
+      - 8000:8000
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.local
+    volumes:
+      - ./client:/client
+      - /client/node_modules
+    working_dir: /client
+    ports:
+      - 5173:5173
+    command: npm run local
+
+volumes:
+  db-data:
