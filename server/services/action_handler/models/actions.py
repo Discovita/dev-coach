@@ -10,6 +10,7 @@ from .params import (
     SkipIdentityCategoryParams,
     UpdateWhoYouAreParams,
     UpdateWhoYouWantToBeParams,
+    UnskipIdentityCategoryParams,
 )
 
 
@@ -98,6 +99,15 @@ class UpdateWhoYouAreAction(BaseModel):
 class UpdateWhoYouWantToBeAction(BaseModel):
     params: UpdateWhoYouWantToBeParams = Field(
         ..., description="Parameters for updating 'who you want to be' identities."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UnskipIdentityCategoryAction(BaseModel):
+    params: UnskipIdentityCategoryParams = Field(
+        ..., description="Parameters for unskipping an identity category."
     )
 
     class Config:

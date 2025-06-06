@@ -11,4 +11,6 @@ export enum ActionType {
   SELECT_IDENTITY_FOCUS = "select_identity_focus",
   UPDATE_WHO_YOU_ARE = "update_who_you_are",
   UPDATE_WHO_YOU_WANT_TO_BE = "update_who_you_want_to_be",
+  SKIP_IDENTITY_CATEGORY = "skip_identity_category",
+  UNSKIP_IDENTITY_CATEGORY = "unskip_identity_category",
 }
