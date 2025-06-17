@@ -103,7 +103,6 @@ class PromptManager:
     ):
         """
         Build a prompt for the Sentinel LLM call.
-        - user: the User object
         - user_msg: the triggering ChatMessage (role=USER)
         - prev_coach_msg: the previous COACH ChatMessage (or None)
         - notes: list of UserNote objects
@@ -121,7 +120,7 @@ class PromptManager:
             prev_coach_msg=prev_coach_msg.content if prev_coach_msg else "None",
             notes='; '.join([n.note for n in notes]) if notes else "None"
         )
-        allowed_actions = ["add_user_note"]
+        allowed_actions = [ActionType.ADD_USER_NOTE.value]
         response_format_model = build_dynamic_response_format(allowed_actions)
 
         # You can define a simple response format if needed

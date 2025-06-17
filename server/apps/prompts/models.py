@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
 from enums.action_type import ActionType
+from enums.prompt_type import PromptType
 
 
 class Prompt(models.Model):
@@ -19,6 +20,8 @@ class Prompt(models.Model):
         max_length=32,
         choices=CoachingPhase.choices,
         help_text="The phase of the coach this prompt is associated with.",
+        null=True,
+        blank=True,
     )
     version = models.IntegerField(default=1, help_text="Version number of the prompt")
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -35,6 +38,12 @@ class Prompt(models.Model):
         default=list,
         blank=True,
         help_text="List of allowed action types for this prompt.",
+    )
+    prompt_type = models.CharField(
+        max_length=32,
+        choices=PromptType.choices,
+        default=PromptType.COACH,
+        help_text="Type of prompt (coach, sentinel, system, etc.)"
     )
     is_active = models.BooleanField(default=True, help_text="Is this prompt active?")
     created_at = models.DateTimeField(auto_now_add=True)
