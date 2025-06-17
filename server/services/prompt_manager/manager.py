@@ -9,6 +9,8 @@ from apps.coach_states.models import CoachState
 from apps.prompts.models import Prompt
 from apps.users.models import User
 from enums.action_type import ActionType
+from apps.chat_messages.models import ChatMessage
+from apps.user_notes.models import UserNote
 from services.prompt_manager import gather_prompt_context, format_for_provider
 from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
 from services.prompt_manager.utils import (
@@ -92,3 +94,39 @@ class PromptManager:
         coach_prompt = append_recent_messages(coach_prompt, coach_state)
 
         return coach_prompt, response_format
+
+    def create_sentinel_prompt(
+        self,
+        user_msg: ChatMessage,
+        prev_coach_msg: ChatMessage,
+        notes: list[UserNote],
+    ):
+        """
+        Build a prompt for the Sentinel LLM call.
+        - user: the User object
+        - user_msg: the triggering ChatMessage (role=USER)
+        - prev_coach_msg: the previous COACH ChatMessage (or None)
+        - notes: list of UserNote objects
+        """
+        # Hardcoded template for Sentinel
+        prompt = (
+            "You are the Sentinel, an assistant that extracts and maintains important notes about the user.\n"
+            "User message: {user_msg}\n"
+            "Previous coach message: {prev_coach_msg}\n"
+            "Current notes: {notes}\n"
+            "Extract any new important information from the user message and update the notes list if needed. "
+            "Return the updated notes as a concise, non-redundant list."
+        ).format(
+            user_msg=user_msg.content,
+            prev_coach_msg=prev_coach_msg.content if prev_coach_msg else "None",
+            notes='; '.join([n.note for n in notes]) if notes else "None"
+        )
+        allowed_actions = ["add_user_note"]
+        response_format_model = build_dynamic_response_format(allowed_actions)
+
+        # You can define a simple response format if needed
+        response_format = {
+            "notes": "list of strings (the updated notes)"
+        }
+
+        return prompt, response_format
