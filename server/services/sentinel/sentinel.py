@@ -1,9 +1,12 @@
 from enums.ai import AIModel
 
+from services.ai.ai_service_factory import AIServiceFactory
 from services.logger import configure_logging
 from services.prompt_manager.manager import PromptManager
+from models.SentinelChatResponse import SentinelChatResponse
 
-log = configure_logging(__name__, log_level="INFO")
+
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 class Sentinel:
@@ -17,12 +20,14 @@ class Sentinel:
         self.model = AIModel.GPT_4O_MINI
 
     def extract_notes(self):
+        ai_service = AIServiceFactory.create(self.model)
         # Use the PromptManager to build the sentinel prompt
-        prompt, response_format = self.prompt_manager.create_sentinel_prompt(self.user, self.model)
-        log.info(f"Sentinel LLM prompt:\n{prompt}")
-        log.info(f"Sentinel response format: {response_format}")
-        # Call your LLM here (stub for now)
-        # llm_response = call_llm(prompt, response_format)
-        # log.info(f"LLM response: {llm_response}")
-        # Parse and update notes (stub for now)
-        # ...
+        sentinel_prompt, response_format = self.prompt_manager.create_sentinel_prompt(
+            self.user, self.model
+        )
+        log.debug(f"Sentinel LLM prompt:\n{sentinel_prompt}")
+        log.debug(f"Sentinel response format: {response_format}")
+        response: SentinelChatResponse = ai_service.call_sentinel(
+            sentinel_prompt, response_format, self.model
+        )
+        log.critical(response)

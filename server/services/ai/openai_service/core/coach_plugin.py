@@ -15,6 +15,7 @@ from typing import Optional, Type
 from pydantic import BaseModel
 from apps.chat_messages.models import ChatMessage
 from models.CoachChatResponse import CoachChatResponse
+from models.SentinelChatResponse import SentinelChatResponse
 from services.ai.openai_service.core.base import OpenAIService
 from enums.ai import AIModel
 from services.ai.base import AIService
@@ -105,6 +106,68 @@ class OpenAIServicePlugin(AIService):
             )
             # 6. Parse and return
             parsed = self.parse_response(
+                response=response.choices[0].message.parsed,
+                dynamic_model=response_format,
+            )
+            log.debug(f"OenAI response: {parsed}")
+            log.debug(f"OpenAI response: {type(parsed)}")
+            return parsed
+
+    def call_sentinel(
+        self,
+        sentinel_prompt: str,
+        response_format: Type[BaseModel],
+        model: AIModel,
+        temperature: Optional[float] = None,
+        **kwargs,
+    ) -> SentinelChatResponse:
+        """
+        Generate a response using the new OpenAIService.
+        """
+        temperature = (
+            temperature
+            if temperature is not None
+            else getattr(self.service, "temperature", 0.2)
+        )
+
+        # 2. Token parameter
+        token_param = AIModel.get_token_param_name(model)
+        max_tokens = kwargs.get(token_param, AIModel.get_default_token_limit(model))
+
+        # 3. Build messages
+        messages = self.service.create_messages(
+            system_message=sentinel_prompt,
+        )
+
+        # 4. Prepare params
+        completion_params = {
+            "model": model.value,
+            "temperature": temperature,
+            token_param: max_tokens,
+        }
+        for key, value in kwargs.items():
+            if key not in completion_params and key not in [
+                "max_tokens",
+                "max_completion_tokens",
+                "temperature",
+                "response_format",
+                "images",
+            ]:
+                completion_params[key] = value
+
+        # 5. Call completion
+        if (
+            response_format
+            and isinstance(response_format, type)
+            and issubclass(response_format, BaseModel)
+        ):
+            response = self.service.create_structured_chat_completion(
+                messages=messages,
+                response_format=response_format,
+                **completion_params,
+            )
+            # 6. Parse and return
+            parsed = self.parse_sentinel_response(
                 response=response.choices[0].message.parsed,
                 dynamic_model=response_format,
             )

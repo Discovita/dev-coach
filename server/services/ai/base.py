@@ -11,6 +11,7 @@ from typing import Optional, Union, Type
 from pydantic import BaseModel
 from enums.ai import AIModel, AIProvider
 from models.CoachChatResponse import CoachChatResponse
+from models.SentinelChatResponse import SentinelChatResponse
 import json
 import re
 
@@ -40,6 +41,15 @@ class AIService(ABC):
         **kwargs,
     ) -> CoachChatResponse:
         """Run a generation prompt."""
+        pass
+
+    @abstractmethod
+    def call_sentinel(
+        self,
+        sentinel_prompt: Optional[str],
+        **kwargs,
+    ) -> SentinelChatResponse:
+        """Call the sentinel."""
         pass
 
     @abstractmethod
@@ -87,3 +97,19 @@ class AIService(ABC):
         else:
             validated = dynamic_model.model_validate(response)
         return CoachChatResponse.model_validate(validated.model_dump())
+
+    @staticmethod
+    def parse_sentinel_response(
+        response: Union[str, BaseModel, dict],
+        dynamic_model: Type[BaseModel],
+    ) -> SentinelChatResponse:
+        """
+        Standard pipeline to parse any LLM output into a consistent SentinelChatResponse model.
+        """
+        if isinstance(response, str):
+            response = AIService.extract_json_from_response(response)
+        if isinstance(response, dynamic_model):
+            validated = response
+        else:
+            validated = dynamic_model.model_validate(response)
+        return SentinelChatResponse.model_validate(validated.model_dump())

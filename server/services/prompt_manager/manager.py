@@ -123,4 +123,7 @@ class PromptManager:
         )
         # Append any current user notes
         sentinel_prompt = append_user_notes(sentinel_prompt, coach_state)
+        sentinel_prompt = append_action_instructions(
+            sentinel_prompt, prompt.allowed_actions
+        )
         return sentinel_prompt, response_format
