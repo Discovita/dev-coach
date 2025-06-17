@@ -29,3 +29,5 @@ if DEBUG:
     print(f"Database: {DATABASES}")
     print(f"Settings Module: {env('DJANGO_SETTINGS_MODULE')}")
     print(f"Access the backend here: http://localhost:8000/admin")
+
+CELERY_URL = "redis://redis:6379/0"

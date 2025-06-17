@@ -16,3 +16,6 @@ if DEBUG:
     print(f"Static root path: {STATIC_ROOT}")
     print(f"Base dir: {BASE_DIR}")
     print(f"Database: {DATABASES}")
+
+
+CELERY_URL = "redis://red-d18irs8dl3ps738eim30:6379"

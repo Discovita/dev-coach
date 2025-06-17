@@ -1,5 +1,43 @@
 # Sentinel User Notes System
 
+## Implementation Progress
+
+This section tracks the concrete steps taken to implement the Sentinel User Notes system in the Discovita Dev Coach project, following project rules and best practices.
+
+### 1. App Creation
+- Created a new Django app called `user_notes` using:
+  ```sh
+  cd server/apps && python ../manage.py startapp user_notes
+  ```
+- Followed [How to Add a New App to the DRF Project](../server/.cursor/rules/how-to-add-a-new-app-to-the-drf-project.mdc) for naming and structure.
+
+### 2. App Registration
+- Registered `apps.user_notes` in `INSTALLED_APPS` in `server/settings/common.py`.
+- Updated `apps.py` in the new app to:
+  ```python
+  class UserNotesConfig(AppConfig):
+      default_auto_field = 'django.db.models.BigAutoField'
+      name = 'apps.user_notes'
+  ```
+
+### 3. Model Implementation
+- Implemented the `UserNote` model in `server/apps/user_notes/models.py` with:
+  - UUID primary key
+  - ForeignKey to `User`
+  - Text field for the note
+  - Optional ForeignKey to `ChatMessage` (source)
+  - Timestamp for creation
+  - Comprehensive docstrings and comments
+
+### 4. Migrations
+- Ran:
+  ```sh
+  python manage.py makemigrations user_notes && python manage.py migrate user_notes
+  ```
+- Confirmed the `UserNote` table is now in the database.
+
+---
+
 ## Overview
 
 The **Sentinel User Notes System** adds long-term, evolving memory to the Discovita Dev Coach chatbot. It automatically extracts and stores important information about users as they interact with the chatbot, enabling the coach to remember key facts and context across sessions.
