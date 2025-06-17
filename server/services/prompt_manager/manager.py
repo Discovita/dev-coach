@@ -18,7 +18,7 @@ from services.prompt_manager.utils import (
 )
 from services.logger import configure_logging
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
 
 # NOTE: There might be other things we want to add in every time as well: user info (name, gender, age, etc.)
