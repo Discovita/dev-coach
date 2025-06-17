@@ -15,6 +15,7 @@ class PromptAdmin(admin.ModelAdmin):
         "coaching_phase",
         "version",
         "name",
+        "prompt_type",
         "is_active",
         "created_at",
         "updated_at",
