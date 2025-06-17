@@ -10,5 +10,5 @@ log = configure_logging(__name__, log_level="INFO")
 def extract_user_notes(chat_message_id):
     user_msg = ChatMessage.objects.get(id=chat_message_id)
     sentinel = Sentinel(user_msg.user)
-    sentinel.extract_notes(user_msg)
+    sentinel.extract_notes()
     log.info("Sentinel processed user message for note extraction.")

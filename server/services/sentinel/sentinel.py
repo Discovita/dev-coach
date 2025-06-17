@@ -1,7 +1,10 @@
-from .utils import get_all_user_notes, get_previous_coach_message
+from enums.ai import AIModel
+
 from services.logger import configure_logging
+from services.prompt_manager.manager import PromptManager
 
 log = configure_logging(__name__, log_level="INFO")
+
 
 class Sentinel:
     """
@@ -10,14 +13,16 @@ class Sentinel:
 
     def __init__(self, user):
         self.user = user
+        self.prompt_manager = PromptManager()
+        self.model = AIModel.GPT_4O_MINI
 
-    def extract_notes(self, user_msg):
-        prev_coach_msg = get_previous_coach_message(self.user, user_msg)
-        notes = get_all_user_notes(self.user)
+    def extract_notes(self):
+        # Use the PromptManager to build the sentinel prompt
+        prompt, response_format = self.prompt_manager.create_sentinel_prompt(self.user, self.model)
+        log.info(f"Sentinel LLM prompt:\n{prompt}")
+        log.info(f"Sentinel response format: {response_format}")
         # Call your LLM here (stub for now)
-        # llm_response = call_llm(user_msg, prev_coach_msg, notes)
-        log.info(
-            f"LLM would see: user_msg={user_msg.content}, prev_coach_msg={prev_coach_msg.content if prev_coach_msg else None}, notes={[n.note for n in notes]}"
-        )
+        # llm_response = call_llm(prompt, response_format)
+        # log.info(f"LLM response: {llm_response}")
         # Parse and update notes (stub for now)
         # ...

@@ -16,5 +16,5 @@ def get_previous_coach_message(user: User, user_msg: ChatMessage) -> ChatMessage
         .order_by("-timestamp")
         .first()
     )
-    log.info(f"Previous Message: {prev}")
+    log.debug(f"Previous Message: {prev}")
     return prev

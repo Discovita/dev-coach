@@ -9,13 +9,12 @@ from apps.coach_states.models import CoachState
 from apps.prompts.models import Prompt
 from apps.users.models import User
 from enums.action_type import ActionType
-from apps.chat_messages.models import ChatMessage
-from apps.user_notes.models import UserNote
 from services.prompt_manager import gather_prompt_context, format_for_provider
 from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
 from services.prompt_manager.utils import (
     prepend_system_context,
     prepend_user_notes,
+    append_user_notes,
     append_action_instructions,
     append_recent_messages,
 )
@@ -78,8 +77,8 @@ class PromptManager:
         log.debug(f"response_format: {response_format}")
 
         # Prepend any current user notes
-        coach_prompt = prepend_user_notes(coach_prompt)
-        
+        coach_prompt = prepend_user_notes(coach_prompt, coach_state)
+
         coach_prompt = prepend_system_context(coach_prompt)
         # Append action instructions to the system message
         if prompt.allowed_actions:
@@ -100,7 +99,7 @@ class PromptManager:
 
         return coach_prompt, response_format
 
-    def create_sentinel_prompt(self, user: User):
+    def create_sentinel_prompt(self, user: User, model: AIModel):
         """
         Build a prompt for the Sentinel LLM call using the latest active sentinel prompt from the database.
         - coach_state: the CoachState instance for the user
@@ -116,9 +115,12 @@ class PromptManager:
             raise ValueError("No active Sentinel prompt found in the database.")
         # Gather context for the prompt
         prompt_context = gather_prompt_context(prompt, coach_state)
+        provider = AIModel.get_provider(model)
+        response_format_model = build_dynamic_response_format(prompt.allowed_actions)
         # Format the prompt for the provider
-        coach_prompt, response_format = format_for_provider(
-            prompt,
-            prompt_context,
+        sentinel_prompt, response_format = format_for_provider(
+            prompt, prompt_context, provider, response_format_model
         )
-        return coach_prompt, response_format
+        # Append any current user notes
+        sentinel_prompt = append_user_notes(sentinel_prompt, coach_state)
+        return sentinel_prompt, response_format
