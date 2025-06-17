@@ -14,11 +14,13 @@ from apps.user_notes.models import UserNote
 from services.prompt_manager import gather_prompt_context, format_for_provider
 from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
 from services.prompt_manager.utils import (
-    append_action_instructions,
     prepend_system_context,
+    prepend_user_notes,
+    append_action_instructions,
     append_recent_messages,
 )
 from services.logger import configure_logging
+from enums.prompt_type import PromptType
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -75,6 +77,9 @@ class PromptManager:
         log.debug(f"coach_prompt: {coach_prompt}")
         log.debug(f"response_format: {response_format}")
 
+        # Prepend any current user notes
+        coach_prompt = prepend_user_notes(coach_prompt)
+        
         coach_prompt = prepend_system_context(coach_prompt)
         # Append action instructions to the system message
         if prompt.allowed_actions:
@@ -95,37 +100,25 @@ class PromptManager:
 
         return coach_prompt, response_format
 
-    def create_sentinel_prompt(
-        self,
-        user_msg: ChatMessage,
-        prev_coach_msg: ChatMessage,
-        notes: list[UserNote],
-    ):
+    def create_sentinel_prompt(self, user: User):
         """
-        Build a prompt for the Sentinel LLM call.
-        - user_msg: the triggering ChatMessage (role=USER)
-        - prev_coach_msg: the previous COACH ChatMessage (or None)
-        - notes: list of UserNote objects
+        Build a prompt for the Sentinel LLM call using the latest active sentinel prompt from the database.
+        - coach_state: the CoachState instance for the user
         """
-        # Hardcoded template for Sentinel
+        coach_state = CoachState.objects.get(user=user)
+        # Fetch the latest active sentinel prompt
         prompt = (
-            "You are the Sentinel, an assistant that extracts and maintains important notes about the user.\n"
-            "User message: {user_msg}\n"
-            "Previous coach message: {prev_coach_msg}\n"
-            "Current notes: {notes}\n"
-            "Extract any new important information from the user message and update the notes list if needed. "
-            "Return the updated notes as a concise, non-redundant list."
-        ).format(
-            user_msg=user_msg.content,
-            prev_coach_msg=prev_coach_msg.content if prev_coach_msg else "None",
-            notes='; '.join([n.note for n in notes]) if notes else "None"
+            Prompt.objects.filter(prompt_type=PromptType.SENTINEL, is_active=True)
+            .order_by("-version")
+            .first()
         )
-        allowed_actions = [ActionType.ADD_USER_NOTE.value]
-        response_format_model = build_dynamic_response_format(allowed_actions)
-
-        # You can define a simple response format if needed
-        response_format = {
-            "notes": "list of strings (the updated notes)"
-        }
-
-        return prompt, response_format
+        if not prompt:
+            raise ValueError("No active Sentinel prompt found in the database.")
+        # Gather context for the prompt
+        prompt_context = gather_prompt_context(prompt, coach_state)
+        # Format the prompt for the provider
+        coach_prompt, response_format = format_for_provider(
+            prompt,
+            prompt_context,
+        )
+        return coach_prompt, response_format

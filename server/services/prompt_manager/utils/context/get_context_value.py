@@ -1,6 +1,5 @@
 from enums.context_keys import ContextKey
 from apps.coach_states.models import CoachState
-
 from services.prompt_manager.utils.context.func import (
     get_user_name_context,
     get_identities_context,
@@ -8,8 +7,11 @@ from services.prompt_manager.utils.context.func import (
     get_identity_focus_context,
     get_who_you_are,
     get_who_you_want_to_be,
+    get_focused_identities_context,
+    get_user_notes_context,
+    get_current_message_context,
+    get_previous_message_context,
 )
-
 
 def get_context_value(key: ContextKey, coach_state: CoachState):
     """
@@ -29,9 +31,11 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
     elif key == ContextKey.WHO_YOU_WANT_TO_BE:
         return get_who_you_want_to_be(coach_state)
     elif key == ContextKey.FOCUSED_IDENTITIES:
-        from services.prompt_manager.utils.context.func.get_focused_identities_context import get_focused_identities_context
         return get_focused_identities_context(coach_state)
     elif key == ContextKey.USER_NOTES:
-        from services.prompt_manager.utils.context.func.get_user_notes_context import get_user_notes_context
         return get_user_notes_context(coach_state)
+    elif key == ContextKey.CURRENT_MESSAGE:
+        return get_current_message_context(coach_state)
+    elif key == ContextKey.PREVIOUS_MESSAGE:
+        return get_previous_message_context(coach_state)
     # Add more context key handlers as needed

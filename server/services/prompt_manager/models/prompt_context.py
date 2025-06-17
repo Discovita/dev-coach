@@ -17,3 +17,5 @@ class PromptContext(BaseModel):
     who_you_want_to_be: Optional[str]
     focused_identities: Optional[str]
     user_notes: Optional[str]
+    current_message: Optional[str]
+    previous_message: Optional[str]

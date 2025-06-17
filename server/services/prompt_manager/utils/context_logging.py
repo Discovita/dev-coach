@@ -25,3 +25,5 @@ def log_context_stats(prompt_context: PromptContext):
     )
     log.debug(f"FOCUSED_IDENTITIES: {getattr(prompt_context, 'focused_identities', None)}")
     log.debug(f"USER_NOTES: {getattr(prompt_context, 'user_notes', None)}")
+    log.debug(f"CURRENT_MESSAGE: {getattr(prompt_context, 'current_message', None)}")
+    log.debug(f"PREVIOUS_MESSAGE: {getattr(prompt_context, 'previous_message', None)}")
