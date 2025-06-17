@@ -37,7 +37,6 @@ services:
     command: celery -A celery_config worker -l INFO
     environment:
       - DJANGO_SETTINGS_MODULE=settings.local
-      - CELERY_BROKER_URL=redis://redis:6379/0
     volumes:
       - ./server:/server
     depends_on:

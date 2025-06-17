@@ -17,7 +17,6 @@ COPY . .
 RUN mkdir -p .staticfiles
 
 ENV DJANGO_SETTINGS_MODULE=settings.local
-ENV CELERY_BROKER_URL="redis://redis:6379/0"
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
