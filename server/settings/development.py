@@ -18,4 +18,7 @@ if DEBUG:
     print(f"Database: {DATABASES}")
 
 
-CELERY_URL = "redis://red-d18irs8dl3ps738eim30:6379"
+CELERY_BROKER_URL = "redis://red-d18irs8dl3ps738eim30:6379"
+CELERY_RESULT_BACKEND = None  # Or 'redis://...' if you want to store results
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TIMEZONE = "UTC"

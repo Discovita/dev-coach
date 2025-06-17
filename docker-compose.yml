@@ -30,5 +30,19 @@ services:
     ports:
       - 6379:6379
 
+  celery:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.local
+    command: celery -A celery_config worker -l INFO
+    environment:
+      - DJANGO_SETTINGS_MODULE=settings.local
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./server:/server
+    depends_on:
+      - redis
+      - backend
+
 volumes:
   db-data:

@@ -30,4 +30,7 @@ if DEBUG:
     print(f"Settings Module: {env('DJANGO_SETTINGS_MODULE')}")
     print(f"Access the backend here: http://localhost:8000/admin")
 
-CELERY_URL = "redis://redis:6379/0"
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = None  # Or 'redis://...' if you want to store results
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TIMEZONE = "UTC"
