@@ -31,4 +31,7 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
     elif key == ContextKey.FOCUSED_IDENTITIES:
         from services.prompt_manager.utils.context.func.get_focused_identities_context import get_focused_identities_context
         return get_focused_identities_context(coach_state)
+    elif key == ContextKey.USER_NOTES:
+        from services.prompt_manager.utils.context.func.get_user_notes_context import get_user_notes_context
+        return get_user_notes_context(coach_state)
     # Add more context key handlers as needed

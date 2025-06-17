@@ -6,3 +6,4 @@ from .get_recent_messages_context import get_recent_messages_context
 from .get_who_you_are import get_who_you_are
 from .get_who_you_want_to_be import get_who_you_want_to_be
 from .get_focused_identities_context import get_focused_identities_context
+from .get_user_notes_context import get_user_notes_context

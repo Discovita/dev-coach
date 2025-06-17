@@ -24,3 +24,4 @@ def log_context_stats(prompt_context: PromptContext):
         f"NUMBER_OF_IDENTITIES: {getattr(prompt_context, 'number_of_identities', None)}"
     )
     log.debug(f"FOCUSED_IDENTITIES: {getattr(prompt_context, 'focused_identities', None)}")
+    log.debug(f"USER_NOTES: {getattr(prompt_context, 'user_notes', None)}")
