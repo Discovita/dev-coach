@@ -23,6 +23,7 @@ from services.action_handler.models.actions import (
     UnskipIdentityCategoryAction,
     UpdateWhoYouAreAction,
     UpdateWhoYouWantToBeAction,
+    AddUserNoteAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -71,6 +72,10 @@ ACTION_PARAMS = {
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE: {
         "description": "Update the list of the user's aspirational identities. You must pass the complete list of all identities that will go in the final list, not just the ones that have changed.",
         "model": UpdateWhoYouWantToBeAction,
+    },
+    ActionType.ADD_USER_NOTE: {
+        "description": "Add a new note about the user. Use this to store important facts or context about the user that should be remembered for the long term.",
+        "model": AddUserNoteAction,
     },
 }
 

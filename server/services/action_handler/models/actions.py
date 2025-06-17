@@ -11,6 +11,7 @@ from .params import (
     UpdateWhoYouAreParams,
     UpdateWhoYouWantToBeParams,
     UnskipIdentityCategoryParams,
+    AddUserNoteParams,
 )
 
 
@@ -108,6 +109,15 @@ class UpdateWhoYouWantToBeAction(BaseModel):
 class UnskipIdentityCategoryAction(BaseModel):
     params: UnskipIdentityCategoryParams = Field(
         ..., description="Parameters for unskipping an identity category."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class AddUserNoteAction(BaseModel):
+    params: AddUserNoteParams = Field(
+        description="Parameters for adding a note to the users notes"
     )
 
     class Config:

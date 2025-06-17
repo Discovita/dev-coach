@@ -14,6 +14,7 @@ from services.action_handler.actions import (
     unskip_identity_category,
     update_who_you_are,
     update_who_you_want_to_be,
+    add_user_note,
 )
 from services.logger import configure_logging
 
@@ -30,6 +31,7 @@ ACTION_HANDLERS = {
     ActionType.UNSKIP_IDENTITY_CATEGORY: unskip_identity_category,
     ActionType.UPDATE_WHO_YOU_ARE: update_who_you_are,
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE: update_who_you_want_to_be,
+    ActionType.ADD_USER_NOTE: add_user_note,
 }
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -95,6 +97,9 @@ def apply_actions(
         elif action_name == ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value:
             log.info("ACTION: Updating who you want to be")
             update_who_you_want_to_be(coach_state, action.params)
+        elif action_name == ActionType.ADD_USER_NOTE.value:
+            log.info("ACTION: Adding user note")
+            add_user_note(coach_state, action.params)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue

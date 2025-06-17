@@ -122,3 +122,10 @@ class UpdateWhoYouWantToBeParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class AddUserNoteParams(BaseModel):
+    note: str
+
+    class Config:
+        extra = "forbid"
