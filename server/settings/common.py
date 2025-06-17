@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "apps.identities",
     "apps.prompts",
     "apps.users",
+    "apps.user_notes",
     # Third-party apps...
     "rest_framework",
     "corsheaders",

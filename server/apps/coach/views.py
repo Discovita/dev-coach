@@ -1,4 +1,3 @@
-from django.forms import model_to_dict
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
@@ -17,6 +16,7 @@ from apps.chat_messages.models import ChatMessage
 from services.logger import configure_logging
 from apps.chat_messages.serializer import ChatMessageSerializer
 from apps.identities.serializer import IdentitySerializer
+from apps.identities.models import Identity
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -90,18 +90,16 @@ class CoachViewSet(
         log.debug(f"Actions: {actions}")
 
         # Step 7: Serialize the latest chat history (last 20 messages)
-        large_chat_history_qquery_set = ChatMessage.objects.filter(
+        large_chat_history_query_set = ChatMessage.objects.filter(
             user=request.user
         ).order_by("-timestamp")[:20]
         # Convert queryset to list in chronological order
-        large_chat_history = list(reversed(large_chat_history_qquery_set))
+        large_chat_history = list(reversed(large_chat_history_query_set))
         chat_history_serialized = ChatMessageSerializer(
             large_chat_history, many=True
         ).data
 
         # Step 8: Serialize all identities for the user
-        from apps.identities.models import Identity
-
         identities = Identity.objects.filter(user=request.user)
         identities_serialized = IdentitySerializer(identities, many=True).data
 
