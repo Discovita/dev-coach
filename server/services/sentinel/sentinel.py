@@ -37,5 +37,5 @@ class Sentinel:
         response: SentinelChatResponse = ai_service.call_sentinel(
             sentinel_prompt, response_format, self.model
         )
-        new_state, actions = apply_actions(self.coach_state, response)
-        log.critical(f"Sentinel Response: {response}")
+        apply_actions(self.coach_state, response)
+        log.debug(f"Sentinel Response: {response}")

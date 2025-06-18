@@ -34,7 +34,7 @@ ACTION_HANDLERS = {
     ActionType.ADD_USER_NOTE: add_user_note,
 }
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
 
 def apply_actions(
@@ -64,41 +64,40 @@ def apply_actions(
         actions.append({"type": action_name, "params": params})
         # Example: handle each action type explicitly
         if action_name == ActionType.CREATE_IDENTITY.value:
-            # log.info("\033[94mACTION:\t  Creating identity\033[0m")
-            log.info("ACTION: Creating identity")
+            log.info("\033[94mACTION:\t  Creating identity\033[0m")
             create_identity(coach_state, action.params)
         elif action_name == ActionType.UPDATE_IDENTITY.value:
-            log.info("ACTION: Updating identity")
+            log.info("\033[94mACTION:\t  Updating identity\033[0m")
             update_identity(coach_state, action.params)
         elif action_name == ActionType.ACCEPT_IDENTITY.value:
-            log.info("ACTION: Accepting identity")
+            log.info("\033[94mACTION:\t  Accepting identity\033[0m")
             accept_identity(coach_state, action.params)
         elif action_name == ActionType.ACCEPT_IDENTITY_REFINEMENT.value:
-            log.info("ACTION: Accepting identity refinement")
+            log.info("\033[94mACTION:\t  Accepting identity refinement\033[0m")
             accept_identity_refinement(coach_state, action.params)
         elif action_name == ActionType.ADD_IDENTITY_NOTE.value:
-            log.info("ACTION: Adding identity note")
+            log.info("\033[94mACTION:\t  Adding identity note\033[0m")
             add_identity_note(coach_state, action.params)
         elif action_name == ActionType.TRANSITION_PHASE.value:
-            log.info("ACTION: Transitioning state")
+            log.info("\033[94mACTION:\t  Transitioning state\033[0m")
             transition_phase(coach_state, action.params)
         elif action_name == ActionType.SELECT_IDENTITY_FOCUS.value:
-            log.info("ACTION: Selecting identity focus")
+            log.info("\033[94mACTION:\t  Selecting identity focus\033[0m")            
             select_identity_focus(coach_state, action.params)
         elif action_name == ActionType.SKIP_IDENTITY_CATEGORY.value:
-            log.info("ACTION: Skipping identity category")
+            log.info("\033[94mACTION:\t  Skipping identity category\033[0m")
             skip_identity_category(coach_state, action.params)
         elif action_name == ActionType.UNSKIP_IDENTITY_CATEGORY.value:
-            log.info("ACTION: Unskipping identity category")
+            log.info("\033[94mACTION:\t  Unskipping identity category\033[0m")            
             unskip_identity_category(coach_state, action.params)
         elif action_name == ActionType.UPDATE_WHO_YOU_ARE.value:
-            log.info("ACTION: Updating who you are")
+            log.info("\033[94mACTION:\t  Updating who you are\033[0m")
             update_who_you_are(coach_state, action.params)
         elif action_name == ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value:
-            log.info("ACTION: Updating who you want to be")
+            log.info("\033[94mACTION:\t  Updating who you want to be\033[0m")
             update_who_you_want_to_be(coach_state, action.params)
         elif action_name == ActionType.ADD_USER_NOTE.value:
-            log.info("ACTION: Adding user note")
+            log.info("\033[94mACTION:\t  Adding user note\033[0m")
             add_user_note(coach_state, action.params)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
