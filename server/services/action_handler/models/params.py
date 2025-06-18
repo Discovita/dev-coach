@@ -122,3 +122,12 @@ class UpdateWhoYouWantToBeParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class AddUserNoteParams(BaseModel):
+    notes: list[str] = Field(
+        description="List of notes to add about the user. A separate UserNote will be created for each entry in the list"
+    )
+
+    class Config:
+        extra = "forbid"

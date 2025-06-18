@@ -18,6 +18,7 @@ from enums.ai import AIModel, AIProvider
 
 # from cws_helpers.anthropic_helper import AnthropicHelper
 from models.CoachChatResponse import CoachChatResponse
+from models.SentinelChatResponse import SentinelChatResponse
 from services.ai.base import AIService
 
 
@@ -86,6 +87,15 @@ class AnthropicService(AIService):
         except Exception as e:
             log.error(f"Error generating text with Anthropic: {e}")
             raise
+
+    def call_sentinel(
+        self,
+        prompt: str,
+        system_message: Optional[str] = None,
+        response_format: Type[BaseModel] = None,
+        **kwargs,
+    ) -> SentinelChatResponse:
+        pass
 
     def get_provider_name(self) -> AIProvider:
         """Get the name of the provider being used."""

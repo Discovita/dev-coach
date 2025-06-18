@@ -12,13 +12,16 @@ from enums.action_type import ActionType
 from services.prompt_manager import gather_prompt_context, format_for_provider
 from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
 from services.prompt_manager.utils import (
-    append_action_instructions,
     prepend_system_context,
+    prepend_user_notes,
+    append_user_notes,
+    append_action_instructions,
     append_recent_messages,
 )
 from services.logger import configure_logging
+from enums.prompt_type import PromptType
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
 
 # NOTE: There might be other things we want to add in every time as well: user info (name, gender, age, etc.)
@@ -73,6 +76,9 @@ class PromptManager:
         log.debug(f"coach_prompt: {coach_prompt}")
         log.debug(f"response_format: {response_format}")
 
+        # Prepend any current user notes
+        coach_prompt = prepend_user_notes(coach_prompt, coach_state)
+
         coach_prompt = prepend_system_context(coach_prompt)
         # Append action instructions to the system message
         if prompt.allowed_actions:
@@ -92,3 +98,32 @@ class PromptManager:
         coach_prompt = append_recent_messages(coach_prompt, coach_state)
 
         return coach_prompt, response_format
+
+    def create_sentinel_prompt(self, user: User, model: AIModel):
+        """
+        Build a prompt for the Sentinel LLM call using the latest active sentinel prompt from the database.
+        - coach_state: the CoachState instance for the user
+        """
+        coach_state = CoachState.objects.get(user=user)
+        # Fetch the latest active sentinel prompt
+        prompt = (
+            Prompt.objects.filter(prompt_type=PromptType.SENTINEL, is_active=True)
+            .order_by("-version")
+            .first()
+        )
+        if not prompt:
+            raise ValueError("No active Sentinel prompt found in the database.")
+        # Gather context for the prompt
+        prompt_context = gather_prompt_context(prompt, coach_state)
+        provider = AIModel.get_provider(model)
+        response_format_model = build_dynamic_response_format(prompt.allowed_actions)
+        # Format the prompt for the provider
+        sentinel_prompt, response_format = format_for_provider(
+            prompt, prompt_context, provider, response_format_model
+        )
+        # Append any current user notes
+        sentinel_prompt = append_user_notes(sentinel_prompt, coach_state)
+        sentinel_prompt = append_action_instructions(
+            sentinel_prompt, prompt.allowed_actions
+        )
+        return sentinel_prompt, response_format

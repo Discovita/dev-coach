@@ -25,5 +25,23 @@ services:
       - 5173:5173
     command: npm run local
 
+  redis:
+    image: redis:7
+    ports:
+      - 6379:6379
+
+  celery:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.local
+    command: celery -A celery_config worker -l INFO
+    environment:
+      - DJANGO_SETTINGS_MODULE=settings.local
+    volumes:
+      - ./server:/server
+    depends_on:
+      - redis
+      - backend
+
 volumes:
   db-data:

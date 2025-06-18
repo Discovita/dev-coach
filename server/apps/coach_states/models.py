@@ -27,7 +27,6 @@ class CoachState(models.Model):
         related_name="coach_state",
         help_text="The user this coach state belongs to.",
     )
-    # TODO: need to rename this to current_phase
     current_phase = models.CharField(
         max_length=32,
         choices=CoachingPhase.choices,
