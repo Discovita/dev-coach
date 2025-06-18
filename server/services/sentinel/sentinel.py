@@ -1,10 +1,12 @@
 from enums.ai import AIModel
 
+from apps.coach_states.models import CoachState
+from apps.users.models import User
 from services.ai.ai_service_factory import AIServiceFactory
 from services.logger import configure_logging
 from services.prompt_manager.manager import PromptManager
 from models.SentinelChatResponse import SentinelChatResponse
-
+from services.action_handler.handler import apply_actions
 
 log = configure_logging(__name__, log_level="DEBUG")
 
@@ -14,12 +16,17 @@ class Sentinel:
     Service for extracting and updating user notes based on chat messages.
     """
 
-    def __init__(self, user):
+    def __init__(self, user: User):
         self.user = user
         self.prompt_manager = PromptManager()
         self.model = AIModel.GPT_4O_MINI
+        try:
+            self.coach_state = CoachState.objects.get(user=user)
+        except CoachState.DoesNotExist:
+            log.error(f"User Coach State Not Found: {user.id}")
 
     def extract_notes(self):
+
         ai_service = AIServiceFactory.create(self.model)
         # Use the PromptManager to build the sentinel prompt
         sentinel_prompt, response_format = self.prompt_manager.create_sentinel_prompt(
@@ -30,4 +37,5 @@ class Sentinel:
         response: SentinelChatResponse = ai_service.call_sentinel(
             sentinel_prompt, response_format, self.model
         )
-        log.critical(response)
+        new_state, actions = apply_actions(self.coach_state, response)
+        log.critical(f"Sentinel Response: {response}")

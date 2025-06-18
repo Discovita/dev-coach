@@ -124,13 +124,7 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     def reset_chat_messages(self, request: Request):
         """
-        Reset (delete) all chat messages for the authenticated user.
-        Step-by-step:
-        1. Delete all ChatMessage objects for the user.
-        2. Delete all Identity objects for the user.
-        3. Reset the user's CoachState to 'introduction'.
-        4. Add the initial bot message (if any) to the chat history.
-        5. Return the new chat history (should contain only the initial message, or be empty if none).
+        Reset (delete) all chat messages, identities, and user notes for the authenticated user, and reset their CoachState.
         """
         from apps.chat_messages.models import ChatMessage
         from apps.chat_messages.serializer import ChatMessageSerializer
@@ -139,14 +133,18 @@ class UserViewSet(viewsets.GenericViewSet):
         from apps.coach_states.models import CoachState
         from enums.coaching_phase import CoachingPhase
         from apps.identities.models import Identity
+        from apps.user_notes.models import UserNote
 
-        # 1. Delete all chat messages for the user
+        # Delete all chat messages for the user
         ChatMessage.objects.filter(user=request.user).delete()
 
-        # 1a. Delete all identities for the user
+        # Delete all identities for the user
         Identity.objects.filter(user=request.user).delete()
 
-        # 1b. Reset the user's CoachState to 'introduction'
+        # Delete all user notes for the user
+        UserNote.objects.filter(user=request.user).delete()
+
+        # Reset the user's CoachState
         try:
             coach_state = CoachState.objects.get(user=request.user)
             coach_state.current_phase = CoachingPhase.INTRODUCTION
@@ -160,12 +158,12 @@ class UserViewSet(viewsets.GenericViewSet):
         except CoachState.DoesNotExist:
             pass  # Optionally, handle if the user does not have a CoachState
 
-        # 2. Add the initial bot message (if any)
+        # Add the initial bot message (if any)
         initial_message = get_initial_message()
         if initial_message:
             add_chat_message(request.user, initial_message, MessageRole.COACH)
 
-        # 3. Return the new chat history
+        # Return the new chat history
         chat_messages = ChatMessage.objects.filter(user=request.user).order_by(
             "-timestamp"
         )
