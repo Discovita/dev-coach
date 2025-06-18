@@ -8,7 +8,7 @@ from services.prompt_manager.manager import PromptManager
 from models.SentinelChatResponse import SentinelChatResponse
 from services.action_handler.handler import apply_actions
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
 
 class Sentinel:

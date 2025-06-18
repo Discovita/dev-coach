@@ -117,7 +117,7 @@ class UnskipIdentityCategoryAction(BaseModel):
 
 class AddUserNoteAction(BaseModel):
     params: AddUserNoteParams = Field(
-        description="Parameters for adding a note to the users notes"
+        description="Parameters for adding a note (or notes) to the users notes."
     )
 
     class Config:

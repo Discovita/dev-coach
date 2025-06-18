@@ -5,6 +5,8 @@ from apps.coach_states.models import CoachState
 
 def add_user_note(coach_state: CoachState, params: AddUserNoteParams):
     """
-    Action handler to add a new note about the user.
+    Action handler to add new notes about the user.
+    Creates a separate UserNote entry for each note in the list.
     """
-    UserNote.objects.create(user=coach_state.user, note=params.note)
+    for note in params.notes:
+        UserNote.objects.create(user=coach_state.user, note=note.strip())
