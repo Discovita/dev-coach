@@ -11,7 +11,7 @@ def get_user_notes_context(coach_state: CoachState) -> str:
     if user_notes:
         formatted_notes = []
         for i, note in enumerate(user_notes):
-            formatted_notes.append(f"**{i+1}**: {note.note}")
+            formatted_notes.append(f"**{i+1}** (ID: {note.id}): {note.note}")
         notes_block = "\n".join(formatted_notes)
         return f"## User Notes\n\n{notes_block}\n"
     else:

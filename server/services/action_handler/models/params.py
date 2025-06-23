@@ -131,3 +131,20 @@ class AddUserNoteParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class UpdateUserNoteItem(BaseModel):
+    id: str = Field(..., description="ID of the user note to update")
+    note: str = Field(..., description="The new note text")
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateUserNoteParams(BaseModel):
+    notes: list[UpdateUserNoteItem] = Field(
+        ..., description="List of user notes to update, each with id and new note text."
+    )
+
+    class Config:
+        extra = "forbid"

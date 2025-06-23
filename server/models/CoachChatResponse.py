@@ -13,7 +13,7 @@ from services.action_handler.models.actions import (
     UpdateWhoYouAreAction,
     UpdateWhoYouWantToBeAction,
 )
-# NOTE: The AddUserNoteAction is deliberately skipped here because that action is used by the Sentinel
+# NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
 
 
 class CoachChatResponse(BaseModel):

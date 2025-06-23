@@ -10,3 +10,4 @@ from .update_who_you_are import update_who_you_are
 from .update_who_you_want_to_be import update_who_you_want_to_be
 from .unskip_identity_category import unskip_identity_category
 from .add_user_note import add_user_note
+from .update_user_note import update_user_note

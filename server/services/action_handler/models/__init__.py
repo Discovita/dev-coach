@@ -11,6 +11,7 @@ from .params import (
     UpdateWhoYouAreParams,
     UpdateWhoYouWantToBeParams,
     AddUserNoteParams,
+    UpdateUserNoteParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -25,6 +26,7 @@ from .actions import (
     UpdateWhoYouAreAction,
     UpdateWhoYouWantToBeAction,
     AddUserNoteAction,
+    UpdateUserNoteAction,
 )
 
 __all__ = [
@@ -40,6 +42,7 @@ __all__ = [
     "UpdateWhoYouAreParams",
     "UpdateWhoYouWantToBeParams",
     "AddUserNoteParams",
+    "UpdateUserNoteParams",
     "SelectIdentityFocusAction",
     "CreateIdentityAction",
     "UpdateIdentityAction",
@@ -52,4 +55,5 @@ __all__ = [
     "UpdateWhoYouAreAction",
     "UpdateWhoYouWantToBeAction",
     "AddUserNoteAction",
+    "UpdateUserNoteAction",
 ]
