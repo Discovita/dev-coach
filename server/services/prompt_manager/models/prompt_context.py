@@ -19,3 +19,4 @@ class PromptContext(BaseModel):
     user_notes: Optional[str]
     current_message: Optional[str]
     previous_message: Optional[str]
+    current_phase: Optional[str]

@@ -16,6 +16,7 @@ class ContextKey(models.TextChoices):
     USER_NOTES = "user_notes", "User Notes"
     CURRENT_MESSAGE = "current_message", "Current Message"
     PREVIOUS_MESSAGE = "previous_message", "Previous Message"
+    CURRENT_PHASE = "current_phase", "Current Phase"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":

@@ -11,6 +11,7 @@ from services.prompt_manager.utils.context.func import (
     get_user_notes_context,
     get_current_message_context,
     get_previous_message_context,
+    get_current_phase_context
 )
 
 def get_context_value(key: ContextKey, coach_state: CoachState):
@@ -38,4 +39,6 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_current_message_context(coach_state)
     elif key == ContextKey.PREVIOUS_MESSAGE:
         return get_previous_message_context(coach_state)
+    elif key == ContextKey.CURRENT_PHASE:
+        return get_current_phase_context(coach_state)
     # Add more context key handlers as needed
