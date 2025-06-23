@@ -15,6 +15,7 @@ from services.action_handler.models.actions import (
     UnskipIdentityCategoryAction,
     AddUserNoteAction,
     UpdateUserNoteAction,
+    DeleteUserNoteAction,
 )
 
 from services.logger import configure_logging
@@ -35,6 +36,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE: UpdateWhoYouWantToBeAction,
     ActionType.ADD_USER_NOTE: AddUserNoteAction,
     ActionType.UPDATE_USER_NOTE: UpdateUserNoteAction,
+    ActionType.DELETE_USER_NOTE: DeleteUserNoteAction,
 }
 
 

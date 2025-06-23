@@ -16,6 +16,7 @@ from services.action_handler.actions import (
     update_who_you_want_to_be,
     add_user_note,
     update_user_note,
+    delete_user_note,
 )
 from services.logger import configure_logging
 
@@ -34,6 +35,7 @@ ACTION_HANDLERS = {
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE: update_who_you_want_to_be,
     ActionType.ADD_USER_NOTE: add_user_note,
     ActionType.UPDATE_USER_NOTE: update_user_note,
+    ActionType.DELETE_USER_NOTE: delete_user_note,
 }
 
 log = configure_logging(__name__, log_level="INFO")
@@ -104,6 +106,9 @@ def apply_actions(
         elif action_name == ActionType.UPDATE_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Updating user note\033[0m")
             update_user_note(coach_state, action.params)
+        elif action_name == ActionType.DELETE_USER_NOTE.value:
+            log.info("\033[94mACTION:\t  Deleting user note\033[0m")
+            delete_user_note(coach_state, action.params)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue

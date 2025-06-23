@@ -13,6 +13,7 @@ from .params import (
     UnskipIdentityCategoryParams,
     AddUserNoteParams,
     UpdateUserNoteParams,
+    DeleteUserNoteParams,
 )
 
 
@@ -128,6 +129,15 @@ class AddUserNoteAction(BaseModel):
 class UpdateUserNoteAction(BaseModel):
     params: UpdateUserNoteParams = Field(
         ..., description="Parameters for updating user notes by id."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class DeleteUserNoteAction(BaseModel):
+    params: DeleteUserNoteParams = Field(
+        ..., description="Parameters for deleting user notes by id."
     )
 
     class Config:

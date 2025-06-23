@@ -148,3 +148,12 @@ class UpdateUserNoteParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class DeleteUserNoteParams(BaseModel):
+    ids: list[str] = Field(
+        ..., description="List of user note IDs to delete."
+    )
+
+    class Config:
+        extra = "forbid"

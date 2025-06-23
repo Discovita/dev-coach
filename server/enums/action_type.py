@@ -22,6 +22,7 @@ class ActionType(models.TextChoices):
     UPDATE_WHO_YOU_WANT_TO_BE = "update_who_you_want_to_be", "Update Who You Want to Be"
     ADD_USER_NOTE = "add_user_note", "Add User Note"
     UPDATE_USER_NOTE = "update_user_note", "Update User Note"
+    DELETE_USER_NOTE = "delete_user_note", "Delete User Note"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""
