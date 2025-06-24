@@ -1,0 +1,4 @@
+- **The Doer of Things:**
+  - *Explanation:* This is your action-taking identity—the part of you that gets things done, solves problems, and moves life forward.
+  - *Examples:* "organizer," "problem solver," "leader," "achiever."
+  - *Leigh Ann's style (inspiration):* "Finally, The Doer of Things. This is your action-taking identity—the part of you that gets things done and moves life forward."
