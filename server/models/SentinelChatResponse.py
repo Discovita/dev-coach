@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from services.action_handler.models.actions import AddUserNoteAction
+from services.action_handler.models.actions import (
+    AddUserNoteAction,
+    UpdateUserNoteAction,
+    DeleteUserNoteAction,
+)
 
 
 class SentinelChatResponse(BaseModel):
@@ -11,4 +15,10 @@ class SentinelChatResponse(BaseModel):
 
     add_user_note: Optional[AddUserNoteAction] = Field(
         default=None, description="Perform the add_user_note action."
+    )
+    update_user_note: Optional[UpdateUserNoteAction] = Field(
+        default=None, description="Perform the update_user_note action."
+    )
+    delete_user_note: Optional[DeleteUserNoteAction] = Field(
+        default=None, description="Perform the delete_user_note action."
     )

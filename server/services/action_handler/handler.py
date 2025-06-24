@@ -86,13 +86,13 @@ def apply_actions(
             log.info("\033[94mACTION:\t  Transitioning state\033[0m")
             transition_phase(coach_state, action.params)
         elif action_name == ActionType.SELECT_IDENTITY_FOCUS.value:
-            log.info("\033[94mACTION:\t  Selecting identity focus\033[0m")            
+            log.info("\033[94mACTION:\t  Selecting identity focus\033[0m")
             select_identity_focus(coach_state, action.params)
         elif action_name == ActionType.SKIP_IDENTITY_CATEGORY.value:
             log.info("\033[94mACTION:\t  Skipping identity category\033[0m")
             skip_identity_category(coach_state, action.params)
         elif action_name == ActionType.UNSKIP_IDENTITY_CATEGORY.value:
-            log.info("\033[94mACTION:\t  Unskipping identity category\033[0m")            
+            log.info("\033[94mACTION:\t  Unskipping identity category\033[0m")
             unskip_identity_category(coach_state, action.params)
         elif action_name == ActionType.UPDATE_WHO_YOU_ARE.value:
             log.info("\033[94mACTION:\t  Updating who you are\033[0m")
@@ -112,6 +112,7 @@ def apply_actions(
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue
+        log.info(f"\033[94mPARAMS:\t  {action.params}\033[0m")
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()

@@ -19,7 +19,7 @@ class Sentinel:
     def __init__(self, user: User):
         self.user = user
         self.prompt_manager = PromptManager()
-        self.model = AIModel.GPT_4O_MINI
+        self.model = AIModel.GPT_4O
         try:
             self.coach_state = CoachState.objects.get(user=user)
         except CoachState.DoesNotExist:
