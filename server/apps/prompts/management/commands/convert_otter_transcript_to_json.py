@@ -52,7 +52,7 @@ def pre_process_html(file_name):
 
     # Recursively remove only truly empty tags (tags with no content and no children)
 
-    remove_empty_tags(soup)
+    # remove_empty_tags(soup)
 
     # Rename the root <div> to <section> before processing the divs
     all_divs = soup.find_all("div")
