@@ -6,10 +6,6 @@ from apps.coach_states.models import CoachState
 def update_user_note(coach_state: CoachState, params: UpdateUserNoteParams):
     """
     Action handler to update one or more user notes by ID.
-    For each item in params.notes:
-      1. Fetch the UserNote by id and ensure it belongs to the current user.
-      2. Update the note field with the new value.
-      3. Save the UserNote.
     """
     for item in params.notes:
         try:
