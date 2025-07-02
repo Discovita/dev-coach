@@ -169,4 +169,6 @@ These can overlap but serve different functions and energies.
 
 ### Transition Language
 
+> Example - feel free to enhance this to create the best experience for the user.
+
 _"Perfect! Your [Physical Expression identity] has a clear sense of how you want to tend to your vessel. Now let's explore how you show up in your family relationships. Ready to look at your Familial Relations identity?"_
