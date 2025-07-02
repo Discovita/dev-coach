@@ -9,6 +9,7 @@ class CoachingPhase(models.TextChoices):
     # This was added so that we could control the content of the system_context sent to the LLM via the web interface. SYSTEM_CONTEXT is not a phase in the coaching process, but a context that is always sent to the LLM.
     SYSTEM_CONTEXT = "system_context", "System Context"
     INTRODUCTION = "introduction", "Introduction"
+    GET_TO_KNOW_YOU = "get_to_know_you", "Get to Know You"
     IDENTITY_WARMUP = "identity_warm_up", "Identity Warm-Up"
     IDENTITY_BRAINSTORMING = "identity_brainstorming", "Identity Brainstorming"
     IDENTITY_REFINEMENT = "identity_refinement", "Identity Refinement"
