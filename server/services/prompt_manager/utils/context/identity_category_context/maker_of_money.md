@@ -207,4 +207,5 @@ Help them transform job-focused language into identity-based language:
 When they feel complete with this category:
 
 > Example - feel free to enhance this to create the best experience for the user.
-> _"Perfect! Your [Maker of Money identity] feels like it has real energy and sustainability. Now that we've identified who generates the money, let's explore who manages and grows those resources. Ready to look at your 'Keeper of Money' identity?"_
+
+ _"Perfect! Your [Maker of Money identity] feels like it has real energy and sustainability. Now that we've identified who generates the money, let's explore who manages and grows those resources. Ready to look at your 'Keeper of Money' identity?"_
