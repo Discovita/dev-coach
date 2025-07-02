@@ -6,12 +6,18 @@ You are a memory extraction system specifically designed for an identity coachin
 
 ## Current Context
 **Coaching Phase:** identity_brainstorming
-**Bot's previous response:** Wonderful! Now, let's shift our focus to the **Maker of Money** category. This identity is all about who you are when it comes to earning and creating financial abundance in your life. Whether you see yourself as an entrepreneur, a professional, or perhaps a leader, this is your chance to define that aspect of yourself.
+**Bot's previous response:** It sounds like your Keeper of Money identity is deeply rooted in wisdom, quality, and long-term stability. Let's craft an identity that reflects these values and your approach to financial management.
 
-Considering your interest in becoming a Business Owner, perhaps an identity like "Strategic Entrepreneur" or "Visionary Leader" might resonate with you. These could capture your analytical skills and your aspirations for business ownership.
+### Potential Keeper of Money Identity:
+- **Prudent Wealth Steward**: This identity embodies your preference for making thoughtful, quality-focused financial decisions. It reflects your commitment to investing in reliable, steady growth and choosing quality over quantity.
 
-What do you think? Is there a particular identity that speaks to you, or would you like to explore other possibilities?
-**User's current message:** Wait - Can we add another one to the Passions and Talents?
+### Why This Identity Resonates:
+- **Prudence and Stability**: Your preference for steady mutual funds over flashy stock trading aligns with a prudent approach to wealth management.
+- **Quality Over Quantity**: Your willingness to invest in quality items reflects a discerning and thoughtful financial strategy.
+- **Long-Term Vision**: This identity supports your desire to build a stable financial future, ensuring that your resources are used wisely and effectively.
+
+Does "Prudent Wealth Steward" feel like a fitting identity for your Keeper of Money? Or is there another aspect you'd like to explore further?
+**User's current message:** I'm good with this for now. I like it thank you
 
 ## What TO Extract (High Value for Coaching Context)
 
@@ -154,7 +160,27 @@ Remember: Your goal is to help the coaching bot provide increasingly personalize
 
 ## User Notes
 
-**1** (ID: 9e034474-902c-4166-a1fd-69f584e75988): Prefers analytical/problem-solving approach over creative expression; works better with existing frameworks than creating new ones
+**1** (ID: 51c1bba7-e49e-4222-bff6-374d5a4a5641): Grew up in Norcross, Georgia, north of Atlanta
+**2** (ID: df658081-28b6-4098-93c4-52302e0de84b): Has two younger brothers
+**3** (ID: 81e511f2-7cd0-4a50-8f85-bf3bed510237): Grew up playing street hockey and baseball in a suburban neighborhood
+**4** (ID: cb073bb7-b1f6-4749-bc41-f4d4c0bf52fd): Moved from Norcross, Georgia to Alto, Georgia at age 15
+**5** (ID: 51a8d3cd-3c2a-41e5-b08c-1f0181dd5e30): Experienced a challenging transition moving to Alto, Georgia for high school, felt like an outsider but found a supportive group of friends who were also outsiders.
+**6** (ID: 57c64bd0-2ca8-492f-8da4-0b5db3d2ccfb): Feels like an outsider but has learned to get along better with others through past experiences
+**7** (ID: 23f34245-ea9f-4dd5-9951-01416a70ffde): Former nuclear engineer who operated nuclear power plants
+**8** (ID: 1e41689d-bdb1-42a6-b228-c942c498316a): Moved to Spain during Covid with wife, who is originally from Spain
+**9** (ID: 4fbae67f-19b4-45c0-bccc-5951946e72f6): Transitioned to a career as a software developer working from home
+**10** (ID: 7c352f34-78db-42e6-bae0-49eff46ecb93): Wife and kids are happier in Spain, contributing to overall family happiness.
+**11** (ID: e4daa079-ae2b-463e-afbe-c75f4929b761): Misses nuclear power job but finds software engineering interesting and engaging enough.
+**12** (ID: 7e6ab47c-788b-456e-bd73-9440dcc0593b): Passionate about woodworking, has been collecting tools and engaging in the hobby for over 25 years, though hasn't practiced recently due to life changes.
+**13** (ID: 5ee4466a-1937-4989-ad8e-c7a6be6901f8): Enjoys traveling and exploring new places
+**14** (ID: 8e422aa1-8da9-4f96-9a15-efcb0c40febc): Enjoys problem-solving, which influences approach to work and personal projects
+**15** (ID: 9b72454d-5ad4-4912-9c2b-5da2769a7e28): Enjoys home improvement and woodworking, reflecting a value of making things better and creating with hands.
+**16** (ID: c6915a2a-defb-4183-8aa7-ac79261506f9): Aspires to own a business but feels lacking in certain attributes needed for entrepreneurship
+**17** (ID: 9f1e1fe9-4ae1-46ac-94c9-1e47a1c68526): Struggles with negotiation and conflict resolution, tends to avoid confrontation and finds it challenging to say no.
+**18** (ID: d1352cb5-3c5d-4c3d-a91f-fa449a07ef1d): Derives satisfaction from helping others and feeling needed, which influences personal and professional interactions.
+**19** (ID: acaf410f-294f-4df4-b088-acd902918e68): Values hard work and quality, consistently giving 110% to every task, which has been a guiding principle in their approach to work and making money.
+**20** (ID: deb4518a-4a3b-4ee8-a041-2aa2c89327c2): Values prudent financial decisions and prefers steady investments like mutual funds over high-risk options.
+**21** (ID: b4c0d299-4743-4111-9940-5ca1059db17d): Prioritizes quality over quantity in purchases, willing to pay a premium for high-quality items.
 
 
 # Available Actions
