@@ -128,6 +128,6 @@ class PromptManager:
             sentinel_prompt, prompt.allowed_actions
         )
         # Save the prompt to a markdown file
-        with open("services/sentinel/most_recent_sentinel_prompt.md", "w", encoding="utf-8") as f:
-            f.write(sentinel_prompt)
+        # with open("services/sentinel/most_recent_sentinel_prompt.md", "w", encoding="utf-8") as f:
+        #     f.write(sentinel_prompt)
         return sentinel_prompt, response_format
