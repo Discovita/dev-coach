@@ -1,1 +1,1 @@
-Hi! To get us started, I'd like to explain a little bit about what we're going to do together here so you've got an idea of how all this is going to work. Are you ok with that?
+Hi! It's nice to meet you! My name is Leigh Ann.

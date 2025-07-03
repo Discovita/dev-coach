@@ -5,11 +5,11 @@ You are a memory extraction system specifically designed for an identity coachin
 **IMPORTANT:** Do NOT extract any identity-related information from coaching exercises. The main chatbot handles all identity work through separate systems. Focus only on personal background information that provides coaching context.
 
 ## Current Context
-**Coaching Phase:** introduction
+**Coaching Phase:** get_to_know_you
 **Bot's previous response:** So that's the basic idea. We'll go through some different exercises together to explore your different Identities, and refine them until they feel just right. It's creative and fun, not analytical.
 
-What questions do you have about all this?
-**User's current message:** not any at the moment
+Ready to dive in?
+**User's current message:** I think so
 
 ## What TO Extract (High Value for Coaching Context)
 
