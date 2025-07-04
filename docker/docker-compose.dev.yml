@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: ../server
+      dockerfile: docker/Dockerfile.dev
+    environment:
+      - DJANGO_SETTINGS_MODULE=settings.development
+  frontend:
+    build:
+      context: ../client
+      dockerfile: docker/Dockerfile.dev
+    environment:
+      - VITE_COACH_BASE_URL=http://localhost:8000/api/v1
+      - VITE_ENV=DEVELOPMENT
+  celery:
+    build:
+      context: ../server
+      dockerfile: docker/Dockerfile.dev
+    environment:
+      - DJANGO_SETTINGS_MODULE=settings.development
+# From the project root run:
+# COMPOSE_PROJECT_NAME=dev-coach-dev docker compose --profile dev -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up --build
