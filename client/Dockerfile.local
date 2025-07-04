@@ -1,6 +1,0 @@
-FROM node:22.11
-WORKDIR /client
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
-EXPOSE 5173
-CMD ["npm", "run", "dev"]

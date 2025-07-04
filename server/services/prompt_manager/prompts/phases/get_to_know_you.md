@@ -94,6 +94,7 @@ Before moving to the next phase, ensure you have covered these core areas (unles
 - Family structure (siblings, parents, children, etc.)
 - Work or what they do for a living
 - Hobbies or interests
+- What brought you here to this? What are you hoping to find. 
 
 Use User Notes and the conversation so far to check which areas have already been discussed. If a topic is already covered, do not repeat it.
 

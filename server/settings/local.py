@@ -1,5 +1,4 @@
 from settings.common import *
-from django.core.exceptions import ImproperlyConfigured
 
 DEBUG = True
 
@@ -8,19 +7,26 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5174",
 ]
 
-try:
-    DATABASES = {
-        "default": env.db("DJANGO_LOCAL_DATABASE_URL"),
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["LOCAL_DB_NAME"],
+        "USER": os.environ["LOCAL_DB_USER"],
+        "PASSWORD": os.environ["LOCAL_DB_PASSWORD"],
+        "HOST": os.environ["LOCAL_DB_HOST"],
+        "PORT": os.environ["LOCAL_DB_PORT"],
     }
-except ImproperlyConfigured:
-    raise ImproperlyConfigured(
-        "You're trying to connect to the local database from your local environment. DJANGO_LOCAL_DATABASE_URL is not set. Please set it before running the server."
-    )
+}
 
 # Whitenoise configuration for development
 WHITENOISE_ROOT = STATIC_ROOT  # Use the same absolute path
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_INDEX_FILE = True
+
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = None  # Or 'redis://...' if you want to store results
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TIMEZONE = "UTC"
 
 # Optional: Add debug logging for static files
 if DEBUG:
@@ -29,8 +35,3 @@ if DEBUG:
     print(f"Database: {DATABASES}")
     print(f"Settings Module: {env('DJANGO_SETTINGS_MODULE')}")
     print(f"Access the backend here: http://localhost:8000/admin")
-
-CELERY_BROKER_URL = "redis://redis:6379/0"
-CELERY_RESULT_BACKEND = None  # Or 'redis://...' if you want to store results
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TIMEZONE = "UTC"
