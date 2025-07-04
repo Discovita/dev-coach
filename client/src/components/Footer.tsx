@@ -11,12 +11,17 @@
  * - All elements are styled with Tailwind and shadcn/ui conventions.
  * - 100% comment coverage for clarity and maintainability.
  */
+const ENVIRONMENT = import.meta.env.VITE_ENV;
+console.log("Environment", ENVIRONMENT);
+
 export default function Footer() {
   return (
     <footer className="relative z-[1000] flex-none dark:bg-neutral-800 dark:border-gray-800">
       <div className="container mx-auto px-4 py-4 text-center">
         <p className="text-sm text-gold-600 dark:text-gold-700">
-          &copy; {new Date().getFullYear()} Discovita. All rights reserved.
+          &copy; {new Date().getFullYear()} Discovita. All rights reserved.{" "}
+          {(ENVIRONMENT === "LOCAL" || ENVIRONMENT === "DEVELOPMENT") &&
+            ENVIRONMENT}
         </p>
       </div>
     </footer>

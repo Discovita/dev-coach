@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "local": "vite --host 0.0.0.0",
-    "dev": "vite",
+    "dev": "vite --mode development --host 0.0.0.0",
+    "staging": "vite --mode staging --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

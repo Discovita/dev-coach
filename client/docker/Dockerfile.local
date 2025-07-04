@@ -1,0 +1,8 @@
+FROM node:22.11
+WORKDIR /client
+COPY package*.json ./
+RUN npm config set registry https://registry.npmjs.org/
+RUN npm ci --legacy-peer-deps --progress=true --loglevel=verbose;
+COPY . .
+EXPOSE 5173
+CMD ["npm", "run", "local"]

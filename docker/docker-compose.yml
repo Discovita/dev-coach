@@ -1,0 +1,65 @@
+services:
+  db:
+    profiles: ["local"]
+    image: postgres:17.1
+    environment:
+      - POSTGRES_DB=local_dev_coach
+      - POSTGRES_USER=dev_coach_database_user
+      - POSTGRES_PASSWORD=UxRZ75YUsR2wFL6B3JnUDWN8XDyriY3v
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "local_dev_coach",
+          "-U",
+          "dev_coach_database_user",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  backend:
+    profiles: ["local", "dev"]
+    build:
+      context: ../server
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ../server:/server
+    ports:
+      - 8000:8000
+
+  frontend:
+    build:
+      context: ../client
+    working_dir: /client
+    ports:
+      - 5173:5173
+
+  redis:
+    profiles: ["local"]
+    image: redis:7
+    ports:
+      - 6379:6379
+
+  celery:
+    profiles: ["local"]
+    build:
+      context: ../server
+    command: celery -A celery_config worker -l INFO
+    volumes:
+      - ../server:/server
+    depends_on:
+      - redis
+      - backend
+
+volumes:
+  db-data:
