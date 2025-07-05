@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     # Third-party apps...
     "rest_framework",
     "corsheaders",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,14 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Discovita Dev Coach API",
+    "DESCRIPTION": "API schema for Discovita Dev Coach",
+    "VERSION": "1.0.0",
+    # Add more settings as needed
 }
 
 # ----------------------------------------------

@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 # Local Modules
 from apps.authentication.views import AuthViewSet
@@ -39,7 +40,8 @@ auth_paths = [
 ]
 
 docs_paths = [
-    # Add documentation paths here if needed
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]
 
 # Combine all urlpatterns
