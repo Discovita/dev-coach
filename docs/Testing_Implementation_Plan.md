@@ -123,6 +123,56 @@ A scenario template is a JSON object describing the initial state for all releva
 
 ---
 
+## Validation Implementation Plan
+
+### Goals
+- Ensure scenario templates match the current schema for all relevant models (`User`, `CoachState`, `Identity`, `ChatMessage`, `UserNote`).
+- Catch missing required fields, extra/invalid fields, and type mismatches.
+- Provide clear, actionable error messages to the admin user.
+- Make validation reusable for both creation and update of scenarios.
+
+### Approach
+- **Use Django REST Framework (DRF) Serializers:**
+  - For each section of the template (`user`, `coach_state`, `identities`, `chat_messages`, `user_notes`), use the corresponding DRF serializer (or a custom one if needed).
+  - Validate the data as if it were being used to create a model instance (but don't actually save).
+- **Validation Flow:**
+  1. Parse the `template` JSON.
+  2. For each section:
+     - Pass the data to the appropriate serializer with `data=...`.
+     - Call `is_valid()`.
+     - Collect any errors.
+  3. If any errors are found, return a 400 response with a structured list of errors, e.g.:
+     ```json
+     {
+       "errors": [
+         {"section": "user", "error": "Missing required field: email"},
+         {"section": "coach_state", "error": "Unknown field: foo"}
+       ]
+     }
+     ```
+  4. If all sections are valid, allow the scenario to be created/updated.
+- **Error Messaging:**
+  - Errors should be section-specific (e.g., "user", "identity[0]").
+  - Human-readable and actionable (e.g., "Missing required field: current_phase in coach_state").
+  - Optionally, include suggestions for fixing the error.
+- **Extensibility:**
+  - If models change, updating the serializers will automatically update the validation logic.
+  - If new sections are added to the template, add corresponding validation.
+- **(Optional) Schema Versioning:**
+  - If you add a `schema_version` field to the template, you can provide version-specific validation in the future.
+
+### Testing
+- **Write comprehensive tests for the validation logic before using it in production.**
+  - Tests should cover:
+    - Valid templates (should pass)
+    - Templates missing required fields (should fail with clear errors)
+    - Templates with extra/invalid fields (should fail with clear errors)
+    - Type mismatches (should fail with clear errors)
+    - Edge cases (empty sections, nulls, etc.)
+- **Tests will ensure the validation is robust and reliable before enabling scenario management in the UI.**
+
+---
+
 ## API Endpoints (Django Rest Framework ViewSet)
 
 - `POST /api/test-scenarios/` — Create a new scenario from a template (with validation).
@@ -173,6 +223,7 @@ A scenario template is a JSON object describing the initial state for all releva
 - [x] Add `test_scenario` FK to all relevant models
   - Implementation note: Used string reference for FK to avoid circular import issues.
 - [ ] Implement robust backend validation for scenario templates (with clear error messages)
+- [ ] Write and pass comprehensive tests for scenario template validation
 - [ ] Build DRF viewset for scenario management (CRUD, reset, validation)
 - [ ] Build admin frontend page for test scenario management (list, view, edit, create, show errors)
 - [ ] (Optional) Add schema versioning to templates
