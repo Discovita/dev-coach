@@ -67,6 +67,13 @@ class Identity(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True, help_text="Timestamp when the identity was last updated."
     )
+    test_scenario = models.ForeignKey(
+        'test_scenario.TestScenario',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Test scenario this identity is associated with (for test data isolation)."
+    )
 
     def __str__(self):
         """

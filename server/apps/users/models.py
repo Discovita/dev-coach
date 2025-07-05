@@ -103,6 +103,14 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    test_scenario = models.ForeignKey(
+        'test_scenario.TestScenario',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Test scenario this user is associated with (for test data isolation)."
+    )
+
     objects = UserManager()
 
     # Field settings

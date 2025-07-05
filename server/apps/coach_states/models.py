@@ -81,6 +81,13 @@ class CoachState(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True, help_text="Timestamp when the coach state was last updated."
     )
+    test_scenario = models.ForeignKey(
+        'test_scenario.TestScenario',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Test scenario this coach state is associated with (for test data isolation)."
+    )
 
     def __str__(self):
         return f"CoachState for {self.user.email} ({self.current_phase})"

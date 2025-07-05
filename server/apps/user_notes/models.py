@@ -36,6 +36,13 @@ class UserNote(models.Model):
         auto_now_add=True,
         help_text="Timestamp when this note was created."
     )
+    test_scenario = models.ForeignKey(
+        'test_scenario.TestScenario',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Test scenario this user note is associated with (for test data isolation)."
+    )
 
     def __str__(self):
         return f"Note for {self.user.email}: {self.note[:40]}..."
