@@ -1,7 +1,7 @@
 import pytest
 
 # Import the validation function (to be implemented)
-# from apps.test_scenario.validation import validate_scenario_template
+from apps.test_scenario.validation import validate_scenario_template
 
 """
 Test Suite: Scenario Template Validation
@@ -13,6 +13,7 @@ Covers:
 - Extra/invalid fields (should fail)
 - Type mismatches (should fail)
 - Edge cases (empty sections, nulls, etc.)
+- All optional fields present (should pass)
 
 Each test asserts that the validation function returns the expected errors (or no errors) for a given template.
 """
@@ -21,6 +22,7 @@ Each test asserts that the validation function returns the expected errors (or n
 VALID_TEMPLATE = {
     "user": {
         "email": "test@example.com",
+        "password": "Coach123!",  # Required for test scenario users
         "first_name": "Test",
         "last_name": "User"
     },
@@ -53,13 +55,75 @@ VALID_TEMPLATE = {
 
 def test_valid_template_passes():
     """
-    GIVEN a fully valid scenario template
+    GIVEN a fully valid scenario template (with required fields only)
     WHEN it is validated
     THEN no errors should be returned
     """
-    # errors = validate_scenario_template(VALID_TEMPLATE)
-    # assert errors == []
-    pass  # Remove when implementing
+    errors = validate_scenario_template(VALID_TEMPLATE)
+    assert errors == []
+
+
+def test_all_optional_fields_present():
+    """
+    GIVEN a template with all optional fields populated for each section
+    WHEN it is validated
+    THEN no errors should be returned
+    """
+    template = {
+        "user": {
+            "email": "test2@example.com",
+            "password": "Coach123!",
+            "first_name": "Optional",
+            "last_name": "Fields",
+            "is_active": True,
+            "is_superuser": False,
+            "is_staff": False,
+            "verification_token": "abc123",
+            "email_verification_sent_at": "2024-01-01T00:00:00Z",
+            "last_login": "2024-01-01T00:00:00Z",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z"
+        },
+        "coach_state": {
+            "current_phase": "IDENTITY_BRAINSTORMING",
+            "identity_focus": "PASSIONS",
+            "who_you_are": ["Curious Explorer"],
+            "who_you_want_to_be": ["Visionary Leader"],
+            "skipped_identity_categories": ["PASSIONS"],
+            "current_identity": None,
+            "proposed_identity": None,
+            "metadata": {"foo": "bar"},
+            "updated_at": "2024-01-01T00:00:00Z"
+        },
+        "identities": [
+            {
+                "name": "Curious Explorer",
+                "category": "PASSIONS",
+                "state": "ACCEPTED",
+                "affirmation": "I am curious.",
+                "visualization": "A vivid scene.",
+                "notes": ["note1", "note2"],
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z"
+            }
+        ],
+        "chat_messages": [
+            {
+                "role": "USER",
+                "content": "I'm ready to brainstorm new identities.",
+                "timestamp": "2024-01-01T00:00:00Z"
+            }
+        ],
+        "user_notes": [
+            {
+                "note": "User is highly motivated at this stage.",
+                "source_message": None,
+                "created_at": "2024-01-01T00:00:00Z"
+            }
+        ]
+    }
+    errors = validate_scenario_template(template)
+    assert errors == []
 
 
 def test_missing_required_field_in_user():
@@ -69,9 +133,8 @@ def test_missing_required_field_in_user():
     THEN an error about the missing field should be returned
     """
     template = {**VALID_TEMPLATE, "user": {"first_name": "Test"}}
-    # errors = validate_scenario_template(template)
-    # assert any(e["section"] == "user" and "email" in e["error"] for e in errors)
-    pass
+    errors = validate_scenario_template(template)
+    assert any(e["section"] == "user" and "email" in e["error"] for e in errors)
 
 
 def test_extra_field_in_identity():
@@ -84,9 +147,8 @@ def test_extra_field_in_identity():
     template["identities"] = [
         {"name": "Curious Explorer", "category": "PASSIONS", "state": "ACCEPTED", "foo": "bar"}
     ]
-    # errors = validate_scenario_template(template)
-    # assert any(e["section"].startswith("identity") and "foo" in e["error"] for e in errors)
-    pass
+    errors = validate_scenario_template(template)
+    assert any(e["section"].startswith("identity") and "foo" in e["error"] for e in errors)
 
 
 def test_type_mismatch_in_coach_state():
@@ -97,9 +159,8 @@ def test_type_mismatch_in_coach_state():
     """
     template = VALID_TEMPLATE.copy()
     template["coach_state"] = {**template["coach_state"], "who_you_are": "NotAList"}
-    # errors = validate_scenario_template(template)
-    # assert any(e["section"] == "coach_state" and "who_you_are" in e["error"] for e in errors)
-    pass
+    errors = validate_scenario_template(template)
+    assert any(e["section"] == "coach_state" and "who_you_are" in e["error"] for e in errors)
 
 
 def test_empty_sections_are_handled():
@@ -112,9 +173,8 @@ def test_empty_sections_are_handled():
     template["identities"] = []
     template["chat_messages"] = []
     template["user_notes"] = []
-    # errors = validate_scenario_template(template)
-    # assert errors == []
-    pass
+    errors = validate_scenario_template(template)
+    assert errors == []
 
 
 def test_null_section_is_error():
@@ -125,9 +185,8 @@ def test_null_section_is_error():
     """
     template = VALID_TEMPLATE.copy()
     template["user"] = None
-    # errors = validate_scenario_template(template)
-    # assert any(e["section"] == "user" and "missing" in e["error"] for e in errors)
-    pass
+    errors = validate_scenario_template(template)
+    assert any(e["section"] == "user" and "missing" in e["error"] for e in errors)
 
 
 def test_missing_section_is_error():
@@ -138,8 +197,7 @@ def test_missing_section_is_error():
     """
     template = VALID_TEMPLATE.copy()
     template.pop("coach_state")
-    # errors = validate_scenario_template(template)
-    # assert any(e["section"] == "coach_state" and "missing" in e["error"] for e in errors)
-    pass
+    errors = validate_scenario_template(template)
+    assert any(e["section"] == "coach_state" and "missing" in e["error"] for e in errors)
 
 # Add more edge case tests as needed for your business logic 
