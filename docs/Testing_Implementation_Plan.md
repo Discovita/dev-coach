@@ -14,6 +14,7 @@ This document outlines the plan for implementing a robust, backend-driven, templ
 - **Trackable:** All test data must be clearly associated with its scenario for easy cleanup and isolation from real user data.
 - **Backend-driven:** Test state management is handled on the backend, not the frontend.
 - **Extensible:** The system should support new fields and models as the app evolves.
+- **Admin UI First:** The first priority is to build an admin-facing UI for managing test scenarios (list, view, edit, create). The feature to capture a live user's state as a scenario will be implemented last.
 
 ---
 
@@ -101,22 +102,42 @@ A scenario template is a JSON object describing the initial state for all releva
 
 ---
 
+## Robust Template Validation & Schema Drift Handling
+
+- The `template` field is a JSON object that must match the structure and required fields of the current backend models (User, CoachState, Identity, ChatMessage, UserNote).
+- **Backend Validation:**
+  - On scenario creation or edit, the backend will validate the template against the current model serializers.
+  - If the template is missing required fields, has extra/invalid fields, or otherwise does not match the schema, the backend will return clear, actionable error messages.
+  - Example errors:
+    - "Missing required field: `current_phase` in `coach_state`."
+    - "Unknown field: `foo` in `identity`."
+- **Frontend Error Display:**
+  - The admin UI will display these errors in a user-friendly way, with instructions for fixing them.
+- **Future Versioning:**
+  - (Optional, for future) Store a `schema_version` in the template for future migrations and compatibility checks.
+
+---
+
 ## API Endpoints (Django Rest Framework ViewSet)
 
-- `POST /api/test-scenarios/` — Create a new scenario from a template.
+- `POST /api/test-scenarios/` — Create a new scenario from a template (with validation).
 - `GET /api/test-scenarios/` — List all scenarios.
 - `GET /api/test-scenarios/{id}/` — Get scenario details.
-- `PUT/PATCH /api/test-scenarios/{id}/` — Update scenario/template.
+- `PUT/PATCH /api/test-scenarios/{id}/` — Update scenario/template (with validation).
 - `POST /api/test-scenarios/{id}/reset/` — Reset scenario to template.
 - `DELETE /api/test-scenarios/{id}/` — Delete scenario and all related data.
+- *(To be implemented last)*: Endpoint to capture a live user's state as a new scenario (name TBD, not "freeze").
 
 ---
 
 ## Frontend Integration
 
-- **TestStateSelector** and related UI will fetch scenarios from the backend.
-- UI for editing templates (optional, but recommended for future flexibility).
-- Trigger reset, edit, and delete via API.
+- **Admin Test Scenario Management Page:**
+  - List all test scenarios.
+  - View/edit a scenario (with live validation feedback).
+  - Create a new scenario.
+  - Display backend validation errors in a user-friendly way.
+- *(To be implemented last)*: UI for capturing a live user's state as a scenario.
 
 ---
 
@@ -126,6 +147,8 @@ A scenario template is a JSON object describing the initial state for all releva
 - **Support partial updates:** Only update the part of the scenario you want to change.
 - **UI-driven scenario creation/editing:** Build forms that map directly to the template structure.
 - **All test data is isolated by the `test_scenario` FK.**
+- **Graceful error handling:** Always provide clear, actionable feedback if a template is invalid.
+- **(Optional) Versioning:** Consider storing a `schema_version` in each template for future compatibility.
 
 ---
 
@@ -134,17 +157,19 @@ A scenario template is a JSON object describing the initial state for all releva
 - Should we support scenario versioning/history?
 - Should we allow importing/exporting templates for sharing?
 - How should we handle schema migrations for templates if models change significantly?
+- What should we call the feature that captures a live user's state as a scenario? ("Freeze" is not descriptive enough.)
 
 ---
 
 ## Next Steps / TODO Checklist
 
-- [ ] Update models to add `test_scenario` FK
-- [ ] Create the `TestScenario` model
-- [ ] Implement scenario creation/reset logic (template parser/runner)
-- [ ] Build DRF viewset for scenario management
-- [ ] Update frontend to use backend-driven scenarios
-- [ ] (Optional) Build UI for editing templates
+- [ ] Create the `TestScenario` model (with JSONField for template)
+- [ ] Add `test_scenario` FK to all relevant models
+- [ ] Implement robust backend validation for scenario templates (with clear error messages)
+- [ ] Build DRF viewset for scenario management (CRUD, reset, validation)
+- [ ] Build admin frontend page for test scenario management (list, view, edit, create, show errors)
+- [ ] (Optional) Add schema versioning to templates
+- [ ] (Last) Implement feature to capture a live user's state as a scenario (name TBD)
 
 ---
 
