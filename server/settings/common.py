@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "apps.prompts",
     "apps.users",
     "apps.user_notes",
+    'apps.test_scenario',
     # Third-party apps...
     "rest_framework",
     "corsheaders",
