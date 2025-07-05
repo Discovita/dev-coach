@@ -39,9 +39,11 @@ This document outlines the plan for implementing a robust, backend-driven, templ
   - `template` (JSONField, stores the declarative template)
   - `created_at`, `updated_at`
   - *(Optional)* `created_by` (FK to User)
+- **Implementation Note:**
+  - ✅ Model created with all required fields and docstrings. See `server/apps/test_scenario/models.py`.
 
 ### 2. Add `test_scenario` FK to All Relevant Models
-- **Models to update:**
+- **Models updated:**
   - `User`
   - `CoachState`
   - `Identity`
@@ -50,6 +52,9 @@ This document outlines the plan for implementing a robust, backend-driven, templ
 - **Purpose:**
   - Groups all test data for a scenario
   - Enables easy filtering, reset, and deletion
+- **Implementation Note:**
+  - ✅ Added nullable `test_scenario` ForeignKey to all relevant models.
+  - Used string reference `'test_scenario.TestScenario'` for the FK to avoid circular import issues. This was necessary for successful implementation and is a best practice in Django when models are interdependent.
 
 ---
 
@@ -163,8 +168,10 @@ A scenario template is a JSON object describing the initial state for all releva
 
 ## Next Steps / TODO Checklist
 
-- [ ] Create the `TestScenario` model (with JSONField for template)
-- [ ] Add `test_scenario` FK to all relevant models
+- [x] Create the `TestScenario` model (with JSONField for template)
+  - Implementation note: Model created with all required fields and docstrings.
+- [x] Add `test_scenario` FK to all relevant models
+  - Implementation note: Used string reference for FK to avoid circular import issues.
 - [ ] Implement robust backend validation for scenario templates (with clear error messages)
 - [ ] Build DRF viewset for scenario management (CRUD, reset, validation)
 - [ ] Build admin frontend page for test scenario management (list, view, edit, create, show errors)
