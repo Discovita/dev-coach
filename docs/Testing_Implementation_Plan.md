@@ -18,6 +18,32 @@ This document outlines the plan for implementing a robust, backend-driven, templ
 
 ---
 
+## Implementation Progress & Notes
+
+### **Key Decisions & Lessons Learned**
+- **Template Serializers:** Created dedicated serializers for each section (User, CoachState, Identity, ChatMessage, UserNote) that strictly match the fields required for scenario creation. These serializers:
+  - Forbid extra/unknown fields (using a mixin)
+  - Provide actionable error messages (including field names)
+  - Are the canonical schema for scenario templates
+- **Validation Logic:** Updated to use the template serializers, ensuring robust, actionable validation for all template input.
+- **Test Suite:** Comprehensive tests for template validation are in place and all are passing. These tests cover:
+  - Valid templates
+  - Missing required fields
+  - Extra/invalid fields
+  - Type mismatches
+  - Edge cases (empty sections, nulls, etc.)
+- **Error Handling:** Error messages now include field names, making them much more actionable for both developers and UI users.
+- **Strictness:** The system now strictly enforces template schema, which will prevent subtle bugs and make future UI/automation work much more reliable.
+
+### **Current Status**
+- [x] Template serializers implemented and in sync with creation logic
+- [x] Validation logic updated to use template serializers
+- [x] All validation tests passing (robust coverage)
+- [x] Extra fields are now forbidden and reported clearly
+- [x] Error messages are actionable and field-specific
+
+---
+
 ## Approach: Template-Based Scenarios
 
 ### Why Templates?
@@ -222,8 +248,8 @@ A scenario template is a JSON object describing the initial state for all releva
   - Implementation note: Model created with all required fields and docstrings.
 - [x] Add `test_scenario` FK to all relevant models
   - Implementation note: Used string reference for FK to avoid circular import issues.
-- [ ] Implement robust backend validation for scenario templates (with clear error messages)
-- [ ] Write and pass comprehensive tests for scenario template validation
+- [x] Implement robust backend validation for scenario templates (with clear error messages)
+- [x] Write and pass comprehensive tests for scenario template validation
 - [ ] Build DRF viewset for scenario management (CRUD, reset, validation)
 - [ ] Build admin frontend page for test scenario management (list, view, edit, create, show errors)
 - [ ] (Optional) Add schema versioning to templates
