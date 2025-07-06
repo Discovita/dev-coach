@@ -144,7 +144,7 @@ docker compose down
 
 You can make and apply migrations directly inside the running backend container. Your code and migration files will be updated on your host machine thanks to the volume mount.
 
-#### **Option 1: Using Docker Compose Exec**
+#### **Using Docker Compose Exec**
 
 Make migrations:
 ```sh
@@ -158,19 +158,77 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
 ```
 
-#### **Option 2: Using Docker Exec Directly**
+---
 
-First, find the backend container name (usually `dev-coach-local-backend-1`):
+### Running Tests Inside the Backend Docker Container
+
+Ensure the local environment is running according to the directions above.
+
+To run your Django/pytest tests in the same environment as your backend (recommended for this project):
+
+- **In a new terminal, run your tests inside the backend container:**
+  ```sh
+  COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest apps/test_scenario/tests/
+  ```
+  - This will run all tests in the `server/apps/test_scenario/tests/` directory.
+  - To run all tests in the project, omit the path:
+    ```sh
+    COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest
+    ```
+
+**Tip:**
+- This approach ensures your tests use the same environment, database, and dependencies as your running backend service.
+- You can use this pattern for any Django management or test command.
+
+---
+
+## Managing Migrations and Container Lifecycle
+
+### Starting the Environment
+
+To start all services (frontend, backend, celery, redis, and Postgres) for local development:
+
 ```sh
-docker ps
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose --profile local \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.local.yml up --build
 ```
 
-Then run:
+- Add `-d` to run in detached mode (in the background):
+  ```sh
+  COMPOSE_PROJECT_NAME=dev-coach-local \
+    docker compose --profile local \
+    -f docker/docker-compose.yml \
+    -f docker/docker-compose.local.yml up --build -d
+  ```
+
+### Stopping the Environment
+
+To stop and remove all containers and networks:
+
 ```sh
-docker exec -it dev-coach-local-backend-1 python manage.py makemigrations
+docker compose down
 ```
+
+---
+
+### Making and Applying Django Migrations (While Containers Are Running)
+
+You can make and apply migrations directly inside the running backend container. Your code and migration files will be updated on your host machine thanks to the volume mount.
+
+#### **Using Docker Compose Exec**
+
+Make migrations:
 ```sh
-docker exec -it dev-coach-local-backend-1 python manage.py migrate
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py makemigrations
+```
+
+Apply migrations:
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
 ```
 
 ---

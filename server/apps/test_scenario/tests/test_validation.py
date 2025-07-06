@@ -1,6 +1,6 @@
 import pytest
-
-# Import the validation function (to be implemented)
+pytestmark = pytest.mark.django_db
+# Import the validation function and template serializers
 from apps.test_scenario.validation import validate_scenario_template
 
 """
@@ -18,7 +18,7 @@ Covers:
 Each test asserts that the validation function returns the expected errors (or no errors) for a given template.
 """
 
-# Example valid template (update fields as needed to match your serializers)
+# Example valid template (update fields as needed to match your template serializers)
 VALID_TEMPLATE = {
     "user": {
         "email": "test@example.com",
@@ -79,10 +79,7 @@ def test_all_optional_fields_present():
             "is_superuser": False,
             "is_staff": False,
             "verification_token": "abc123",
-            "email_verification_sent_at": "2024-01-01T00:00:00Z",
-            "last_login": "2024-01-01T00:00:00Z",
-            "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-01T00:00:00Z"
+            "email_verification_sent_at": "2024-01-01T00:00:00Z"
         },
         "coach_state": {
             "current_phase": "IDENTITY_BRAINSTORMING",
@@ -92,8 +89,7 @@ def test_all_optional_fields_present():
             "skipped_identity_categories": ["PASSIONS"],
             "current_identity": None,
             "proposed_identity": None,
-            "metadata": {"foo": "bar"},
-            "updated_at": "2024-01-01T00:00:00Z"
+            "metadata": {"foo": "bar"}
         },
         "identities": [
             {
@@ -102,23 +98,18 @@ def test_all_optional_fields_present():
                 "state": "ACCEPTED",
                 "affirmation": "I am curious.",
                 "visualization": "A vivid scene.",
-                "notes": ["note1", "note2"],
-                "created_at": "2024-01-01T00:00:00Z",
-                "updated_at": "2024-01-01T00:00:00Z"
+                "notes": ["note1", "note2"]
             }
         ],
         "chat_messages": [
             {
                 "role": "USER",
-                "content": "I'm ready to brainstorm new identities.",
-                "timestamp": "2024-01-01T00:00:00Z"
+                "content": "I'm ready to brainstorm new identities."
             }
         ],
         "user_notes": [
             {
-                "note": "User is highly motivated at this stage.",
-                "source_message": None,
-                "created_at": "2024-01-01T00:00:00Z"
+                "note": "User is highly motivated at this stage."
             }
         ]
     }
