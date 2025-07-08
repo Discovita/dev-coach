@@ -60,7 +60,7 @@ This document outlines the plan for implementing a robust, backend-driven, templ
 ### 1. `TestScenario` Model
 - **Fields:**
   - `id` (UUID, PK)
-  - `name` (unique, for selection)
+  - `name` (unique, for selection) (this should have some sort of structure: e.g. created_by_name:title)
   - `description` (for UI)
   - `template` (JSONField, stores the declarative template)
   - `created_at`, `updated_at`
