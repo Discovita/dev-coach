@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status, decorators, mixins, serializers
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
 from .models import TestScenario
 from .serializers import TestScenarioSerializer
 from .validation import validate_scenario_template
@@ -23,7 +23,7 @@ class TestScenarioViewSet(
 
     queryset = TestScenario.objects.all()
     serializer_class = TestScenarioSerializer
-    permission_classes = [AllowAny]  # Adjust as needed
+    permission_classes = [IsAdminUser]
 
     def perform_create(self, serializer):
         template = self.request.data.get("template")
