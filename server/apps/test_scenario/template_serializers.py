@@ -18,8 +18,8 @@ class TemplateUserSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     Only includes fields required for user creation in a scenario.
     This must be kept in sync with the user creation logic in UserManager and User model.
     """
-    email = serializers.EmailField(help_text="User's email address (must be unique). Required.")
-    password = serializers.CharField(help_text="Password for the test user. Required.")
+    email = serializers.EmailField(required=False, help_text="User's email address. If not provided or not unique, a unique test email will be generated automatically.")
+    password = serializers.CharField(required=False, help_text="Password for the test user. Not required; always set to 'Coach123!' by the backend.")
     first_name = serializers.CharField(help_text="First name of the user. Required.")
     last_name = serializers.CharField(help_text="Last name of the user. Required.")
     # Optional fields for user creation (add as needed)

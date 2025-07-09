@@ -1,10 +1,6 @@
 import { COACH_BASE_URL, TEST_SCENARIOS } from "@/constants/api";
 import { TestScenario } from "@/types/testScenario";
 import { authFetch } from "@/utils/authFetch";
-import {
-  FIXED_TEST_USER_EMAIL,
-  FIXED_TEST_USER_PASSWORD,
-} from "@/constants/api";
 export async function fetchTestScenarios(): Promise<TestScenario[]> {
   const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}`);
   if (!res.ok) throw new Error("Failed to fetch test scenarios");
@@ -26,11 +22,7 @@ export async function createTestScenario(
     ...data,
     template: {
       ...template,
-      user: {
-        ...user,
-        email: FIXED_TEST_USER_EMAIL,
-        password: FIXED_TEST_USER_PASSWORD,
-      },
+      user: { ...user },
     },
   };
   const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}`, {
@@ -57,11 +49,7 @@ export async function updateTestScenario(
     ...data,
     template: {
       ...template,
-      user: {
-        ...user,
-        email: FIXED_TEST_USER_EMAIL,
-        password: FIXED_TEST_USER_PASSWORD,
-      },
+      user: { ...user },
     },
   };
   const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}`, {
@@ -77,15 +65,22 @@ export async function updateTestScenario(
  * Calls /api/v1/test-scenarios/{id}/reset (POST)
  * Returns the backend response (should indicate success or error).
  */
-export async function resetTestScenario(id: string): Promise<{ success: boolean; message?: string }> {
-  const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}/reset`, {
-    method: "POST",
-  });
+export async function resetTestScenario(
+  id: string
+): Promise<{ success: boolean; message?: string }> {
+  const res = await authFetch(
+    `${COACH_BASE_URL}${TEST_SCENARIOS}/${id}/reset`,
+    {
+      method: "POST",
+    }
+  );
   if (!res.ok) throw new Error("Failed to reset test scenario");
   return res.json();
 }
 
-export async function deleteTestScenario(id: string): Promise<{ success: boolean; message?: string }> {
+export async function deleteTestScenario(
+  id: string
+): Promise<{ success: boolean; message?: string }> {
   const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}`, {
     method: "DELETE",
   });

@@ -34,8 +34,15 @@ class TestScenarioViewSet(
         instance = serializer.save(
             created_by=self.request.user if self.request.user.is_authenticated else None
         )
-        # Instantiate scenario (user only for now)
-        instantiate_test_scenario(instance, create_user=True, create_coach_state=True)
+        # Instantiate scenario with all supported sections
+        instantiate_test_scenario(
+            instance,
+            create_user=True,
+            create_coach_state=True,
+            create_identities=True,
+            create_chat_messages=True,
+            create_user_notes=True,
+        )
 
     def perform_update(self, serializer):
         template = self.request.data.get("template")
@@ -43,8 +50,15 @@ class TestScenarioViewSet(
         if errors:
             raise serializers.ValidationError({"template": errors})
         instance = serializer.save()
-        # Re-instantiate scenario (user only for now)
-        instantiate_test_scenario(instance, create_user=True, create_coach_state=True)
+        # Re-instantiate scenario with all supported sections
+        instantiate_test_scenario(
+            instance,
+            create_user=True,
+            create_coach_state=True,
+            create_identities=True,
+            create_chat_messages=True,
+            create_user_notes=True,
+        )
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -60,9 +74,15 @@ class TestScenarioViewSet(
         Custom action to reset a test scenario to its original template state.
         """
         scenario = self.get_object()
-        instantiate_test_scenario(scenario, create_user=True)
-        instantiate_test_scenario(scenario, create_user=True, create_coach_state=True)
+        instantiate_test_scenario(
+            scenario,
+            create_user=True,
+            create_coach_state=True,
+            create_identities=True,
+            create_chat_messages=True,
+            create_user_notes=True,
+        )
         return Response(
-            {"success": True, "message": "Scenario reset (user only)."},
+            {"success": True, "message": "Scenario reset (all data)."},
             status=status.HTTP_200_OK,
         )

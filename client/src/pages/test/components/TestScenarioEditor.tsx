@@ -5,6 +5,8 @@ import { TestScenario } from "@/types/testScenario";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
 import TestScenarioCoachStateForm, { CoachStateFormValue } from "@/pages/test/components/TestScenarioCoachStateForm";
+import { IdentityFormValue } from "@/types/identity";
+import TestScenarioIdentitiesForm from "@/pages/test/components/TestScenarioIdentitiesForm";
 
 interface TestScenarioEditorProps {
   scenario: TestScenario | null;
@@ -58,6 +60,15 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
         return (scenario.template as Record<string, unknown>).coach_state as CoachStateFormValue;
       }
       return {};
+    })()
+  );
+  // Identities section state
+  const [identities, setIdentities] = useState<IdentityFormValue[]>(
+    (() => {
+      if (scenario?.template && typeof scenario.template === 'object' && scenario.template !== null && 'identities' in scenario.template) {
+        return (scenario.template as Record<string, unknown>).identities as IdentityFormValue[];
+      }
+      return [];
     })()
   );
   const [saving, setSaving] = useState(false);
@@ -132,7 +143,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           <TestScenarioCoachStateForm value={coachState} onChange={setCoachState} />
         </TabsContent>
         <TabsContent value="identities">
-          <div className="text-neutral-500">[Identities form coming soon]</div>
+          <TestScenarioIdentitiesForm value={identities} onChange={setIdentities} />
         </TabsContent>
         <TabsContent value="chat_messages">
           <div className="text-neutral-500">[Chat Messages form coming soon]</div>

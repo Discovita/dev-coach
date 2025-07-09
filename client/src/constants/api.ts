@@ -10,7 +10,3 @@ export const RESEND_VERIFICATION = "/auth/resend-verification";
 export const FORGOT_PASSWORD = "/auth/forgot-password";
 export const RESET_PASSWORD = "/auth/reset-password";
 export const TEST_SCENARIOS = "/test-scenarios";
-
-
-export const FIXED_TEST_USER_EMAIL = "testuser@discovita.com";
-export const FIXED_TEST_USER_PASSWORD = "Test123!";
