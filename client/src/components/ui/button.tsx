@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
  */
 const buttonVariants = cva(
   // Base styles for all buttons
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors transition-shadow disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors transition-shadow disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none cursor-pointer",
   {
     variants: {
       variant: {
@@ -58,6 +58,7 @@ const buttonVariants = cva(
       },
       size: {
         default: "px-6 py-2",
+        xs: "h-5 rounded-md gap-1 px-2 py-3 text-xs",
         sm: "h-9 rounded-md gap-1.5 px-4 text-xs",
         lg: "h-12 rounded-md px-8 text-lg",
         icon: "size-8",

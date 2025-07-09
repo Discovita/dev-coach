@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { testStates } from "@/tests/testStates";
-import TestStateSelector from "@/pages/test/components/TestStateSelector";
 import TestChat from "@/pages/test/components/TestChat";
-import { ModuleRegistry, ClientSideRowModelModule, ValidationModule } from "ag-grid-community";
+import {
+  ModuleRegistry,
+  ClientSideRowModelModule,
+  ValidationModule,
+} from "ag-grid-community";
 import { useTestScenarios } from "@/hooks/use-test-scenarios";
 import { TestScenario } from "@/types/testScenario";
 import TestScenarioPageHeader from "./components/TestScenarioPageHeader";
@@ -19,7 +22,9 @@ function Test() {
   const [selectedState, setSelectedState] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
   const { data: scenarios, isLoading, isError, refetch } = useTestScenarios();
-  const [editingScenario, setEditingScenario] = useState<TestScenario | null>(null);
+  const [editingScenario, setEditingScenario] = useState<TestScenario | null>(
+    null
+  );
   const [showEditor, setShowEditor] = useState(false);
 
   // Create mutation
@@ -58,7 +63,11 @@ function Test() {
   };
 
   // Handler for saving a scenario
-  const handleSaveScenario = async (fields: { name: string; description: string; user: { first_name: string; last_name: string } }) => {
+  const handleSaveScenario = async (fields: {
+    name: string;
+    description: string;
+    user: { first_name: string; last_name: string };
+  }) => {
     if (editingScenario) {
       // Update
       await updateMutation.mutateAsync({
@@ -70,7 +79,8 @@ function Test() {
           template: {
             ...editingScenario.template,
             user: {
-              ...((editingScenario.template as Record<string, unknown>).user || {}),
+              ...((editingScenario.template as Record<string, unknown>).user ||
+                {}),
               ...fields.user,
             },
           },
@@ -96,6 +106,8 @@ function Test() {
 
   if (hasStarted) {
     return (
+      // TODO: Fix the selected state that gets passed in here
+      // May have to convert this to read test scenarios directly
       <TestChat
         selectedState={selectedState}
         setHasStarted={setHasStarted}
@@ -106,14 +118,6 @@ function Test() {
 
   return (
     <div className="_Test flex flex-col items-center w-full h-full p-4">
-      <div className="w-full max-w-3xl">
-        <TestStateSelector
-          selectedState={selectedState}
-          setSelectedState={setSelectedState}
-          setHasStarted={setHasStarted}
-          testStates={testStates}
-        />
-      </div>
       <div className="w-full max-w-5xl my-8">
         <TestScenarioPageHeader onCreate={handleCreateScenario} />
         <TestScenarioTable

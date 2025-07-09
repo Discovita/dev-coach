@@ -12,7 +12,22 @@ interface TestScenarioTableProps {
   onEdit: (scenario: TestScenario) => void;
 }
 
-const TestScenarioTable = ({ scenarios, isLoading, isError, onEdit }: TestScenarioTableProps) => {
+const TestScenarioTable = ({
+  scenarios,
+  isLoading,
+  isError,
+  onEdit,
+}: TestScenarioTableProps) => {
+  // Dummy handlers for Start and Start Fresh actions
+  const handleStart = (scenario: TestScenario) => {
+    // TODO: Implement navigation to session (continue)
+    console.log("Start (continue) scenario", scenario.id);
+  };
+  const handleStartFresh = (scenario: TestScenario) => {
+    // TODO: Implement reset and navigation
+    console.log("Start Fresh scenario", scenario.id);
+  };
+
   const columnDefs = useMemo<ColDef<TestScenario>[]>(
     () => [
       { field: "name", headerName: "Name", flex: 1 },
@@ -22,16 +37,32 @@ const TestScenarioTable = ({ scenarios, isLoading, isError, onEdit }: TestScenar
         headerName: "Actions",
         field: undefined, // Not a real data field
         cellRenderer: (params: ICellRendererParams<TestScenario>) => (
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => onEdit(params.data as TestScenario)}
-            className="mr-2"
-          >
-            Edit
-          </Button>
+          <div className="flex gap-2 mt-1">
+            <Button
+              size="xs"
+              variant="default"
+              onClick={() => handleStart(params.data as TestScenario)}
+            >
+              Start
+            </Button>
+            <Button
+              size="xs"
+              variant="default"
+              onClick={() => handleStartFresh(params.data as TestScenario)}
+              className="bg-gold-300 hover:bg-gold-400"
+            >
+              Start Fresh
+            </Button>
+            <Button
+              size="xs"
+              variant="secondary"
+              onClick={() => onEdit(params.data as TestScenario)}
+            >
+              Edit
+            </Button>
+          </div>
         ),
-        width: 120,
+        width: 260,
         sortable: false,
         filter: false,
       },
@@ -44,7 +75,9 @@ const TestScenarioTable = ({ scenarios, isLoading, isError, onEdit }: TestScenar
       {isLoading ? (
         <div className="ag-overlay-loading-center">Loading...</div>
       ) : isError ? (
-        <div className="ag-overlay-loading-center text-red-600">Error loading scenarios.</div>
+        <div className="ag-overlay-loading-center text-red-600">
+          Error loading scenarios.
+        </div>
       ) : (
         <AgGridReact<TestScenario>
           theme={themeQuartz}
@@ -64,4 +97,4 @@ const TestScenarioTable = ({ scenarios, isLoading, isError, onEdit }: TestScenar
   );
 };
 
-export default TestScenarioTable; 
+export default TestScenarioTable;
