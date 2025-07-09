@@ -71,3 +71,16 @@ export async function updateTestScenario(
   if (!res.ok) throw new Error("Failed to update test scenario");
   return res.json();
 }
+
+/**
+ * Reset a test scenario to its template state.
+ * Calls /api/v1/test-scenarios/{id}/reset (POST)
+ * Returns the backend response (should indicate success or error).
+ */
+export async function resetTestScenario(id: string): Promise<{ success: boolean; message?: string }> {
+  const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}/reset`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to reset test scenario");
+  return res.json();
+}

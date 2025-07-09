@@ -12,7 +12,7 @@ import TestScenarioPageHeader from "./components/TestScenarioPageHeader";
 import TestScenarioTable from "./components/TestScenarioTable";
 import TestScenarioEditor from "./components/TestScenarioEditor";
 import { useMutation } from "@tanstack/react-query";
-import { createTestScenario, updateTestScenario } from "@/api/testScenarios";
+import { createTestScenario, updateTestScenario, resetTestScenario } from "@/api/testScenarios";
 import { toast } from "sonner";
 // If you see a type error for ag-grid-react, ensure @types/ag-grid-react is installed or use a type override.
 
@@ -31,34 +31,26 @@ function Test() {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: createTestScenario,
+    // Remove toast logic from here
     onSuccess: () => {
       refetch();
       setShowEditor(false);
       setEditingScenario(null);
-      toast.success("Test scenario created successfully!");
     },
-    onError: (err) => {
-      toast.error("Failed to create test scenario", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    },
+    onError: () => {},
   });
 
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<TestScenario> }) =>
       updateTestScenario(id, data),
+    // Remove toast logic from here
     onSuccess: () => {
       refetch();
       setShowEditor(false);
       setEditingScenario(null);
-      toast.success("Test scenario updated successfully!");
     },
-    onError: (err) => {
-      toast.error("Failed to update test scenario", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    },
+    onError: () => {},
   });
 
   // Handler for editing a scenario
@@ -81,31 +73,57 @@ function Test() {
   }) => {
     if (editingScenario) {
       // Update
-      await updateMutation.mutateAsync({
-        id: editingScenario.id,
-        data: {
-          ...editingScenario,
+      const toastId = toast.loading("Updating scenario...");
+      try {
+        await updateMutation.mutateAsync({
+          id: editingScenario.id,
+          data: {
+            ...editingScenario,
+            name: fields.name,
+            description: fields.description,
+            template: {
+              ...editingScenario.template,
+              user: {
+                ...((editingScenario.template as Record<string, unknown>).user ||
+                  {}),
+                ...fields.user,
+              },
+            },
+          },
+        });
+        toast.success("Scenario updated. Resetting data...", { id: toastId });
+        await resetTestScenario(editingScenario.id);
+        toast.success("Scenario data reset successfully!", { id: toastId });
+        refetch();
+        setShowEditor(false);
+        setEditingScenario(null);
+      } catch (err) {
+        toast.error("Failed to update or reset scenario", {
+          id: toastId,
+          description: err instanceof Error ? err.message : undefined,
+        });
+      }
+    } else {
+      // Create
+      const toastId = toast.loading("Creating scenario...");
+      try {
+        await createMutation.mutateAsync({
           name: fields.name,
           description: fields.description,
           template: {
-            ...editingScenario.template,
-            user: {
-              ...((editingScenario.template as Record<string, unknown>).user ||
-                {}),
-              ...fields.user,
-            },
+            user: fields.user,
           },
-        },
-      });
-    } else {
-      // Create
-      await createMutation.mutateAsync({
-        name: fields.name,
-        description: fields.description,
-        template: {
-          user: fields.user,
-        },
-      });
+        });
+        toast.success("Test scenario created successfully!", { id: toastId });
+        refetch();
+        setShowEditor(false);
+        setEditingScenario(null);
+      } catch (err) {
+        toast.error("Failed to create test scenario", {
+          id: toastId,
+          description: err instanceof Error ? err.message : undefined,
+        });
+      }
     }
   };
 
