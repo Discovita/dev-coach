@@ -13,13 +13,14 @@ import TestScenarioTable from "./components/TestScenarioTable";
 import TestScenarioEditor from "./components/TestScenarioEditor";
 import { useMutation } from "@tanstack/react-query";
 import { createTestScenario, updateTestScenario } from "@/api/testScenarios";
+import { toast } from "sonner";
 // If you see a type error for ag-grid-react, ensure @types/ag-grid-react is installed or use a type override.
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([ClientSideRowModelModule, ValidationModule]);
 
 function Test() {
-  const [selectedState, setSelectedState] = useState("");
+  const [selectedState] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
   const { data: scenarios, isLoading, isError, refetch } = useTestScenarios();
   const [editingScenario, setEditingScenario] = useState<TestScenario | null>(
@@ -34,8 +35,13 @@ function Test() {
       refetch();
       setShowEditor(false);
       setEditingScenario(null);
+      toast.success("Test scenario created successfully!");
     },
-    onError: () => {},
+    onError: (err) => {
+      toast.error("Failed to create test scenario", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    },
   });
 
   // Update mutation
@@ -46,8 +52,13 @@ function Test() {
       refetch();
       setShowEditor(false);
       setEditingScenario(null);
+      toast.success("Test scenario updated successfully!");
     },
-    onError: () => {},
+    onError: (err) => {
+      toast.error("Failed to update test scenario", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    },
   });
 
   // Handler for editing a scenario

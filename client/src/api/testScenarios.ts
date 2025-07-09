@@ -64,7 +64,7 @@ export async function updateTestScenario(
       },
     },
   };
-  const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}/`, {
+  const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });
