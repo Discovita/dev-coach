@@ -29,6 +29,11 @@ def trigger_sentinel_on_user_message(sender, instance, created, **kwargs):
     Signal receiver for ChatMessage post_save.
     If a new ChatMessage is created and its role is USER, trigger the Celery task to extract user notes.
     Uses delay_on_commit to ensure the task runs after the DB transaction is committed.
+    Skips extraction if the message is associated with a test scenario (test data isolation).
     """
     if created and instance.role == MessageRole.USER:
+        # Do not extract notes for test scenario messages
+        if instance.test_scenario_id is not None:
+            log.debug(f"Skipping user note extraction for test scenario message: {instance.id}")
+            return
         extract_user_notes.delay_on_commit(instance.pk)
