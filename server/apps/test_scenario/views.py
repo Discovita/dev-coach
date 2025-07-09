@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAdminUser
 from .models import TestScenario
 from .serializers import TestScenarioSerializer
 from .validation import validate_scenario_template
+from .services import instantiate_test_scenario
 
 
 class TestScenarioViewSet(
@@ -30,25 +31,29 @@ class TestScenarioViewSet(
         errors = validate_scenario_template(template)
         if errors:
             raise serializers.ValidationError({"template": errors})
-        serializer.save(
+        instance = serializer.save(
             created_by=self.request.user if self.request.user.is_authenticated else None
         )
+        # Instantiate scenario (user only for now)
+        instantiate_test_scenario(instance, create_user=True)
 
     def perform_update(self, serializer):
         template = self.request.data.get("template")
         errors = validate_scenario_template(template)
         if errors:
             raise serializers.ValidationError({"template": errors})
-        serializer.save()
+        instance = serializer.save()
+        # Re-instantiate scenario (user only for now)
+        instantiate_test_scenario(instance, create_user=True)
 
     @decorators.action(detail=True, methods=["post"], url_path="reset")
     def reset(self, request, pk=None):
         """
         Custom action to reset a test scenario to its original template state.
-        (Implementation to be added)
         """
-        # TODO: Implement scenario reset logic
+        scenario = self.get_object()
+        instantiate_test_scenario(scenario, create_user=True)
         return Response(
-            {"success": True, "message": "Reset not yet implemented."},
+            {"success": True, "message": "Scenario reset (user only)."},
             status=status.HTTP_200_OK,
         )

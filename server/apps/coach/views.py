@@ -20,6 +20,47 @@ from apps.identities.models import Identity
 
 log = configure_logging(__name__, log_level="INFO")
 
+"""
+Admin Impersonation Pattern for Test Scenarios
+---------------------------------------------
+
+Purpose:
+    Allow admin users to simulate/test chatbot flows as a test user (from a TestScenario), even though the admin is the one authenticated.
+    This is essential for running scenario-based tests and debugging without manual user switching.
+
+Problem:
+    By default, all endpoints use `request.user` for actions (creating messages, identities, etc.).
+    When an admin is logged in, this would associate all new data with the admin, not the test user from the scenario.
+
+Solution (Impersonation Pattern):
+    - Allow admin users to specify a `user_id` or `test_scenario_id` in the request body.
+    - If the requester is an admin (`is_staff` or `is_superuser`), use the specified test user for all downstream actions (instead of `request.user`).
+    - Otherwise, default to `request.user`.
+    - This enables admins to "impersonate" a test user for the duration of the request, ensuring all created/modified data is associated with the correct test user and scenario.
+
+Implementation:
+    1. In each relevant view (e.g., process_message), determine the acting user:
+        acting_user = request.user
+        if request.user.is_staff:
+            if 'user_id' in request.data:
+                acting_user = User.objects.get(id=request.data['user_id'])
+            elif 'test_scenario_id' in request.data:
+                scenario = TestScenario.objects.get(id=request.data['test_scenario_id'])
+                acting_user = User.objects.get(test_scenario=scenario)
+    2. Use `acting_user` everywhere instead of `request.user` for all business logic and object creation.
+    3. Only allow this override for admin users (never for regular users).
+    4. Log all impersonation actions for auditability.
+
+Security Considerations:
+    - Only trusted admin users should be able to impersonate others.
+    - Always check permissions before allowing impersonation.
+    - Consider logging impersonation events for traceability.
+
+Benefits:
+    - Enables robust scenario-based testing and debugging.
+    - Prevents accidental data pollution by associating test data with the correct user/scenario.
+    - Makes it easy to automate or manually test any phase of the chatbot flow.
+"""
 
 class CoachViewSet(
     viewsets.GenericViewSet,

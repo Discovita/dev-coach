@@ -1,0 +1,57 @@
+POST http://127.0.0.1:8000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin@admin.com",
+  "password": "Coach123!"
+}
+
+###
+GET http://127.0.0.1:8000/api/v1/test-scenarios
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMDY0MjY2LCJpYXQiOjE3NTE5Nzc4NjYsImp0aSI6IjNjOWNmMzU5NmI1ZTQ4MTE4N2FhNjA2YzNiMGQyZmE0IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.13mpRomKX_cytVny28sweccqqQsSPcpp4L6s6HEikD8
+
+###
+POST http://127.0.0.1:8000/api/v1/test-scenarios
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMDY0MjY2LCJpYXQiOjE3NTE5Nzc4NjYsImp0aSI6IjNjOWNmMzU5NmI1ZTQ4MTE4N2FhNjA2YzNiMGQyZmE0IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.13mpRomKX_cytVny28sweccqqQsSPcpp4L6s6HEikD8
+
+{
+  "name": "My Test Scenario",
+  "description": "Testing user creation only",
+  "template": {
+    "user": {
+      "email": "testuser@example.com",
+      "password": "Coach123!",
+      "first_name": "Test",
+      "last_name": "User"
+    }
+  }
+}
+
+###
+GET http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+
+#PUT http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+###
+PUT http://127.0.0.1:8000/api/v1/test-scenarios/fe9fd7c1-1b45-42bb-bde6-46e1502f1d89
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMDY0MjY2LCJpYXQiOjE3NTE5Nzc4NjYsImp0aSI6IjNjOWNmMzU5NmI1ZTQ4MTE4N2FhNjA2YzNiMGQyZmE0IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.13mpRomKX_cytVny28sweccqqQsSPcpp4L6s6HEikD8
+
+{
+  "name": "My Test Scenario",
+  "description": "Updated description",
+  "template": {
+    "user": {
+      "email": "testuser@example.com",
+      "password": "Coach123!",
+      "first_name": "Casey",
+      "last_name": "User"
+    }
+  }
+}
+
+###
+DELETE http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+
+###
+POST http://127.0.0.1:8000/api/v1/test-scenarios/{id}/reset

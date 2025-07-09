@@ -52,6 +52,16 @@ VALID_TEMPLATE = {
     ]
 }
 
+# Minimal valid template (only user required)
+MINIMAL_VALID_TEMPLATE = {
+    "user": {
+        "email": "test@example.com",
+        "password": "Coach123!",
+        "first_name": "Test",
+        "last_name": "User"
+    }
+}
+
 
 def test_valid_template_passes():
     """
@@ -180,15 +190,28 @@ def test_null_section_is_error():
     assert any(e["section"] == "user" and "missing" in e["error"] for e in errors)
 
 
-def test_missing_section_is_error():
+def test_missing_section_is_okay_for_optional_sections():
     """
-    GIVEN a template missing an entire section (e.g., no coach_state)
+    GIVEN a template missing an optional section (e.g., no coach_state)
     WHEN it is validated
-    THEN an error about the missing section should be returned
+    THEN no errors should be returned
     """
     template = VALID_TEMPLATE.copy()
     template.pop("coach_state")
+    template.pop("identities")
+    template.pop("chat_messages")
+    template.pop("user_notes")
     errors = validate_scenario_template(template)
-    assert any(e["section"] == "coach_state" and "missing" in e["error"] for e in errors)
+    assert errors == []
+
+
+def test_minimal_valid_template_passes():
+    """
+    GIVEN a template with only the required user section
+    WHEN it is validated
+    THEN no errors should be returned
+    """
+    errors = validate_scenario_template(MINIMAL_VALID_TEMPLATE)
+    assert errors == []
 
 # Add more edge case tests as needed for your business logic 

@@ -41,7 +41,7 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
                     errors.append({"section": loc, "error": error_msg})
 
     # --- Required sections ---
-    required_sections = ["user", "coach_state", "identities", "chat_messages", "user_notes"]
+    required_sections = ["user"]
     for section in required_sections:
         if section not in template or template[section] is None:
             errors.append({"section": section, "error": f"Section '{section}' is missing or null."})
@@ -52,13 +52,13 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
         if not serializer.is_valid():
             collect_serializer_errors("user", serializer.errors)
 
-    # --- CoachState section validation ---
+    # --- CoachState section validation (optional) ---
     if "coach_state" in template and template["coach_state"] is not None:
         serializer = TemplateCoachStateSerializer(data=template["coach_state"])
         if not serializer.is_valid():
             collect_serializer_errors("coach_state", serializer.errors)
 
-    # --- Identities section validation ---
+    # --- Identities section validation (optional) ---
     if "identities" in template and template["identities"] is not None:
         if not isinstance(template["identities"], list):
             errors.append({"section": "identities", "error": "Section 'identities' must be a list."})
@@ -68,7 +68,7 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
                 if not serializer.is_valid():
                     collect_serializer_errors("identity", serializer.errors, index=idx)
 
-    # --- ChatMessages section validation ---
+    # --- ChatMessages section validation (optional) ---
     if "chat_messages" in template and template["chat_messages"] is not None:
         if not isinstance(template["chat_messages"], list):
             errors.append({"section": "chat_messages", "error": "Section 'chat_messages' must be a list."})
@@ -78,7 +78,7 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
                 if not serializer.is_valid():
                     collect_serializer_errors("chat_message", serializer.errors, index=idx)
 
-    # --- UserNotes section validation ---
+    # --- UserNotes section validation (optional) ---
     if "user_notes" in template and template["user_notes"] is not None:
         if not isinstance(template["user_notes"], list):
             errors.append({"section": "user_notes", "error": "Section 'user_notes' must be a list."})
