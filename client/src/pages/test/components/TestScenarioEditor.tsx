@@ -9,9 +9,10 @@ interface TestScenarioEditorProps {
   scenario: TestScenario | null;
   onSave: (fields: { name: string; description: string; user: { first_name: string; last_name: string } }) => void;
   onCancel: () => void;
+  onDelete?: () => void;
 }
 
-const TestScenarioEditor = ({ scenario, onSave, onCancel }: TestScenarioEditorProps) => {
+const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenarioEditorProps) => {
   // General section state
   const [name, setName] = useState(
     scenario?.name || ""
@@ -132,6 +133,11 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel }: TestScenarioEditorPr
         <Button type="button" onClick={onCancel} variant="secondary" disabled={saving}>
           Cancel
         </Button>
+        {scenario && onDelete && (
+          <Button type="button" onClick={onDelete} variant="destructive" disabled={saving}>
+            Delete
+          </Button>
+        )}
       </div>
     </form>
   );

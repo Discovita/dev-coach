@@ -84,3 +84,11 @@ export async function resetTestScenario(id: string): Promise<{ success: boolean;
   if (!res.ok) throw new Error("Failed to reset test scenario");
   return res.json();
 }
+
+export async function deleteTestScenario(id: string): Promise<{ success: boolean; message?: string }> {
+  const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete test scenario");
+  return res.json();
+}

@@ -12,8 +12,9 @@ import TestScenarioPageHeader from "./components/TestScenarioPageHeader";
 import TestScenarioTable from "./components/TestScenarioTable";
 import TestScenarioEditor from "./components/TestScenarioEditor";
 import { useMutation } from "@tanstack/react-query";
-import { createTestScenario, updateTestScenario, resetTestScenario } from "@/api/testScenarios";
+import { createTestScenario, updateTestScenario, resetTestScenario, deleteTestScenario } from "@/api/testScenarios";
 import { toast } from "sonner";
+import { DeleteTestScenarioDialog } from "./components/DeleteTestScenarioDialog";
 // If you see a type error for ag-grid-react, ensure @types/ag-grid-react is installed or use a type override.
 
 // Register AG Grid modules
@@ -27,6 +28,9 @@ function Test() {
     null
   );
   const [showEditor, setShowEditor] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [scenarioToDelete, setScenarioToDelete] = useState<TestScenario | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Create mutation
   const createMutation = useMutation({
@@ -51,6 +55,20 @@ function Test() {
       setEditingScenario(null);
     },
     onError: () => {},
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteTestScenario(id),
+    onSuccess: () => {
+      toast.success("Test scenario deleted successfully!");
+      refetch();
+    },
+    onError: (err) => {
+      toast.error("Failed to delete test scenario", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    },
   });
 
   // Handler for editing a scenario
@@ -127,6 +145,41 @@ function Test() {
     }
   };
 
+  // Handler for deleting a scenario (open dialog)
+  const handleDeleteScenario = (scenario: TestScenario) => {
+    setScenarioToDelete(scenario);
+    setDeleteDialogOpen(true);
+  };
+
+  // Handler for confirming deletion
+  const handleConfirmDelete = () => {
+    if (!scenarioToDelete) return;
+    setIsDeleting(true);
+    const toastId = toast.loading("Deleting scenario...");
+    deleteMutation.mutate(scenarioToDelete.id, {
+      onSuccess: () => {
+        toast.success("Test scenario deleted successfully!", { id: toastId });
+        setDeleteDialogOpen(false);
+        setScenarioToDelete(null);
+        setShowEditor(false); // Close the editor if open
+        setEditingScenario(null); // Clear editing scenario
+      },
+      onError: (err) => {
+        toast.error("Failed to delete test scenario", { id: toastId, description: err instanceof Error ? err.message : undefined });
+      },
+      onSettled: () => {
+        setIsDeleting(false);
+      },
+    });
+  };
+
+  // Handler for canceling delete
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setScenarioToDelete(null);
+    setIsDeleting(false);
+  };
+
   // Handler for canceling edit/create
   const handleCancelEdit = () => {
     setShowEditor(false);
@@ -154,6 +207,14 @@ function Test() {
           isLoading={isLoading}
           isError={isError}
           onEdit={handleEditScenario}
+          onDelete={handleDeleteScenario}
+        />
+        <DeleteTestScenarioDialog
+          isOpen={deleteDialogOpen}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          scenario={scenarioToDelete}
+          isDeleting={isDeleting}
         />
       </div>
       {showEditor && (
@@ -161,6 +222,7 @@ function Test() {
           scenario={editingScenario}
           onSave={handleSaveScenario}
           onCancel={handleCancelEdit}
+          onDelete={editingScenario ? () => handleDeleteScenario(editingScenario) : undefined}
         />
       )}
     </div>

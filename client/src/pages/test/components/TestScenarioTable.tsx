@@ -10,6 +10,7 @@ interface TestScenarioTableProps {
   isLoading: boolean;
   isError: boolean;
   onEdit: (scenario: TestScenario) => void;
+  onDelete: (scenario: TestScenario) => void;
 }
 
 const TestScenarioTable = ({
@@ -17,6 +18,7 @@ const TestScenarioTable = ({
   isLoading,
   isError,
   onEdit,
+  onDelete,
 }: TestScenarioTableProps) => {
   // Dummy handlers for Start and Start Fresh actions
   const handleStart = (scenario: TestScenario) => {
@@ -51,7 +53,7 @@ const TestScenarioTable = ({
               onClick={() => handleStartFresh(params.data as TestScenario)}
               className="bg-gold-300 hover:bg-gold-400"
             >
-              Start Fresh
+              New
             </Button>
             <Button
               size="xs"
@@ -60,14 +62,21 @@ const TestScenarioTable = ({
             >
               Edit
             </Button>
+            <Button
+              size="xs"
+              variant="destructive"
+              onClick={() => onDelete(params.data as TestScenario)}
+            >
+              Delete
+            </Button>
           </div>
         ),
-        width: 260,
+        width: 230,
         sortable: false,
         filter: false,
       },
     ],
-    [onEdit]
+    [onEdit, onDelete]
   );
 
   return (
