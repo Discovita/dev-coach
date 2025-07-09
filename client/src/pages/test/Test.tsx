@@ -8,38 +8,16 @@ import {
   ModuleRegistry,
   ClientSideRowModelModule,
   ValidationModule,
+  ColDef,
 } from "ag-grid-community";
 import { ICellRendererParams } from "ag-grid-community"; // AG Grid cell renderer params type
 import { Button } from "@/components/ui/button";
+import { useTestScenarios } from "@/hooks/use-test-scenarios";
+import { TestScenario } from "@/types/testScenario";
 // If you see a type error for ag-grid-react, ensure @types/ag-grid-react is installed or use a type override.
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([ClientSideRowModelModule, ValidationModule]);
-
-// Placeholder type for TestScenario (replace with real type as needed)
-type TestScenario = {
-  id: string;
-  name: string;
-  description: string;
-  created_by?: string;
-  [key: string]: unknown;
-};
-
-// Dummy data for scenarios
-const DUMMY_SCENARIOS: TestScenario[] = [
-  {
-    id: "1",
-    name: "Identity Brainstorming",
-    description: "Scenario for the Identity Brainstorming phase.",
-    created_by: "admin@example.com",
-  },
-  {
-    id: "2",
-    name: "Warm-Up Phase",
-    description: "Scenario for the warm-up phase.",
-    created_by: "coach@example.com",
-  },
-];
 
 // Placeholder for the editor component
 const TestScenarioEditor = ({
@@ -75,23 +53,23 @@ const TestScenarioEditor = ({
 function Test() {
   const [selectedState, setSelectedState] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
-  // Test scenario CRUD state
-  const scenarios = DUMMY_SCENARIOS;
+  // Fetch test scenarios from API
+  const { data: scenarios, isLoading, isError } = useTestScenarios();
   const [editingScenario, setEditingScenario] = useState<TestScenario | null>(
     null
   );
   const [showEditor, setShowEditor] = useState(false);
 
   // AG Grid column definitions
-  const columnDefs = useMemo(
+  const columnDefs = useMemo<ColDef<TestScenario>[]>(
     () => [
       { field: "name", headerName: "Name", flex: 1 },
       { field: "description", headerName: "Description", flex: 2 },
       { field: "created_by", headerName: "Created By", flex: 1 },
       {
         headerName: "Actions",
-        field: "actions",
-        cellRenderer: (params: ICellRendererParams) => (
+        field: undefined, // Not a real data field
+        cellRenderer: (params: ICellRendererParams<TestScenario>) => (
           <Button
             size="sm"
             variant="secondary"
@@ -165,19 +143,25 @@ function Test() {
           </Button>
         </div>
         <div className="w-full">
-          <AgGridReact
-            theme={themeQuartz}
-            rowData={scenarios}
-            columnDefs={columnDefs}
-            domLayout="autoHeight"
-            animateRows={true}
-            suppressHorizontalScroll={false}
-            noRowsOverlayComponent={() => (
-              <div className="ag-overlay-loading-center">
-                No test scenarios found.
-              </div>
-            )}
-          />
+          {isLoading ? (
+            <div className="ag-overlay-loading-center">Loading...</div>
+          ) : isError ? (
+            <div className="ag-overlay-loading-center text-red-600">Error loading scenarios.</div>
+          ) : (
+            <AgGridReact<TestScenario>
+              theme={themeQuartz}
+              rowData={scenarios || []}
+              columnDefs={columnDefs}
+              domLayout="autoHeight"
+              animateRows={true}
+              suppressHorizontalScroll={false}
+              noRowsOverlayComponent={() => (
+                <div className="ag-overlay-loading-center">
+                  No test scenarios found.
+                </div>
+              )}
+            />
+          )}
         </div>
       </div>
       {/* Editor (not a modal) */}
