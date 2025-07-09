@@ -4,10 +4,16 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TestScenario } from "@/types/testScenario";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
+import TestScenarioCoachStateForm, { CoachStateFormValue } from "@/pages/test/components/TestScenarioCoachStateForm";
 
 interface TestScenarioEditorProps {
   scenario: TestScenario | null;
-  onSave: (fields: { name: string; description: string; user: { first_name: string; last_name: string } }) => void;
+  onSave: (fields: {
+    name: string;
+    description: string;
+    user: { first_name: string; last_name: string };
+    coach_state?: Record<string, unknown>;
+  }) => void;
   onCancel: () => void;
   onDelete?: () => void;
 }
@@ -45,6 +51,15 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
       return '';
     })()
   );
+  // Coach State section state
+  const [coachState, setCoachState] = useState<CoachStateFormValue>(
+    (() => {
+      if (scenario?.template && typeof scenario.template === 'object' && scenario.template !== null && 'coach_state' in scenario.template) {
+        return (scenario.template as Record<string, unknown>).coach_state as CoachStateFormValue;
+      }
+      return {};
+    })()
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
@@ -73,6 +88,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
         name,
         description,
         user: { first_name: firstName, last_name: lastName },
+        coach_state: coachState as Record<string, unknown>,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -113,7 +129,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           />
         </TabsContent>
         <TabsContent value="coach_state">
-          <div className="text-neutral-500">[Coach State form coming soon]</div>
+          <TestScenarioCoachStateForm value={coachState} onChange={setCoachState} />
         </TabsContent>
         <TabsContent value="identities">
           <div className="text-neutral-500">[Identities form coming soon]</div>

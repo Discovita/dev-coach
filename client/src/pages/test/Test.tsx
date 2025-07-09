@@ -88,6 +88,7 @@ function Test() {
     name: string;
     description: string;
     user: { first_name: string; last_name: string };
+    coach_state?: Record<string, unknown>;
   }) => {
     if (editingScenario) {
       // Update
@@ -106,6 +107,7 @@ function Test() {
                   {}),
                 ...fields.user,
               },
+              ...(fields.coach_state ? { coach_state: fields.coach_state } : {}),
             },
           },
         });
@@ -130,6 +132,7 @@ function Test() {
           description: fields.description,
           template: {
             user: fields.user,
+            ...(fields.coach_state ? { coach_state: fields.coach_state } : {}),
           },
         });
         toast.success("Test scenario created successfully!", { id: toastId });
