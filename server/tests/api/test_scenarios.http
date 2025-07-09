@@ -8,12 +8,12 @@ Content-Type: application/json
 
 ###
 GET http://127.0.0.1:8000/api/v1/test-scenarios
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMDY0MjY2LCJpYXQiOjE3NTE5Nzc4NjYsImp0aSI6IjNjOWNmMzU5NmI1ZTQ4MTE4N2FhNjA2YzNiMGQyZmE0IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.13mpRomKX_cytVny28sweccqqQsSPcpp4L6s6HEikD8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
 
 ###
 POST http://127.0.0.1:8000/api/v1/test-scenarios
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMDY0MjY2LCJpYXQiOjE3NTE5Nzc4NjYsImp0aSI6IjNjOWNmMzU5NmI1ZTQ4MTE4N2FhNjA2YzNiMGQyZmE0IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.13mpRomKX_cytVny28sweccqqQsSPcpp4L6s6HEikD8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
 
 {
   "name": "My Test Scenario",
@@ -24,6 +24,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
       "password": "Coach123!",
       "first_name": "Test",
       "last_name": "User"
+    },
+    "coach_state": {
+      "current_phase": "identity_brainstorming",
+      "identity_focus": "physical_expression",
+      "who_you_are": ["Curious Explorer"],
+      "who_you_want_to_be": ["Visionary Leader"],
+      "skipped_identity_categories": [],
+      "current_identity": null,
+      "proposed_identity": null,
+      "metadata": {}
     }
   }
 }
@@ -33,9 +43,9 @@ GET http://127.0.0.1:8000/api/v1/test-scenarios/{id}
 
 # PUT http://127.0.0.1:8000/api/v1/test-scenarios/{id}
 ###
-PUT http://127.0.0.1:8000/api/v1/test-scenarios/fe9fd7c1-1b45-42bb-bde6-46e1502f1d89
+PUT http://127.0.0.1:8000/api/v1/test-scenarios/a304f640-8761-4a36-bf4a-a7bb3bdb4ad9
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMDY0MjY2LCJpYXQiOjE3NTE5Nzc4NjYsImp0aSI6IjNjOWNmMzU5NmI1ZTQ4MTE4N2FhNjA2YzNiMGQyZmE0IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.13mpRomKX_cytVny28sweccqqQsSPcpp4L6s6HEikD8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
 
 {
   "name": "My Test Scenario",
@@ -46,12 +56,27 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
       "password": "Coach123!",
       "first_name": "Casey",
       "last_name": "User"
+    },
+    "coach_state": {
+      "current_phase": "IDENTITY_BRAINSTORMING",
+      "identity_focus": "PASSIONS",
+      "who_you_are": ["Curious Explorer"],
+      "who_you_want_to_be": ["Visionary Leader"],
+      "skipped_identity_categories": [],
+      "current_identity": null,
+      "proposed_identity": null,
+      "metadata": {}
     }
   }
 }
 
+# DELETE http://127.0.0.1:8000/api/v1/test-scenarios/{id}
 ###
-DELETE http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+DELETE http://127.0.0.1:8000/api/v1/test-scenarios/a304f640-8761-4a36-bf4a-a7bb3bdb4ad9
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
 
+# POST http://127.0.0.1:8000/api/v1/test-scenarios/{id}/reset
 ###
-POST http://127.0.0.1:8000/api/v1/test-scenarios/{id}/reset
+POST http://127.0.0.1:8000/api/v1/test-scenarios/a304f640-8761-4a36-bf4a-a7bb3bdb4ad9/reset
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw

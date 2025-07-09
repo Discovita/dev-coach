@@ -35,7 +35,7 @@ class TestScenarioViewSet(
             created_by=self.request.user if self.request.user.is_authenticated else None
         )
         # Instantiate scenario (user only for now)
-        instantiate_test_scenario(instance, create_user=True)
+        instantiate_test_scenario(instance, create_user=True, create_coach_state=True)
 
     def perform_update(self, serializer):
         template = self.request.data.get("template")
@@ -44,7 +44,15 @@ class TestScenarioViewSet(
             raise serializers.ValidationError({"template": errors})
         instance = serializer.save()
         # Re-instantiate scenario (user only for now)
-        instantiate_test_scenario(instance, create_user=True)
+        instantiate_test_scenario(instance, create_user=True, create_coach_state=True)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy to return a success message on deletion.
+        """
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"success": True, "message": "Test scenario deleted successfully."}, status=status.HTTP_200_OK)
 
     @decorators.action(detail=True, methods=["post"], url_path="reset")
     def reset(self, request, pk=None):
@@ -53,6 +61,7 @@ class TestScenarioViewSet(
         """
         scenario = self.get_object()
         instantiate_test_scenario(scenario, create_user=True)
+        instantiate_test_scenario(scenario, create_user=True, create_coach_state=True)
         return Response(
             {"success": True, "message": "Scenario reset (user only)."},
             status=status.HTTP_200_OK,

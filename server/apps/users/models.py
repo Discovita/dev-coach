@@ -107,7 +107,7 @@ class User(AbstractUser):
         'test_scenario.TestScenario',
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,  # Important: ensures test users are deleted when their scenario is deleted
         help_text="Test scenario this user is associated with (for test data isolation)."
     )
 
