@@ -6,19 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-
-// Type for the coach state form value
-export interface CoachStateFormValue {
-  current_phase?: CoachingPhase;
-  identity_focus?: IdentityCategory;
-  skipped_identity_categories?: IdentityCategory[];
-  who_you_are?: string[];
-  who_you_want_to_be?: string[];
-}
+import { TestScenarioCoachState } from "@/types/testScenario";
 
 interface CoachStateFormProps {
-  value: CoachStateFormValue;
-  onChange: (value: CoachStateFormValue) => void;
+  value: TestScenarioCoachState;
+  onChange: (value: TestScenarioCoachState) => void;
 }
 
 const phaseOptions = Object.values(CoachingPhase).map((v) => ({ value: v, label: v.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) }));
@@ -81,7 +73,7 @@ function CoachStateListField({
  */
 const TestScenarioCoachStateForm = ({ value, onChange }: CoachStateFormProps) => {
   // Handlers for each field
-  const handleField = <K extends keyof CoachStateFormValue>(key: K, val: CoachStateFormValue[K]) => {
+  const handleField = <K extends keyof TestScenarioCoachState>(key: K, val: TestScenarioCoachState[K]) => {
     onChange({ ...value, [key]: val });
   };
 

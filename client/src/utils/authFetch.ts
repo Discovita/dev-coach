@@ -103,6 +103,15 @@ export const authFetch = async (
 
   // Make the initial request
   console.log("[authFetch] Making request to:", url);
+  console.log("[authFetch] Request options:", options);
+  if (options.body) {
+    try {
+      const parsedBody = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+      console.log("[authFetch] Request body:", parsedBody);
+    } catch (e) {
+      console.log("[authFetch] Request body (raw):", options.body);
+    }
+  }
   let response = await fetch(url, options);
 
   // If access token has expired, refresh it and retry the request

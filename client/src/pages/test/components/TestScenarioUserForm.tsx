@@ -1,10 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TestScenarioUser } from "@/types/testScenario";
 
 interface TestScenarioUserFormProps {
   firstName: string;
   lastName: string;
-  onChange: (fields: { first_name: string; last_name: string }) => void;
+  onChange: (fields: Pick<TestScenarioUser, "first_name" | "last_name">) => void;
 }
 
 const TestScenarioUserForm = ({

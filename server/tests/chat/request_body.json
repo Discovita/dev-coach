@@ -1,0 +1,56 @@
+{
+    "id": "aacec0ff-d030-4217-9973-914c3d63ba30",
+    "created_by": "superadmin@admin.com",
+    "name": "My Test Scenario",
+    "description": "Testing user creation and all related data",
+    "template": {
+        "user": {
+            "last_name": "User",
+            "first_name": "Test"
+        },
+        "identities": [
+            {
+                "name": "Curious Explorer",
+                "notes": [
+                    "note1",
+                    "note2"
+                ],
+                "state": "proposed",
+                "category": "physical_expression",
+                "affirmation": "I am curious.",
+                "visualization": "A vivid scene."
+            }
+        ],
+        "user_notes": [
+            {
+                "note": "User is highly motivated at this stage."
+            }
+        ],
+        "coach_state": {
+            "metadata": {},
+            "who_you_are": [
+                "Curious Explorer"
+            ],
+            "current_phase": "identity_brainstorming",
+            "identity_focus": "physical_expression",
+            "current_identity": null,
+            "proposed_identity": null,
+            "who_you_want_to_be": [
+                "Visionary Leader"
+            ],
+            "skipped_identity_categories": []
+        },
+        "chat_messages": [
+            {
+                "role": "user",
+                "content": "I'm ready to brainstorm new identities."
+            },
+            {
+                "role": "coach",
+                "content": "Let's get started!"
+            }
+        ]
+    },
+    "created_at": "2025-07-12T13:15:22.202670Z",
+    "updated_at": "2025-07-13T12:31:39.445014Z"
+}

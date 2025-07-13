@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IdentityFormValue } from "@/types/identity";
+import { TestScenarioIdentity } from "@/types/testScenario";
 import { IdentityCategory } from "@/enums/identityCategory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/select";
 
 interface TestScenarioIdentitiesFormProps {
-  value: IdentityFormValue[];
-  onChange: (identities: IdentityFormValue[]) => void;
+  value: TestScenarioIdentity[];
+  onChange: (identities: TestScenarioIdentity[]) => void;
 }
 
-const emptyIdentity = (): IdentityFormValue => ({
+const emptyIdentity = (): TestScenarioIdentity => ({
   name: "",
   category: IdentityCategory.PASSIONS_AND_TALENTS,
   affirmation: "",
@@ -30,7 +30,7 @@ export default function TestScenarioIdentitiesForm({
   onChange,
 }: TestScenarioIdentitiesFormProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [draft, setDraft] = useState<IdentityFormValue>(emptyIdentity());
+  const [draft, setDraft] = useState<TestScenarioIdentity>(emptyIdentity());
   const [error, setError] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
 
@@ -63,11 +63,14 @@ export default function TestScenarioIdentitiesForm({
       const updated = value.map((id, i) =>
         i === editingIndex ? { ...draft } : id
       );
+      console.log("Updated identities (edit):", updated);
       onChange(updated);
       setEditingIndex(null);
       setDraft(emptyIdentity());
     } else {
-      onChange([...value, { ...draft }]);
+      const updated = [...value, { ...draft }];
+      console.log("Updated identities (add):", updated);
+      onChange(updated);
       setDraft(emptyIdentity());
     }
   };
@@ -166,7 +169,6 @@ export default function TestScenarioIdentitiesForm({
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               placeholder="e.g. Creative Visionary"
-              required
             />
           </div>
           <div>

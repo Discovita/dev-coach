@@ -49,6 +49,8 @@ class Identity(models.Model):
         choices=IdentityState.choices,
         default=IdentityState.PROPOSED,
         help_text="Current state of the identity (proposed, accepted, refinement complete).",
+        null=True,
+        blank=True,
     )
     notes = ArrayField(
         models.TextField(),

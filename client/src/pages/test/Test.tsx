@@ -87,8 +87,7 @@ function Test() {
   const handleSaveScenario = async (fields: {
     name: string;
     description: string;
-    user: { first_name: string; last_name: string };
-    coach_state?: Record<string, unknown>;
+    template: TestScenario["template"];
   }) => {
     if (editingScenario) {
       // Update
@@ -100,15 +99,7 @@ function Test() {
             ...editingScenario,
             name: fields.name,
             description: fields.description,
-            template: {
-              ...editingScenario.template,
-              user: {
-                ...((editingScenario.template as Record<string, unknown>).user ||
-                  {}),
-                ...fields.user,
-              },
-              ...(fields.coach_state ? { coach_state: fields.coach_state } : {}),
-            },
+            template: fields.template,
           },
         });
         toast.success("Scenario updated. Resetting data...", { id: toastId });
@@ -131,8 +122,8 @@ function Test() {
           name: fields.name,
           description: fields.description,
           template: {
-            user: fields.user,
-            ...(fields.coach_state ? { coach_state: fields.coach_state } : {}),
+            user: fields.template.user,
+            ...(fields.template.coach_state ? { coach_state: fields.template.coach_state } : {}),
           },
         });
         toast.success("Test scenario created successfully!", { id: toastId });

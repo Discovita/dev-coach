@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TestScenario } from "@/types/testScenario";
+import { TestScenario, TestScenarioTemplate, TestScenarioUser, TestScenarioCoachState, TestScenarioIdentity } from "@/types/testScenario";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
-import TestScenarioCoachStateForm, { CoachStateFormValue } from "@/pages/test/components/TestScenarioCoachStateForm";
-import { IdentityFormValue } from "@/types/identity";
+import TestScenarioCoachStateForm from "@/pages/test/components/TestScenarioCoachStateForm";
 import TestScenarioIdentitiesForm from "@/pages/test/components/TestScenarioIdentitiesForm";
 
 interface TestScenarioEditorProps {
@@ -13,8 +12,7 @@ interface TestScenarioEditorProps {
   onSave: (fields: {
     name: string;
     description: string;
-    user: { first_name: string; last_name: string };
-    coach_state?: Record<string, unknown>;
+    template: TestScenarioTemplate;
   }) => void;
   onCancel: () => void;
   onDelete?: () => void;
@@ -31,42 +29,34 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
   // User section state
   const [firstName, setFirstName] = useState(
     (() => {
-      const user = scenario?.template && typeof scenario.template === 'object' && scenario.template !== null && 'user' in scenario.template
-        ? (scenario.template as Record<string, unknown>).user
+      const user = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
+        ? scenario.template.user as TestScenarioUser
         : undefined;
-      if (user && typeof user === 'object' && user !== null && 'first_name' in user) {
-        const value = (user as Record<string, unknown>)["first_name"];
-        return typeof value === 'string' ? value : '';
-      }
-      return '';
+      return user?.first_name || '';
     })()
   );
   const [lastName, setLastName] = useState(
     (() => {
-      const user = scenario?.template && typeof scenario.template === 'object' && scenario.template !== null && 'user' in scenario.template
-        ? (scenario.template as Record<string, unknown>).user
+      const user = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
+        ? scenario.template.user as TestScenarioUser
         : undefined;
-      if (user && typeof user === 'object' && user !== null && 'last_name' in user) {
-        const value = (user as Record<string, unknown>)["last_name"];
-        return typeof value === 'string' ? value : '';
-      }
-      return '';
+      return user?.last_name || '';
     })()
   );
   // Coach State section state
-  const [coachState, setCoachState] = useState<CoachStateFormValue>(
+  const [coachState, setCoachState] = useState<TestScenarioCoachState>(
     (() => {
-      if (scenario?.template && typeof scenario.template === 'object' && scenario.template !== null && 'coach_state' in scenario.template) {
-        return (scenario.template as Record<string, unknown>).coach_state as CoachStateFormValue;
+      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.coach_state) {
+        return scenario.template.coach_state as TestScenarioCoachState;
       }
       return {};
     })()
   );
   // Identities section state
-  const [identities, setIdentities] = useState<IdentityFormValue[]>(
+  const [identities, setIdentities] = useState<TestScenarioIdentity[]>(
     (() => {
-      if (scenario?.template && typeof scenario.template === 'object' && scenario.template !== null && 'identities' in scenario.template) {
-        return (scenario.template as Record<string, unknown>).identities as IdentityFormValue[];
+      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.identities) {
+        return scenario.template.identities as TestScenarioIdentity[];
       }
       return [];
     })()
@@ -95,11 +85,15 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
       return;
     }
     try {
+      console.log("Identities being sent:", identities);
       await onSave({
         name,
         description,
-        user: { first_name: firstName, last_name: lastName },
-        coach_state: coachState as Record<string, unknown>,
+        template: {
+          user: { first_name: firstName, last_name: lastName },
+          coach_state: coachState,
+          identities: identities,
+        },
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");

@@ -8,15 +8,15 @@ Content-Type: application/json
 
 ###
 GET http://127.0.0.1:8000/api/v1/test-scenarios
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNDEyNTAyLCJpYXQiOjE3NTIzMjYxMDIsImp0aSI6ImVlODU1Y2FiMzMxMzQ4MDNiOGEwOGE1ZGQ4YzFiN2EyIiwidXNlcl9pZCI6IjFkMGU4OTQ1LWY5ZDYtNGY4YS1iNDhiLTA3YWVmNGY5ZTc3MCJ9.Xe9lhcCei4B389lYMhapLYiNRm8JIcecO16yxOPKRjo
 
 ###
 POST http://127.0.0.1:8000/api/v1/test-scenarios
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNDEyNTAyLCJpYXQiOjE3NTIzMjYxMDIsImp0aSI6ImVlODU1Y2FiMzMxMzQ4MDNiOGEwOGE1ZGQ4YzFiN2EyIiwidXNlcl9pZCI6IjFkMGU4OTQ1LWY5ZDYtNGY4YS1iNDhiLTA3YWVmNGY5ZTc3MCJ9.Xe9lhcCei4B389lYMhapLYiNRm8JIcecO16yxOPKRjo
 
 {
-  "name": "My Test Scenario 2",
+  "name": "My Test Scenario",
   "description": "Testing user creation and all related data",
   "template": {
     "user": {
@@ -37,7 +37,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
       {
         "name": "Curious Explorer",
         "category": "physical_expression",
-        "state": "proposed",
         "affirmation": "I am curious.",
         "visualization": "A vivid scene.",
         "notes": ["note1", "note2"]
@@ -68,7 +67,7 @@ GET http://127.0.0.1:8000/api/v1/test-scenarios/{id}
 ###
 PUT http://127.0.0.1:8000/api/v1/test-scenarios/c23f3ea1-6a48-4491-810c-b37a714a88b4
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNDEyNTAyLCJpYXQiOjE3NTIzMjYxMDIsImp0aSI6ImVlODU1Y2FiMzMxMzQ4MDNiOGEwOGE1ZGQ4YzFiN2EyIiwidXNlcl9pZCI6IjFkMGU4OTQ1LWY5ZDYtNGY4YS1iNDhiLTA3YWVmNGY5ZTc3MCJ9.Xe9lhcCei4B389lYMhapLYiNRm8JIcecO16yxOPKRjo
 
 {
   "name": "My Test Scenario 2",
@@ -92,7 +91,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
       {
         "name": "Visionary Leader",
         "category": "physical_expression",
-        "state": "accepted",
         "affirmation": "I am a visionary.",
         "visualization": "A grand vision.",
         "notes": ["note3"]
@@ -119,15 +117,15 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 ###
 # Verify scenario update and all related data
 GET http://127.0.0.1:8000/api/v1/test-scenarios/{id}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNDEyNTAyLCJpYXQiOjE3NTIzMjYxMDIsImp0aSI6ImVlODU1Y2FiMzMxMzQ4MDNiOGEwOGE1ZGQ4YzFiN2EyIiwidXNlcl9pZCI6IjFkMGU4OTQ1LWY5ZDYtNGY4YS1iNDhiLTA3YWVmNGY5ZTc3MCJ9.Xe9lhcCei4B389lYMhapLYiNRm8JIcecO16yxOPKRjo
 
 # DELETE http://127.0.0.1:8000/api/v1/test-scenarios/{id}
 ###
 DELETE http://127.0.0.1:8000/api/v1/test-scenarios/c23f3ea1-6a48-4491-810c-b37a714a88b4
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNDEyNTAyLCJpYXQiOjE3NTIzMjYxMDIsImp0aSI6ImVlODU1Y2FiMzMxMzQ4MDNiOGEwOGE1ZGQ4YzFiN2EyIiwidXNlcl9pZCI6IjFkMGU4OTQ1LWY5ZDYtNGY4YS1iNDhiLTA3YWVmNGY5ZTc3MCJ9.Xe9lhcCei4B389lYMhapLYiNRm8JIcecO16yxOPKRjo
 
 # POST http://127.0.0.1:8000/api/v1/test-scenarios/{id}/reset
 ###
 POST http://127.0.0.1:8000/api/v1/test-scenarios/c23f3ea1-6a48-4491-810c-b37a714a88b4/reset
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTUwNzcwLCJpYXQiOjE3NTIwNjQzNzAsImp0aSI6ImQzMDE5MGVkZGJiNjRiZjFhYWVjODYyMDExYWZjYjM4IiwidXNlcl9pZCI6IjQ5Yzg4ZGRkLWM4NmQtNDk0Yy04YjI5LWMzZWQ3ODk1Y2NkZSJ9.MqY4nW44Ka2R3OySuc3UsLQ62f7oc66NokAslB8ZzEw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyNDEyNTAyLCJpYXQiOjE3NTIzMjYxMDIsImp0aSI6ImVlODU1Y2FiMzMxMzQ4MDNiOGEwOGE1ZGQ4YzFiN2EyIiwidXNlcl9pZCI6IjFkMGU4OTQ1LWY5ZDYtNGY4YS1iNDhiLTA3YWVmNGY5ZTc3MCJ9.Xe9lhcCei4B389lYMhapLYiNRm8JIcecO16yxOPKRjo
