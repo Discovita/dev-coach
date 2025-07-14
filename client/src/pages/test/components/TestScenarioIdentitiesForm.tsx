@@ -164,7 +164,7 @@ export default function TestScenarioIdentitiesForm({
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label>Name</Label>
+            <Label className="mb-2">Name</Label>
             <Input
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
@@ -172,7 +172,7 @@ export default function TestScenarioIdentitiesForm({
             />
           </div>
           <div>
-            <Label>Category</Label>
+            <Label className="mb-2">Category</Label>
             <Select
               value={draft.category}
               onValueChange={(v) =>
@@ -194,7 +194,7 @@ export default function TestScenarioIdentitiesForm({
             </Select>
           </div>
           <div>
-            <Label>Affirmation</Label>
+            <Label className="mb-2">Affirmation</Label>
             <Input
               value={draft.affirmation || ""}
               onChange={(e) =>
@@ -204,7 +204,7 @@ export default function TestScenarioIdentitiesForm({
             />
           </div>
           <div>
-            <Label>Visualization</Label>
+            <Label className="mb-2">Visualization</Label>
             <Input
               value={draft.visualization || ""}
               onChange={(e) =>

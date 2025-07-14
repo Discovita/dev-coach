@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TestScenario, TestScenarioTemplate, TestScenarioUser, TestScenarioCoachState, TestScenarioIdentity, TestScenarioChatMessage } from "@/types/testScenario";
+import { TestScenario, TestScenarioTemplate, TestScenarioUser, TestScenarioCoachState, TestScenarioIdentity, TestScenarioChatMessage, TestScenarioUserNote } from "@/types/testScenario";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
 import TestScenarioCoachStateForm from "@/pages/test/components/TestScenarioCoachStateForm";
 import TestScenarioIdentitiesForm from "@/pages/test/components/TestScenarioIdentitiesForm";
 import TestScenarioChatMessagesForm from "@/pages/test/components/TestScenarioChatMessagesForm";
+import TestScenarioUserNotesForm from "@/pages/test/components/TestScenarioUserNotesForm";
 
 interface TestScenarioEditorProps {
   scenario: TestScenario | null;
@@ -78,6 +79,15 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
       return [];
     })()
   );
+  // User Notes section state
+  const [userNotes, setUserNotes] = useState<TestScenarioUserNote[]>(
+    (() => {
+      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.user_notes) {
+        return scenario.template.user_notes as TestScenarioUserNote[];
+      }
+      return [];
+    })()
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
@@ -111,6 +121,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           coach_state: coachState,
           identities: identities,
           chat_messages: chatMessages,
+          user_notes: userNotes,
         },
       });
     } catch (err) {
@@ -163,7 +174,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           <TestScenarioChatMessagesForm value={chatMessages} onChange={setChatMessages} />
         </TabsContent>
         <TabsContent value="user_notes">
-          <div className="text-neutral-500">[User Notes form coming soon]</div>
+          <TestScenarioUserNotesForm value={userNotes} onChange={setUserNotes} />
         </TabsContent>
       </Tabs>
       {error && <div className="text-red-600 mt-2">{error}</div>}
