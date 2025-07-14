@@ -44,6 +44,13 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
       return user?.last_name || '';
     })()
   );
+  // For display only
+  const testUserEmail = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
+    ? (scenario.template.user as TestScenarioUser).email
+    : undefined;
+  const testUserPassword = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
+    ? (scenario.template.user as TestScenarioUser).password
+    : undefined;
   // Coach State section state
   const [coachState, setCoachState] = useState<TestScenarioCoachState>(
     (() => {
@@ -142,6 +149,8 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
             firstName={firstName}
             lastName={lastName}
             onChange={handleUserChange}
+            email={testUserEmail}
+            password={testUserPassword}
           />
         </TabsContent>
         <TabsContent value="coach_state">

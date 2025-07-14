@@ -4,6 +4,16 @@ import { IdentityCategory } from "@/enums/identityCategory";
 export interface TestScenarioUser {
   first_name: string;
   last_name: string;
+  /**
+   * The email for the test user, if available (set by backend).
+   * Only for display; do not send to backend on update/create.
+   */
+  email?: string;
+  /**
+   * The password for the test user, if available (set by backend, always 'Coach123!').
+   * Only for display; do not send to backend on update/create.
+   */
+  password?: string;
 }
 
 export interface TestScenarioCoachState {

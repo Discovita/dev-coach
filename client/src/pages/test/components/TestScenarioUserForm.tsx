@@ -6,12 +6,16 @@ interface TestScenarioUserFormProps {
   firstName: string;
   lastName: string;
   onChange: (fields: Pick<TestScenarioUser, "first_name" | "last_name">) => void;
+  email?: string;
+  password?: string;
 }
 
 const TestScenarioUserForm = ({
   firstName,
   lastName,
   onChange,
+  email,
+  password,
 }: TestScenarioUserFormProps) => {
   return (
     <div className="flex flex-col gap-4 mt-4">
@@ -44,6 +48,30 @@ const TestScenarioUserForm = ({
           className="mt-1"
         />
       </div>
+      {email && (
+        <div>
+          <Label htmlFor="test_user_email">Test User Email</Label>
+          <Input
+            id="test_user_email"
+            type="text"
+            value={email}
+            readOnly
+            className="mt-1 bg-neutral-100 cursor-not-allowed"
+          />
+        </div>
+      )}
+      {password && (
+        <div>
+          <Label htmlFor="test_user_password">Test User Password</Label>
+          <Input
+            id="test_user_password"
+            type="text"
+            value={password}
+            readOnly
+            className="mt-1 bg-neutral-100 cursor-not-allowed"
+          />
+        </div>
+      )}
     </div>
   );
 };
