@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TestScenario, TestScenarioTemplate, TestScenarioUser, TestScenarioCoachState, TestScenarioIdentity } from "@/types/testScenario";
+import { TestScenario, TestScenarioTemplate, TestScenarioUser, TestScenarioCoachState, TestScenarioIdentity, TestScenarioChatMessage } from "@/types/testScenario";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
 import TestScenarioCoachStateForm from "@/pages/test/components/TestScenarioCoachStateForm";
 import TestScenarioIdentitiesForm from "@/pages/test/components/TestScenarioIdentitiesForm";
+import TestScenarioChatMessagesForm from "@/pages/test/components/TestScenarioChatMessagesForm";
 
 interface TestScenarioEditorProps {
   scenario: TestScenario | null;
@@ -61,6 +62,15 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
       return [];
     })()
   );
+  // Chat Messages section state
+  const [chatMessages, setChatMessages] = useState<TestScenarioChatMessage[]>(
+    (() => {
+      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.chat_messages) {
+        return scenario.template.chat_messages as TestScenarioChatMessage[];
+      }
+      return [];
+    })()
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
@@ -93,6 +103,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           user: { first_name: firstName, last_name: lastName },
           coach_state: coachState,
           identities: identities,
+          chat_messages: chatMessages,
         },
       });
     } catch (err) {
@@ -140,7 +151,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           <TestScenarioIdentitiesForm value={identities} onChange={setIdentities} />
         </TabsContent>
         <TabsContent value="chat_messages">
-          <div className="text-neutral-500">[Chat Messages form coming soon]</div>
+          <TestScenarioChatMessagesForm value={chatMessages} onChange={setChatMessages} />
         </TabsContent>
         <TabsContent value="user_notes">
           <div className="text-neutral-500">[User Notes form coming soon]</div>

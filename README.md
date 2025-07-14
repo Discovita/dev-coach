@@ -130,6 +130,49 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
     -f docker/docker-compose.local.yml up --build -d
   ```
 
+### Forcing Dependency Reinstalls and Rebuilds (Frontend/Backend)
+
+**If you add new packages or dependencies to the frontend or backend, Docker may use cached layers and not install them unless you force a rebuild.**
+
+- To ensure all new dependencies are installed and recognized, use the following flags:
+
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose --profile local \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.local.yml up --build --force-recreate --no-deps
+```
+
+- **Flags explained:**
+  - `--build`: Always build images before starting containers.
+  - `--force-recreate`: Recreate containers even if their configuration and image haven't changed.
+  - `--no-deps`: Don't start linked services (dependencies). Use this if you only want to rebuild a specific service (e.g., frontend or backend) without restarting the database or redis.
+  - `--no-cache`: (use with `docker compose build`) Forces Docker to not use any cache when building images. Use this if you suspect the build cache is stale:
+    ```sh
+    COMPOSE_PROJECT_NAME=dev-coach-local \
+      docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml build --no-cache frontend
+    ```
+    Then bring up the environment as usual.
+
+#### Common Troubleshooting
+
+- **New packages not recognized in containers?**
+  - Make sure you:
+    1. Add the package to the correct `package.json` or `requirements.txt`.
+    2. Run with `--build --force-recreate` to ensure Docker rebuilds the image and reinstalls dependencies.
+    3. If still not working, try `docker compose build --no-cache` for the affected service.
+- **Frontend/Backend code changes not reflected?**
+  - If you only changed code (not dependencies), a simple `docker compose up --build` is usually enough.
+  - For dependency changes, always use `--build --force-recreate`.
+- **Want to rebuild only the frontend or backend?**
+  - You can specify the service name at the end:
+    ```sh
+    COMPOSE_PROJECT_NAME=dev-coach-local \
+      docker compose --profile local \
+      -f docker/docker-compose.yml \
+      -f docker/docker-compose.local.yml up --build --force-recreate frontend
+    ```
+
 ### Stopping the Environment
 
 To stop and remove all containers and networks:

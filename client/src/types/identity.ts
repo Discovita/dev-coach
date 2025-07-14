@@ -4,7 +4,7 @@ import { IdentityCategory } from "@/enums/identityCategory";
  * Represents a single identity with its state for test scenario editing.
  * Matches backend Identity model fields.
  */
-export interface IdentityFormValue {
+export interface Identity {
   /** Unique identifier (optional for new identities) */
   id?: string;
   /** Name/label for the identity (required) */
