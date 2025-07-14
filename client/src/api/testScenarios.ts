@@ -1,6 +1,7 @@
 import { COACH_BASE_URL, TEST_SCENARIOS } from "@/constants/api";
 import { TestScenario } from "@/types/testScenario";
 import { authFetch } from "@/utils/authFetch";
+import { TestScenarioTemplate } from "@/types/testScenario";
 
 export async function fetchTestScenarios(): Promise<TestScenario[]> {
   const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}`);
@@ -11,13 +12,13 @@ export async function fetchTestScenarios(): Promise<TestScenario[]> {
 export async function createTestScenario(
   data: Partial<TestScenario>
 ): Promise<TestScenario> {
-  const template =
+  const template: any =
     typeof data.template === "object" && data.template !== null
       ? data.template
       : {};
   const user =
-    typeof template.user === "object" && template.user !== null
-      ? template.user
+    typeof (template as any).user === "object" && (template as any).user !== null
+      ? (template as any).user
       : {};
   const payload = {
     ...data,
@@ -42,9 +43,10 @@ export async function updateTestScenario(
     typeof data.template === "object" && data.template !== null
       ? data.template
       : {};
+  const t = template as Partial<TestScenarioTemplate>;
   const user =
-    typeof template.user === "object" && template.user !== null
-      ? template.user
+    typeof t.user === "object" && t.user !== null
+      ? t.user
       : {};
   const payload = {
     ...data,
