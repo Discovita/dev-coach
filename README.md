@@ -274,8 +274,18 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
 ```
 
----
+Create a super user:
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+docker compose \
+-f docker/docker-compose.yml \
+-f docker/docker-compose.local.yml \
+exec backend python manage.py createsuperuser \
+--noinput --email superadmin@admin.com
+```
 
-**Tip:**
-- Always make sure your containers are running before executing these commands.
-- You can use these same patterns for other Django management commands as well.
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend \
+python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); u=User.objects.get(email='superadmin@admin.com'); u.set_password('Coach123!'); u.save()"
+```

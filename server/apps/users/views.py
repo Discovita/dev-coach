@@ -168,3 +168,137 @@ class UserViewSet(viewsets.GenericViewSet):
             "-timestamp"
         )
         return Response(ChatMessageSerializer(chat_messages, many=True).data)
+
+class TestUserViewSet(viewsets.GenericViewSet):
+    """
+    ViewSet for test scenario user related endpoints.
+    All endpoints require admin/superuser and a user id (pk).
+    """
+
+    def get_test_user(self, pk):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return None
+
+    def admin_required(self, request):
+        return request.user.is_staff or request.user.is_superuser
+
+    @decorators.action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="profile",
+    )
+    def profile(self, request, pk=None):
+        """
+        Get profile data for a test scenario user.
+        """
+        if not self.admin_required(request):
+            return Response({"detail": "Not authorized."}, status=403)
+        user = self.get_test_user(pk)
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+        from apps.users.serializer import UserProfileSerializer
+        return Response(UserProfileSerializer(user).data)
+
+    @decorators.action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="complete",
+    )
+    def complete(self, request, pk=None):
+        """
+        Get complete data for a test scenario user, ensuring the chat history contains the initial bot message if empty.
+        """
+        if not self.admin_required(request):
+            return Response({"detail": "Not authorized."}, status=403)
+        user = self.get_test_user(pk)
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+        from apps.chat_messages.models import ChatMessage
+        from apps.chat_messages.utils import get_initial_message, add_chat_message
+        from enums.message_role import MessageRole
+        chat_messages = ChatMessage.objects.filter(user=user)
+        if not chat_messages.exists():
+            initial_message = get_initial_message()
+            if initial_message:
+                add_chat_message(user, initial_message, MessageRole.COACH)
+        from apps.users.serializer import UserSerializer
+        return Response(UserSerializer(user).data)
+
+    @decorators.action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="coach-state",
+    )
+    def coach_state(self, request, pk=None):
+        """
+        Get the coach state for a test scenario user.
+        """
+        if not self.admin_required(request):
+            return Response({"detail": "Not authorized."}, status=403)
+        user = self.get_test_user(pk)
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+        from apps.coach_states.models import CoachState
+        from apps.coach_states.serializer import CoachStateSerializer
+        try:
+            coach_state = CoachState.objects.get(user=user)
+        except CoachState.DoesNotExist:
+            return Response({"detail": "Coach state not found."}, status=404)
+        return Response(CoachStateSerializer(coach_state).data)
+
+    @decorators.action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="identities",
+    )
+    def identities(self, request, pk=None):
+        """
+        Get the identities for a test scenario user.
+        """
+        if not self.admin_required(request):
+            return Response({"detail": "Not authorized."}, status=403)
+        user = self.get_test_user(pk)
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+        from apps.identities.models import Identity
+        from apps.identities.serializer import IdentitySerializer
+        identities = Identity.objects.filter(user=user)
+        return Response(IdentitySerializer(identities, many=True).data)
+
+    @decorators.action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="chat-messages",
+    )
+    def chat_messages(self, request, pk=None):
+        """
+        Get the chat messages for a test scenario user.
+        If the chat history is empty, add the initial bot message and return it.
+        """
+        if not self.admin_required(request):
+            return Response({"detail": "Not authorized."}, status=403)
+        user = self.get_test_user(pk)
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+        from apps.chat_messages.models import ChatMessage
+        from apps.chat_messages.serializer import ChatMessageSerializer
+        from apps.chat_messages.utils import get_initial_message, add_chat_message
+        from enums.message_role import MessageRole
+        chat_messages_qs = ChatMessage.objects.filter(user=user).order_by("-timestamp")
+        if not chat_messages_qs.exists():
+            initial_message = get_initial_message()
+            if initial_message:
+                add_chat_message(user, initial_message, MessageRole.COACH)
+                chat_messages_qs = ChatMessage.objects.filter(user=user).order_by("-timestamp")
+        latest_messages_qs = chat_messages_qs[:20]
+        ordered_messages = list(reversed(latest_messages_qs))
+        return Response(ChatMessageSerializer(ordered_messages, many=True).data)

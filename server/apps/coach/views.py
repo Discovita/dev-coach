@@ -159,3 +159,89 @@ class CoachViewSet(
             log.error(f"Serializer errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"], url_path="process-message-for-user")
+    def process_message_for_user(self, request: Request):
+        """
+        Process a message as if sent by a specific user (admin only).
+        """
+        if not request.user.is_staff and not request.user.is_superuser:
+            return Response({"detail": "Not authorized."}, status=403)
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response({"detail": "user_id is required."}, status=400)
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            acting_user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=404)
+
+        # Step 1: Parse and validate the incoming request
+        serializer = CoachRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        message = serializer.validated_data["message"]
+        model = serializer.get_model()
+
+        # Step 2: Ensure chat history starts with the initial bot message if empty
+        chat_history_qs = ChatMessage.objects.filter(user=acting_user)
+        if not chat_history_qs.exists():
+            initial_message = get_initial_message()
+            if initial_message:
+                add_chat_message(acting_user, initial_message, MessageRole.COACH)
+
+        # Step 3: Add the user message to the chat history (async)
+        add_chat_message(acting_user, message, MessageRole.USER)
+
+        # Step 4: Retrieve the user's CoachState
+        try:
+            coach_state = CoachState.objects.get(user=acting_user)
+        except CoachState.DoesNotExist:
+            return Response(
+                {"detail": "Coach state not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Step 5: Build the prompt using the PromptManager
+        prompt_manager = PromptManager()
+        coach_prompt, response_format = prompt_manager.create_chat_prompt(
+            user=acting_user, model=model
+        )
+        chat_history_for_prompt_query_set = ChatMessage.objects.filter(
+            user=acting_user
+        ).order_by("-timestamp")[:5]
+        chat_history_for_prompt = list(reversed(chat_history_for_prompt_query_set))
+
+        ai_service = AIServiceFactory.create(model)
+        response: CoachChatResponse = ai_service.generate(
+            coach_prompt, chat_history_for_prompt, response_format, model
+        )
+        add_chat_message(acting_user, response.message, MessageRole.COACH)
+        new_state, actions = apply_actions(coach_state, response)
+        coach_state_serializer = CoachStateSerializer(new_state)
+        log.debug(f"Actions: {actions}")
+
+        large_chat_history_query_set = ChatMessage.objects.filter(
+            user=acting_user
+        ).order_by("-timestamp")[:20]
+        large_chat_history = list(reversed(large_chat_history_query_set))
+        chat_history_serialized = ChatMessageSerializer(
+            large_chat_history, many=True
+        ).data
+
+        identities = Identity.objects.filter(user=acting_user)
+        identities_serialized = IdentitySerializer(identities, many=True).data
+
+        response_data = {
+            "message": response.message,
+            "coach_state": coach_state_serializer.data,
+            "final_prompt": coach_prompt,
+            "actions": actions,
+            "chat_history": chat_history_serialized,
+            "identities": identities_serialized,
+        }
+        serializer = CoachResponseSerializer(data=response_data)
+        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            log.error(f"Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)

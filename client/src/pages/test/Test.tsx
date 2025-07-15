@@ -1,35 +1,39 @@
 import { useState } from "react";
-import { testStates } from "@/tests/testStates";
 import TestChat from "@/pages/test/components/TestChat";
 import {
   ModuleRegistry,
   ClientSideRowModelModule,
   ValidationModule,
 } from "ag-grid-community";
-import { useTestScenarios } from "@/hooks/use-test-scenarios";
+import { useTestScenarios } from "@/hooks/test-scenario/use-test-scenarios";
 import { TestScenario } from "@/types/testScenario";
-import TestScenarioPageHeader from "./components/TestScenarioPageHeader";
-import TestScenarioTable from "./components/TestScenarioTable";
-import TestScenarioEditor from "./components/TestScenarioEditor";
+import TestScenarioPageHeader from "@/pages/test/components/TestScenarioPageHeader";
+import TestScenarioTable from "@/pages/test/components/TestScenarioTable";
+import TestScenarioEditor from "@/pages/test/components/TestScenarioEditor";
 import { useMutation } from "@tanstack/react-query";
-import { createTestScenario, updateTestScenario, resetTestScenario, deleteTestScenario } from "@/api/testScenarios";
+import {
+  createTestScenario,
+  updateTestScenario,
+  resetTestScenario,
+  deleteTestScenario,
+} from "@/api/testScenarios";
 import { toast } from "sonner";
-import { DeleteTestScenarioDialog } from "./components/DeleteTestScenarioDialog";
-// If you see a type error for ag-grid-react, ensure @types/ag-grid-react is installed or use a type override.
+import { DeleteTestScenarioDialog } from "@/pages/test/components/DeleteTestScenarioDialog";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([ClientSideRowModelModule, ValidationModule]);
 
 function Test() {
-  const [selectedState] = useState("");
-  const [hasStarted, setHasStarted] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState<TestScenario | null>(null);
   const { data: scenarios, isLoading, isError, refetch } = useTestScenarios();
   const [editingScenario, setEditingScenario] = useState<TestScenario | null>(
     null
   );
   const [showEditor, setShowEditor] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [scenarioToDelete, setScenarioToDelete] = useState<TestScenario | null>(null);
+  const [scenarioToDelete, setScenarioToDelete] = useState<TestScenario | null>(
+    null
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Create mutation
@@ -123,7 +127,9 @@ function Test() {
           description: fields.description,
           template: {
             user: fields.template.user,
-            ...(fields.template.coach_state ? { coach_state: fields.template.coach_state } : {}),
+            ...(fields.template.coach_state
+              ? { coach_state: fields.template.coach_state }
+              : {}),
           },
         });
         toast.success("Test scenario created successfully!", { id: toastId });
@@ -159,7 +165,10 @@ function Test() {
         setEditingScenario(null); // Clear editing scenario
       },
       onError: (err) => {
-        toast.error("Failed to delete test scenario", { id: toastId, description: err instanceof Error ? err.message : undefined });
+        toast.error("Failed to delete test scenario", {
+          id: toastId,
+          description: err instanceof Error ? err.message : undefined,
+        });
       },
       onSettled: () => {
         setIsDeleting(false);
@@ -180,20 +189,54 @@ function Test() {
     setEditingScenario(null);
   };
 
-  if (hasStarted) {
+  // Handler for starting a scenario (continue from current state)
+  const handleStartScenario = (scenario: TestScenario) => {
+    // Step 1: Set the selected scenario to launch chat
+    setSelectedScenario(scenario);
+  };
+
+  // Handler for starting a scenario fresh (reset to template)
+  const handleStartFreshScenario = async (scenario: TestScenario) => {
+    // Step 1: Reset the scenario on the backend
+    const toastId = toast.loading("Resetting scenario...");
+    try {
+      await resetTestScenario(scenario.id);
+      toast.success("Scenario reset. Launching...", { id: toastId });
+      // Step 2: Refetch scenarios to get the updated state
+      await refetch();
+      // Step 3: Find the updated scenario and set as selected
+      const updated = scenarios?.find((s) => s.id === scenario.id);
+      if (updated) {
+        setSelectedScenario(updated);
+      } else {
+        toast.error("Could not find updated scenario", { id: toastId });
+      }
+    } catch (err) {
+      toast.error("Failed to reset scenario", {
+        id: toastId,
+        description: err instanceof Error ? err.message : undefined,
+      });
+    }
+  };
+
+  // Handler for returning to the scenario table
+  const handleBackToTable = () => {
+    setSelectedScenario(null);
+  };
+
+  if (selectedScenario) {
     return (
-      // TODO: Fix the selected state that gets passed in here
-      // May have to convert this to read test scenarios directly
+      // Render the chat for the selected scenario (now contains user id for test scenario chat API calls)
       <TestChat
-        selectedState={selectedState}
-        setHasStarted={setHasStarted}
-        testStates={testStates}
+        scenario={selectedScenario}
+        setHasStarted={handleBackToTable}
       />
     );
   }
 
   return (
     <div className="_Test flex flex-col items-center w-full h-full p-4">
+      {/* Removed TestStateSelector */}
       <div className="w-full max-w-5xl my-8">
         <TestScenarioPageHeader onCreate={handleCreateScenario} />
         <TestScenarioTable
@@ -202,6 +245,8 @@ function Test() {
           isError={isError}
           onEdit={handleEditScenario}
           onDelete={handleDeleteScenario}
+          onStart={handleStartScenario} // New prop for starting scenario
+          onStartFresh={handleStartFreshScenario} // New prop for starting fresh
         />
         <DeleteTestScenarioDialog
           isOpen={deleteDialogOpen}
@@ -216,7 +261,11 @@ function Test() {
           scenario={editingScenario}
           onSave={handleSaveScenario}
           onCancel={handleCancelEdit}
-          onDelete={editingScenario ? () => handleDeleteScenario(editingScenario) : undefined}
+          onDelete={
+            editingScenario
+              ? () => handleDeleteScenario(editingScenario)
+              : undefined
+          }
         />
       )}
     </div>

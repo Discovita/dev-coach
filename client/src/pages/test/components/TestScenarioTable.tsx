@@ -11,6 +11,16 @@ interface TestScenarioTableProps {
   isError: boolean;
   onEdit: (scenario: TestScenario) => void;
   onDelete: (scenario: TestScenario) => void;
+  /**
+   * Handler for starting a scenario (continue from current state)
+   * Provided by Test.tsx
+   */
+  onStart: (scenario: TestScenario) => void;
+  /**
+   * Handler for starting a scenario fresh (reset to template)
+   * Provided by Test.tsx
+   */
+  onStartFresh: (scenario: TestScenario) => void;
 }
 
 const TestScenarioTable = ({
@@ -19,22 +29,23 @@ const TestScenarioTable = ({
   isError,
   onEdit,
   onDelete,
+  onStart,
+  onStartFresh,
 }: TestScenarioTableProps) => {
   // Dummy handlers for Start and Start Fresh actions
-  const handleStart = (scenario: TestScenario) => {
-    // TODO: Implement navigation to session (continue)
-    console.log("Start (continue) scenario", scenario.id);
-  };
-  const handleStartFresh = (scenario: TestScenario) => {
-    // TODO: Implement reset and navigation
-    console.log("Start Fresh scenario", scenario.id);
-  };
+  // const handleStart = (scenario: TestScenario) => {
+  //   // TODO: Implement navigation to session (continue)
+  //   console.log("Start (continue) scenario", scenario.id);
+  // };
+  // const handleStartFresh = (scenario: TestScenario) => {
+  //   // TODO: Implement reset and navigation
+  //   console.log("Start Fresh scenario", scenario.id);
+  // };
 
   const columnDefs = useMemo<ColDef<TestScenario>[]>(
     () => [
       { field: "name", headerName: "Name", flex: 1 },
       { field: "description", headerName: "Description", flex: 2 },
-      { field: "created_by", headerName: "Created By", flex: 1 },
       {
         headerName: "Actions",
         field: undefined, // Not a real data field
@@ -43,14 +54,14 @@ const TestScenarioTable = ({
             <Button
               size="xs"
               variant="default"
-              onClick={() => handleStart(params.data as TestScenario)}
+              onClick={() => onStart(params.data as TestScenario)}
             >
               Start
             </Button>
             <Button
               size="xs"
               variant="default"
-              onClick={() => handleStartFresh(params.data as TestScenario)}
+              onClick={() => onStartFresh(params.data as TestScenario)}
               className="bg-gold-300 hover:bg-gold-400"
             >
               New
@@ -76,7 +87,7 @@ const TestScenarioTable = ({
         filter: false,
       },
     ],
-    [onEdit, onDelete]
+    [onEdit, onDelete, onStart, onStartFresh]
   );
 
   return (

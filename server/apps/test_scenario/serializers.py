@@ -30,6 +30,7 @@ class TestScenarioSerializer(serializers.ModelSerializer):
         user = instance.user_set.first()  # or however you link the test user
         if user:
             template_user = template.get("user", {})
+            template_user["id"] = user.id  # Add user id for frontend API calls
             template_user["email"] = user.email
             template_user["password"] = "Coach123!"  # Always the default
             template["user"] = template_user
