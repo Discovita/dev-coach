@@ -30,10 +30,10 @@ export const TestScenarioChatInterface: React.FC<{ userId: string }> = ({ userId
 
   // Get coach state for the test user
   const {
-    data: coachState,
+    coachState,
     isLoading: isLoadingCoachState,
     isError: isErrorCoachState,
-    refetch: refetchCoachState,
+    refetchCoachState,
   } = useTestScenarioUserCoachState(userId);
 
   // Compose the messages to display, including the pending message if any (optimistic UI)

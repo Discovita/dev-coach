@@ -91,7 +91,7 @@ const TestScenarioTable = ({
   );
 
   return (
-    <div className="w-full">
+    <div className="_TestScenarioTable w-full">
       {isLoading ? (
         <div className="ag-overlay-loading-center">Loading...</div>
       ) : isError ? (

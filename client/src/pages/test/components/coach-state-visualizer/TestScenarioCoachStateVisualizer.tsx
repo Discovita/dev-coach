@@ -3,44 +3,56 @@ import { TabName } from "./types";
 import { getDefaultExpandedSections, getTabsConfig } from "./utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { useCoachState } from "@/hooks/use-coach-state";
-import { useChatMessages } from "@/hooks/use-chat-messages";
-import { useIdentities } from "@/hooks/use-identities";
-import { useFinalPrompt } from "@/hooks/use-final-prompt";
-import { useActions } from "@/hooks/use-actions";
-import { TabContent } from "./utils/tabContentFactory";
+import { TestScenarioTabContent } from "./utils/tabContentFactory";
 import { CoachState } from "@/types/coachState";
 import { Action } from "@/types/action";
 import { Message } from "@/types/message";
+// Only import test-scenario hooks
+import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-scenario-user-coach-state";
+import { useTestScenarioUserChatMessages } from "@/hooks/test-scenario/use-test-scenario-user-chat-messages";
+import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
+import { useTestScenarioUserFinalPrompt } from "@/hooks/test-scenario/use-test-scenario-user-final-prompt";
+import { useTestScenarioUserActions } from "@/hooks/test-scenario/use-test-scenario-user-actions";
 
 /**
- * CoachStateVisualizer component (self-fetching version)
- * Fetches all required data using hooks and visualizes the coach state.
+ * Props for TestScenarioCoachStateVisualizer
+ * @param testUserId The test scenario user id. Required.
+ */
+export interface TestScenarioCoachStateVisualizerProps {
+  testUserId: string;
+}
+
+/**
+ * TestScenarioCoachStateVisualizer component (self-fetching version)
+ * Fetches all required data using test-scenario hooks and visualizes the coach state for a test user.
  * Now uses TabContent component for tab rendering.
  *
  * Step-by-step:
- * 1. Fetch coach state using useCoachState.
- * 2. Fetch chat messages (and last response) using useChatMessages.
- * 3. Fetch identities using useIdentities (for extensibility).
+ * 1. Fetch coach state using useTestScenarioUserCoachState.
+ * 2. Fetch chat messages (and last response) using useTestScenarioUserChatMessages.
+ * 3. Fetch identities using useTestScenarioUserIdentities.
  * 4. Handle loading and error states for all hooks.
  * 5. Use the fetched coachState and latest response for visualization.
  * 6. Maintain tab, section, and update state as before, but now use robust cache-driven tab update notification logic.
  */
-export const CoachStateVisualizer: React.FC = () => {
+export const TestScenarioCoachStateVisualizer: React.FC<TestScenarioCoachStateVisualizerProps> = ({ testUserId }) => {
   // 1. Fetch coach state
   const {
     coachState,
     isLoading: isCoachStateLoading,
     isError: isCoachStateError,
-  } = useCoachState();
+  } = useTestScenarioUserCoachState(testUserId);
+
   // 2. Fetch chat messages (and last response)
-  const { chatMessages } = useChatMessages();
+  const { chatMessages } = useTestScenarioUserChatMessages(testUserId);
+
   // 3. Fetch identities (optional, for extensibility)
-  useIdentities(); // Not used directly, but ensures cache is up to date
+  useTestScenarioUserIdentities(testUserId); // Not used directly, but ensures cache is up to date
+
   // Fetch final prompt
-  const finalPrompt = useFinalPrompt();
+  const finalPrompt = useTestScenarioUserFinalPrompt(testUserId);
   // Fetch actions
-  const actions = useActions();
+  const actions = useTestScenarioUserActions(testUserId);
 
   // 6. Maintain tab and section state as before
   const [activeTab, setActiveTab] = useState<TabName>(TabName.STATE);
@@ -158,7 +170,7 @@ export const CoachStateVisualizer: React.FC = () => {
   };
 
   return (
-    <div className="_CoachStateVisualizer flex flex-col h-full w-full max-h-screen rounded-none dark:rounded-none shadow-gold-md overflow-hidden dark:bg-[#333333] dark:border-none">
+    <div className="_TestScenarioCoachStateVisualizer flex flex-col h-full w-full max-h-screen rounded-none dark:rounded-none shadow-gold-md overflow-hidden dark:bg-[#333333] dark:border-none">
       <Tabs
         value={activeTab}
         onValueChange={(v) => handleTabClick(v as TabName)}
@@ -208,10 +220,11 @@ export const CoachStateVisualizer: React.FC = () => {
             className="flex-1 overflow-y-auto p-4 scrollbar"
           >
             {activeTab === tab.name && (
-              <TabContent
+              <TestScenarioTabContent
                 tabName={tab.name as TabName}
                 expandedSections={expandedSections}
                 toggleSection={toggleSection}
+                testUserId={testUserId}
               />
             )}
           </TabsContent>

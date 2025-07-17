@@ -19,12 +19,16 @@ import {
 } from "@/api/testScenarios";
 import { toast } from "sonner";
 import { DeleteTestScenarioDialog } from "@/pages/test/components/DeleteTestScenarioDialog";
+import { Button } from "@/components/ui/button";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([ClientSideRowModelModule, ValidationModule]);
 
 function Test() {
-  const [selectedScenario, setSelectedScenario] = useState<TestScenario | null>(null);
+  const [selectedScenario, setSelectedScenario] = useState<TestScenario | null>(
+    null
+  );
+  const [isResumingOwnChat, setIsResumingOwnChat] = useState(false);
   const { data: scenarios, isLoading, isError, refetch } = useTestScenarios();
   const [editingScenario, setEditingScenario] = useState<TestScenario | null>(
     null
@@ -219,24 +223,48 @@ function Test() {
     }
   };
 
+  // Handler for resuming admin's own chat
+  const handleResumeOwnChat = () => {
+    setIsResumingOwnChat(true);
+    setSelectedScenario(null);
+  };
+
   // Handler for returning to the scenario table
   const handleBackToTable = () => {
     setSelectedScenario(null);
+    setIsResumingOwnChat(false);
   };
 
   if (selectedScenario) {
     return (
-      // Render the chat for the selected scenario (now contains user id for test scenario chat API calls)
       <TestChat
         scenario={selectedScenario}
         setHasStarted={handleBackToTable}
+        testUserId={
+          selectedScenario.template.user?.id
+            ? String(selectedScenario.template.user.id)
+            : undefined
+        }
       />
+    );
+  }
+
+  if (isResumingOwnChat) {
+    // Provide a dummy scenario object for admin session
+    const adminScenario = { name: "My Chat Session" } as TestScenario;
+    return (
+      <TestChat scenario={adminScenario} setHasStarted={handleBackToTable} />
     );
   }
 
   return (
     <div className="_Test flex flex-col items-center w-full h-full p-4">
-      {/* Removed TestStateSelector */}
+      {/* Resume My Chat button */}
+      <div className="w-full max-w-5xl my-4 flex justify-end">
+        <Button variant="default" onClick={handleResumeOwnChat}>
+          Resume My Chat
+        </Button>
+      </div>
       <div className="w-full max-w-5xl my-8">
         <TestScenarioPageHeader onCreate={handleCreateScenario} />
         <TestScenarioTable
@@ -245,8 +273,8 @@ function Test() {
           isError={isError}
           onEdit={handleEditScenario}
           onDelete={handleDeleteScenario}
-          onStart={handleStartScenario} // New prop for starting scenario
-          onStartFresh={handleStartFreshScenario} // New prop for starting fresh
+          onStart={handleStartScenario}
+          onStartFresh={handleStartFreshScenario}
         />
         <DeleteTestScenarioDialog
           isOpen={deleteDialogOpen}
