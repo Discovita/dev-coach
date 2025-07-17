@@ -113,7 +113,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
     }
     try {
       console.log("Identities being sent:", identities);
-      await onSave({
+      onSave({
         name,
         description,
         template: {

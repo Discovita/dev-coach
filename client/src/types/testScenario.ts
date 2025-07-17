@@ -6,7 +6,7 @@ export interface TestScenarioUser {
    * The unique id for the test user (used for API calls to fetch user data).
    * Set by the backend in the test scenario serializer.
    */
-  id: string | number;
+  id?: string | number;
   first_name: string;
   last_name: string;
   /**
