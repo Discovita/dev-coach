@@ -41,6 +41,7 @@ This document outlines the plan for implementing a robust, backend-driven, templ
 - [x] All validation tests passing (robust coverage)
 - [x] Extra fields are now forbidden and reported clearly
 - [x] Error messages are actionable and field-specific
+- [x] **TestUserViewSet and all admin endpoints for fetching test user data (profile, complete, coach state, identities, chat messages) are implemented and documented.**
 
 ---
 
@@ -233,12 +234,94 @@ A scenario template is a JSON object describing the initial state for all releva
 
 ---
 
-## Open Questions / Future Enhancements
+## New Feature: Capture ("Freeze") Current User Session as Test Scenario
 
-- Should we support scenario versioning/history?
-- Should we allow importing/exporting templates for sharing?
-- How should we handle schema migrations for templates if models change significantly?
-- What should we call the feature that captures a live user's state as a scenario? ("Freeze" is not descriptive enough.)
+### Overview
+
+Enable an admin to capture ("freeze") the current state of any user session (including chat messages, identities, coach state, user notes, and user profile) and create a new test scenario from it. This feature is admin-only, accessible from the `TestChat.tsx` component, and will streamline QA and scenario creation.
+
+### Requirements
+
+- **Admin-only:** Feature is only available to admin users.
+- **Accessible from TestChat:** UI is in `TestChat.tsx` (for both admin’s own session and test scenario sessions).
+- **Data to Capture:** All relevant user state: `User`, `CoachState`, `Identity`, `ChatMessage`, `UserNote`.
+- **Form Input:** Admin provides a unique scenario name and description.
+- **Backend:** New API endpoint to accept user ID, name, and description, and generate a new `TestScenario` with a template built from the user’s current state.
+- **Validation:** Name must be unique; backend validates and returns actionable errors.
+- **Extensibility:** Solution should be robust to future model/template changes.
+
+### Backend Implementation
+
+- **New API Endpoint:**
+  - **Location:** `server/apps/test_scenario/views.py` (in `TestScenarioViewSet`)
+  - **Route:** `POST /api/test-scenarios/freeze-session/`
+  - **Permissions:** `IsAdminUser`
+  - **Input:** `{ user_id, name, description }`
+  - **Output:** Created `TestScenario` object (or error)
+
+- **Logic:**
+  1. **Validate input:** Ensure `user_id` exists, `name` is unique, and required fields are present.
+  2. **Gather user state:** Query all relevant models for the given user:
+     - `User`
+     - `CoachState`
+     - `Identity` (all for user)
+     - `ChatMessage` (all for user)
+     - `UserNote` (all for user)
+     
+     **Note:** The backend already provides robust admin-only endpoints for fetching all required user state via the `TestUserViewSet` (see `test_user_api.md`). These can be leveraged for the freeze-session feature.
+  3. **Build template JSON:** Structure as per the canonical template schema.
+  4. **Create new `TestScenario`:** Save with the generated template, name, and description.
+  5. **(Optional) Instantiate scenario:** Use existing logic if immediate instantiation is desired.
+  6. **Return:** The created scenario or a structured error.
+
+- **Validation & Error Handling:**
+  - Use DRF serializers for template validation (as in existing scenario creation).
+  - Return clear, actionable error messages for:
+    - Duplicate name
+    - Invalid/missing user
+    - Schema mismatches
+
+### Frontend Implementation
+
+- **UI/UX in `TestChat.tsx`:**
+  - **Button:** “Create Test Scenario from Current Session” (admin-only)
+  - **Modal/Form:** For entering scenario name and description
+  - **API Call:** On submit, send `{ user_id, name, description }` to new endpoint
+  - **Feedback:** Show loading, success, and error states
+  - **Update UI:** Optionally refresh scenario list or show a link to the new scenario
+
+- **Data Handling:**
+  - **user_id:**  
+    - If in test scenario mode: use `testUserId`
+    - If in admin mode: use current user’s ID (from auth context/hook)
+  - **Form validation:** Ensure name/description are not empty before submit
+
+- **Comments & Documentation:**
+  - Add step-by-step comments at the top of the handler/component
+  - Inline comments for non-obvious logic
+
+### Testing & Validation
+
+- **Backend:**  
+  - Unit tests for endpoint (valid/invalid input, edge cases)
+  - Manual test: create scenario from both admin and test user sessions
+- **Frontend:**  
+  - Manual test: create scenario, handle errors, see new scenario in list
+  - (Optional) Add Cypress or React Testing Library tests for UI
+
+### Documentation
+
+- Update relevant markdown docs:
+  - `test_scenario_system_overview.md`
+  - `Testing_Implementation_Plan.md`
+  - `test_scenario_admin_tools_overview.md`
+- Document new endpoint, UI, and any changes to the template schema
+
+### Edge Cases & Future-Proofing
+
+- **Large sessions:** Consider pagination/limits if user has many messages/notes
+- **Schema drift:** Use DRF serializers for template validation to ensure future compatibility
+- **Extensibility:** If new models are added, update both the backend data gathering and the template schema
 
 ---
 
@@ -250,10 +333,17 @@ A scenario template is a JSON object describing the initial state for all releva
   - Implementation note: Used string reference for FK to avoid circular import issues.
 - [x] Implement robust backend validation for scenario templates (with clear error messages)
 - [x] Write and pass comprehensive tests for scenario template validation
-- [ ] Build DRF viewset for scenario management (CRUD, reset, validation)
+- [x] Build DRF viewset for scenario management (CRUD, reset, validation)
+- [x] Build admin backend endpoints for test user data (TestUserViewSet: profile, complete, coach state, identities, chat messages)
 - [ ] Build admin frontend page for test scenario management (list, view, edit, create, show errors)
 - [ ] (Optional) Add schema versioning to templates
-- [ ] (Last) Implement feature to capture a live user's state as a scenario (name TBD)
+- [x] (Last) Implement feature to capture a live user's state as a scenario (see section above)
+- [ ] Implement new freeze-session endpoint in `TestScenarioViewSet`
+- [ ] Add/extend serializers and tests for freeze-session
+- [ ] Add button, modal, and API integration in `TestChat.tsx`
+- [ ] Add UI feedback and error handling for freeze-session
+- [ ] Update markdown docs and API docs for freeze-session
+- [ ] Manual and automated tests for end-to-end freeze-session flow
 
 ---
 
