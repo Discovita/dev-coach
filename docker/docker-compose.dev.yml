@@ -12,6 +12,7 @@ services:
     environment:
       - VITE_COACH_BASE_URL=http://localhost:8000/api/v1
       - VITE_ENV=DEVELOPMENT
+    command: npm run dev
   celery:
     build:
       context: ../server

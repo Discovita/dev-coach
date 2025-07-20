@@ -1,0 +1,148 @@
+POST http://127.0.0.1:8000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin@admin.com",
+  "password": "Coach123!"
+}
+
+###
+GET http://127.0.0.1:8000/api/v1/test-scenarios
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+###
+POST http://127.0.0.1:8000/api/v1/test-scenarios
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+{
+  "name": "My Test Scenario",
+  "description": "Testing user creation and all related data",
+  "template": {
+    "user": {
+      "first_name": "Test",
+      "last_name": "User"
+    },
+    "coach_state": {
+      "current_phase": "identity_brainstorming",
+      "identity_focus": "physical_expression",
+      "who_you_are": ["Curious Explorer"],
+      "who_you_want_to_be": ["Visionary Leader"],
+      "skipped_identity_categories": [],
+      "current_identity": null,
+      "proposed_identity": null,
+      "metadata": {}
+    },
+    "identities": [
+      {
+        "name": "Curious Explorer",
+        "category": "physical_expression",
+        "affirmation": "I am curious.",
+        "visualization": "A vivid scene.",
+        "notes": ["note1", "note2"]
+      }
+    ],
+    "chat_messages": [
+      {
+        "role": "user",
+        "content": "I'm ready to brainstorm new identities."
+      },
+      {
+        "role": "coach",
+        "content": "Let's get started!"
+      }
+    ],
+    "user_notes": [
+      {
+        "note": "User is highly motivated at this stage."
+      }
+    ]
+  }
+}
+
+###
+GET http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+
+# PUT http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+###
+PUT http://127.0.0.1:8000/api/v1/test-scenarios/c23f3ea1-6a48-4491-810c-b37a714a88b4
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+{
+  "name": "My Test Scenario 2",
+  "description": "Updated description and data",
+  "template": {
+    "user": {
+      "first_name": "Casey",
+      "last_name": "User"
+    },
+    "coach_state": {
+      "current_phase": "identity_brainstorming",
+      "identity_focus": "physical_expression",
+      "who_you_are": ["Curious Explorer"],
+      "who_you_want_to_be": ["Visionary Leader"],
+      "skipped_identity_categories": [],
+      "current_identity": null,
+      "proposed_identity": null,
+      "metadata": {}
+    },
+    "identities": [
+      {
+        "name": "Visionary Leader",
+        "category": "physical_expression",
+        "affirmation": "I am a visionary.",
+        "visualization": "A grand vision.",
+        "notes": ["note3"]
+      }
+    ],
+    "chat_messages": [
+      {
+        "role": "user",
+        "content": "I've updated my identity EDITED."
+      },
+      {
+        "role": "coach",
+        "content": "Identity updated!"
+      }
+    ],
+    "user_notes": [
+      {
+        "note": "User updated their identity EDITED."
+      }
+    ]
+  }
+}
+
+###
+# Verify scenario update and all related data
+GET http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+# DELETE http://127.0.0.1:8000/api/v1/test-scenarios/{id}
+###
+DELETE http://127.0.0.1:8000/api/v1/test-scenarios/c23f3ea1-6a48-4491-810c-b37a714a88b4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+# POST http://127.0.0.1:8000/api/v1/test-scenarios/{id}/reset
+###
+POST http://127.0.0.1:8000/api/v1/test-scenarios/c23f3ea1-6a48-4491-810c-b37a714a88b4/reset
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+# GET http://127.0.0.1:8000/api/v1/user/{id}/complete
+###
+GET http://127.0.0.1:8000/api/v1/user/e07da756-47d5-4a50-852a-0c00c40159e3/complete
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+
+###
+POST http://127.0.0.1:8000/api/v1/test-scenarios/freeze-session
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTAwODg3LCJpYXQiOjE3NTMwMTQ0ODcsImp0aSI6ImM5OWRhNTAzZDM0ZDRkZDZhMTY5OGMyMWVkYmU2NDBjIiwidXNlcl9pZCI6IjUxMGJiOGQ5LTNhMjQtNDlkNi1hYThiLTE5MjJlOGY0OWQ5OSJ9.jCSd8YTC0CtoG-d3-zlZCmiwe2n8GqKT5GqFdM9jdTs
+
+{
+  "user_id": "510bb8d9-3a24-49d6-aa8b-1922e8f49d99",
+  "name": "Frozen Scenario for User 510bb8d9",
+  "description": "Test scenario created by freezing user 510bb8d9-3a24-49d6-aa8b-1922e8f49d99"
+}

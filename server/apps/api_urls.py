@@ -6,13 +6,15 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 # Local Modules
 from apps.authentication.views import AuthViewSet
 from apps.prompts.views import PromptViewSet
 from apps.core.views import CoreViewSet
 from apps.coach.views import CoachViewSet
-from apps.users.views import UserViewSet
+from apps.users.views import UserViewSet, TestUserViewSet
+from apps.test_scenario.views import TestScenarioViewSet
 
 # Local Modules
 
@@ -27,6 +29,8 @@ default_router.register(r"prompts", PromptViewSet, basename="prompts")
 default_router.register(r"core", CoreViewSet, basename="core")
 default_router.register(r"coach", CoachViewSet, basename="coach")
 default_router.register(r"user", UserViewSet, basename="user")
+default_router.register(r"test-user", TestUserViewSet, basename="test-user")
+default_router.register(r"test-scenarios", TestScenarioViewSet, basename="test-scenarios")
 
 # JWT token URLs
 jwt_patterns = [
@@ -39,7 +43,8 @@ auth_paths = [
 ]
 
 docs_paths = [
-    # Add documentation paths here if needed
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]
 
 # Combine all urlpatterns

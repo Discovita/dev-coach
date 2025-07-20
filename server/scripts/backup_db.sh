@@ -4,7 +4,7 @@
 # Example: ./backup_db.sh my_backup.sql
 
 # Database credentials
-DB_HOST="dpg-d0doal95pdvs739dklo0-a"
+DB_HOST="dpg-d0doal95pdvs739dklo0-a.oregon-postgres.render.com"
 DB_NAME="dev_coach_database"
 DB_USER="dev_coach_database_user"
 DB_PASSWORD="UxRZ75YUsR2wFL6B3JnUDWN8XDyriY3v"

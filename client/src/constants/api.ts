@@ -9,3 +9,5 @@ export const VERIFY_EMAIL = "/auth/verify-email";
 export const RESEND_VERIFICATION = "/auth/resend-verification";
 export const FORGOT_PASSWORD = "/auth/forgot-password";
 export const RESET_PASSWORD = "/auth/reset-password";
+export const TEST_SCENARIOS = "/test-scenarios";
+export const FREEZE_SESSION = "/test-scenarios/freeze-session"

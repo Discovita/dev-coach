@@ -106,3 +106,186 @@ docker compose down
 ---
 
 For more details, see the `docker-compose.yml` and Dockerfiles in each service directory.
+
+---
+
+## Managing Migrations and Container Lifecycle
+
+### Starting the Environment
+
+To start all services (frontend, backend, celery, redis, and Postgres) for local development:
+
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose --profile local \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.local.yml up --build
+```
+
+- Add `-d` to run in detached mode (in the background):
+  ```sh
+  COMPOSE_PROJECT_NAME=dev-coach-local \
+    docker compose --profile local \
+    -f docker/docker-compose.yml \
+    -f docker/docker-compose.local.yml up --build -d --force-recreate
+  ```
+
+### Forcing Dependency Reinstalls and Rebuilds (Frontend/Backend)
+
+**If you add new packages or dependencies to the frontend or backend, Docker may use cached layers and not install them unless you force a rebuild.**
+
+- To ensure all new dependencies are installed and recognized, use the following flags:
+
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose --profile local \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.local.yml up --build --force-recreate --no-deps
+```
+
+- **Flags explained:**
+  - `--build`: Always build images before starting containers.
+  - `--force-recreate`: Recreate containers even if their configuration and image haven't changed.
+  - `--no-deps`: Don't start linked services (dependencies). Use this if you only want to rebuild a specific service (e.g., frontend or backend) without restarting the database or redis.
+  - `--no-cache`: (use with `docker compose build`) Forces Docker to not use any cache when building images. Use this if you suspect the build cache is stale:
+    ```sh
+    COMPOSE_PROJECT_NAME=dev-coach-local \
+      docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml build --no-cache frontend
+    ```
+    Then bring up the environment as usual.
+
+#### Common Troubleshooting
+
+- **New packages not recognized in containers?**
+  - Make sure you:
+    1. Add the package to the correct `package.json` or `requirements.txt`.
+    2. Run with `--build --force-recreate` to ensure Docker rebuilds the image and reinstalls dependencies.
+    3. If still not working, try `docker compose build --no-cache` for the affected service.
+- **Frontend/Backend code changes not reflected?**
+  - If you only changed code (not dependencies), a simple `docker compose up --build` is usually enough.
+  - For dependency changes, always use `--build --force-recreate`.
+- **Want to rebuild only the frontend or backend?**
+  - You can specify the service name at the end:
+    ```sh
+    COMPOSE_PROJECT_NAME=dev-coach-local \
+      docker compose --profile local \
+      -f docker/docker-compose.yml \
+      -f docker/docker-compose.local.yml up --build --force-recreate frontend
+    ```
+
+### Stopping the Environment
+
+To stop and remove all containers and networks:
+
+```sh
+docker compose down
+```
+
+---
+
+### Making and Applying Django Migrations (While Containers Are Running)
+
+You can make and apply migrations directly inside the running backend container. Your code and migration files will be updated on your host machine thanks to the volume mount.
+
+#### **Using Docker Compose Exec**
+
+Make migrations:
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py makemigrations
+```
+
+Apply migrations:
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
+```
+
+---
+
+### Running Tests Inside the Backend Docker Container
+
+Ensure the local environment is running according to the directions above.
+
+To run your Django/pytest tests in the same environment as your backend (recommended for this project):
+
+- **In a new terminal, run your tests inside the backend container:**
+  ```sh
+  COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest apps/test_scenario/tests/
+  ```
+  - This will run all tests in the `server/apps/test_scenario/tests/` directory.
+  - To run all tests in the project, omit the path:
+    ```sh
+    COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest
+    ```
+
+**Tip:**
+- This approach ensures your tests use the same environment, database, and dependencies as your running backend service.
+- You can use this pattern for any Django management or test command.
+
+---
+
+## Managing Migrations and Container Lifecycle
+
+### Starting the Environment
+
+To start all services (frontend, backend, celery, redis, and Postgres) for local development:
+
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose --profile local \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.local.yml up --build
+```
+
+- Add `-d` to run in detached mode (in the background):
+  ```sh
+  COMPOSE_PROJECT_NAME=dev-coach-local \
+    docker compose --profile local \
+    -f docker/docker-compose.yml \
+    -f docker/docker-compose.local.yml up --build -d
+  ```
+
+### Stopping the Environment
+
+To stop and remove all containers and networks:
+
+```sh
+docker compose down
+```
+
+---
+
+### Making and Applying Django Migrations (While Containers Are Running)
+
+You can make and apply migrations directly inside the running backend container. Your code and migration files will be updated on your host machine thanks to the volume mount.
+
+#### **Using Docker Compose Exec**
+
+Make migrations:
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py makemigrations
+```
+
+Apply migrations:
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
+```
+
+Create a super user:
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+docker compose \
+-f docker/docker-compose.yml \
+-f docker/docker-compose.local.yml \
+exec backend python manage.py createsuperuser \
+--noinput --email superadmin@admin.com
+```
+
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend \
+python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); u=User.objects.get(email='superadmin@admin.com'); u.set_password('Coach123!'); u.save()"
+```

@@ -37,6 +37,13 @@ class ChatMessage(models.Model):
         help_text="When the message was sent.",
         db_index=True,
     )
+    test_scenario = models.ForeignKey(
+        'test_scenario.TestScenario',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Test scenario this chat message is associated with (for test data isolation)."
+    )
 
     # NOTE: This is used when formatting the messages for prompts.
     def __str__(self):
