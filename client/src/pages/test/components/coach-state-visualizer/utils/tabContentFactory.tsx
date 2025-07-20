@@ -169,7 +169,7 @@ export const TestScenarioTabContent: React.FC<{
   const { coachState } = useTestScenarioUserCoachState(testUserId);
   const finalPrompt = useTestScenarioUserFinalPrompt(testUserId);
   const actions: Action[] = useTestScenarioUserActions(testUserId);
-  useTestScenarioUserIdentities(testUserId); // Not used directly, but ensures cache is up to date
+  const { identities } = useTestScenarioUserIdentities(testUserId); // <-- FIX: get identities here
   const { chatMessages } = useTestScenarioUserChatMessages(testUserId);
 
   switch (tabName) {
@@ -241,7 +241,7 @@ export const TestScenarioTabContent: React.FC<{
         <>
           {renderJsonSection(
             "Confirmed Identities",
-            [], // Not fetched directly, but could be added if needed
+            identities || [], // <-- FIX: use identities here
             "identities",
             expandedSections["identities"],
             toggleSection
@@ -260,7 +260,8 @@ export const TestScenarioTabContent: React.FC<{
             toggleSection
           )}
 
-          {(!coachState?.proposed_identity) &&
+          {(!identities || identities.length === 0) &&
+            !coachState?.proposed_identity &&
             renderEmptyState("No identities created yet.")}
         </>
       );
