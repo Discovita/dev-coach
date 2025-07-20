@@ -120,8 +120,11 @@ class TestScenarioViewSet(
             return Response({"detail": "A scenario with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
         # 3. Gather all user state, STRICT to template serializers
-        first_name = user.first_name or "Test"
-        last_name = user.last_name or "User"
+        # Use provided first_name/last_name if present and non-blank, else fallback to user or defaults
+        req_first_name = request.data.get("first_name", "").strip()
+        req_last_name = request.data.get("last_name", "").strip()
+        first_name = req_first_name or user.first_name or "Test"
+        last_name = req_last_name or user.last_name or "User"
         user_section = {
             "email": user.email,
             "first_name": first_name,

@@ -109,7 +109,6 @@ export const ChatInterface: React.FC = () => {
       <ChatControls
         isProcessingMessage={updateStatus === "pending"}
         onSendMessage={handleSendMessage}
-        isTest={false}
       />
     </div>
   );

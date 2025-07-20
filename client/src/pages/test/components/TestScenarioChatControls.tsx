@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { TestScenarioConversationResetter } from "@/pages/test/components/TestScenarioConversationResetter";
+import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
+import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
+import { User } from "@/types/user";
 
 interface TestScenarioChatControlsProps {
   isProcessingMessage: boolean;
@@ -11,14 +14,14 @@ interface TestScenarioChatControlsProps {
   onResetSuccess?: () => void;
 }
 
-export const TestScenarioChatControls: React.FC<TestScenarioChatControlsProps> = ({
-  isProcessingMessage,
-  onSendMessage,
-  scenarioId,
-  onResetSuccess,
-}) => {
+export const TestScenarioChatControls: React.FC<
+  TestScenarioChatControlsProps
+> = ({ isProcessingMessage, onSendMessage, scenarioId, onResetSuccess }) => {
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Get current user profile from TanStack Query cache
+  const profile = useReactiveQueryData<User>(["user", "profile"]);
 
   /**
    * Resizes the textarea to fit content, up to a max height.
@@ -96,7 +99,14 @@ export const TestScenarioChatControls: React.FC<TestScenarioChatControlsProps> =
         </Button>
       </form>
       <div className="flex justify-center items-center gap-6">
-        <TestScenarioConversationResetter scenarioId={scenarioId} onResetSuccess={onResetSuccess} />
+        <TestScenarioConversationResetter
+          scenarioId={scenarioId}
+          onResetSuccess={onResetSuccess}
+        />
+        <TestScenarioSessionFreezer
+          userId={profile?.id || ""}
+          onSuccess={() => {}}
+        />
         <ConversationExporter />
       </div>
     </div>
