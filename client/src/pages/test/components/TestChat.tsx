@@ -71,10 +71,10 @@ const TestChat: React.FC<TestChatProps> = ({
         </Button>
       </div>
       <div className="_TestChatContent flex flex-col xl:flex-row items-start flex-1 min-h-0">
-        <div className="_TestChatInterfaceContainer flex flex-col w-full xl:flex-1 min-w-0 overflow-hidden h-full min-h-0 xl:mr-4">
+        <div className="_ChatInterfaceContainer flex flex-col w-full xl:flex-1 min-w-0 overflow-hidden h-full min-h-0 xl:mr-4">
           <ChatInterface />
         </div>
-        <div className="_TestChatCoachStateVisualizerContainer w-full xl:w-2/5 min-w-0 xl:min-w-[600px] border-t xl:border-t-0 xl:border-l border-border-color overflow-hidden h-full min-h-0">
+        <div className="_ChatCoachStateVisualizerContainer w-full xl:w-2/5 min-w-0 xl:min-w-[600px] border-t xl:border-t-0 xl:border-l border-border-color overflow-hidden h-full min-h-0">
           <CoachStateVisualizer key="admin" />
         </div>
       </div>

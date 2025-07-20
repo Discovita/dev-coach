@@ -22,7 +22,7 @@ class TemplateUserSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     password = serializers.CharField(required=False, help_text="Password for the test user. Not required; always set to 'Coach123!' by the backend.")
     first_name = serializers.CharField(help_text="First name of the user. Required.")
     last_name = serializers.CharField(help_text="Last name of the user. Required.")
-    # Optional fields for user creation (add as needed)
+    # these fields are here to maintain integrity with the db models to prevent errors. 
     is_active = serializers.BooleanField(required=False, help_text="Is the user active?")
     is_superuser = serializers.BooleanField(required=False, help_text="Is the user a superuser?")
     is_staff = serializers.BooleanField(required=False, help_text="Is the user staff?")

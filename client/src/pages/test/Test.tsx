@@ -28,7 +28,7 @@ function Test() {
   const [selectedScenario, setSelectedScenario] = useState<TestScenario | null>(
     null
   );
-  const [isResumingOwnChat, setIsResumingOwnChat] = useState(false);
+  const [isResumingOwnSession, setIsResumingOwnSession] = useState(false);
   const { data: scenarios, isLoading, isError, refetch } = useTestScenarios();
   const [editingScenario, setEditingScenario] = useState<TestScenario | null>(
     null
@@ -224,15 +224,15 @@ function Test() {
   };
 
   // Handler for resuming admin's own chat
-  const handleResumeOwnChat = () => {
-    setIsResumingOwnChat(true);
+  const handleResumeOwnSession = () => {
+    setIsResumingOwnSession(true);
     setSelectedScenario(null);
   };
 
   // Handler for returning to the scenario table
   const handleBackToTable = () => {
     setSelectedScenario(null);
-    setIsResumingOwnChat(false);
+    setIsResumingOwnSession(false);
   };
 
   if (selectedScenario) {
@@ -249,7 +249,7 @@ function Test() {
     );
   }
 
-  if (isResumingOwnChat) {
+  if (isResumingOwnSession) {
     // Provide a dummy scenario object for admin session
     const adminScenario = { name: "My Chat Session" } as TestScenario;
     return (
@@ -259,12 +259,6 @@ function Test() {
 
   return (
     <div className="_Test flex flex-col items-center w-full h-full p-4">
-      {/* Resume My Chat button */}
-      <div className="w-full max-w-5xl my-4 flex justify-end">
-        <Button variant="default" onClick={handleResumeOwnChat}>
-          Resume My Chat
-        </Button>
-      </div>
       <div className="w-full max-w-5xl my-8">
         <TestScenarioPageHeader onCreate={handleCreateScenario} />
         <TestScenarioTable
@@ -283,6 +277,11 @@ function Test() {
           scenario={scenarioToDelete}
           isDeleting={isDeleting}
         />
+      </div>
+      <div className="w-full max-w-5xl my-4 flex justify-end">
+        <Button variant="default" onClick={handleResumeOwnSession}>
+          Resume My Session
+        </Button>
       </div>
       {showEditor && (
         <TestScenarioEditor
