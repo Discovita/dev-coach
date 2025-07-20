@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TestScenario } from "@/types/testScenario";
 import { TestScenarioChatInterface } from "@/pages/test/components/TestScenarioChatInterface";
 import { ChatInterface } from "@/pages/chat/components/ChatInterface";
+import { toast } from "sonner";
 
 interface TestChatProps {
   scenario: TestScenario;
@@ -37,7 +38,14 @@ const TestChat: React.FC<TestChatProps> = ({
         </div>
         <div className="_TestChatContent flex flex-col xl:flex-row items-start flex-1 min-h-0">
           <div className="_TestChatInterfaceContainer flex flex-col w-full xl:flex-1 min-w-0 overflow-hidden h-full min-h-0 xl:mr-4">
-            <TestScenarioChatInterface userId={String(testUserId)} />
+            <TestScenarioChatInterface
+              userId={String(testUserId)}
+              scenarioId={scenario.id}
+              onResetSuccess={() => {
+                toast.success("Test scenario reset successfully!");
+                setHasStarted(false); // Navigate back to /test page
+              }}
+            />
           </div>
           <div className="_TestChatCoachStateVisualizerContainer w-full xl:w-2/5 min-w-0 xl:min-w-[600px] border-t xl:border-t-0 xl:border-l border-border-color overflow-hidden h-full min-h-0">
             <TestScenarioCoachStateVisualizer testUserId={testUserId} key={`test-${testUserId}`} />

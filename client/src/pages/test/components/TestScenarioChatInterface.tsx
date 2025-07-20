@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import { ChatControls } from "@/pages/chat/components/ChatControls";
+import { TestScenarioChatControls } from "@/pages/test/components/TestScenarioChatControls";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useTestScenarioUserChatMessages } from "@/hooks/test-scenario/use-test-scenario-user-chat-messages";
 import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-scenario-user-coach-state";
+import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * TestScenarioChatInterface component
@@ -13,10 +14,17 @@ import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-sc
  *
  * Props:
  *   userId: string - The id of the test scenario user.
+ *   scenarioId: string - The id of the test scenario.
+ *   onResetSuccess?: () => void - Optional callback after reset
  */
-export const TestScenarioChatInterface: React.FC<{ userId: string }> = ({ userId }) => {
+export const TestScenarioChatInterface: React.FC<{ userId: string; scenarioId: string; onResetSuccess?: () => void }> = ({
+  userId,
+  scenarioId,
+  onResetSuccess,
+}) => {
   // Reference to the end of the messages list for auto-scrolling
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   // Get chat messages for the test user (with optimistic UI support)
   const {
@@ -76,6 +84,13 @@ export const TestScenarioChatInterface: React.FC<{ userId: string }> = ({ userId
     handleSendMessage(response);
   };
 
+  // Enhanced onResetSuccess: invalidate chat and coach state queries, then call parent callback
+  const handleResetSuccess = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId, "chatMessages"] });
+    queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId, "coachState"] });
+    if (onResetSuccess) onResetSuccess();
+  }, [queryClient, userId, onResetSuccess]);
+
   // Loading and error states
   if (isLoading || isLoadingCoachState) {
     return (
@@ -101,10 +116,12 @@ export const TestScenarioChatInterface: React.FC<{ userId: string }> = ({ userId
         messagesEndRef={messagesEndRef}
         coachState={coachState}
       />
-      <ChatControls
+      <TestScenarioChatControls
         isProcessingMessage={isPending}
         onSendMessage={handleSendMessage}
+        scenarioId={scenarioId}
+        onResetSuccess={handleResetSuccess}
       />
     </div>
   );
-}; 
+};

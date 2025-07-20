@@ -30,7 +30,6 @@ const TestScenarioTable = ({
   onEdit,
   onDelete,
   onStart,
-  onStartFresh,
 }: TestScenarioTableProps) => {
   // Dummy handlers for Start and Start Fresh actions
   // const handleStart = (scenario: TestScenario) => {
@@ -60,14 +59,6 @@ const TestScenarioTable = ({
             </Button>
             <Button
               size="xs"
-              variant="default"
-              onClick={() => onStartFresh(params.data as TestScenario)}
-              className="bg-gold-300 hover:bg-gold-400"
-            >
-              New
-            </Button>
-            <Button
-              size="xs"
               variant="secondary"
               onClick={() => onEdit(params.data as TestScenario)}
             >
@@ -87,7 +78,7 @@ const TestScenarioTable = ({
         filter: false,
       },
     ],
-    [onEdit, onDelete, onStart, onStartFresh]
+    [onEdit, onDelete, onStart]
   );
 
   return (
