@@ -23,7 +23,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <ThemeProvider>
           <App />
-          <Toaster closeButton />
+          <Toaster closeButton richColors position="top-right" />
           <ReactQueryDevtools />
         </ThemeProvider>
       </BrowserRouter>
