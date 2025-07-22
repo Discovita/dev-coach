@@ -133,7 +133,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
 
   return (
     <form
-      className="w-full p-6 bg-white rounded-lg shadow mb-8"
+      className="w-7xl p-6 bg-white rounded-lg shadow mb-8"
       onSubmit={handleSubmit}
     >
       <h2 className="text-2xl font-semibold mb-4">

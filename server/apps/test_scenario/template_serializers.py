@@ -50,6 +50,7 @@ class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer)
     """
     name = serializers.CharField(help_text="Name of the identity. Required.")
     category = serializers.CharField(help_text="Category this identity belongs to. Required.")
+    state = serializers.CharField(required=False, allow_blank=True, help_text="Current state of the identity (proposed, accepted, refinement complete).")
     affirmation = serializers.CharField(required=False, allow_blank=True, help_text="Affirmation statement for the identity.")
     visualization = serializers.CharField(required=False, allow_blank=True, help_text="Visualization for the identity.")
     notes = serializers.ListField(child=serializers.CharField(), required=False, help_text="List of notes about the identity.")

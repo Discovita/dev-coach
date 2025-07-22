@@ -5,6 +5,9 @@ from .models import TestScenario
 from .serializers import TestScenarioSerializer
 from .validation import validate_scenario_template
 from .services import instantiate_test_scenario
+from services.logger import configure_logging
+
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 class TestScenarioViewSet(
@@ -99,6 +102,7 @@ class TestScenarioViewSet(
         5. Create and save the new TestScenario
         6. Return the serialized scenario or error
         """
+        log.debug(f"[TestScenarioViewSet.freeze_session] Request: {request.data}")
         # 1. Permissions: admin only
         if not request.user.is_staff and not request.user.is_superuser:
             return Response({"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN)

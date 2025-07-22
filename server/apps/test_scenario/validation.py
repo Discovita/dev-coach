@@ -7,7 +7,9 @@ from apps.test_scenario.template_serializers import (
     TemplateChatMessageSerializer,
     TemplateUserNoteSerializer,
 )
+from services.logger import configure_logging
 
+log = configure_logging(__name__, log_level="DEBUG")
 
 def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     """
@@ -22,6 +24,7 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     Example error:
         [{"section": "user", "error": "Missing required field: email"}]
     """
+    log.debug(f"[TestScenario.validation] Validating scenario template")
     errors = []
 
     # --- Helper for serializer errors ---
