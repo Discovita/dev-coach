@@ -243,7 +243,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
   COMPOSE_PROJECT_NAME=dev-coach-local \
     docker compose --profile local \
     -f docker/docker-compose.yml \
-    -f docker/docker-compose.local.yml up --build -d
+    -f docker/docker-compose.local.yml up --build -d --force-recreate
   ```
 
 ### Stopping the Environment
