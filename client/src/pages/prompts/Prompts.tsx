@@ -90,18 +90,16 @@ export function PromptsTabs() {
     prompts.find((p) => p.version === selectedVersion) || null;
 
   // Automatically select the most recent version (highest number) when switching tabs or when versions change
+  // Always select the most recent version (highest) when switching tabs (activeCoachState)
+  // This ensures the newest version is shown by default, regardless of previous selection
   useEffect(() => {
     if (versions.length > 0) {
-      // If no version is selected or the selected version is not in the list, select the highest
-      if (selectedVersion === null || !versions.includes(selectedVersion)) {
-        setSelectedVersion(versions[0]); // versions is sorted descending
-      }
+      setSelectedVersion(versions[0]); // versions is sorted descending
     } else {
       setSelectedVersion(null);
     }
-    // Only run when activeCoachState, versions, or selectedVersion change
-    // (safe: setSelectedVersion is a no-op if already correct)
-  }, [activeCoachState, versions, selectedVersion]);
+    // Only run when activeCoachState or versions changes
+  }, [activeCoachState, versions]);
 
   /**
    * Resets all editable fields to their original values from selectedPrompt.
