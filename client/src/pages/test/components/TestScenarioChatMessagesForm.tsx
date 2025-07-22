@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { TestScenarioChatMessage } from "@/types/testScenario";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,17 +11,18 @@ interface Props {
 
 const roles = ["user", "coach"];
 
+/**
+ * TestScenarioChatMessagesForm Visual Logic
+ * -----------------------------------------
+ * - Each message row has extra vertical padding and minHeight to prevent content from being cut off.
+ * - Coach messages have a light gold background and a left border for emphasis.
+ * - User messages have a white background and no border.
+ * - Both message types use box-sizing: border-box to ensure padding is included in height calculations.
+ */
 export default function TestScenarioChatMessagesForm({ value, onChange }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<TestScenarioChatMessage>({ role: "user", content: "" });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: value.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 48,
-    overscan: 10,
-  });
 
   const handleSave = () => {
     if (!draft.content.trim()) return;
@@ -50,7 +50,7 @@ export default function TestScenarioChatMessagesForm({ value, onChange }: Props)
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="_TestScenarioChatMessagesForm flex flex-col gap-4">
       <div>
         <div className="flex gap-2 mb-2">
           <Select value={draft.role} onValueChange={role => setDraft(d => ({ ...d, role }))}>
@@ -70,54 +70,47 @@ export default function TestScenarioChatMessagesForm({ value, onChange }: Props)
             className="flex-1"
             onKeyDown={e => { if (e.key === "Enter") handleSave(); }}
           />
-          <Button type="button" onClick={handleSave}>
+          <Button type="button" onClick={handleSave} className="shrink-0">
             {editingIndex !== null ? "Save" : "Add"}
           </Button>
         </div>
       </div>
       <div
         ref={parentRef}
-        style={{
-          height: 320,
-          width: "100%",
-          overflow: "auto",
-          border: "1px solid #eee",
-          borderRadius: 6,
-        }}
+        className="overflow-auto border border-[#eee] rounded-lg bg-white"
+        style={{ height: 500, width: "100%" }}
       >
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            position: "relative",
-          }}
-        >
-          {rowVirtualizer.getVirtualItems().map(virtualRow => {
-            const msg = value[virtualRow.index];
-            return (
-              <div
-                key={virtualRow.key}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  transform: `translateY(${virtualRow.start}px)`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  borderBottom: "1px solid #f3f3f3",
-                  padding: "4px 8px",
-                  background: virtualRow.index % 2 === 0 ? "#fafbfc" : "#fff",
-                }}
-              >
-                <span className="font-mono text-xs text-neutral-500 w-12">{msg.role}</span>
-                <span className="flex-1">{msg.content}</span>
-                <Button size="xs" variant="secondary" onClick={() => handleEdit(virtualRow.index)}>Edit</Button>
-                <Button size="xs" variant="destructive" onClick={() => handleDelete(virtualRow.index)}>Delete</Button>
-              </div>
-            );
-          })}
-        </div>
+        {value.map((msg, idx) => (
+          <div
+            key={idx}
+            className={[
+              "flex items-start gap-2 border-b border-[#f3f3f3] px-4 py-3 min-h-[48px] box-border w-full",
+              msg.role === "coach"
+                ? "bg-[#fffbe6] border-l-4 border-l-[#eab308]"
+                : "bg-white border-l-4 border-l-transparent"
+            ].join(" ")}
+          >
+            <span
+              className={[
+                "font-mono text-xs w-12 mt-1",
+                msg.role === "coach" ? "text-[#b45309] font-bold" : "text-neutral-500 font-normal"
+              ].join(" ")}
+            >
+              {msg.role}
+            </span>
+            <div
+              className="flex-1 whitespace-pre-wrap break-words leading-[1.5] py-0.5"
+            >
+              {msg.content}
+            </div>
+            <Button size="xs" variant="secondary" onClick={() => handleEdit(idx)} className="ml-2">
+              Edit
+            </Button>
+            <Button size="xs" variant="destructive" onClick={() => handleDelete(idx)} className="ml-1">
+              Delete
+            </Button>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { TestScenarioUserNote } from "@/types/testScenario";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +13,6 @@ export default function TestScenarioUserNotesForm({ value, onChange }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<TestScenarioUserNote>({ note: "" });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: value.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 48,
-    overscan: 10,
-  });
 
   const handleSave = () => {
     if (!draft.note.trim()) return;
@@ -65,50 +57,26 @@ export default function TestScenarioUserNotesForm({ value, onChange }: Props) {
       </div>
       <div
         ref={parentRef}
-        style={{
-          height: 240,
-          width: "100%",
-          overflow: "auto",
-          border: "1px solid #eee",
-          borderRadius: 6,
-        }}
+        className="overflow-auto border border-[#eee] rounded-lg bg-white"
+        style={{ height: 500, width: "100%" }}
       >
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            position: "relative",
-          }}
-        >
-          {rowVirtualizer.getVirtualItems().map(virtualRow => {
-            const note = value[virtualRow.index];
-            return (
-              <div
-                key={virtualRow.key}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  transform: `translateY(${virtualRow.start}px)`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  borderBottom: "1px solid #f3f3f3",
-                  padding: "4px 8px",
-                  background: virtualRow.index % 2 === 0 ? "#fafbfc" : "#fff",
-                }}
-              >
-                <span className="flex-1">{note.note}</span>
-                <Button type="button" size="xs" variant="secondary" onClick={() => handleEdit(virtualRow.index)}>
-                  Edit
-                </Button>
-                <Button type="button" size="xs" variant="destructive" onClick={() => handleDelete(virtualRow.index)}>
-                  Delete
-                </Button>
-              </div>
-            );
-          })}
-        </div>
+        {value.map((note, idx) => (
+          <div
+            key={idx}
+            className={[
+              "flex items-center gap-2 border-b border-[#f3f3f3] px-4 py-3 min-h-[48px] box-border w-full",
+              idx % 2 === 0 ? "bg-[#fafbfc]" : "bg-white"
+            ].join(" ")}
+          >
+            <span className="flex-1 whitespace-pre-wrap break-words leading-[1.5] py-0.5">{note.note}</span>
+            <Button type="button" size="xs" variant="secondary" onClick={() => handleEdit(idx)} className="ml-2">
+              Edit
+            </Button>
+            <Button type="button" size="xs" variant="destructive" onClick={() => handleDelete(idx)} className="ml-1">
+              Delete
+            </Button>
+          </div>
+        ))}
       </div>
     </div>
   );
