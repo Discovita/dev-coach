@@ -30,11 +30,12 @@ export const ChatInterface: React.FC = () => {
   const { coachState } = useCoachState();
 
   // Compose the messages to display, including the pending message if any
-  // This enables optimistic UI: the user's message appears immediately while sending
+  // Always sort by timestamp to ensure correct order, as backend/hook may not guarantee order
   const displayedMessages = React.useMemo(() => {
+    let messages: { role: string; content: string; timestamp: string }[] = chatMessages || [];
     if (isPending && pendingMessage?.content) {
-      return [
-        ...(chatMessages || []),
+      messages = [
+        ...messages,
         {
           role: "user",
           content: pendingMessage.content,
@@ -42,7 +43,8 @@ export const ChatInterface: React.FC = () => {
         },
       ];
     }
-    return chatMessages || [];
+    // Sort by timestamp ascending (oldest first)
+    return messages.slice().sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }, [chatMessages, isPending, pendingMessage]);
 
   // Scroll to bottom when messages change
