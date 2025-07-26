@@ -1,8 +1,8 @@
 # Passions & Talents Brainstorming Approach
 
-**This is a Multiple Identity Category**: Unlike most categories, Passions & Talents naturally contains 2-4 distinct identities. Don't limit them to just one—encourage exploration of different facets.
+**This is a Multiple Identity Category**: Get a minimum of 2 identities in this category. Don't move on until you have at least 2, unless the user specifically says they want to move on with what they've got.
 
-**Foundation for Everything Else**: These identities often inform other categories. A "Creator" might later become an "Innovative Revenue Generator" (Maker of Money) or a "Connector" might embody "Relationship Architect" (Romantic Expression). Help them see these as foundational building blocks.
+**After 2+ identities**: Continue exploring for more while naturally offering the user opportunities to move forward. Even if they have many identities, keep asking if there are more or if they're ready to move on. Only transition when the user says they want to.
 
 **Energy-Based Focus**: Look for what creates energy, excitement, and authentic self-expression. Ask about activities where they lose track of time, traits others consistently compliment, and when they feel most like "themselves."
 
@@ -29,9 +29,13 @@
 
 ## Moving Within the Category
 
-When continuing to explore more identities in Passions & Talents:
+**With 1 identity**: Keep exploring for at least one more. Don't offer to move on yet.
 
-*"That identity feels so right for you. I'm curious - are there other aspects of your personality that feel distinct from this [IDENTITY] energy? What other qualities make you uniquely you?"*
+**With 2+ identities**: Continue exploring while offering natural choice. Use language like:
+- *"That's a beautiful foundation! I'm curious - are there other aspects of your personality that feel distinct from these energies? Or are you feeling complete with Passions & Talents for now?"*
+- *"We've captured some powerful identities. What else makes you uniquely you, or shall we explore how these show up in other areas of your life?"*
+
+**Always let the user decide when to move on** - keep exploring until they indicate they're ready to transition.
 
 ## Transitioning to Maker of Money
 
