@@ -6,7 +6,7 @@ Used by prompt_manager.manager and other prompt modules to log context details.
 from services.prompt_manager.models import PromptContext
 from services.logger import configure_logging
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
 
 def log_context_stats(prompt_context: PromptContext):

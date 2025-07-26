@@ -20,25 +20,7 @@ from services.action_handler.actions import (
 )
 from services.logger import configure_logging
 
-# Mapping of ActionType to handler function
-ACTION_HANDLERS = {
-    ActionType.CREATE_IDENTITY: create_identity,
-    ActionType.UPDATE_IDENTITY: update_identity,
-    ActionType.ACCEPT_IDENTITY: accept_identity,
-    ActionType.ACCEPT_IDENTITY_REFINEMENT: accept_identity_refinement,
-    ActionType.ADD_IDENTITY_NOTE: add_identity_note,
-    ActionType.TRANSITION_PHASE: transition_phase,
-    ActionType.SELECT_IDENTITY_FOCUS: select_identity_focus,
-    ActionType.SKIP_IDENTITY_CATEGORY: skip_identity_category,
-    ActionType.UNSKIP_IDENTITY_CATEGORY: unskip_identity_category,
-    ActionType.UPDATE_WHO_YOU_ARE: update_who_you_are,
-    ActionType.UPDATE_WHO_YOU_WANT_TO_BE: update_who_you_want_to_be,
-    ActionType.ADD_USER_NOTE: add_user_note,
-    ActionType.UPDATE_USER_NOTE: update_user_note,
-    ActionType.DELETE_USER_NOTE: delete_user_note,
-}
-
-log = configure_logging(__name__, log_level="INFO")
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 def apply_actions(

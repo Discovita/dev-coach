@@ -22,6 +22,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
 import { DeletePromptDialog } from "./components/DeletePromptDialog";
 import { toast } from "sonner";
+import { useRef } from "react";
 
 /**
  * PromptsTabs
@@ -46,6 +47,8 @@ export function PromptsTabs() {
   const [activeCoachState, setActiveCoachState] = useState<string | null>(null);
   // Track the selected version
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
+  // Track previous activeCoachState to detect tab changes
+  const prevActiveCoachStateRef = useRef<string | null>(null);
 
   /**
    * State for editing the selected prompt.
@@ -89,16 +92,17 @@ export function PromptsTabs() {
   const selectedPrompt =
     prompts.find((p) => p.version === selectedVersion) || null;
 
-  // Automatically select the most recent version (highest number) when switching tabs or when versions change
-  // Always select the most recent version (highest) when switching tabs (activeCoachState)
-  // This ensures the newest version is shown by default, regardless of previous selection
+  // Only reset selectedVersion to the highest version when the tab (activeCoachState) actually changes
+  // This allows the user to select other versions from the dropdown without being overridden
   useEffect(() => {
-    if (versions.length > 0) {
-      setSelectedVersion(versions[0]); // versions is sorted descending
-    } else {
-      setSelectedVersion(null);
+    if (prevActiveCoachStateRef.current !== activeCoachState) {
+      if (versions.length > 0) {
+        setSelectedVersion(versions[0]); // versions is sorted descending
+      } else {
+        setSelectedVersion(null);
+      }
     }
-    // Only run when activeCoachState or versions changes
+    prevActiveCoachStateRef.current = activeCoachState;
   }, [activeCoachState, versions]);
 
   /**

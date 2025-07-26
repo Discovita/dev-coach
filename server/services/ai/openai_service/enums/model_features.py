@@ -14,14 +14,18 @@ log = logging.getLogger(__name__)
 STRUCTURED_OUTPUT_MODELS: Set[str] = {
     "gpt-4.5-preview",
     "o3-mini",
+    "o4-mini",
     "o1",
+    "o3",
     "gpt-4o-mini",
     "gpt-4o",
 }
 
 COMPLETION_TOKEN_MODELS: Set[str] = {
     "o3-mini",
+    "o4-mini",
     "o1",
+    "o3",
     "o1-mini",
     "gpt-4o",
     "gpt-4o-mini",
@@ -29,6 +33,8 @@ COMPLETION_TOKEN_MODELS: Set[str] = {
 
 UNSUPPORTED_PARAMETERS: Dict[str, Set[str]] = {
     "o3-mini": {"temperature", "top_p", "parallel_tool_calls"},
+    "o4-mini": {"temperature", "top_p", "parallel_tool_calls"},
     "o1": {"temperature", "top_p", "parallel_tool_calls"},
+    "o3": {"temperature", "top_p", "parallel_tool_calls"},
     "o1-mini": {"temperature", "top_p", "parallel_tool_calls"},
 }

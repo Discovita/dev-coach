@@ -45,9 +45,11 @@ class AIModel(models.TextChoices):
     # OpenAI GPT models
     GPT_4_1 = "gpt-4.1", "GPT-4.1"
     GPT_4_5_PREVIEW = "gpt-4.5-preview", "GPT-4.5 Preview"
-    O3_MINI = "o3-mini", "O3 Mini"
     O1 = "o1", "o1"
     O1_MINI = "o1-mini", "O1 Mini"
+    O3 = "o3", "o3"
+    O3_MINI = "o3-mini", "O3 Mini"
+    O4_MINI = "o4-mini", "O4 Mini"
     GPT_4O = "gpt-4o", "GPT 4o"
     GPT_4O_MINI = "gpt-4o-mini", "GPT 4o Mini"
     GPT_4_TURBO = "gpt-4-turbo", "GPT 4 Turbo"
@@ -66,9 +68,12 @@ class AIModel(models.TextChoices):
         ]
 
         openai_models = [
+            cls.GPT_4_1,
             cls.GPT_4_5_PREVIEW,
             cls.O3_MINI,
+            cls.O4_MINI,
             cls.O1,
+            cls.O3,
             cls.O1_MINI,
             cls.GPT_4O,
             cls.GPT_4O_MINI,
@@ -99,8 +104,11 @@ class AIModel(models.TextChoices):
                 "claude-3.5-haiku": cls.CLAUDE_3_5_HAIKU,
                 "gpt-4.5-preview": cls.GPT_4_5_PREVIEW,
                 "o3-mini": cls.O3_MINI,
+                "o4-mini": cls.O4_MINI,
                 "o1": cls.O1,
+                "o3": cls.O3,                
                 "o1-mini": cls.O1_MINI,
+                "o4-mini": cls.O4_MINI,
                 "gpt-4o": cls.GPT_4O,
                 "gpt-4o-mini": cls.GPT_4O_MINI,
                 "gpt-4": cls.GPT_4,
@@ -216,7 +224,7 @@ class AIModel(models.TextChoices):
         Default is GPT_4O.
         """
         if not model_name:
-            return cls.GPT_4O
+            return cls.O3_MINI
         return cls.from_string(model_name)
 
 # -----------------------------------------------------------------------------
@@ -228,8 +236,10 @@ class AIModel(models.TextChoices):
 STRUCTURED_OUTPUT_MODELS: Set[str] = {
     "gpt-4.1",
     "gpt-4.5-preview",
-    "o3-mini",
     "o1",
+    "o3",
+    "o3-mini",
+    "o4-mini",
     "gpt-4o-mini",
     "gpt-4o",
 }
@@ -238,9 +248,11 @@ STRUCTURED_OUTPUT_MODELS: Set[str] = {
 # Used in: AIModel.get_token_param_name
 COMPLETION_TOKEN_MODELS: Set[str] = {
     "gpt-4.1",
-    "o3-mini",
     "o1",
     "o1-mini",
+    "o3",
+    "o3-mini",
+    "o4-mini",
     "gpt-4o",
     "gpt-4o-mini",
 }
@@ -251,7 +263,9 @@ DEFAULT_TOKEN_LIMITS: Dict[str, int] = {
     "gpt-4.1": 32768,
     "gpt-4.5-preview": 16384,
     "o3-mini": 100000,
+    "o4-mini": 100000,
     "o1": 100000,
+    "o3": 200000,
     "o1-mini": 65536,
     "gpt-4o": 16384,
     "gpt-4o-mini": 16384,

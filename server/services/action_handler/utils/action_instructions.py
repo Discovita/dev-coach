@@ -32,23 +32,23 @@ from services.action_handler.models.actions import (
 # Each entry should have a clear, concise description and the corresponding Pydantic model
 ACTION_PARAMS = {
     ActionType.SELECT_IDENTITY_FOCUS: {
-        "description": "Select an identity to focus on.",
+        "description": "Select an Identity to focus on.",
         "model": SelectIdentityFocusAction,
     },
     ActionType.CREATE_IDENTITY: {
-        "description": "Create a new identity for the user.",
+        "description": "Create a new Identity for the user. DO NOT create duplicate Identities. If this Identity already exists for the user as listed in their Current Identities List. Also, only create an Identity for the user when the user has expressed consent with it. DO NOT preemptively create Identities for the user.",
         "model": CreateIdentityAction,
     },
     ActionType.UPDATE_IDENTITY: {
-        "description": "Update the details of an existing identity.",
+        "description": "Update the details of an existing Identity. ",
         "model": UpdateIdentityAction,
     },
     ActionType.ACCEPT_IDENTITY: {
-        "description": "Accept an identity as valid or complete.",
+        "description": "Accept an Identity as valid or complete.",
         "model": AcceptIdentityAction,
     },
     ActionType.ACCEPT_IDENTITY_REFINEMENT: {
-        "description": "Mark an identity as refinement complete.",
+        "description": "Mark an Identity as refinement complete.",
         "model": AcceptIdentityRefinementAction,
     },
     ActionType.TRANSITION_PHASE: {
@@ -56,15 +56,15 @@ ACTION_PARAMS = {
         "model": TransitionPhaseAction,
     },
     ActionType.ADD_IDENTITY_NOTE: {
-        "description": "Add a note to an identity.",
+        "description": "Add a note to an Identity.",
         "model": AddIdentityNoteAction,
     },
     ActionType.SKIP_IDENTITY_CATEGORY: {
-        "description": "Add this identity category to the list of skipped categories.",
+        "description": "Add this Identity category to the list of skipped categories.",
         "model": SkipIdentityCategoryAction,
     },
     ActionType.UNSKIP_IDENTITY_CATEGORY: {
-        "description": "Remove this identity category from the list of skipped categories.",
+        "description": "Remove this Identity category from the list of skipped categories.",
         "model": UnskipIdentityCategoryAction,
     },
     ActionType.UPDATE_WHO_YOU_ARE: {
