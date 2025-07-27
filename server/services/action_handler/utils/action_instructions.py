@@ -36,7 +36,7 @@ ACTION_PARAMS = {
         "model": SelectIdentityFocusAction,
     },
     ActionType.CREATE_IDENTITY: {
-        "description": "Create a new Identity for the user. DO NOT create duplicate Identities. If this Identity already exists for the user as listed in their Current Identities List. Also, only create an Identity for the user when the user has expressed consent with it. DO NOT preemptively create Identities for the user.",
+        "description": "Creates a new Identity for the user. DO NOT create duplicate Identities. Ask yourself - Has the user expressed consent to create this Identity? If the answer is no, don't create a new one. DO NOT preemptively create Identities for the user.",
         "model": CreateIdentityAction,
     },
     ActionType.UPDATE_IDENTITY: {
