@@ -11,7 +11,7 @@ function Home() {
       transition={{ duration: 0.8 }}
     >
       <h1 className="text-gold-700 text-2xl font-bold sm:text-4xl">
-        Welcome to the Coach
+        Welcome to the Agent Coach
       </h1>
     </motion.div>
   );

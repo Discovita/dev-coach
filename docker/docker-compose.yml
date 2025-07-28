@@ -3,8 +3,8 @@ services:
     profiles: ["local"]
     image: postgres:17.1
     environment:
-      - POSTGRES_DB=agent_coach_db
-      - POSTGRES_USER=agent_coach_user
+      - POSTGRES_DB=local_dev_coach
+      - POSTGRES_USER=dev_coach_database_user
       - POSTGRES_PASSWORD=UxRZ75YUsR2wFL6B3JnUDWN8XDyriY3v
     volumes:
       - agent_coach_db-data:/var/lib/postgresql/data
@@ -17,9 +17,9 @@ services:
           "pg_isready",
           "-q",
           "-d",
-          "agent_coach_db",
+          "local_dev_coach",
           "-U",
-          "agent_coach_user",
+          "dev_coach_database_user",
         ]
       interval: 5s
       timeout: 5s

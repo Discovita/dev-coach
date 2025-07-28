@@ -33,7 +33,7 @@ export default function AuthNavbar() {
           className="flex items-center space-x-3 rtl:space-x-reverse"
         >
           <span className="self-center text-2xl font-semibold whitespace-nowrap text-gold-50 dark:text-gold-600 ml-5">
-            Coach
+            Agent Coach
           </span>
         </Link>
         <div className="flex items-center">
