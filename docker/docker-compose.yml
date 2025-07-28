@@ -3,11 +3,11 @@ services:
     profiles: ["local"]
     image: postgres:17.1
     environment:
-      - POSTGRES_DB=local_dev_coach
-      - POSTGRES_USER=dev_coach_database_user
+      - POSTGRES_DB=agent_coach_db
+      - POSTGRES_USER=agent_coach_user
       - POSTGRES_PASSWORD=UxRZ75YUsR2wFL6B3JnUDWN8XDyriY3v
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - agent_coach_db-data:/var/lib/postgresql/data
     ports:
       - 5432:5432
     healthcheck:
@@ -17,14 +17,14 @@ services:
           "pg_isready",
           "-q",
           "-d",
-          "local_dev_coach",
+          "agent_coach_db",
           "-U",
-          "dev_coach_database_user",
+          "agent_coach_user",
         ]
       interval: 5s
       timeout: 5s
       retries: 5
-  
+
   backend:
     profiles: ["local", "dev"]
     build:
@@ -67,4 +67,4 @@ services:
       - backend
 
 volumes:
-  db-data:
+  agent_coach_db-data:

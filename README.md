@@ -9,6 +9,66 @@ This project uses Docker Compose to run both the backend (Django) and frontend (
 
 ---
 
+# Database Configuration
+
+This environment uses **two separate PostgreSQL databases** running on the same PostgreSQL server instance to support both Django and LangGraph functionality:
+
+## Database Overview
+
+| Database Name           | Purpose                                      | Managed By             | Tables Created                                               |
+| ----------------------- | -------------------------------------------- | ---------------------- | ------------------------------------------------------------ |
+| `agent_coach_db`        | Django application data                      | Django ORM             | User models, coaching state, identities, chat messages, etc. |
+| `langgraph_checkpoints` | Agent conversation state & tool call history | LangGraph checkpointer | Automatic checkpoint and state management tables             |
+
+## Database Connection Details
+
+Both databases use the same connection credentials but different database names:
+
+```bash
+# Shared connection details
+HOST=db (Docker service name)
+PORT=5432
+USER=agent_coach_user
+PASSWORD=UxRZ75YUsR2wFL6B3JnUDWN8XDyriY3v
+
+# Database names
+MAIN_DB=agent_coach_db           # Django application
+LANGGRAPH_DB=langgraph_checkpoints  # LangGraph agent state
+```
+
+## Why Two Databases?
+
+- **Separation of Concerns**: Django business logic separate from agent orchestration state
+- **Independent Management**: Django migrations don't interfere with LangGraph's internal schema
+- **Performance**: Optimized storage patterns for different data types
+- **Debugging**: Easy to inspect agent conversation flows vs application data separately
+
+## Creating the Databases
+
+The `agent_coach_db` is created automatically when the PostgreSQL container starts. The `langgraph_checkpoints` database must be created manually:
+
+```sh
+COMPOSE_PROJECT_NAME=agent-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec db createdb -U agent_coach_user langgraph_checkpoints
+```
+
+## Verifying Database Setup
+
+To verify both databases exist:
+
+```sh
+COMPOSE_PROJECT_NAME=agent-coach-local \
+  docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec db psql -U agent_coach_user -d agent_coach_db -c "\l"
+```
+
+You should see both `agent_coach_db` and `langgraph_checkpoints` in the database list.
+
+## Database Migrations
+
+- **Django migrations** apply only to `agent_coach_db` (the default database)
+- **LangGraph tables** are created automatically when the checkpointer is first initialized
+- Both databases persist in the same Docker volume: `agent_coach_db-data`
+
 ## Environments Overview
 
 | Environment | Database       | Frontend | Backend | Celery | Redis  | Usage                                  |
@@ -34,7 +94,7 @@ cd dev-coach
 This runs everything (frontend, backend, celery, redis, and Postgres) locally.
 
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose --profile local \
   -f docker/docker-compose.yml \
   -f docker/docker-compose.local.yml up --build
@@ -49,7 +109,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
 This runs frontend, backend, celery, and redis locally, but connects to the remote (staging) database.
 
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-dev \
+COMPOSE_PROJECT_NAME=agent-coach-dev \
   docker compose --profile dev \
   -f docker/docker-compose.yml \
   -f docker/docker-compose.dev.yml up --build
@@ -116,7 +176,7 @@ For more details, see the `docker-compose.yml` and Dockerfiles in each service d
 To start all services (frontend, backend, celery, redis, and Postgres) for local development:
 
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose --profile local \
   -f docker/docker-compose.yml \
   -f docker/docker-compose.local.yml up --build
@@ -124,7 +184,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
 
 - Add `-d` to run in detached mode (in the background):
   ```sh
-  COMPOSE_PROJECT_NAME=dev-coach-local \
+  COMPOSE_PROJECT_NAME=agent-coach-local \
     docker compose --profile local \
     -f docker/docker-compose.yml \
     -f docker/docker-compose.local.yml up --build -d --force-recreate
@@ -137,7 +197,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
 - To ensure all new dependencies are installed and recognized, use the following flags:
 
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose --profile local \
   -f docker/docker-compose.yml \
   -f docker/docker-compose.local.yml up --build --force-recreate --no-deps
@@ -149,7 +209,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
   - `--no-deps`: Don't start linked services (dependencies). Use this if you only want to rebuild a specific service (e.g., frontend or backend) without restarting the database or redis.
   - `--no-cache`: (use with `docker compose build`) Forces Docker to not use any cache when building images. Use this if you suspect the build cache is stale:
     ```sh
-    COMPOSE_PROJECT_NAME=dev-coach-local \
+    COMPOSE_PROJECT_NAME=agent-coach-local \
       docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml build --no-cache frontend
     ```
     Then bring up the environment as usual.
@@ -167,7 +227,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
 - **Want to rebuild only the frontend or backend?**
   - You can specify the service name at the end:
     ```sh
-    COMPOSE_PROJECT_NAME=dev-coach-local \
+    COMPOSE_PROJECT_NAME=agent-coach-local \
       docker compose --profile local \
       -f docker/docker-compose.yml \
       -f docker/docker-compose.local.yml up --build --force-recreate frontend
@@ -190,14 +250,16 @@ You can make and apply migrations directly inside the running backend container.
 #### **Using Docker Compose Exec**
 
 Make migrations:
+
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py makemigrations
 ```
 
 Apply migrations:
+
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
 ```
 
@@ -211,15 +273,16 @@ To run your Django/pytest tests in the same environment as your backend (recomme
 
 - **In a new terminal, run your tests inside the backend container:**
   ```sh
-  COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest apps/test_scenario/tests/
+  COMPOSE_PROJECT_NAME=agent-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest apps/test_scenario/tests/
   ```
   - This will run all tests in the `server/apps/test_scenario/tests/` directory.
   - To run all tests in the project, omit the path:
     ```sh
-    COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest
+    COMPOSE_PROJECT_NAME=agent-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest
     ```
 
 **Tip:**
+
 - This approach ensures your tests use the same environment, database, and dependencies as your running backend service.
 - You can use this pattern for any Django management or test command.
 
@@ -232,7 +295,7 @@ To run your Django/pytest tests in the same environment as your backend (recomme
 To start all services (frontend, backend, celery, redis, and Postgres) for local development:
 
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose --profile local \
   -f docker/docker-compose.yml \
   -f docker/docker-compose.local.yml up --build
@@ -240,7 +303,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
 
 - Add `-d` to run in detached mode (in the background):
   ```sh
-  COMPOSE_PROJECT_NAME=dev-coach-local \
+  COMPOSE_PROJECT_NAME=agent-coach-local \
     docker compose --profile local \
     -f docker/docker-compose.yml \
     -f docker/docker-compose.local.yml up --build -d --force-recreate
@@ -263,20 +326,23 @@ You can make and apply migrations directly inside the running backend container.
 #### **Using Docker Compose Exec**
 
 Make migrations:
+
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py makemigrations
 ```
 
 Apply migrations:
+
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
 ```
 
 Create a super user:
+
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
 docker compose \
 -f docker/docker-compose.yml \
 -f docker/docker-compose.local.yml \
@@ -285,7 +351,7 @@ exec backend python manage.py createsuperuser \
 ```
 
 ```sh
-COMPOSE_PROJECT_NAME=dev-coach-local \
+COMPOSE_PROJECT_NAME=agent-coach-local \
 docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend \
 python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); u=User.objects.get(email='superadmin@admin.com'); u.set_password('Coach123!'); u.save()"
 ```

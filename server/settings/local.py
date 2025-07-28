@@ -10,12 +10,20 @@ CSRF_TRUSTED_ORIGINS = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["LOCAL_DB_NAME"],
-        "USER": os.environ["LOCAL_DB_USER"],
-        "PASSWORD": os.environ["LOCAL_DB_PASSWORD"],
-        "HOST": os.environ["LOCAL_DB_HOST"],
-        "PORT": os.environ["LOCAL_DB_PORT"],
-    }
+        "NAME": os.environ["LOCAL_AGENT_DB_NAME"],
+        "USER": os.environ["LOCAL_AGENT_DB_USER"],
+        "PASSWORD": os.environ["LOCAL_AGENT_DB_PASSWORD"],
+        "HOST": os.environ["LOCAL_AGENT_DB_HOST"],
+        "PORT": os.environ["LOCAL_AGENT_DB_PORT"],
+    },
+    "langgraph": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["LOCAL_LANGGRAPH_DB_NAME"],
+        "USER": os.environ["LOCAL_AGENT_DB_USER"],
+        "PASSWORD": os.environ["LOCAL_AGENT_DB_PASSWORD"],
+        "HOST": os.environ["LOCAL_AGENT_DB_HOST"],
+        "PORT": os.environ["LOCAL_AGENT_DB_PORT"],
+    },
 }
 
 # Whitenoise configuration for development
