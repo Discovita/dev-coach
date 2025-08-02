@@ -62,6 +62,7 @@ Benefits:
     - Makes it easy to automate or manually test any phase of the chatbot flow.
 """
 
+
 class CoachViewSet(
     viewsets.GenericViewSet,
 ):
@@ -171,6 +172,7 @@ class CoachViewSet(
         if not user_id:
             return Response({"detail": "user_id is required."}, status=400)
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
         try:
             acting_user = User.objects.get(pk=user_id)
@@ -240,8 +242,11 @@ class CoachViewSet(
             "identities": identities_serialized,
         }
         serializer = CoachResponseSerializer(data=response_data)
-        serializer.is_valid(raise_exception=True)
         if not serializer.is_valid():
             log.error(f"Serializer errors: {serializer.errors}")
+            log.error(f"Coach state serializer data: {coach_state_serializer.data}")
+            log.error(
+                f"Coach state serializer data type: {type(coach_state_serializer.data)}"
+            )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
