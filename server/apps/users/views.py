@@ -299,6 +299,6 @@ class TestUserViewSet(viewsets.GenericViewSet):
             if initial_message:
                 add_chat_message(user, initial_message, MessageRole.COACH)
                 chat_messages_qs = ChatMessage.objects.filter(user=user).order_by("-timestamp")
-        latest_messages_qs = chat_messages_qs[:20]
+        latest_messages_qs = chat_messages_qs
         ordered_messages = list(reversed(latest_messages_qs))
         return Response(ChatMessageSerializer(ordered_messages, many=True).data)

@@ -32,7 +32,7 @@ from services.action_handler.models.actions import (
 # Each entry should have a clear, concise description and the corresponding Pydantic model
 ACTION_PARAMS = {
     ActionType.SELECT_IDENTITY_FOCUS: {
-        "description": "Select an Identity to focus on.",
+        "description": "Select the appropriate Identity Category to focus on.",
         "model": SelectIdentityFocusAction,
     },
     ActionType.CREATE_IDENTITY: {
