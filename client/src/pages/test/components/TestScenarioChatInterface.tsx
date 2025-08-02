@@ -123,6 +123,7 @@ export const TestScenarioChatInterface: React.FC<{ userId: string; scenarioId: s
         isProcessingMessage={isPending}
         onSendMessage={handleSendMessage}
         scenarioId={scenarioId}
+        testUserId={userId}
         onResetSuccess={handleResetSuccess}
       />
     </div>
