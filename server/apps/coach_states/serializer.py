@@ -18,7 +18,10 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "current_phase",  # Current phase of the coaching session
             "current_identity",  # The identity currently being refined
             "proposed_identity",  # The currently proposed identity
-            "metadata",  # Additional metadata for the coaching session
+            "identity_focus",  # The current category focus
+            "skipped_identity_categories",
+            "who_you_are",
+            "who_you_want_to_be",
             "updated_at",  # Timestamp of last update
         )
         read_only_fields = (
