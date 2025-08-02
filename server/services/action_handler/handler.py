@@ -10,6 +10,7 @@ from services.action_handler.actions import (
     add_identity_note,
     transition_phase,
     select_identity_focus,
+    set_current_identity,
     skip_identity_category,
     unskip_identity_category,
     update_who_you_are,
@@ -70,6 +71,9 @@ def apply_actions(
         elif action_name == ActionType.SELECT_IDENTITY_FOCUS.value:
             log.info("\033[94mACTION:\t  Selecting identity focus\033[0m")
             select_identity_focus(coach_state, action.params)
+        elif action_name == ActionType.SET_CURRENT_IDENTITY.value:
+            log.info("\033[94mACTION:\t  Setting current identity\033[0m")
+            set_current_identity(coach_state, action.params)
         elif action_name == ActionType.SKIP_IDENTITY_CATEGORY.value:
             log.info("\033[94mACTION:\t  Skipping identity category\033[0m")
             skip_identity_category(coach_state, action.params)

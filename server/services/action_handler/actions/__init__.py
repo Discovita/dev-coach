@@ -5,6 +5,7 @@ from .accept_identity_refinement import accept_identity_refinement
 from .add_identity_note import add_identity_note
 from .transition_phase import transition_phase
 from .select_identity_focus import select_identity_focus 
+from .set_current_identity import set_current_identity
 from .skip_identity_category import skip_identity_category
 from .update_who_you_are import update_who_you_are
 from .update_who_you_want_to_be import update_who_you_want_to_be

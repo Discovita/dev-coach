@@ -1,5 +1,6 @@
 from .params import (
     SelectIdentityFocusParams,
+    SetCurrentIdentityParams,
     CreateIdentityParams,
     UpdateIdentityParams,
     AcceptIdentityParams,
@@ -16,6 +17,7 @@ from .params import (
 )
 from .actions import (
     SelectIdentityFocusAction,
+    SetCurrentIdentityAction,
     CreateIdentityAction,
     UpdateIdentityAction,
     AcceptIdentityAction,
@@ -33,6 +35,7 @@ from .actions import (
 
 __all__ = [
     "SelectIdentityFocusParams",
+    "SetCurrentIdentityParams",
     "CreateIdentityParams",
     "UpdateIdentityParams",
     "AcceptIdentityParams",
@@ -47,6 +50,7 @@ __all__ = [
     "UpdateUserNoteParams",
     "DeleteUserNoteParams",
     "SelectIdentityFocusAction",
+    "SetCurrentIdentityAction",
     "CreateIdentityAction",
     "UpdateIdentityAction",
     "AcceptIdentityAction",
