@@ -20,9 +20,14 @@ def log_context_stats(prompt_context: PromptContext):
     log.debug(
         f"NUMBER_OF_IDENTITIES: {getattr(prompt_context, 'number_of_identities', None)}"
     )
-    log.debug(f"FOCUSED_IDENTITIES: {getattr(prompt_context, 'focused_identities', None)}")
+    log.debug(
+        f"FOCUSED_IDENTITIES: {getattr(prompt_context, 'focused_identities', None)}"
+    )
     log.debug(f"USER_NOTES: {getattr(prompt_context, 'user_notes', None)}")
     log.debug(f"CURRENT_MESSAGE: {getattr(prompt_context, 'current_message', None)}")
     log.debug(f"PREVIOUS_MESSAGE: {getattr(prompt_context, 'previous_message', None)}")
     log.debug(f"CURRENT_PHASE: {getattr(prompt_context, 'current_phase', None)}")
-    log.debug(f"BRAINSTORMING_CATEGORY_CONTEXT: {getattr(prompt_context, 'brainstorming_category_context', None)}")
+    log.debug(
+        f"BRAINSTORMING_CATEGORY_CONTEXT: {getattr(prompt_context, 'brainstorming_category_context', None)}"
+    )
+    log.debug(f"CURRENT_IDENTITY: {getattr(prompt_context, 'current_identity', None)}")

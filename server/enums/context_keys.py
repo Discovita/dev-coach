@@ -18,6 +18,7 @@ class ContextKey(models.TextChoices):
     PREVIOUS_MESSAGE = "previous_message", "Previous Message"
     CURRENT_PHASE = "current_phase", "Current Phase"
     BRAINSTORMING_CATEGORY_CONTEXT = "brainstorming_category_context", "Brainstorming Category Context"
+    CURRENT_IDENTITY = "current_identity", "Current Identity"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":
