@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from .params import (
     SelectIdentityFocusParams,
+    SetCurrentIdentityParams,
     CreateIdentityParams,
     UpdateIdentityParams,
     AcceptIdentityParams,
@@ -21,6 +22,15 @@ from .params import (
 class SelectIdentityFocusAction(BaseModel):
     params: SelectIdentityFocusParams = Field(
         ..., description="Parameters for selecting an identity to focus on."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class SetCurrentIdentityAction(BaseModel):
+    params: SetCurrentIdentityParams = Field(
+        ..., description="Parameters for setting the current identity being refined."
     )
 
     class Config:

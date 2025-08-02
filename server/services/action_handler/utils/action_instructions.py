@@ -13,6 +13,7 @@ from enums.action_type import ActionType
 # Import the action models for each action type
 from services.action_handler.models.actions import (
     SelectIdentityFocusAction,
+    SetCurrentIdentityAction,
     CreateIdentityAction,
     UpdateIdentityAction,
     AcceptIdentityAction,
@@ -34,6 +35,10 @@ ACTION_PARAMS = {
     ActionType.SELECT_IDENTITY_FOCUS: {
         "description": "Select the appropriate Identity Category to focus on.",
         "model": SelectIdentityFocusAction,
+    },
+    ActionType.SET_CURRENT_IDENTITY: {
+        "description": "Set the current identity being refined in the Identity Refinement Phase. Use this when you want to work on refining a specific users Identity",
+        "model": SetCurrentIdentityAction,
     },
     ActionType.CREATE_IDENTITY: {
         "description": "Creates a new Identity for the user. DO NOT create duplicate Identities. Ask yourself - Has the user expressed consent to create this Identity? If the answer is no, don't create a new one. DO NOT preemptively create Identities for the user.",

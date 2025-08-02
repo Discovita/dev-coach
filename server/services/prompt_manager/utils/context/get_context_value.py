@@ -12,7 +12,8 @@ from services.prompt_manager.utils.context.func import (
     get_current_message_context,
     get_previous_message_context,
     get_current_phase_context,
-    get_brainstorming_category_context
+    get_brainstorming_category_context,
+    get_current_identity_context
 )
 
 def get_context_value(key: ContextKey, coach_state: CoachState):
@@ -44,4 +45,6 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_current_phase_context(coach_state)
     elif key == ContextKey.BRAINSTORMING_CATEGORY_CONTEXT:
         return get_brainstorming_category_context(coach_state)
+    elif key == ContextKey.CURRENT_IDENTITY:
+        return get_current_identity_context(coach_state)
     # Add more context key handlers as needed

@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from services.action_handler.models.actions import (
     SelectIdentityFocusAction,
+    SetCurrentIdentityAction,
     CreateIdentityAction,
     UpdateIdentityAction,
     AcceptIdentityAction,
@@ -27,6 +28,9 @@ class CoachChatResponse(BaseModel):
 
     select_identity_focus: Optional[SelectIdentityFocusAction] = Field(
         default=None, description="Perform the select_identity_focus action."
+    )
+    set_current_identity: Optional[SetCurrentIdentityAction] = Field(
+        default=None, description="Perform the set_current_identity action."
     )
     create_identity: Optional[CreateIdentityAction] = Field(
         default=None, description="Perform the create_identity action."

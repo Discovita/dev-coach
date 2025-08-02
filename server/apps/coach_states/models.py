@@ -38,7 +38,7 @@ class CoachState(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="current_coach_states",
-        help_text="The identity currently being refined.",
+        help_text="The Identity currently being refined in the Identity Refinement Phase",
     )
     proposed_identity = models.ForeignKey(
         Identity,

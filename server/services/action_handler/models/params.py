@@ -16,6 +16,15 @@ class SelectIdentityFocusParams(BaseModel):
         extra = "forbid"
 
 
+class SetCurrentIdentityParams(BaseModel):
+    identity_id: str = Field(
+        ..., description="ID of the identity to set as the current identity being refined"
+    )
+
+    class Config:
+        extra = "forbid"
+
+
 class CreateIdentityParams(BaseModel):
     name: str = Field(
         ..., description="A concise label for the identity (e.g., 'Creative Visionary')"

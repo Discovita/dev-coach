@@ -3,6 +3,7 @@ from pydantic import Field, create_model, BaseModel
 from enums.action_type import ActionType
 from services.action_handler.models.actions import (
     SelectIdentityFocusAction,
+    SetCurrentIdentityAction,
     CreateIdentityAction,
     UpdateIdentityAction,
     AcceptIdentityAction,
@@ -24,6 +25,7 @@ log = configure_logging(__name__, log_level="INFO")
 
 ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.SELECT_IDENTITY_FOCUS: SelectIdentityFocusAction,
+    ActionType.SET_CURRENT_IDENTITY: SetCurrentIdentityAction,
     ActionType.CREATE_IDENTITY: CreateIdentityAction,
     ActionType.UPDATE_IDENTITY: UpdateIdentityAction,
     ActionType.ACCEPT_IDENTITY: AcceptIdentityAction,
