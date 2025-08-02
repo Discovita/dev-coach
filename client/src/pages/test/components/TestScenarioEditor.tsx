@@ -165,7 +165,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           />
         </TabsContent>
         <TabsContent value="coach_state">
-          <TestScenarioCoachStateForm value={coachState} onChange={setCoachState} />
+          <TestScenarioCoachStateForm value={coachState} onChange={setCoachState} identities={identities} />
         </TabsContent>
         <TabsContent value="identities">
           <TestScenarioIdentitiesForm value={identities} onChange={setIdentities} />
