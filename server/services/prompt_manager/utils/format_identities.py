@@ -12,6 +12,8 @@ def format_identities(identities: List[Identity]) -> str:
     for identity in identities:
         identity_str = f"#### {identity.name} ({identity.get_category_display()})\n"
         identity_str += f"**ID:** {identity.id}\n"
+        if identity.state:
+            identity_str += f"**State:** {identity.state}\n"
         if identity.affirmation:
             identity_str += f"**Affirmation:** {identity.affirmation}\n"
         if identity.visualization:

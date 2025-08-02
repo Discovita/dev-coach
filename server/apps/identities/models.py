@@ -47,6 +47,7 @@ class Identity(models.Model):
     state = models.CharField(
         max_length=32,
         choices=IdentityState.choices,
+        default=IdentityState.ACCEPTED,
         help_text="Current state of the identity (proposed, accepted, refinement complete).",
         null=True,
         blank=True,
@@ -69,11 +70,11 @@ class Identity(models.Model):
         auto_now=True, help_text="Timestamp when the identity was last updated."
     )
     test_scenario = models.ForeignKey(
-        'test_scenario.TestScenario',
+        "test_scenario.TestScenario",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        help_text="Test scenario this identity is associated with (for test data isolation)."
+        help_text="Test scenario this identity is associated with (for test data isolation).",
     )
 
     def __str__(self):
@@ -81,6 +82,7 @@ class Identity(models.Model):
         String representation of the identity for admin/debugging.
         """
         return f"{self.name[:30]} ({self.get_category_display()}) - {self.get_state_display()}"
+
 
 class Meta:
     verbose_name = "Identity"
