@@ -52,7 +52,7 @@ class CoachState(models.Model):
         max_length=255,
         choices=IdentityCategory.choices,
         default=IdentityCategory.PASSIONS,
-        help_text="The identity focus for the coaching session.",
+        help_text="The identity category focus for the coaching session. Used when ",
     )
     skipped_identity_categories = ArrayField(
         models.CharField(max_length=64, choices=IdentityCategory.choices),

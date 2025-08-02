@@ -133,7 +133,7 @@ class CoachViewSet(
         # Step 7: Serialize the latest chat history (last 20 messages)
         large_chat_history_query_set = ChatMessage.objects.filter(
             user=request.user
-        ).order_by("-timestamp")[:20]
+        ).order_by("-timestamp")
         # Convert queryset to list in chronological order
         large_chat_history = list(reversed(large_chat_history_query_set))
         chat_history_serialized = ChatMessageSerializer(

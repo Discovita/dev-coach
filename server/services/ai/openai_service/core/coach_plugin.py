@@ -66,18 +66,16 @@ class OpenAIServicePlugin(AIService):
             else getattr(self.service, "temperature", 0.2)
         )
 
-        # 2. Token parameter
         token_param = AIModel.get_token_param_name(model)
         max_tokens = kwargs.get(token_param, AIModel.get_default_token_limit(model))
 
-        # 3. Build messages
+        # NOTE: Removed chat history because the messages I want to send in are being added manually already as part of the prompt with added Action context between the messages. It is believed that having the messages twice is negatively affecting the performance of the Coach.
         messages = self.service.create_messages(
             system_message=coach_prompt,
-            messages=chat_history,
+            # messages=chat_history,
             images=images,
         )
 
-        # 4. Prepare params
         completion_params = {
             "model": model.value,
             "temperature": temperature,
@@ -93,7 +91,6 @@ class OpenAIServicePlugin(AIService):
             ]:
                 completion_params[key] = value
 
-        # 5. Call completion
         if (
             response_format
             and isinstance(response_format, type)
@@ -104,7 +101,6 @@ class OpenAIServicePlugin(AIService):
                 response_format=response_format,
                 **completion_params,
             )
-            # 6. Parse and return
             parsed = self.parse_response(
                 response=response.choices[0].message.parsed,
                 dynamic_model=response_format,
