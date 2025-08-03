@@ -40,6 +40,12 @@ class Action(models.Model):
         help_text="Parameters passed to the action (stored as JSON)."
     )
     
+    result_summary = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Natural language description of what the action accomplished."
+    )
+    
     timestamp = models.DateTimeField(
         auto_now_add=True,
         help_text="When the action was performed.",

@@ -34,6 +34,7 @@ class ActionSerializer(serializers.ModelSerializer):
             'action_type',
             'action_type_display',
             'parameters',
+            'result_summary',
             'timestamp',
             'timestamp_formatted',
             'coach_message',
@@ -94,6 +95,7 @@ class ActionListSerializer(serializers.ModelSerializer):
             'id',
             'action_type',
             'action_type_display',
+            'result_summary',
             'timestamp',
             'coach_message_preview',
         ]
@@ -121,6 +123,7 @@ class ActionCreateSerializer(serializers.ModelSerializer):
             'user',
             'action_type',
             'parameters',
+            'result_summary',
             'coach_message',
             'test_scenario',
         ]

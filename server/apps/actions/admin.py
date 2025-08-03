@@ -13,6 +13,7 @@ class ActionAdmin(admin.ModelAdmin):
         'action_type', 
         'user', 
         'timestamp', 
+        'result_summary',
         'test_scenario',
         'coach_message_preview'
     ]
@@ -41,7 +42,7 @@ class ActionAdmin(admin.ModelAdmin):
             'fields': ('id', 'user', 'action_type', 'timestamp')
         }),
         ('Action Details', {
-            'fields': ('parameters', 'coach_message')
+            'fields': ('parameters', 'result_summary', 'coach_message')
         }),
         ('Test Scenario', {
             'fields': ('test_scenario',),
