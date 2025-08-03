@@ -3,6 +3,8 @@ from services.action_handler.models import UpdateUserNoteParams
 from apps.coach_states.models import CoachState
 
 
+# NOTE: For now, this function does not log actions to the Action table.
+# Since these actions are performed by the Sentinel only, these actions don't belong with the "Coach" actions
 def update_user_note(coach_state: CoachState, params: UpdateUserNoteParams):
     """
     Action handler to update one or more user notes by ID.
@@ -14,4 +16,4 @@ def update_user_note(coach_state: CoachState, params: UpdateUserNoteParams):
             user_note.save()
         except UserNote.DoesNotExist:
             # Optionally log or handle missing notes
-            continue 
+            continue
