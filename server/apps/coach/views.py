@@ -125,7 +125,7 @@ class CoachViewSet(
         response: CoachChatResponse = ai_service.generate(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
-        # Step 6: Add the coach response to the chat history (async)
+        # Step 6: Add the coach response to the chat history
         add_chat_message(request.user, response.message, MessageRole.COACH)
         new_state, actions = apply_actions(coach_state, response)
         coach_state_serializer = CoachStateSerializer(new_state)
