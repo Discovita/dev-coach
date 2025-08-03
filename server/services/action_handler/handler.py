@@ -89,13 +89,13 @@ def apply_actions(
             update_who_you_want_to_be(coach_state, action.params, coach_message)
         elif action_name == ActionType.ADD_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Adding user note\033[0m")
-            add_user_note(coach_state, action.params, coach_message)
+            add_user_note(coach_state, action.params)
         elif action_name == ActionType.UPDATE_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Updating user note\033[0m")
-            update_user_note(coach_state, action.params, coach_message)
+            update_user_note(coach_state, action.params)
         elif action_name == ActionType.DELETE_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Deleting user note\033[0m")
-            delete_user_note(coach_state, action.params, coach_message)
+            delete_user_note(coach_state, action.params)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue
