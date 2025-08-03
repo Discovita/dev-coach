@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from enums.action_type import ActionType
 from apps.coach_states.models import CoachState
+from apps.chat_messages.models import ChatMessage
 from models.CoachChatResponse import CoachChatResponse
 from services.action_handler.actions import (
     create_identity,
@@ -25,7 +26,7 @@ log = configure_logging(__name__, log_level="DEBUG")
 
 
 def apply_actions(
-    coach_state: CoachState, response: CoachChatResponse
+    coach_state: CoachState, response: CoachChatResponse, coach_message: ChatMessage
 ) -> Tuple[CoachState, List[str]]:
     """
     Applies all non-None actions from a CoachChatResponse to a CoachState object and returns the updated state.
@@ -52,49 +53,49 @@ def apply_actions(
         # Example: handle each action type explicitly
         if action_name == ActionType.CREATE_IDENTITY.value:
             log.info("\033[94mACTION:\t  Creating identity\033[0m")
-            create_identity(coach_state, action.params)
+            create_identity(coach_state, action.params, coach_message)
         elif action_name == ActionType.UPDATE_IDENTITY.value:
             log.info("\033[94mACTION:\t  Updating identity\033[0m")
-            update_identity(coach_state, action.params)
+            update_identity(coach_state, action.params, coach_message)
         elif action_name == ActionType.ACCEPT_IDENTITY.value:
             log.info("\033[94mACTION:\t  Accepting identity\033[0m")
-            accept_identity(coach_state, action.params)
+            accept_identity(coach_state, action.params, coach_message)
         elif action_name == ActionType.ACCEPT_IDENTITY_REFINEMENT.value:
             log.info("\033[94mACTION:\t  Accepting identity refinement\033[0m")
-            accept_identity_refinement(coach_state, action.params)
+            accept_identity_refinement(coach_state, action.params, coach_message)
         elif action_name == ActionType.ADD_IDENTITY_NOTE.value:
             log.info("\033[94mACTION:\t  Adding identity note\033[0m")
-            add_identity_note(coach_state, action.params)
+            add_identity_note(coach_state, action.params, coach_message)
         elif action_name == ActionType.TRANSITION_PHASE.value:
             log.info("\033[94mACTION:\t  Transitioning state\033[0m")
-            transition_phase(coach_state, action.params)
+            transition_phase(coach_state, action.params, coach_message)
         elif action_name == ActionType.SELECT_IDENTITY_FOCUS.value:
             log.info("\033[94mACTION:\t  Selecting identity focus\033[0m")
-            select_identity_focus(coach_state, action.params)
+            select_identity_focus(coach_state, action.params, coach_message)
         elif action_name == ActionType.SET_CURRENT_IDENTITY.value:
             log.info("\033[94mACTION:\t  Setting current identity\033[0m")
-            set_current_identity(coach_state, action.params)
+            set_current_identity(coach_state, action.params, coach_message)
         elif action_name == ActionType.SKIP_IDENTITY_CATEGORY.value:
             log.info("\033[94mACTION:\t  Skipping identity category\033[0m")
-            skip_identity_category(coach_state, action.params)
+            skip_identity_category(coach_state, action.params, coach_message)
         elif action_name == ActionType.UNSKIP_IDENTITY_CATEGORY.value:
             log.info("\033[94mACTION:\t  Unskipping identity category\033[0m")
-            unskip_identity_category(coach_state, action.params)
+            unskip_identity_category(coach_state, action.params, coach_message)
         elif action_name == ActionType.UPDATE_WHO_YOU_ARE.value:
             log.info("\033[94mACTION:\t  Updating who you are\033[0m")
-            update_who_you_are(coach_state, action.params)
+            update_who_you_are(coach_state, action.params, coach_message)
         elif action_name == ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value:
             log.info("\033[94mACTION:\t  Updating who you want to be\033[0m")
-            update_who_you_want_to_be(coach_state, action.params)
+            update_who_you_want_to_be(coach_state, action.params, coach_message)
         elif action_name == ActionType.ADD_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Adding user note\033[0m")
-            add_user_note(coach_state, action.params)
+            add_user_note(coach_state, action.params, coach_message)
         elif action_name == ActionType.UPDATE_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Updating user note\033[0m")
-            update_user_note(coach_state, action.params)
+            update_user_note(coach_state, action.params, coach_message)
         elif action_name == ActionType.DELETE_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Deleting user note\033[0m")
-            delete_user_note(coach_state, action.params)
+            delete_user_note(coach_state, action.params, coach_message)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue
