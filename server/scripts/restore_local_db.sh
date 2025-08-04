@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage: ./restore_local_db.sh [dump_file]
-# Example: ./restore_local_db.sh backups/dev_coach_database_backup_20250703_170048.sql
+# Example: ./restore_local_db.sh backups/local/dev_coach_local_database_backup_20250703_170048.sql
 # If no dump_file is provided, the script will use the most recent file in backups/
 
 # Local database connection info
@@ -15,7 +15,7 @@ LOCAL_DB_PASSWORD="UxRZ75YUsR2wFL6B3JnUDWN8XDyriY3v"
 if [ -n "$1" ]; then
   DUMP_FILE="$1"
 else
-  DUMP_FILE=$(ls -t backups/dev_coach_database_backup_*.sql 2>/dev/null | head -n 1)
+  DUMP_FILE=$(ls -t backups/local/dev_coach_local_database_backup_*.sql 2>/dev/null | head -n 1)
 fi
 
 if [ ! -f "$DUMP_FILE" ]; then
