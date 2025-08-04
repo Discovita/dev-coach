@@ -40,7 +40,7 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
     let parsedParameters = {};
     try {
       parsedParameters = JSON.parse(parametersText);
-    } catch (e) {
+    } catch {
       alert("Invalid JSON in parameters field");
       return;
     }
