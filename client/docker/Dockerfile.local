@@ -1,7 +1,9 @@
 FROM node:22.11
+ARG FRESH_BUILD=1
 WORKDIR /client
 COPY package*.json ./
 RUN npm config set registry https://registry.npmjs.org/
+RUN npm cache clean --force
 RUN npm ci --legacy-peer-deps --progress=true --loglevel=verbose;
 COPY . .
 EXPOSE 5173
