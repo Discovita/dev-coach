@@ -17,7 +17,7 @@ export function useTestScenarioUserActions(testUserId: string) {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["test-scenario-user", testUserId, "actions"],
+    queryKey: ["testScenarioUser", testUserId, "actions"],
     queryFn: () => fetchTestScenarioUserActions(testUserId),
     enabled: !!testUserId,
   });
@@ -30,7 +30,7 @@ export function useTestScenarioUserActions(testUserId: string) {
       throw new Error("Update test scenario actions not implemented");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["test-scenario-user", testUserId, "actions"] });
+      queryClient.invalidateQueries({ queryKey: ["testScenarioUser", testUserId, "actions"] });
     },
   });
 
