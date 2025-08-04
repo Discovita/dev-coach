@@ -6,6 +6,9 @@ from apps.user_notes.models import UserNote
 from apps.actions.models import Action
 import hashlib
 import uuid
+from services.logger import configure_logging
+
+log = configure_logging(__name__, log_level="INFO")
 
 
 def instantiate_test_scenario(
@@ -164,6 +167,7 @@ def instantiate_test_scenario(
                 except ChatMessage.DoesNotExist:
                     # If no exact match, try to find the most recent coach message
                     # This is a fallback for cases where content might have slight variations
+                    log.warning("Using fallback chat message for action relationship")
                     coach_message = ChatMessage.objects.filter(
                         user=created_user,
                         test_scenario=scenario,
