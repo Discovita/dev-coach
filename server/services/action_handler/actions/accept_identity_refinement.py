@@ -27,7 +27,7 @@ def accept_identity_refinement(
         user=coach_state.user,
         action_type=ActionType.ACCEPT_IDENTITY_REFINEMENT.value,
         parameters=params.model_dump(),
-        result_summary=f"Completed refinement for identity '{identity.name}'",
+        result_summary=f"Accepted refinement for identity '{identity.name}'",
         coach_message=coach_message,
         test_scenario=coach_state.user.test_scenario if hasattr(coach_state.user, 'test_scenario') else None
     )
