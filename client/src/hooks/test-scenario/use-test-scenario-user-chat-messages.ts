@@ -51,12 +51,8 @@ export function useTestScenarioUserChatMessages(userId: string) {
           response.final_prompt
         );
       }
-      if (response.actions && response.actions.length > 0) {
-        const prevActions: string[] =
-          queryClient.getQueryData(["testScenarioUser", userId, "actions"]) || [];
-        const updatedActions = [...prevActions, ...response.actions];
-        queryClient.setQueryData(["testScenarioUser", userId, "actions"], updatedActions);
-      }
+      // Invalidate actions cache to trigger refetch of latest actions from database
+      queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId, "actions"] });
     },
   });
 
