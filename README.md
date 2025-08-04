@@ -305,9 +305,9 @@ docker compose \
 -f docker/docker-compose.yml \
 -f docker/docker-compose.local.yml \
 exec db pg_dump \
--U postgres \
+-U dev_coach_database_user \
 -d local_dev_coach \
--Fc > server/backups/dev_coach_backup_$(date +%Y%m%d_%H%M%S).dump
+-Fc > server/backups/dev_coach_local_backup_$(date +%Y%m%d_%H%M%S).dump
 ```
 
 Restore from the backup
