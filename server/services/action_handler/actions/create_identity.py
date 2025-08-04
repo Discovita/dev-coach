@@ -23,7 +23,7 @@ def create_identity(coach_state: CoachState, params: CreateIdentityParams, coach
     ).first()
     
     if existing_identity:
-        log.info(f"Identity with name '{params.name}' already exists for user {coach_state.user.id}. Skipping creation.")
+        log.warning(f"Identity with name '{params.name}' already exists for user {coach_state.user.id}. Skipping creation.")
         return None
     
     # Create new identity if it doesn't exist
