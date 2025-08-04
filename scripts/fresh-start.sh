@@ -5,17 +5,17 @@
 
 echo "🧹 Starting fresh rebuild..."
 
-# Stop and remove everything for this project
-echo "📦 Stopping containers and removing volumes..."
-COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml down --volumes --remove-orphans
+# Stop and remove containers (but preserve database volume)
+echo "📦 Stopping containers..."
+COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml down --remove-orphans
 
 # Remove project-specific images
 echo "🗑️  Removing project images..."
 docker images | grep dev-coach-local | awk '{print $3}' | xargs -r docker rmi
 
-# Remove project-specific volumes
-echo "🗑️  Removing project volumes..."
-docker volume ls | grep dev-coach-local | awk '{print $2}' | xargs -r docker volume rm
+# Remove project-specific volumes (but preserve database)
+echo "🗑️  Removing project volumes (preserving database)..."
+docker volume ls | grep dev-coach-local | grep -v db-data | awk '{print $2}' | xargs -r docker volume rm
 
 # Fresh rebuild with no cache
 echo "🔨 Building fresh containers..."
