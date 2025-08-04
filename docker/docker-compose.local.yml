@@ -22,5 +22,33 @@ services:
       dockerfile: docker/Dockerfile.local
     environment:
       - DJANGO_SETTINGS_MODULE=settings.local
+
+# Fresh rebuild profile - forces complete rebuild without cache
+x-fresh-build: &fresh-build
+  backend:
+    build:
+      context: ../server
+      dockerfile: docker/Dockerfile.local
+      no_cache: true
+      args:
+        - FRESH_BUILD=${FRESH_BUILD:-$(date +%s)}
+  frontend:
+    build:
+      context: ../client
+      dockerfile: docker/Dockerfile.local
+      no_cache: true
+      args:
+        - FRESH_BUILD=${FRESH_BUILD:-$(date +%s)}
+  celery:
+    build:
+      context: ../server
+      dockerfile: docker/Dockerfile.local
+      no_cache: true
+      args:
+        - FRESH_BUILD=${FRESH_BUILD:-$(date +%s)}
+
 # From the project root run:
 # COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml up --build
+# 
+# For fresh rebuild:
+# COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local --profile fresh -f docker/docker-compose.yml -f docker/docker-compose.local.yml up --build
