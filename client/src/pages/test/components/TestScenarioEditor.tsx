@@ -9,6 +9,7 @@ import {
   TestScenarioIdentity,
   TestScenarioChatMessage,
   TestScenarioUserNote,
+  TestScenarioAction,
 } from "@/types/testScenario";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
@@ -16,6 +17,7 @@ import TestScenarioCoachStateForm from "@/pages/test/components/TestScenarioCoac
 import TestScenarioIdentitiesForm from "@/pages/test/components/TestScenarioIdentitiesForm";
 import TestScenarioChatMessagesForm from "@/pages/test/components/TestScenarioChatMessagesForm";
 import TestScenarioUserNotesForm from "@/pages/test/components/TestScenarioUserNotesForm";
+import TestScenarioActionsForm from "@/pages/test/components/TestScenarioActionsForm";
 
 interface TestScenarioEditorProps {
   scenario: TestScenario | null;
@@ -127,6 +129,19 @@ const TestScenarioEditor = ({
       return [];
     })()
   );
+  // Actions section state
+  const [actions, setActions] = useState<TestScenarioAction[]>(
+    (() => {
+      if (
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.actions
+      ) {
+        return scenario.template.actions as TestScenarioAction[];
+      }
+      return [];
+    })()
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
@@ -167,6 +182,7 @@ const TestScenarioEditor = ({
           identities: identities,
           chat_messages: chatMessages,
           user_notes: userNotes,
+          actions: actions,
         },
       });
     } catch (err) {
@@ -192,6 +208,7 @@ const TestScenarioEditor = ({
           <TabsTrigger value="identities">Identities</TabsTrigger>
           <TabsTrigger value="chat_messages">Chat Messages</TabsTrigger>
           <TabsTrigger value="user_notes">User Notes</TabsTrigger>
+          <TabsTrigger value="actions">Actions</TabsTrigger>
         </TabsList>
         <TabsContent value="general">
           <TestScenarioGeneralForm
@@ -232,6 +249,12 @@ const TestScenarioEditor = ({
           <TestScenarioUserNotesForm
             value={userNotes}
             onChange={setUserNotes}
+          />
+        </TabsContent>
+        <TabsContent value="actions">
+          <TestScenarioActionsForm
+            value={actions}
+            onChange={setActions}
           />
         </TabsContent>
       </Tabs>
