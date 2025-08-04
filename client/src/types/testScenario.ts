@@ -1,5 +1,6 @@
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { IdentityCategory } from "@/enums/identityCategory";
+import { ActionType } from "@/enums/actionType";
 
 export interface TestScenarioUser {
   /**
@@ -47,12 +48,21 @@ export interface TestScenarioUserNote {
   note: string;
 }
 
+export interface TestScenarioAction {
+  action_type: ActionType;
+  parameters: Record<string, any>;
+  result_summary?: string;
+  timestamp?: string;
+  coach_message_content?: string;
+}
+
 export interface TestScenarioTemplate {
   user: TestScenarioUser;
   coach_state?: TestScenarioCoachState;
   identities?: TestScenarioIdentity[];
   chat_messages?: TestScenarioChatMessage[];
   user_notes?: TestScenarioUserNote[];
+  actions?: TestScenarioAction[];
 }
 
 export type TestScenario = {
