@@ -3,6 +3,8 @@ from services.action_handler.models import DeleteUserNoteParams
 from apps.coach_states.models import CoachState
 
 
+# NOTE: For now, this function does not log actions to the Action table.
+# Since these actions are performed by the Sentinel only, these actions don't belong with the "Coach" actions
 def delete_user_note(coach_state: CoachState, params: DeleteUserNoteParams):
     """
     Action handler to delete one or more user notes by ID.
@@ -16,4 +18,4 @@ def delete_user_note(coach_state: CoachState, params: DeleteUserNoteParams):
             user_note.delete()
         except UserNote.DoesNotExist:
             # Optionally log or handle missing notes
-            continue 
+            continue

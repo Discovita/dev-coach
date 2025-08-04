@@ -1,18 +1,45 @@
-import { useQuery } from "@tanstack/react-query";
-import { Action } from "@/types/action";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchTestScenarioUserActions } from "@/api/testScenarioUser";
 
 /**
  * useTestScenarioUserActions hook
- * Retrieves the running list of all actions for a test scenario user from the TanStack Query cache.
- * Updates reactively when new actions are added.
- * Used in: Any test scenario component that needs to display all actions received from the coach so far.
+ * Retrieves all actions for a specific test user from the database.
+ * Used in: Test scenario visualizer components.
+ * @param testUserId - The ID of the test user to get actions for
  */
-export function useTestScenarioUserActions(userId: string): Action[] {
-  // Use useQuery to subscribe to changes in the actions cache for the test user
-  const { data } = useQuery<Action[]>({
-    queryKey: ["testScenarioUser", userId, "actions"],
-    // No fetcher: this is only set by mutation, so return empty array if not present
-    queryFn: () => [],
+export function useTestScenarioUserActions(testUserId: string) {
+  const queryClient = useQueryClient();
+
+  // Fetch the test user's actions
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["testScenarioUser", testUserId, "actions"],
+    queryFn: () => fetchTestScenarioUserActions(testUserId),
+    enabled: !!testUserId,
   });
-  return data || [];
+
+  // Placeholder for update mutation (implement as needed)
+  // The argument will be added when the update API is implemented
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      // Implement update API call here
+      throw new Error("Update test scenario actions not implemented");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["testScenarioUser", testUserId, "actions"] });
+    },
+  });
+
+  return {
+    actions: data || [],
+    isLoading,
+    isError,
+    refetchActions: refetch,
+    updateActions: updateMutation.mutateAsync,
+    updateStatus: updateMutation.status,
+  };
 } 

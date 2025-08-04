@@ -289,3 +289,35 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
 docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend \
 python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); u=User.objects.get(email='superadmin@admin.com'); u.set_password('Coach123!'); u.save()"
 ```
+
+---
+
+### Making a backup and restoring the local database
+
+- Run these commands from the root directory
+- Saves backups in `server/backups/`
+
+Create the backup:
+
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+docker compose \
+-f docker/docker-compose.yml \
+-f docker/docker-compose.local.yml \
+exec db pg_dump \
+-U dev_coach_database_user \
+-d local_dev_coach \
+-Fc > server/backups/dev_coach_local_backup_$(date +%Y%m%d_%H%M%S).dump
+```
+
+Restore from the backup
+
+```sh
+COMPOSE_PROJECT_NAME=dev-coach-local \
+docker compose \
+-f docker/docker-compose.yml \
+-f docker/docker-compose.local.yml \
+exec -T db pg_restore \
+-U postgres \
+-d dev_coach_core_local < server/backups/your_backup_file.dump
+```

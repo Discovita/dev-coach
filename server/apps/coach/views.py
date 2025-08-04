@@ -125,9 +125,9 @@ class CoachViewSet(
         response: CoachChatResponse = ai_service.generate(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
-        # Step 6: Add the coach response to the chat history (async)
-        add_chat_message(request.user, response.message, MessageRole.COACH)
-        new_state, actions = apply_actions(coach_state, response)
+        # Step 6: Add the coach response to the chat history
+        coach_message = add_chat_message(request.user, response.message, MessageRole.COACH)
+        new_state, actions = apply_actions(coach_state, response, coach_message)
         coach_state_serializer = CoachStateSerializer(new_state)
         log.debug(f"Actions: {actions}")
 
@@ -217,8 +217,8 @@ class CoachViewSet(
         response: CoachChatResponse = ai_service.generate(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
-        add_chat_message(acting_user, response.message, MessageRole.COACH)
-        new_state, actions = apply_actions(coach_state, response)
+        coach_message = add_chat_message(acting_user, response.message, MessageRole.COACH)
+        new_state, actions = apply_actions(coach_state, response, coach_message)
         coach_state_serializer = CoachStateSerializer(new_state)
         log.debug(f"Actions: {actions}")
 

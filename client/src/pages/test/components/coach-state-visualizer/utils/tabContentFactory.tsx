@@ -17,7 +17,6 @@ import { useTestScenarioUserFinalPrompt } from "@/hooks/test-scenario/use-test-s
 import { useTestScenarioUserActions } from "@/hooks/test-scenario/use-test-scenario-user-actions";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
 import { useTestScenarioUserChatMessages } from "@/hooks/test-scenario/use-test-scenario-user-chat-messages";
-import { Action } from "@/types/action";
 
 /**
  * TabContent component
@@ -33,7 +32,7 @@ export const TabContent: React.FC<{
   // Fetch all required data using hooks
   const { coachState } = useCoachState();
   const finalPrompt = useFinalPrompt();
-  const actions: Action[] = useActions();
+  const { actions } = useActions();
   const { identities } = useIdentities();
   const { chatMessages } = useChatMessages();
 
@@ -168,7 +167,7 @@ export const TestScenarioTabContent: React.FC<{
   // Fetch all required data using test-scenario hooks
   const { coachState } = useTestScenarioUserCoachState(testUserId);
   const finalPrompt = useTestScenarioUserFinalPrompt(testUserId);
-  const actions: Action[] = useTestScenarioUserActions(testUserId);
+  const { actions } = useTestScenarioUserActions(testUserId);
   const { identities } = useTestScenarioUserIdentities(testUserId); // <-- FIX: get identities here
   const { chatMessages } = useTestScenarioUserChatMessages(testUserId);
 
@@ -177,7 +176,7 @@ export const TestScenarioTabContent: React.FC<{
       return (
         <>
           {renderJsonSection(
-            "Current State",
+            "Current Coach State",
             getCurrentStateInfo(coachState),
             "state",
             expandedSections["state"],
@@ -219,15 +218,6 @@ export const TestScenarioTabContent: React.FC<{
               toggleSection
             )}
 
-          {/* Available Actions is a string[]; render as JSON, not as actions */}
-          {renderJsonSection(
-            "Available Actions",
-            undefined, // You can fetch available actions from coachState if needed
-            "availableActions",
-            expandedSections["availableActions"],
-            toggleSection
-          )}
-
           {(!actions || actions.length === 0) &&
             renderEmptyState(
               "No action information available yet.",
@@ -240,23 +230,10 @@ export const TestScenarioTabContent: React.FC<{
       return (
         <>
           {renderJsonSection(
-            "Confirmed Identities",
-            identities || [], // <-- FIX: use identities here
+            "Identities",
+            identities || [],
             "identities",
             expandedSections["identities"],
-            toggleSection
-          )}
-
-          {renderJsonSection(
-            "Proposed Identity",
-            coachState?.proposed_identity
-              ? (coachState.proposed_identity as unknown as Record<
-                  string,
-                  unknown
-                >)
-              : null,
-            "proposedIdentity",
-            expandedSections["proposedIdentity"],
             toggleSection
           )}
 

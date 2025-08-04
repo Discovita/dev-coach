@@ -152,3 +152,31 @@ class TemplateUserNoteSerializer(ForbidExtraFieldsMixin, serializers.Serializer)
     created_at = serializers.DateTimeField(
         required=False, help_text="Timestamp when this note was created."
     )
+
+
+class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
+    """
+    Serializer for action data in a test scenario template.
+    Only includes fields required for action creation.
+    Used for capturing coach actions during test scenario creation and instantiation.
+    """
+
+    action_type = serializers.CharField(
+        help_text="Type of action performed by the coach. Required."
+    )
+    parameters = serializers.DictField(
+        help_text="Parameters passed to the action (stored as JSON). Required."
+    )
+    result_summary = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Natural language description of what the action accomplished."
+    )
+    timestamp = serializers.DateTimeField(
+        required=False, help_text="When the action was performed."
+    )
+    coach_message_content = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Content of the coach message that triggered this action (for linking during instantiation)."
+    )

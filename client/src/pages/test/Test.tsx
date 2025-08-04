@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TestChat from "@/pages/test/components/TestChat";
 import {
   ModuleRegistry,
@@ -39,6 +39,12 @@ function Test() {
     null
   );
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (scenarios) {
+      console.log("[Test] scenarios loaded:", scenarios.length);
+    }
+  }, [scenarios]);
 
   // Create mutation
   const createMutation = useMutation({
@@ -81,7 +87,9 @@ function Test() {
 
   // Handler for editing a scenario
   const handleEditScenario = (scenario: TestScenario) => {
-    setEditingScenario(scenario);
+    // Find the scenario from the current scenarios array to ensure we have the latest data
+    const currentScenario = scenarios?.find(s => s.id === scenario.id);
+    setEditingScenario(currentScenario || scenario);
     setShowEditor(true);
   };
 
@@ -236,6 +244,7 @@ function Test() {
   };
 
   if (selectedScenario) {
+    console.log("[Test] selectedScenario: ", selectedScenario);
     return (
       <TestChat
         scenario={selectedScenario}

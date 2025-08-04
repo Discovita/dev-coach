@@ -10,7 +10,7 @@ DB_USER="dev_coach_database_user"
 DB_PASSWORD="UxRZ75YUsR2wFL6B3JnUDWN8XDyriY3v"
 
 # Output file
-OUTPUT_FILE=${1:-"backups/dev_coach_database_backup_$(date +%Y%m%d_%H%M%S).sql"}
+OUTPUT_FILE=${1:-"backups/dev/dev_coach_dev_database_backup_$(date +%Y%m%d_%H%M%S).sql"}
 
 # Run the backup
 export PGPASSWORD="$DB_PASSWORD"

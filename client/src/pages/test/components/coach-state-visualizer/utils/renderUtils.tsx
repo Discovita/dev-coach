@@ -3,7 +3,7 @@ import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { copyToClipboard } from "./dataUtils";
 import { Button } from "@/components/ui/button";
 import { Action } from "@/types/action";
-
+import ActionItem from "@/pages/test/components/coach-state-visualizer/utils/ActionItem";
 
 export const renderJsonSection = (
   title: string,
@@ -15,7 +15,7 @@ export const renderJsonSection = (
   if (!data || (Array.isArray(data) && data.length === 0)) return null;
 
   return (
-    <div className="mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_JSONSection mb-4 border rounded-md overflow-hidden border-gold-600">
       <div
         className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
@@ -61,7 +61,7 @@ export const renderActionsSection = (
   if (!actions || actions.length === 0) return null;
 
   return (
-    <div className="mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_ActionsSection mb-4 border rounded-md overflow-hidden border-gold-600">
       <div
         className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
@@ -89,49 +89,9 @@ export const renderActionsSection = (
         </div>
       </div>
       {isExpanded && (
-        <div className="flex flex-col gap-3 p-4 max-h-full overflow-y-auto bg-gold-50 dark:bg-neutral-700">
+        <div className="flex flex-col gap-2 p-4 max-h-full overflow-y-auto bg-gold-50 dark:bg-neutral-700">
           {actions.map((action: Action, index: number) => (
-            <div
-              key={index}
-              className="rounded-md border overflow-hidden bg-white dark:bg-neutral-800 shadow transition-transform hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <div className="px-4 py-2 text-white font-semibold text-sm uppercase tracking-wide bg-gold-500 dark:bg-gold-600">
-                {action.type}
-              </div>
-              <div className="p-3">
-                {/* Render params as a key-value table if present and not null */}
-                {action.params && typeof action.params === "object" && !Array.isArray(action.params) && Object.keys(action.params).length > 0 ? (
-                  <table className="w-full border-collapse text-sm">
-                    <thead>
-                      <tr>
-                        <th className="bg-[#f8f8f8] dark:bg-neutral-700 font-semibold text-[#555] dark:text-gold-50 p-2 text-left">
-                          Parameter
-                        </th>
-                        <th className="bg-[#f8f8f8] dark:bg-neutral-700 font-semibold text-[#555] dark:text-gold-50 p-2 text-left">
-                          Value
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(action.params).map(([name, value], pIndex) => (
-                        <tr key={pIndex}>
-                          <td className="font-medium text-[#555] dark:text-gold-100 w-2/5 p-2">
-                            {name}
-                          </td>
-                          <td className="font-mono bg-[#f9f9f9] dark:bg-neutral-900 p-2 rounded break-words max-w-[60%] text-[#333] dark:text-gold-50">
-                            {JSON.stringify(value)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="italic text-[#888] dark:text-gold-200 text-center p-2">
-                    No parameters
-                  </div>
-                )}
-              </div>
-            </div>
+            <ActionItem key={index} action={action} />
           ))}
         </div>
       )}
@@ -145,7 +105,7 @@ export const renderFinalPrompt = (
   toggleSection: (section: string) => void
 ): React.ReactElement | null => {
   return (
-    <div className="mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_FinalPrompt mb-4 border rounded-md overflow-hidden border-gold-600">
       <div
         className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection("prompt")}
@@ -189,7 +149,7 @@ export const renderEmptyState = (
   secondaryText?: string
 ): React.ReactElement => {
   return (
-    <div className="p-6 text-center bg-gold-50 dark:bg-neutral-800 border border-dashed rounded-md text-neutral-400 dark:border-gold-500">
+    <div className="_EmptyState p-6 text-center bg-gold-50 dark:bg-neutral-800 border border-dashed rounded-md text-neutral-400 dark:border-gold-500">
       <p className="font-medium mb-2">{primaryText}</p>
       {secondaryText && <p className="mt-1">{secondaryText}</p>}
     </div>

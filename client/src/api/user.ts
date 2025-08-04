@@ -55,6 +55,16 @@ export async function fetchChatMessages() {
 }
 
 /**
+ * Fetch the current authenticated user's actions.
+ * Calls /user/me/actions/
+ */
+export async function fetchActions() {
+  const response = await authFetch(`${COACH_BASE_URL}/user/me/actions`, {});
+  if (!response.ok) throw new Error("Failed to fetch actions");
+  return response.json();
+}
+
+/**
  * Reset (delete) all chat messages for the current authenticated user.
  * Calls /user/me/reset-chat-messages/ (POST)
  * Returns the new chat history (should contain only the initial message, or be empty if none).

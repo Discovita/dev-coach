@@ -34,7 +34,7 @@ const AdminLayout = () => {
       {/* Main content area - scrollable container, never exceeds 100vh. Only the Outlet scrolls. */}
       <main className="_Main flex flex-col flex-1 min-h-0 max-h-screen justify-center bg-transparent dark:bg-[#333333]">
         {/* Only the Outlet (page content) scrolls if needed */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="_OutletContainer flex-1 min-h-0 overflow-y-auto">
           <Outlet />
         </div>
       </main>

@@ -1,13 +1,23 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TestScenario, TestScenarioTemplate, TestScenarioUser, TestScenarioCoachState, TestScenarioIdentity, TestScenarioChatMessage, TestScenarioUserNote } from "@/types/testScenario";
+import {
+  TestScenario,
+  TestScenarioTemplate,
+  TestScenarioUser,
+  TestScenarioCoachState,
+  TestScenarioIdentity,
+  TestScenarioChatMessage,
+  TestScenarioUserNote,
+  TestScenarioAction,
+} from "@/types/testScenario";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
 import TestScenarioCoachStateForm from "@/pages/test/components/TestScenarioCoachStateForm";
 import TestScenarioIdentitiesForm from "@/pages/test/components/TestScenarioIdentitiesForm";
 import TestScenarioChatMessagesForm from "@/pages/test/components/TestScenarioChatMessagesForm";
 import TestScenarioUserNotesForm from "@/pages/test/components/TestScenarioUserNotesForm";
+import TestScenarioActionsForm from "@/pages/test/components/TestScenarioActionsForm";
 
 interface TestScenarioEditorProps {
   scenario: TestScenario | null;
@@ -20,42 +30,61 @@ interface TestScenarioEditorProps {
   onDelete?: () => void;
 }
 
-const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenarioEditorProps) => {
+const TestScenarioEditor = ({
+  scenario,
+  onSave,
+  onCancel,
+  onDelete,
+}: TestScenarioEditorProps) => {
+  console.log("[TestScenarioEditor] scenario: ", scenario);
+
   // General section state
-  const [name, setName] = useState(
-    scenario?.name || ""
-  );
-  const [description, setDescription] = useState(
-    scenario?.description || ""
-  );
+  const [name, setName] = useState(scenario?.name || "");
+  const [description, setDescription] = useState(scenario?.description || "");
   // User section state
   const [firstName, setFirstName] = useState(
     (() => {
-      const user = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
-        ? scenario.template.user as TestScenarioUser
-        : undefined;
-      return user?.first_name || '';
+      const user =
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.user
+          ? (scenario.template.user as TestScenarioUser)
+          : undefined;
+      return user?.first_name || "";
     })()
   );
   const [lastName, setLastName] = useState(
     (() => {
-      const user = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
-        ? scenario.template.user as TestScenarioUser
-        : undefined;
-      return user?.last_name || '';
+      const user =
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.user
+          ? (scenario.template.user as TestScenarioUser)
+          : undefined;
+      return user?.last_name || "";
     })()
   );
   // For display only
-  const testUserEmail = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
-    ? (scenario.template.user as TestScenarioUser).email
-    : undefined;
-  const testUserPassword = scenario?.template && typeof scenario.template === 'object' && scenario.template.user
-    ? (scenario.template.user as TestScenarioUser).password
-    : undefined;
+  const testUserEmail =
+    scenario?.template &&
+    typeof scenario.template === "object" &&
+    scenario.template.user
+      ? (scenario.template.user as TestScenarioUser).email
+      : undefined;
+  const testUserPassword =
+    scenario?.template &&
+    typeof scenario.template === "object" &&
+    scenario.template.user
+      ? (scenario.template.user as TestScenarioUser).password
+      : undefined;
   // Coach State section state
   const [coachState, setCoachState] = useState<TestScenarioCoachState>(
     (() => {
-      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.coach_state) {
+      if (
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.coach_state
+      ) {
         return scenario.template.coach_state as TestScenarioCoachState;
       }
       return {};
@@ -64,7 +93,11 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
   // Identities section state
   const [identities, setIdentities] = useState<TestScenarioIdentity[]>(
     (() => {
-      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.identities) {
+      if (
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.identities
+      ) {
         return scenario.template.identities as TestScenarioIdentity[];
       }
       return [];
@@ -73,7 +106,11 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
   // Chat Messages section state
   const [chatMessages, setChatMessages] = useState<TestScenarioChatMessage[]>(
     (() => {
-      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.chat_messages) {
+      if (
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.chat_messages
+      ) {
         return scenario.template.chat_messages as TestScenarioChatMessage[];
       }
       return [];
@@ -82,8 +119,25 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
   // User Notes section state
   const [userNotes, setUserNotes] = useState<TestScenarioUserNote[]>(
     (() => {
-      if (scenario?.template && typeof scenario.template === 'object' && scenario.template.user_notes) {
+      if (
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.user_notes
+      ) {
         return scenario.template.user_notes as TestScenarioUserNote[];
+      }
+      return [];
+    })()
+  );
+  // Actions section state
+  const [actions, setActions] = useState<TestScenarioAction[]>(
+    (() => {
+      if (
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.actions
+      ) {
+        return scenario.template.actions as TestScenarioAction[];
       }
       return [];
     })()
@@ -92,12 +146,18 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
 
-  const handleGeneralChange = (fields: { name: string; description: string }) => {
+  const handleGeneralChange = (fields: {
+    name: string;
+    description: string;
+  }) => {
     setName(fields.name);
     setDescription(fields.description);
   };
 
-  const handleUserChange = (fields: { first_name: string; last_name: string }) => {
+  const handleUserChange = (fields: {
+    first_name: string;
+    last_name: string;
+  }) => {
     setFirstName(fields.first_name);
     setLastName(fields.last_name);
   };
@@ -122,6 +182,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           identities: identities,
           chat_messages: chatMessages,
           user_notes: userNotes,
+          actions: actions,
         },
       });
     } catch (err) {
@@ -147,6 +208,7 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           <TabsTrigger value="identities">Identities</TabsTrigger>
           <TabsTrigger value="chat_messages">Chat Messages</TabsTrigger>
           <TabsTrigger value="user_notes">User Notes</TabsTrigger>
+          <TabsTrigger value="actions">Actions</TabsTrigger>
         </TabsList>
         <TabsContent value="general">
           <TestScenarioGeneralForm
@@ -165,16 +227,35 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
           />
         </TabsContent>
         <TabsContent value="coach_state">
-          <TestScenarioCoachStateForm value={coachState} onChange={setCoachState} identities={identities} />
+          <TestScenarioCoachStateForm
+            value={coachState}
+            onChange={setCoachState}
+            identities={identities}
+          />
         </TabsContent>
         <TabsContent value="identities">
-          <TestScenarioIdentitiesForm value={identities} onChange={setIdentities} />
+          <TestScenarioIdentitiesForm
+            value={identities}
+            onChange={setIdentities}
+          />
         </TabsContent>
         <TabsContent value="chat_messages">
-          <TestScenarioChatMessagesForm value={chatMessages} onChange={setChatMessages} />
+          <TestScenarioChatMessagesForm
+            value={chatMessages}
+            onChange={setChatMessages}
+          />
         </TabsContent>
         <TabsContent value="user_notes">
-          <TestScenarioUserNotesForm value={userNotes} onChange={setUserNotes} />
+          <TestScenarioUserNotesForm
+            value={userNotes}
+            onChange={setUserNotes}
+          />
+        </TabsContent>
+        <TabsContent value="actions">
+          <TestScenarioActionsForm
+            value={actions}
+            onChange={setActions}
+          />
         </TabsContent>
       </Tabs>
       {error && <div className="text-red-600 mt-2">{error}</div>}
@@ -182,11 +263,21 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
         <Button type="submit" variant="default" disabled={saving}>
           {saving ? "Saving..." : "Save"}
         </Button>
-        <Button type="button" onClick={onCancel} variant="secondary" disabled={saving}>
+        <Button
+          type="button"
+          onClick={onCancel}
+          variant="secondary"
+          disabled={saving}
+        >
           Cancel
         </Button>
         {scenario && onDelete && (
-          <Button type="button" onClick={onDelete} variant="destructive" disabled={saving}>
+          <Button
+            type="button"
+            onClick={onDelete}
+            variant="destructive"
+            disabled={saving}
+          >
             Delete
           </Button>
         )}
@@ -195,4 +286,4 @@ const TestScenarioEditor = ({ scenario, onSave, onCancel, onDelete }: TestScenar
   );
 };
 
-export default TestScenarioEditor; 
+export default TestScenarioEditor;
