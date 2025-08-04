@@ -3,6 +3,7 @@ from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from apps.chat_messages.models import ChatMessage
 from apps.user_notes.models import UserNote
+from apps.actions.models import Action
 import hashlib
 import uuid
 
@@ -14,6 +15,7 @@ def instantiate_test_scenario(
     create_identities=False,
     create_coach_state=False,
     create_user_notes=False,
+    create_actions=False,
 ):
     """
     Instantiates a test scenario from its template.
@@ -110,11 +112,12 @@ def instantiate_test_scenario(
         created_coach_state = coach_state
 
     # Handle chat messages creation
+    created_chat_messages = []
     if create_chat_messages and template.get("chat_messages") and created_user:
         # Delete existing chat messages for this user and scenario
         ChatMessage.objects.filter(user=created_user, test_scenario=scenario).delete()
         for msg_data in template["chat_messages"]:
-            ChatMessage.objects.create(
+            chat_message = ChatMessage.objects.create(
                 user=created_user,
                 test_scenario=scenario,
                 role=msg_data.get("role"),
@@ -124,6 +127,7 @@ def instantiate_test_scenario(
                     msg_data.get("timestamp") if msg_data.get("timestamp") else None
                 ),
             )
+            created_chat_messages.append(chat_message)
 
     # Handle user notes creation
     if create_user_notes and template.get("user_notes") and created_user:
@@ -139,6 +143,47 @@ def instantiate_test_scenario(
                     note_data.get("created_at") if note_data.get("created_at") else None
                 ),
             )
+
+    # Handle actions creation AFTER chat messages are created
+    if create_actions and template.get("actions") and created_user:
+        # Delete existing actions for this user and scenario
+        Action.objects.filter(user=created_user, test_scenario=scenario).delete()
+        
+        for action_data in template["actions"]:
+            # Find the corresponding coach message by content matching
+            coach_message = None
+            if action_data.get("coach_message_content"):
+                # Try to find a coach message with matching content
+                try:
+                    coach_message = ChatMessage.objects.get(
+                        user=created_user,
+                        test_scenario=scenario,
+                        role="coach",
+                        content=action_data["coach_message_content"]
+                    )
+                except ChatMessage.DoesNotExist:
+                    # If no exact match, try to find the most recent coach message
+                    # This is a fallback for cases where content might have slight variations
+                    coach_message = ChatMessage.objects.filter(
+                        user=created_user,
+                        test_scenario=scenario,
+                        role="coach"
+                    ).order_by("-timestamp").first()
+            
+            # Create the action
+            action = Action(
+                user=created_user,
+                test_scenario=scenario,
+                action_type=action_data.get("action_type"),
+                parameters=action_data.get("parameters", {}),
+                result_summary=action_data.get("result_summary", ""),
+                timestamp=(
+                    action_data.get("timestamp") if action_data.get("timestamp") else None
+                ),
+                coach_message=coach_message,
+            )
+            action.save()
+
     return {
         "user": created_user,
         "coach_state": created_coach_state,
