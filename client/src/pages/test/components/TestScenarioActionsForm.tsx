@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { TestScenarioAction } from "@/types/testScenario";
 import { ActionType } from "@/enums/actionType";
 import { Button } from "@/components/ui/button";
@@ -14,37 +14,62 @@ interface Props {
 
 const actionTypes = Object.values(ActionType);
 
+const emptyAction = (): TestScenarioAction => ({
+  action_type: ActionType.CREATE_IDENTITY,
+  parameters: {},
+  result_summary: "",
+  coach_message_content: ""
+});
+
 /**
  * TestScenarioActionsForm Visual Logic
  * ------------------------------------
- * - Each action row has extra vertical padding and minHeight to prevent content from being cut off.
- * - Actions have a light blue background and a left border for emphasis.
- * - Uses box-sizing: border-box to ensure padding is included in height calculations.
- * - Parameters are displayed as JSON for easy editing.
+ * - Follows the same pattern as TestScenarioIdentitiesForm
+ * - Actions list displayed on top with clean, minimal design
+ * - Edit form below in a bordered container
+ * - Consistent styling with other form components
+ * - Expandable action details for better organization
  */
 export default function TestScenarioActionsForm({ value, onChange }: Props) {
-  const parentRef = useRef<HTMLDivElement>(null);
-  const [draft, setDraft] = useState<TestScenarioAction>({ 
-    action_type: ActionType.CREATE_IDENTITY, 
-    parameters: {},
-    result_summary: "",
-    coach_message_content: ""
-  });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [draft, setDraft] = useState<TestScenarioAction>(emptyAction());
+  const [error, setError] = useState<string | null>(null);
   const [parametersText, setParametersText] = useState("{}");
+  const [expandedActions, setExpandedActions] = useState<Set<number>>(new Set());
+
+  const handleEdit = (idx: number) => {
+    setEditingIndex(idx);
+    setDraft({ ...value[idx] });
+    setParametersText(JSON.stringify(value[idx].parameters, null, 2));
+    setError(null);
+  };
+
+  const handleDelete = (idx: number) => {
+    const updated = value.filter((_, i) => i !== idx);
+    onChange(updated);
+    if (editingIndex === idx) {
+      setEditingIndex(null);
+      setDraft(emptyAction());
+      setParametersText("{}");
+    }
+  };
 
   const handleSave = () => {
-    if (!draft.action_type) return;
+    if (!draft.action_type) {
+      setError("Action type is required.");
+      return;
+    }
     
     // Parse parameters JSON
     let parsedParameters = {};
     try {
       parsedParameters = JSON.parse(parametersText);
     } catch {
-      alert("Invalid JSON in parameters field");
+      setError("Invalid JSON in parameters field");
       return;
     }
 
+    setError(null);
     const actionToSave = {
       ...draft,
       parameters: parsedParameters
@@ -54,46 +79,132 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
       const updated = value.map((action, i) => (i === editingIndex ? actionToSave : action));
       onChange(updated);
       setEditingIndex(null);
+      setDraft(emptyAction());
+      setParametersText("{}");
     } else {
-      onChange([...value, actionToSave]);
-    }
-    
-    setDraft({ 
-      action_type: ActionType.CREATE_IDENTITY, 
-      parameters: {},
-      result_summary: "",
-      coach_message_content: ""
-    });
-    setParametersText("{}");
-  };
-
-  const handleEdit = (idx: number) => {
-    setEditingIndex(idx);
-    setDraft(value[idx]);
-    setParametersText(JSON.stringify(value[idx].parameters, null, 2));
-  };
-
-  const handleDelete = (idx: number) => {
-    onChange(value.filter((_, i) => i !== idx));
-    if (editingIndex === idx) {
-      setEditingIndex(null);
-      setDraft({ 
-        action_type: ActionType.CREATE_IDENTITY, 
-        parameters: {},
-        result_summary: "",
-        coach_message_content: ""
-      });
+      const updated = [...value, actionToSave];
+      onChange(updated);
+      setDraft(emptyAction());
       setParametersText("{}");
     }
   };
 
+  const handleCancel = () => {
+    setEditingIndex(null);
+    setDraft(emptyAction());
+    setParametersText("{}");
+    setError(null);
+  };
+
+  const toggleExpanded = (idx: number) => {
+    const newExpanded = new Set(expandedActions);
+    if (newExpanded.has(idx)) {
+      newExpanded.delete(idx);
+    } else {
+      newExpanded.add(idx);
+    }
+    setExpandedActions(newExpanded);
+  };
+
   return (
-    <div className="_TestScenarioActionsForm flex flex-col gap-4">
+    <div className="flex flex-col gap-6 mt-4">
       <div>
-        <div className="flex flex-col gap-2 mb-2">
-          <div className="flex gap-2">
+        <h3 className="font-semibold mb-2">Actions</h3>
+        {value.length === 0 && (
+          <div className="text-neutral-400 mb-2">No actions added yet.</div>
+        )}
+        <ul className="divide-y divide-neutral-200 mb-4">
+          {value.map((action, idx) => (
+            <li
+              key={idx}
+              className="py-2 flex flex-col md:flex-row md:items-center gap-2"
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  {action.result_summary ? (
+                    <span className="font-medium">
+                      {action.result_summary}
+                    </span>
+                  ) : (
+                    <span className="font-medium text-neutral-500">
+                      No result summary
+                    </span>
+                  )}
+                  <span className="text-xs text-neutral-500 font-mono">
+                    [{action.action_type}]
+                  </span>
+                  <span
+                    className={`text-xs text-neutral-400 cursor-pointer transition-transform ${
+                      expandedActions.has(idx) ? "" : "rotate-[-90deg]"
+                    }`}
+                    onClick={() => toggleExpanded(idx)}
+                  >
+                    ▼
+                  </span>
+                </div>
+                
+                {/* Expandable details */}
+                {expandedActions.has(idx) && (
+                  <div className="mt-2 space-y-2 text-xs">
+                    <div>
+                      <span className="font-semibold text-neutral-700">Parameters:</span>
+                      <pre className="bg-gray-100 p-2 rounded mt-1 overflow-x-auto font-mono text-xs">
+                        {JSON.stringify(action.parameters, null, 2)}
+                      </pre>
+                    </div>
+                    
+                    {action.coach_message_content && (
+                      <div>
+                        <span className="font-semibold text-neutral-700">Coach Message:</span>
+                        <div className="bg-yellow-50 p-2 rounded mt-1 italic">
+                          {action.coach_message_content}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {action.timestamp && (
+                      <div>
+                        <span className="font-semibold text-neutral-700">Timestamp:</span>
+                        <span className="text-neutral-600 ml-1">
+                          {new Date(action.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="secondary"
+                  onClick={() => handleEdit(idx)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="destructive"
+                  onClick={() => handleDelete(idx)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+      
+      <div className="border rounded p-4 bg-neutral-50">
+        <h4 className="font-semibold mb-2">
+          {editingIndex !== null ? "Edit Action" : "Add Action"}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label className="mb-2">Action Type</Label>
             <Select value={draft.action_type} onValueChange={actionType => setDraft(d => ({ ...d, action_type: actionType as ActionType }))}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -102,102 +213,50 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
                 ))}
               </SelectContent>
             </Select>
-            <Button type="button" onClick={handleSave} className="shrink-0">
-              {editingIndex !== null ? "Save" : "Add"}
-            </Button>
           </div>
           
-          <div className="grid grid-cols-1 gap-2">
-            <div>
-              <Label htmlFor="parameters">Parameters (JSON)</Label>
-              <Textarea
-                id="parameters"
-                value={parametersText}
-                onChange={e => setParametersText(e.target.value)}
-                placeholder='{"name": "Professional", "category": "CAREER"}'
-                className="font-mono text-sm"
-                rows={3}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="result_summary">Result Summary</Label>
-              <Input
-                id="result_summary"
-                value={draft.result_summary}
-                onChange={e => setDraft(d => ({ ...d, result_summary: e.target.value }))}
-                placeholder="What the action accomplished"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="coach_message_content">Coach Message Content</Label>
-              <Input
-                id="coach_message_content"
-                value={draft.coach_message_content}
-                onChange={e => setDraft(d => ({ ...d, coach_message_content: e.target.value }))}
-                placeholder="Content of the coach message that triggered this action"
-              />
-            </div>
+          <div>
+            <Label className="mb-2">Result Summary</Label>
+            <Input
+              value={draft.result_summary || ""}
+              onChange={e => setDraft(d => ({ ...d, result_summary: e.target.value }))}
+              placeholder="What the action accomplished"
+            />
+          </div>
+          
+          <div className="md:col-span-2">
+            <Label className="mb-2">Parameters (JSON)</Label>
+            <Textarea
+              value={parametersText}
+              onChange={e => setParametersText(e.target.value)}
+              placeholder='{"name": "Professional", "category": "CAREER"}'
+              className="font-mono text-sm resize-y min-h-[100px]"
+            />
+          </div>
+          
+          <div className="md:col-span-2">
+            <Label className="mb-2">Coach Message Content</Label>
+            <Textarea
+              value={draft.coach_message_content || ""}
+              onChange={e => setDraft(d => ({ ...d, coach_message_content: e.target.value }))}
+              placeholder="Content of the coach message that triggered this action"
+              className="resize-y min-h-[180px]"
+            />
           </div>
         </div>
-      </div>
-      
-      <div
-        ref={parentRef}
-        className="overflow-auto border border-[#eee] rounded-lg bg-white"
-        style={{ height: 500, width: "100%" }}
-      >
-        {value.map((action, idx) => (
-          <div
-            key={idx}
-            className="flex items-start gap-2 border-b border-[#f3f3f3] px-4 py-3 min-h-[48px] box-border w-full bg-[#f0f8ff] border-l-4 border-l-[#3b82f6]"
-          >
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-mono text-xs text-[#1e40af] font-bold">
-                  {action.action_type}
-                </span>
-                {action.timestamp && (
-                  <span className="text-xs text-gray-500">
-                    {new Date(action.timestamp).toLocaleString()}
-                  </span>
-                )}
-              </div>
-              
-              <div className="text-sm mb-1">
-                <strong>Parameters:</strong>
-                <pre className="text-xs bg-gray-100 p-1 rounded mt-1 overflow-x-auto">
-                  {JSON.stringify(action.parameters, null, 2)}
-                </pre>
-              </div>
-              
-              {action.result_summary && (
-                <div className="text-sm mb-1">
-                  <strong>Result:</strong> {action.result_summary}
-                </div>
-              )}
-              
-              {action.coach_message_content && (
-                <div className="text-sm">
-                  <strong>Coach Message:</strong> 
-                  <div className="text-xs bg-yellow-50 p-1 rounded mt-1 italic">
-                    {action.coach_message_content}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex gap-1">
-              <Button size="xs" variant="secondary" onClick={() => handleEdit(idx)}>
-                Edit
-              </Button>
-              <Button size="xs" variant="destructive" onClick={() => handleDelete(idx)}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        ))}
+        
+        {error && <div className="text-red-600 mt-2">{error}</div>}
+        
+        <div className="flex gap-2 mt-4">
+          <Button type="button" variant="default" onClick={handleSave}>
+            {editingIndex !== null ? "Save Changes" : "Add Action"}
+          </Button>
+          {editingIndex !== null && (
+            <Button type="button" variant="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
