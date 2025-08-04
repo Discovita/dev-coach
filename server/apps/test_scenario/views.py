@@ -45,6 +45,7 @@ class TestScenarioViewSet(
             create_identities=True,
             create_chat_messages=True,
             create_user_notes=True,
+            create_actions=True,
         )
 
     def perform_update(self, serializer):
@@ -61,6 +62,7 @@ class TestScenarioViewSet(
             create_identities=True,
             create_chat_messages=True,
             create_user_notes=True,
+            create_actions=True,
         )
 
     def destroy(self, request, *args, **kwargs):
@@ -84,6 +86,7 @@ class TestScenarioViewSet(
             create_identities=True,
             create_chat_messages=True,
             create_user_notes=True,
+            create_actions=True,
         )
         return Response(
             {"success": True, "message": "Scenario reset (all data)."},
@@ -96,7 +99,7 @@ class TestScenarioViewSet(
         Admin-only endpoint to capture ("freeze") the current state of a user session as a new test scenario.
         Step-by-step:
         1. Validate input: user_id, name, description (name must be unique, user must exist)
-        2. Gather all user state: User, CoachState, Identities, ChatMessages, UserNotes
+        2. Gather all user state: User, CoachState, Identities, ChatMessages, UserNotes, Actions
         3. Build a scenario template dict as per canonical schema (strict: only required/optional fields)
         4. Validate the template using validate_scenario_template
         5. Create and save the new TestScenario
@@ -204,6 +207,25 @@ class TestScenarioViewSet(
                 note_dict["created_at"] = note.created_at.isoformat()
             user_notes_section.append(note_dict)
 
+        # --- Actions section (only fields in TemplateActionSerializer) ---
+        from apps.actions.models import Action
+        actions_qs = Action.objects.filter(user=user).order_by("timestamp")
+        actions_section = []
+        for action in actions_qs:
+            action_dict = {
+                "action_type": action.action_type,
+                "parameters": action.parameters,
+            }
+            # Optional fields
+            if action.result_summary:
+                action_dict["result_summary"] = action.result_summary
+            if action.timestamp:
+                action_dict["timestamp"] = action.timestamp.isoformat()
+            # Link to coach message content for instantiation
+            if action.coach_message:
+                action_dict["coach_message_content"] = action.coach_message.content
+            actions_section.append(action_dict)
+
         # 4. Build the template dict (only include sections if present)
         template = {"user": user_section}
         if coach_state_section:
@@ -214,6 +236,8 @@ class TestScenarioViewSet(
             template["chat_messages"] = chat_messages_section
         if user_notes_section:
             template["user_notes"] = user_notes_section
+        if actions_section:
+            template["actions"] = actions_section
 
         # 5. Validate the template
         errors = validate_scenario_template(template)
@@ -236,6 +260,7 @@ class TestScenarioViewSet(
             create_identities=True,
             create_chat_messages=True,
             create_user_notes=True,
+            create_actions=True,
         )
 
         # 7. Return the serialized scenario
