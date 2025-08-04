@@ -50,7 +50,7 @@ export interface TestScenarioUserNote {
 
 export interface TestScenarioAction {
   action_type: ActionType;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   result_summary?: string;
   timestamp?: string;
   coach_message_content?: string;
