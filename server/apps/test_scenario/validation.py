@@ -6,6 +6,7 @@ from apps.test_scenario.template_serializers import (
     TemplateIdentitySerializer,
     TemplateChatMessageSerializer,
     TemplateUserNoteSerializer,
+    TemplateActionSerializer,
 )
 from services.logger import configure_logging
 
@@ -16,7 +17,7 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     Validates a test scenario template against the template serializers (creation schema).
 
     Args:
-        template (dict): The scenario template to validate. Should contain keys: 'user', 'coach_state', 'identities', 'chat_messages', 'user_notes'.
+        template (dict): The scenario template to validate. Should contain keys: 'user', 'coach_state', 'identities', 'chat_messages', 'user_notes', 'actions'.
 
     Returns:
         List[Dict[str, str]]: A list of error dicts, each with 'section' and 'error' keys. Empty if valid.
@@ -90,5 +91,15 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
                 serializer = TemplateUserNoteSerializer(data=note)
                 if not serializer.is_valid():
                     collect_serializer_errors("user_note", serializer.errors, index=idx)
+
+    # --- Actions section validation (optional) ---
+    if "actions" in template and template["actions"] is not None:
+        if not isinstance(template["actions"], list):
+            errors.append({"section": "actions", "error": "Section 'actions' must be a list."})
+        else:
+            for idx, action in enumerate(template["actions"]):
+                serializer = TemplateActionSerializer(data=action)
+                if not serializer.is_valid():
+                    collect_serializer_errors("action", serializer.errors, index=idx)
 
     return errors 
