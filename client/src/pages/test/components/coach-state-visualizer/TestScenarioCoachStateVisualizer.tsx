@@ -1,12 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { TabName } from "./types";
 import { getDefaultExpandedSections, getTabsConfig } from "./utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { TestScenarioTabContent } from "./utils/tabContentFactory";
-import { CoachState } from "@/types/coachState";
-import { Action } from "@/types/action";
-import { Message } from "@/types/message";
+import { usePrevious } from "@/hooks/use-previous"; // Update this import path
 // Only import test-scenario hooks
 import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-scenario-user-coach-state";
 import { useTestScenarioUserChatMessages } from "@/hooks/test-scenario/use-test-scenario-user-chat-messages";
@@ -14,140 +12,109 @@ import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-sc
 import { useTestScenarioUserFinalPrompt } from "@/hooks/test-scenario/use-test-scenario-user-final-prompt";
 import { useTestScenarioUserActions } from "@/hooks/test-scenario/use-test-scenario-user-actions";
 
-/**
- * Props for TestScenarioCoachStateVisualizer
- * @param testUserId The test scenario user id. Required.
- */
 export interface TestScenarioCoachStateVisualizerProps {
   testUserId: string;
 }
 
-/**
- * TestScenarioCoachStateVisualizer component (self-fetching version)
- * Fetches all required data using test-scenario hooks and visualizes the coach state for a test user.
- * Now uses TabContent component for tab rendering.
- *
- * Step-by-step:
- * 1. Fetch coach state using useTestScenarioUserCoachState.
- * 2. Fetch chat messages (and last response) using useTestScenarioUserChatMessages.
- * 3. Fetch identities using useTestScenarioUserIdentities.
- * 4. Handle loading and error states for all hooks.
- * 5. Use the fetched coachState and latest response for visualization.
- * 6. Maintain tab, section, and update state as before, but now use robust cache-driven tab update notification logic.
- */
-export const TestScenarioCoachStateVisualizer: React.FC<TestScenarioCoachStateVisualizerProps> = ({ testUserId }) => {
-  // 1. Fetch coach state
+export const TestScenarioCoachStateVisualizer: React.FC<
+  TestScenarioCoachStateVisualizerProps
+> = ({ testUserId }) => {
+  // Fetch data
   const {
     coachState,
     isLoading: isCoachStateLoading,
     isError: isCoachStateError,
   } = useTestScenarioUserCoachState(testUserId);
-
-  // 2. Fetch chat messages (and last response)
   const { chatMessages } = useTestScenarioUserChatMessages(testUserId);
-
-  // 3. Fetch identities (optional, for extensibility)
-  useTestScenarioUserIdentities(testUserId); // Not used directly, but ensures cache is up to date
-
-  // Fetch final prompt
+  useTestScenarioUserIdentities(testUserId);
   const finalPrompt = useTestScenarioUserFinalPrompt(testUserId);
-  // Fetch actions
-  const actions = useTestScenarioUserActions(testUserId);
+  const {
+    actions,
+    isLoading: isActionsLoading,
+    isError: isActionsError,
+  } = useTestScenarioUserActions(testUserId);
 
-  // 6. Maintain tab and section state as before
+  useEffect(() => {
+    if (actions) {
+      console.log("[TestScenarioCoachStateVisualizer] Actions: ", actions);
+    }
+  });
+
+  // State
   const [activeTab, setActiveTab] = useState<TabName>(TabName.STATE);
   const [expandedSections, setExpandedSections] = useState(
     getDefaultExpandedSections()
   );
+  const [visitedTabs, setVisitedTabs] = useState<Set<TabName>>(new Set());
+
+  // Get previous values
+  const prevCoachState = usePrevious(coachState);
+  const prevFinalPrompt = usePrevious(finalPrompt);
+  const prevActions = usePrevious(actions);
+  const prevChatMessages = usePrevious(chatMessages);
+
   const tabsConfig = getTabsConfig();
 
-  // --- Robust cache-driven tab update notification logic ---
-  // Store the last seen value for each tab
-  const lastSeen = useRef<{
-    [TabName.STATE]: CoachState | null;
-    [TabName.PROMPT]: string | undefined;
-    [TabName.ACTIONS]: Action[];
-    [TabName.IDENTITIES]: CoachState | null;
-    [TabName.CONVERSATION]: Message[];
-  }>({
-    [TabName.STATE]: coachState ?? null,
-    [TabName.PROMPT]: finalPrompt,
-    [TabName.ACTIONS]: actions,
-    [TabName.IDENTITIES]: coachState ?? null,
-    [TabName.CONVERSATION]: chatMessages,
-  });
+  // Calculate tab updates
+  const tabUpdates = useMemo(() => {
+    const updates: Record<TabName, boolean> = {
+      [TabName.STATE]: false,
+      [TabName.PROMPT]: false,
+      [TabName.ACTIONS]: false,
+      [TabName.IDENTITIES]: false,
+      [TabName.CONVERSATION]: false,
+    };
 
-  // Store the update flag for each tab
-  const [tabUpdates, setTabUpdates] = useState<Record<TabName, boolean>>({
-    [TabName.STATE]: false,
-    [TabName.PROMPT]: false,
-    [TabName.ACTIONS]: false,
-    [TabName.IDENTITIES]: false,
-    [TabName.CONVERSATION]: false,
-  });
-
-  // On every cache change, compare the current value to the last seen value for each tab
-  useEffect(() => {
-    // Compute change detection for each tab and log the result
-    const stateChanged = !!(
-      lastSeen.current[TabName.STATE] &&
-      coachState &&
-      JSON.stringify(lastSeen.current[TabName.STATE]) !==
-        JSON.stringify(coachState)
-    );
-    const promptChanged = lastSeen.current[TabName.PROMPT] !== finalPrompt;
-    const actionsChanged =
-      JSON.stringify(lastSeen.current[TabName.ACTIONS]) !==
-      JSON.stringify(actions);
-    const identitiesChanged = !!(
-      lastSeen.current[TabName.IDENTITIES] &&
-      coachState &&
-      JSON.stringify(lastSeen.current[TabName.IDENTITIES]) !==
-        JSON.stringify(coachState)
-    );
-    const conversationChanged =
-      JSON.stringify(lastSeen.current[TabName.CONVERSATION]) !==
-      JSON.stringify(chatMessages);
-
-    setTabUpdates((prev) => ({
-      ...prev,
-      [TabName.STATE]: stateChanged,
-      [TabName.PROMPT]: promptChanged,
-      [TabName.ACTIONS]: actionsChanged,
-      [TabName.IDENTITIES]: identitiesChanged,
-      [TabName.CONVERSATION]: conversationChanged,
-    }));
-  }, [coachState, finalPrompt, actions, chatMessages]);
-
-  // When the user visits a tab, update the last seen value for that tab and clear the update flag
-  const handleTabClick = (tabName: TabName) => {
-    switch (tabName) {
-      case TabName.STATE:
-        lastSeen.current[TabName.STATE] = coachState ?? null;
-        break;
-      case TabName.PROMPT:
-        lastSeen.current[TabName.PROMPT] = finalPrompt;
-        break;
-      case TabName.ACTIONS:
-        lastSeen.current[TabName.ACTIONS] = actions;
-        break;
-      case TabName.IDENTITIES:
-        lastSeen.current[TabName.IDENTITIES] = coachState ?? null;
-        break;
-      case TabName.CONVERSATION:
-        lastSeen.current[TabName.CONVERSATION] = chatMessages;
-        break;
+    if (visitedTabs.has(TabName.STATE) && prevCoachState && coachState) {
+      updates[TabName.STATE] =
+        JSON.stringify(prevCoachState) !== JSON.stringify(coachState);
     }
-    setTabUpdates((prev) => ({ ...prev, [tabName]: false }));
+
+    if (visitedTabs.has(TabName.PROMPT) && prevFinalPrompt !== undefined) {
+      updates[TabName.PROMPT] = prevFinalPrompt !== finalPrompt;
+    }
+
+    if (visitedTabs.has(TabName.ACTIONS) && prevActions) {
+      updates[TabName.ACTIONS] =
+        JSON.stringify(prevActions) !== JSON.stringify(actions);
+    }
+
+    if (visitedTabs.has(TabName.IDENTITIES) && prevCoachState && coachState) {
+      updates[TabName.IDENTITIES] =
+        JSON.stringify(prevCoachState) !== JSON.stringify(coachState);
+    }
+
+    if (visitedTabs.has(TabName.CONVERSATION) && prevChatMessages) {
+      updates[TabName.CONVERSATION] =
+        JSON.stringify(prevChatMessages) !== JSON.stringify(chatMessages);
+    }
+
+    return updates;
+  }, [
+    coachState,
+    prevCoachState,
+    finalPrompt,
+    prevFinalPrompt,
+    actions,
+    prevActions,
+    chatMessages,
+    prevChatMessages,
+    visitedTabs,
+  ]);
+
+  const handleTabClick = (tabName: TabName) => {
+    setVisitedTabs((prev) => new Set(prev).add(tabName));
     setActiveTab(tabName);
   };
 
-  // 4. Handle loading and error states
-  const isLoading = isCoachStateLoading;
-  const isError = isCoachStateError;
+  // Handle loading and error states
+  const isLoading = isCoachStateLoading || isActionsLoading;
+  const isError = isCoachStateError || isActionsError;
+
   if (isLoading) {
     return <div className="p-4">Loading coach state...</div>;
   }
+
   if (isError) {
     return (
       <div className="p-4 text-red-700">
@@ -155,13 +122,13 @@ export const TestScenarioCoachStateVisualizer: React.FC<TestScenarioCoachStateVi
       </div>
     );
   }
+
   if (!coachState) {
     return (
       <div className="p-4 text-neutral-500">No coach state available.</div>
     );
   }
 
-  // Toggle section expansion
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -187,7 +154,6 @@ export const TestScenarioCoachStateVisualizer: React.FC<TestScenarioCoachStateVi
               }
             >
               {tab.label}
-              {/* Tab update indicator using Framer Motion for pulse animation */}
               {tabUpdates[tab.name] && (
                 <motion.span
                   className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#e74c3c]"

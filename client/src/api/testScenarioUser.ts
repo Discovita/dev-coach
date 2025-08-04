@@ -6,8 +6,12 @@ import { authFetch } from "@/utils/authFetch";
  * Calls /test-user/{userId}/profile/
  */
 export async function fetchTestScenarioUserProfile(userId: string) {
-  const response = await authFetch(`${COACH_BASE_URL}/test-user/${userId}/profile`, {});
-  if (!response.ok) throw new Error("Failed to fetch test scenario user profile");
+  const response = await authFetch(
+    `${COACH_BASE_URL}/test-user/${userId}/profile`,
+    {}
+  );
+  if (!response.ok)
+    throw new Error("Failed to fetch test scenario user profile");
   return response.json();
 }
 
@@ -16,7 +20,10 @@ export async function fetchTestScenarioUserProfile(userId: string) {
  * Calls /test-user/{userId}/complete/
  */
 export async function fetchTestScenarioUserComplete(userId: string) {
-  const response = await authFetch(`${COACH_BASE_URL}/test-user/${userId}/complete`, {});
+  const response = await authFetch(
+    `${COACH_BASE_URL}/test-user/${userId}/complete`,
+    {}
+  );
   if (!response.ok) throw new Error("Failed to fetch test scenario user data");
   return response.json();
 }
@@ -26,8 +33,12 @@ export async function fetchTestScenarioUserComplete(userId: string) {
  * Calls /test-user/{userId}/coach-state/
  */
 export async function fetchTestScenarioUserCoachState(userId: string) {
-  const response = await authFetch(`${COACH_BASE_URL}/test-user/${userId}/coach-state`, {});
-  if (!response.ok) throw new Error("Failed to fetch test scenario user coach state");
+  const response = await authFetch(
+    `${COACH_BASE_URL}/test-user/${userId}/coach-state`,
+    {}
+  );
+  if (!response.ok)
+    throw new Error("Failed to fetch test scenario user coach state");
   return response.json();
 }
 
@@ -36,8 +47,26 @@ export async function fetchTestScenarioUserCoachState(userId: string) {
  * Calls /test-user/{userId}/identities/
  */
 export async function fetchTestScenarioUserIdentities(userId: string) {
-  const response = await authFetch(`${COACH_BASE_URL}/test-user/${userId}/identities`, {});
-  if (!response.ok) throw new Error("Failed to fetch test scenario user identities");
+  const response = await authFetch(
+    `${COACH_BASE_URL}/test-user/${userId}/identities`,
+    {}
+  );
+  if (!response.ok)
+    throw new Error("Failed to fetch test scenario user identities");
+  return response.json();
+}
+
+/**
+ * Fetch actions for a test scenario user (admin only).
+ * Calls /test-user/{userId}/actions/
+ */
+export async function fetchTestScenarioUserActions(userId: string) {
+  const response = await authFetch(
+    `${COACH_BASE_URL}/test-user/${userId}/actions`,
+    {}
+  );
+  if (!response.ok)
+    throw new Error("Failed to fetch test scenario user actions");
   return response.json();
 }
 
@@ -46,7 +75,11 @@ export async function fetchTestScenarioUserIdentities(userId: string) {
  * Calls /test-user/{userId}/chat-messages/
  */
 export async function fetchTestScenarioUserChatMessages(userId: string) {
-  const response = await authFetch(`${COACH_BASE_URL}/test-user/${userId}/chat-messages`, {});
-  if (!response.ok) throw new Error("Failed to fetch test scenario user chat messages");
+  const response = await authFetch(
+    `${COACH_BASE_URL}/test-user/${userId}/chat-messages`,
+    {}
+  );
+  if (!response.ok)
+    throw new Error("Failed to fetch test scenario user chat messages");
   return response.json();
-} 
+}

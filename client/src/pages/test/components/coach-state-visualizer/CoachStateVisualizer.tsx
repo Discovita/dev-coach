@@ -58,11 +58,11 @@ export const CoachStateVisualizer: React.FC = () => {
     [TabName.IDENTITIES]: CoachState | null;
     [TabName.CONVERSATION]: Message[];
   }>({
-    [TabName.STATE]: coachState ?? null,
-    [TabName.PROMPT]: finalPrompt,
-    [TabName.ACTIONS]: actions,
-    [TabName.IDENTITIES]: coachState ?? null,
-    [TabName.CONVERSATION]: chatMessages,
+    [TabName.STATE]: null,
+    [TabName.PROMPT]: undefined,
+    [TabName.ACTIONS]: [],
+    [TabName.IDENTITIES]: null,
+    [TabName.CONVERSATION]: [],
   });
 
   // Store the update flag for each tab

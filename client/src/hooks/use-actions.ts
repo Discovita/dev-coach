@@ -1,18 +1,50 @@
-import { useQuery } from "@tanstack/react-query";
-import { Action } from "@/types/action";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchActions } from "@/api/user";
 
 /**
- * useActionsHistory hook
- * Retrieves the running list of all actions from the TanStack Query cache.
- * Updates reactively when new actions are added.
- * Used in: Any component that needs to display all actions received from the coach so far.
+ * useActions hook
+ * Handles fetching and updating the user's actions using TanStack Query.
+ *
+ * Step-by-step:
+ * 1. Fetch the user's actions from /api/actions/ using getActions.
+ * 2. Expose loading, error, and data states for UI consumption.
+ * 3. Provide a mutation for updating actions (to be implemented as needed).
+ * 4. Invalidate the query on successful update to keep data fresh.
+ *
+ * Used in: Any component that needs to read or update the user's actions.
  */
-export function useActions(): Action[] {
-  // Use useQuery to subscribe to changes in the actions cache
-  const { data } = useQuery<Action[]>({
+export function useActions() {
+  const queryClient = useQueryClient();
+
+  // Fetch the user's actions
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["user", "actions"],
-    // No fetcher: this is only set by mutation, so return empty array if not present
-    queryFn: () => [],
+    queryFn: fetchActions,
   });
-  return data || [];
+
+  // Placeholder for update mutation (implement as needed)
+  // The argument will be added when the update API is implemented
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      // Implement update API call here
+      throw new Error("Update actions not implemented");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "actions"] });
+    },
+  });
+
+  return {
+    actions: data || [],
+    isLoading,
+    isError,
+    refetchActions: refetch,
+    updateActions: updateMutation.mutateAsync,
+    updateStatus: updateMutation.status,
+  };
 }

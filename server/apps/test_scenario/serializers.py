@@ -26,13 +26,18 @@ class TestScenarioSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         template = data.get("template", {})
-        # Find the test user for this scenario
-        user = instance.user_set.first()  # or however you link the test user
+        # Find the test user for this scenario using the reverse relationship
+        # Since User.test_scenario is a ForeignKey to TestScenario, the reverse relationship is user_set
+        user = instance.user_set.first()
         if user:
             template_user = template.get("user", {})
-            template_user["id"] = user.id  # Add user id for frontend API calls
+            template_user["id"] = str(user.id)  # Convert UUID to string for frontend
             template_user["email"] = user.email
             template_user["password"] = "Coach123!"  # Always the default
             template["user"] = template_user
+            data["template"] = template
+        else:
+            if "user" not in template:
+                template["user"] = {}
             data["template"] = template
         return data 

@@ -87,6 +87,22 @@ class UserViewSet(viewsets.GenericViewSet):
         detail=False,
         methods=["get"],
         permission_classes=[IsAuthenticated],
+        url_path="me/actions",
+    )
+    def actions(self, request: Request):
+        """
+        Get the authenticated user's actions.
+        """
+        from apps.actions.models import Action
+        from apps.actions.serializer import ActionSerializer
+
+        actions = Action.objects.filter(user=request.user).order_by("-timestamp")
+        return Response(ActionSerializer(actions, many=True).data)
+
+    @decorators.action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
         url_path="me/chat-messages",
     )
     def chat_messages(self, request: Request):
@@ -272,6 +288,26 @@ class TestUserViewSet(viewsets.GenericViewSet):
         from apps.identities.serializer import IdentitySerializer
         identities = Identity.objects.filter(user=user)
         return Response(IdentitySerializer(identities, many=True).data)
+
+    @decorators.action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="actions",
+    )
+    def actions(self, request, pk=None):
+        """
+        Get the actions for a test scenario user.
+        """
+        if not self.admin_required(request):
+            return Response({"detail": "Not authorized."}, status=403)
+        user = self.get_test_user(pk)
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+        from apps.actions.models import Action
+        from apps.actions.serializer import ActionSerializer
+        actions = Action.objects.filter(user=user).order_by("-timestamp")
+        return Response(ActionSerializer(actions, many=True).data)
 
     @decorators.action(
         detail=True,
