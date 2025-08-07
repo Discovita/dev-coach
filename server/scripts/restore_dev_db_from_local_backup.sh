@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Usage: ./restore_dev_db.sh [dump_file]
-# Example: ./restore_dev_db.sh backups/local/dev_coach_local_database_backup_20250703_170048.sql
+# Usage: ./restore_dev_db_from_local_backup.sh [dump_file]
+# Example: ./restore_dev_db_from_local_backup.sh backups/local/dev_coach_local_database_backup_20250703_170048.sql
 # If no dump_file is provided, the script will use the most recent file in backups/local/
 
 # Dev database credentials
@@ -35,16 +35,32 @@ if [ "$confirm" != "yes" ]; then
   exit 0
 fi
 
-# Export password so pg_restore doesn't prompt
+# Export password so psql doesn't prompt
 export PGPASSWORD="$DEV_DB_PASSWORD"
 
-# Restore the database
+# First, truncate all tables to clear existing data
+echo "Clearing existing data from database $DEV_DB_NAME..."
+psql -h "$DEV_DB_HOST" -U "$DEV_DB_USER" -d "$DEV_DB_NAME" -c "
+DO \$\$
+DECLARE
+    r RECORD;
+BEGIN
+    -- Disable all triggers temporarily
+    SET session_replication_role = replica;
+    
+    -- Truncate all tables in the public schema
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'TRUNCATE TABLE public.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+    
+    -- Re-enable triggers
+    SET session_replication_role = DEFAULT;
+END \$\$;
+"
+
+# Restore the database using psql (for plain SQL format)
 echo "Restoring $DUMP_FILE to dev database $DEV_DB_NAME..."
-pg_restore --clean --no-owner \
-  --host="$DEV_DB_HOST" \
-  --username="$DEV_DB_USER" \
-  --dbname="$DEV_DB_NAME" \
-  "$DUMP_FILE"
+psql -h "$DEV_DB_HOST" -U "$DEV_DB_USER" -d "$DEV_DB_NAME" -f "$DUMP_FILE"
 
 if [ $? -eq 0 ]; then
   echo "Dev database restore complete."
