@@ -1,6 +1,6 @@
 import { NewPromptForm } from "./components/NewPromptForm";
 import { useCoreEnums } from "@/hooks/use-core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePrompts } from "@/hooks/use-prompts";
 import {
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { DeletePromptDialog } from "./components/DeletePromptDialog";
 import { toast } from "sonner";
 import { useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * PromptsTabs
@@ -34,6 +35,8 @@ import { useRef } from "react";
  * 5. Used above the NewPromptForm in the Prompts page.
  */
 export function PromptsTabs() {
+  // Get query client for cache invalidation
+  const queryClient = useQueryClient();
   // Fetch enums for coach states
   const { data: enums, isLoading: enumsLoading } = useCoreEnums();
   // Fetch all prompts (cached)
@@ -79,10 +82,11 @@ export function PromptsTabs() {
   }, [enums?.coaching_phases]);
 
   // Filter prompts for the selected coach state (in memory)
-  const prompts =
-    allPrompts && activeCoachState && activeCoachState !== "new"
+  const prompts = useMemo(() => {
+    return allPrompts && activeCoachState && activeCoachState !== "new"
       ? allPrompts.filter((p) => p.coaching_phase === activeCoachState)
       : [];
+  }, [allPrompts, activeCoachState]);
 
   // Extract available versions for the dropdown
   const versions = Array.from(new Set(prompts.map((p) => p.version))).sort(
@@ -104,6 +108,25 @@ export function PromptsTabs() {
     }
     prevActiveCoachStateRef.current = activeCoachState;
   }, [activeCoachState, versions]);
+
+  // Additional effect to handle the case where prompts load after the initial tab selection
+  // or when we need to auto-select the highest version after operations like "Save as New Version"
+  useEffect(() => {
+    if (activeCoachState && activeCoachState !== "new" && prompts.length > 0) {
+      const availableVersions = Array.from(
+        new Set(prompts.map((p) => p.version))
+      ).sort((a, b) => b - a);
+      if (availableVersions.length > 0) {
+        // Auto-select the highest version if no version is selected or if the current version doesn't exist
+        const currentVersionExists = prompts.some(
+          (p) => p.version === selectedVersion
+        );
+        if (selectedVersion === null || !currentVersionExists) {
+          setSelectedVersion(availableVersions[0]);
+        }
+      }
+    }
+  }, [activeCoachState, prompts, selectedVersion]);
 
   /**
    * Resets all editable fields to their original values from selectedPrompt.
@@ -194,39 +217,23 @@ export function PromptsTabs() {
         required_context_keys: editContextKeys,
         is_active: editIsActive,
       });
-      // Refetch prompts
-      await refetchPrompts();
-      // After refetch, auto-select the new version (highest version for this coaching_phase)
-      const updatedPrompts = allPrompts
-        ? [
-            ...allPrompts,
-            {
-              ...selectedPrompt,
-              name: editName,
-              description: editDescription,
-              body: editBody,
-              allowed_actions: editAllowedActions,
-              required_context_keys: editContextKeys,
-              is_active: editIsActive,
-              version:
-                Math.max(
-                  ...allPrompts
-                    .filter(
-                      (p) => p.coaching_phase === selectedPrompt.coaching_phase
-                    )
-                    .map((p) => p.version),
-                  0
-                ) + 1,
-            },
-          ]
-        : [];
-      const newVersion = Math.max(
-        ...updatedPrompts
-          .filter((p) => p.coaching_phase === selectedPrompt.coaching_phase)
-          .map((p) => p.version),
-        0
-      );
-      setSelectedVersion(newVersion);
+      // Invalidate the prompts cache and refetch to get the latest data
+      await queryClient.invalidateQueries({ queryKey: ["prompts", "all"] });
+      const refetchResult = await refetchPrompts();
+
+      // Force select the highest version for this coaching phase using the refetched data
+      if (refetchResult.data) {
+        const updatedPrompts = refetchResult.data.filter(
+          (p) => p.coaching_phase === selectedPrompt.coaching_phase
+        );
+        const availableVersions = Array.from(
+          new Set(updatedPrompts.map((p) => p.version))
+        ).sort((a, b) => b - a);
+        if (availableVersions.length > 0) {
+          setSelectedVersion(availableVersions[0]);
+        }
+      }
+
       toast.success("Prompt saved as new version!");
     } catch (err) {
       toast.error("Failed to save as new version", {
