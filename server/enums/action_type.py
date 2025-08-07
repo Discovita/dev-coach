@@ -8,6 +8,15 @@ class ActionType(models.TextChoices):
 
     CREATE_IDENTITY = "create_identity", "Create Identity"
     UPDATE_IDENTITY = "update_identity", "Update Identity"
+    UPDATE_IDENTITY_NAME = "update_identity_name", "Update Identity Name"
+    UPDATE_IDENTITY_AFFIRMATION = (
+        "update_identity_affirmation",
+        "Update Identity Affirmation",
+    )
+    UPDATE_IDENTITY_VISUALIZATION = (
+        "update_identity_visualization",
+        "Update Identity Visualization",
+    )
     ACCEPT_IDENTITY = "accept_identity", "Accept Identity"
     ACCEPT_IDENTITY_REFINEMENT = (
         "accept_identity_refinement",

@@ -40,6 +40,34 @@ class CreateIdentityParams(BaseModel):
         extra = "forbid"
 
 
+class UpdateIdentityNameParams(BaseModel):
+    id: str = Field(..., description="ID of identity to update")
+    name: str = Field(..., description="New name for the identity")
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateIdentityAffirmationParams(BaseModel):
+    id: str = Field(..., description="ID of identity to update")
+    affirmation: str = Field(
+        ..., description="An 'I am' statement with a brief description"
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateIdentityVisualizationParams(BaseModel):
+    id: str = Field(..., description="ID of identity to update")
+    visualization: str = Field(
+        ..., description="A vivid description for the Identity that will be used in the creation of the image for this Identity"
+    )
+
+    class Config:
+        extra = "forbid"
+
+
 class UpdateIdentityParams(BaseModel):
     id: str = Field(..., description="ID of identity to update")
     name: str = Field(..., description="New name for the identity")

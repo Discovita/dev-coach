@@ -6,6 +6,9 @@ from models.CoachChatResponse import CoachChatResponse
 from services.action_handler.actions import (
     create_identity,
     update_identity,
+    update_identity_name,
+    update_identity_affirmation,
+    update_identity_visualization,
     accept_identity,
     accept_identity_refinement,
     add_identity_note,
@@ -57,6 +60,15 @@ def apply_actions(
         elif action_name == ActionType.UPDATE_IDENTITY.value:
             log.info("\033[94mACTION:\t  Updating identity\033[0m")
             update_identity(coach_state, action.params, coach_message)
+        elif action_name == ActionType.UPDATE_IDENTITY_NAME.value:
+            log.info("\033[94mACTION:\t  Updating identity name\033[0m")
+            update_identity_name(coach_state, action.params, coach_message)
+        elif action_name == ActionType.UPDATE_IDENTITY_AFFIRMATION.value:
+            log.info("\033[94mACTION:\t  Updating identity affirmation\033[0m")
+            update_identity_affirmation(coach_state, action.params, coach_message)
+        elif action_name == ActionType.UPDATE_IDENTITY_VISUALIZATION.value:
+            log.info("\033[94mACTION:\t  Updating identity visualization\033[0m")
+            update_identity_visualization(coach_state, action.params, coach_message)
         elif action_name == ActionType.ACCEPT_IDENTITY.value:
             log.info("\033[94mACTION:\t  Accepting identity\033[0m")
             accept_identity(coach_state, action.params, coach_message)

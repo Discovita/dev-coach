@@ -4,6 +4,9 @@
 export enum ActionType {
   CREATE_IDENTITY = "create_identity",
   UPDATE_IDENTITY = "update_identity",
+  UPDATE_IDENTITY_NAME = "update_identity_name",
+  UPDATE_IDENTITY_AFFIRMATION = "update_identity_affirmation",
+  UPDATE_IDENTITY_VISUALIZATION = "update_identity_visualization",
   ACCEPT_IDENTITY = "accept_identity",
   ACCEPT_IDENTITY_REFINEMENT = "accept_identity_refinement",
   ADD_IDENTITY_NOTE = "add_identity_note",

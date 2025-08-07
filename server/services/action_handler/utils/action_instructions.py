@@ -15,6 +15,9 @@ from services.action_handler.models.actions import (
     SelectIdentityFocusAction,
     SetCurrentIdentityAction,
     CreateIdentityAction,
+    UpdateIdentityNameAction,
+    UpdateIdentityAffirmationAction,
+    UpdateIdentityVisualizationAction,
     UpdateIdentityAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
@@ -43,6 +46,18 @@ ACTION_PARAMS = {
     ActionType.CREATE_IDENTITY: {
         "description": "Creates a new Identity for the user. DO NOT create duplicate Identities. Ask yourself - Has the user expressed consent to create this Identity? If the answer is no, don't create a new one. DO NOT preemptively create Identities for the user.",
         "model": CreateIdentityAction,
+    },
+    ActionType.UPDATE_IDENTITY_NAME: {
+        "description": "Update the name of an existing Identity.",
+        "model": UpdateIdentityNameAction,
+    },
+    ActionType.UPDATE_IDENTITY_AFFIRMATION: {
+        "description": "Update the affirmation of an existing Identity.",
+        "model": UpdateIdentityAffirmationAction,
+    },
+    ActionType.UPDATE_IDENTITY_VISUALIZATION: {
+        "description": "Update the visualization of an existing Identity.",
+        "model": UpdateIdentityVisualizationAction,
     },
     ActionType.UPDATE_IDENTITY: {
         "description": "Update the details of an existing Identity. ",
