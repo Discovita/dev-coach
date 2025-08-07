@@ -123,10 +123,10 @@ class UserViewSet(viewsets.GenericViewSet):
             initial_message = get_initial_message()
             if initial_message:
                 add_chat_message(request.user, initial_message, MessageRole.COACH)
-                chat_messages_qs = ChatMessage.objects.filter(user=request.user).order_by(
-                    "-timestamp"
-                )
-        
+                chat_messages_qs = ChatMessage.objects.filter(
+                    user=request.user
+                ).order_by("-timestamp")
+
         latest_messages_qs = chat_messages_qs[:20]
         ordered_messages = list(reversed(latest_messages_qs))
 
@@ -150,6 +150,7 @@ class UserViewSet(viewsets.GenericViewSet):
         from enums.coaching_phase import CoachingPhase
         from apps.identities.models import Identity
         from apps.user_notes.models import UserNote
+        from apps.actions.models import Action
 
         # Delete all chat messages for the user
         ChatMessage.objects.filter(user=request.user).delete()
@@ -159,6 +160,9 @@ class UserViewSet(viewsets.GenericViewSet):
 
         # Delete all user notes for the user
         UserNote.objects.filter(user=request.user).delete()
+
+        # Delete all actions for the user
+        Action.objects.filter(user=request.user).delete()
 
         # Reset the user's CoachState
         try:
@@ -185,6 +189,7 @@ class UserViewSet(viewsets.GenericViewSet):
         )
         return Response(ChatMessageSerializer(chat_messages, many=True).data)
 
+
 class TestUserViewSet(viewsets.GenericViewSet):
     """
     ViewSet for test scenario user related endpoints.
@@ -193,6 +198,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
 
     def get_test_user(self, pk):
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
         try:
             return User.objects.get(pk=pk)
@@ -218,6 +224,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
         if not user:
             return Response({"detail": "User not found."}, status=404)
         from apps.users.serializer import UserProfileSerializer
+
         return Response(UserProfileSerializer(user).data)
 
     @decorators.action(
@@ -238,12 +245,14 @@ class TestUserViewSet(viewsets.GenericViewSet):
         from apps.chat_messages.models import ChatMessage
         from apps.chat_messages.utils import get_initial_message, add_chat_message
         from enums.message_role import MessageRole
+
         chat_messages = ChatMessage.objects.filter(user=user)
         if not chat_messages.exists():
             initial_message = get_initial_message()
             if initial_message:
                 add_chat_message(user, initial_message, MessageRole.COACH)
         from apps.users.serializer import UserSerializer
+
         return Response(UserSerializer(user).data)
 
     @decorators.action(
@@ -263,6 +272,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
             return Response({"detail": "User not found."}, status=404)
         from apps.coach_states.models import CoachState
         from apps.coach_states.serializer import CoachStateSerializer
+
         try:
             coach_state = CoachState.objects.get(user=user)
         except CoachState.DoesNotExist:
@@ -286,6 +296,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
             return Response({"detail": "User not found."}, status=404)
         from apps.identities.models import Identity
         from apps.identities.serializer import IdentitySerializer
+
         identities = Identity.objects.filter(user=user)
         return Response(IdentitySerializer(identities, many=True).data)
 
@@ -306,6 +317,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
             return Response({"detail": "User not found."}, status=404)
         from apps.actions.models import Action
         from apps.actions.serializer import ActionSerializer
+
         actions = Action.objects.filter(user=user).order_by("-timestamp")
         return Response(ActionSerializer(actions, many=True).data)
 
@@ -329,12 +341,15 @@ class TestUserViewSet(viewsets.GenericViewSet):
         from apps.chat_messages.serializer import ChatMessageSerializer
         from apps.chat_messages.utils import get_initial_message, add_chat_message
         from enums.message_role import MessageRole
+
         chat_messages_qs = ChatMessage.objects.filter(user=user).order_by("-timestamp")
         if not chat_messages_qs.exists():
             initial_message = get_initial_message()
             if initial_message:
                 add_chat_message(user, initial_message, MessageRole.COACH)
-                chat_messages_qs = ChatMessage.objects.filter(user=user).order_by("-timestamp")
+                chat_messages_qs = ChatMessage.objects.filter(user=user).order_by(
+                    "-timestamp"
+                )
         latest_messages_qs = chat_messages_qs
         ordered_messages = list(reversed(latest_messages_qs))
         return Response(ChatMessageSerializer(ordered_messages, many=True).data)
