@@ -63,15 +63,8 @@ export function useChatMessages() {
           response.final_prompt
         );
       }
-      // Cache a running list of all actions received so far
-      if (response.actions && response.actions.length > 0) {
-        // Get the current actions history from the cache (default to empty array)
-        const prevActions: string[] =
-          queryClient.getQueryData(["user", "actions"]) || [];
-        // Append new actions to the history (optionally filter duplicates)
-        const updatedActions = [...prevActions, ...response.actions];
-        queryClient.setQueryData(["user", "actions"], updatedActions);
-      }
+      // Invalidate actions cache to trigger refetch of latest actions from database
+      queryClient.invalidateQueries({ queryKey: ["user", "actions"] });
     },
   });
 
