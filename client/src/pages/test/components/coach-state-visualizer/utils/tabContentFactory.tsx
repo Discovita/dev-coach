@@ -5,8 +5,9 @@ import {
   renderEmptyState,
   renderActionsSection,
   renderFinalPrompt,
+  renderCoachStateSection,
 } from "./renderUtils";
-import { getCurrentStateInfo } from "./dataUtils";
+
 import { useCoachState } from "@/hooks/use-coach-state";
 import { useFinalPrompt } from "@/hooks/use-final-prompt";
 import { useActions } from "@/hooks/use-actions";
@@ -40,9 +41,8 @@ export const TabContent: React.FC<{
     case TabName.STATE:
       return (
         <>
-          {renderJsonSection(
-            "Current State",
-            getCurrentStateInfo(coachState),
+          {renderCoachStateSection(
+            coachState,
             "state",
             expandedSections["state"],
             toggleSection
@@ -175,9 +175,8 @@ export const TestScenarioTabContent: React.FC<{
     case TabName.STATE:
       return (
         <>
-          {renderJsonSection(
-            "Current Coach State",
-            getCurrentStateInfo(coachState),
+          {renderCoachStateSection(
+            coachState,
             "state",
             expandedSections["state"],
             toggleSection
