@@ -3,6 +3,9 @@ from .params import (
     SelectIdentityFocusParams,
     SetCurrentIdentityParams,
     CreateIdentityParams,
+    UpdateIdentityNameParams,
+    UpdateIdentityAffirmationParams,
+    UpdateIdentityVisualizationParams,
     UpdateIdentityParams,
     AcceptIdentityParams,
     AcceptIdentityRefinementParams,
@@ -49,6 +52,33 @@ class CreateIdentityAction(BaseModel):
 class UpdateIdentityAction(BaseModel):
     params: UpdateIdentityParams = Field(
         ..., description="Parameters for updating an identity."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateIdentityNameAction(BaseModel):
+    params: UpdateIdentityNameParams = Field(
+        ..., description="Parameters for updating an identity's name."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateIdentityAffirmationAction(BaseModel):
+    params: UpdateIdentityAffirmationParams = Field(
+        ..., description="Parameters for updating an identity's affirmation."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateIdentityVisualizationAction(BaseModel):
+    params: UpdateIdentityVisualizationParams = Field(
+        ..., description="Parameters for updating an identity's visualization."
     )
 
     class Config:
