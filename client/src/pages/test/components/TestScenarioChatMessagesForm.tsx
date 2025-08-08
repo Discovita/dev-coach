@@ -103,10 +103,10 @@ export default function TestScenarioChatMessagesForm({ value, onChange }: Props)
             >
               {msg.content}
             </div>
-            <Button size="xs" variant="secondary" onClick={() => handleEdit(idx)} className="ml-2">
+            <Button type="button" size="xs" variant="secondary" onClick={() => handleEdit(idx)} className="ml-2">
               Edit
             </Button>
-            <Button size="xs" variant="destructive" onClick={() => handleDelete(idx)} className="ml-1">
+            <Button type="button" size="xs" variant="destructive" onClick={() => handleDelete(idx)} className="ml-1">
               Delete
             </Button>
           </div>
