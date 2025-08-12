@@ -43,6 +43,7 @@ export function useTestScenarioUserChatMessages(userId: string) {
         queryClient.setQueryData(["testScenarioUser", userId, "identities"], response.identities);
       }
       if (response.coach_state) {
+        // Update the coach state cache with the new data
         queryClient.setQueryData(["testScenarioUser", userId, "coachState"], response.coach_state);
       }
       if (response.final_prompt !== undefined) {
@@ -53,6 +54,8 @@ export function useTestScenarioUserChatMessages(userId: string) {
       }
       // Invalidate actions cache to trigger refetch of latest actions from database
       queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId, "actions"] });
+      // Also invalidate coach state to ensure the component re-renders with the latest data
+      queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId, "coachState"] });
     },
   });
 

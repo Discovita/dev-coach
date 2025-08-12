@@ -22,6 +22,7 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "skipped_identity_categories",
             "who_you_are",
             "who_you_want_to_be",
+            "asked_questions",  # List of questions asked during Get To Know You phase
             "updated_at",  # Timestamp of last update
         )
         read_only_fields = (

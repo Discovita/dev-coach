@@ -11,7 +11,7 @@ export function useTestScenarioUserCoachState(userId: string) {
     queryKey: ["testScenarioUser", userId, "coachState"],
     queryFn: () => fetchTestScenarioUserCoachState(userId),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 0, // Reduced from 10 minutes to 0 for more responsive updates
     retry: false,
   });
   return {

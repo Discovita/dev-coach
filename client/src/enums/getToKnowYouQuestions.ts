@@ -14,10 +14,10 @@ export enum GetToKnowYouQuestions {
  */
 export function getGetToKnowYouQuestionDisplayName(question: GetToKnowYouQuestions): string {
   const displayNames: Record<GetToKnowYouQuestions, string> = {
-    [GetToKnowYouQuestions.BACKGROUND_UPBRINGING]: "Background/upbringing",
-    [GetToKnowYouQuestions.FAMILY_STRUCTURE]: "Family structure",
-    [GetToKnowYouQuestions.WORK_LIVING]: "Work or what they do for a living",
-    [GetToKnowYouQuestions.HOBBIES_INTERESTS]: "Hobbies or interests",
+    [GetToKnowYouQuestions.BACKGROUND_UPBRINGING]: "Background",
+    [GetToKnowYouQuestions.FAMILY_STRUCTURE]: "Family",
+    [GetToKnowYouQuestions.WORK_LIVING]: "Work",
+    [GetToKnowYouQuestions.HOBBIES_INTERESTS]: "Hobbies",
     [GetToKnowYouQuestions.WHY_HERE_HOPES]: "Why are you here?",
   };
   

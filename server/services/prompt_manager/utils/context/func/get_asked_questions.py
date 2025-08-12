@@ -9,7 +9,7 @@ def get_asked_questions(coach_state: CoachState) -> str:
     """
     asked_questions = coach_state.asked_questions
     if not asked_questions:
-        return "No questions have been asked yet in the Get To Know You phase."
+        return "No questions have been asked yet..."
     
     # Convert enum values to human-readable labels
     question_labels = []

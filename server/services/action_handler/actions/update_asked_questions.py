@@ -18,15 +18,24 @@ def update_asked_questions(
     """
     # Convert enum objects to their string values for storage
     question_values = [question.value for question in params.asked_questions]
-    coach_state.asked_questions = question_values
-    coach_state.save()
     
-    # Log the action with rich context
-    Action.objects.create(
-        user=coach_state.user,
-        action_type=ActionType.UPDATE_ASKED_QUESTIONS.value,
-        parameters=params.model_dump(),
-        result_summary=f"Updated asked questions list with {len(params.asked_questions)} questions",
-        coach_message=coach_message,
-        test_scenario=coach_state.user.test_scenario if hasattr(coach_state.user, 'test_scenario') else None
-    )
+    # Ensure no duplicates (idempotency protection for React Strict Mode)
+    existing_questions = set(coach_state.asked_questions or [])
+    new_questions = set(question_values)
+    
+    # Only update if there are actual changes
+    if existing_questions != new_questions:
+        coach_state.asked_questions = question_values
+        coach_state.save()
+        
+        # Log the action with rich context
+        Action.objects.create(
+            user=coach_state.user,
+            action_type=ActionType.UPDATE_ASKED_QUESTIONS.value,
+            parameters=params.model_dump(),
+            result_summary=f"Updated asked questions list with {len(params.asked_questions)} questions",
+            coach_message=coach_message,
+            test_scenario=coach_state.user.test_scenario if hasattr(coach_state.user, 'test_scenario') else None
+        )
+    else:
+        log.debug("Asked questions list unchanged, skipping update (idempotency protection)")
