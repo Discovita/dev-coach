@@ -18,6 +18,7 @@ from .params import (
     AddUserNoteParams,
     UpdateUserNoteParams,
     DeleteUserNoteParams,
+    UpdateAskedQuestionsParams,
 )
 
 
@@ -178,6 +179,15 @@ class UpdateUserNoteAction(BaseModel):
 class DeleteUserNoteAction(BaseModel):
     params: DeleteUserNoteParams = Field(
         ..., description="Parameters for deleting user notes by id."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class UpdateAskedQuestionsAction(BaseModel):
+    params: UpdateAskedQuestionsParams = Field(
+        ..., description="Parameters for updating asked questions list."
     )
 
     class Config:

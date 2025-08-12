@@ -65,6 +65,8 @@ export function useChatMessages() {
       }
       // Invalidate actions cache to trigger refetch of latest actions from database
       queryClient.invalidateQueries({ queryKey: ["user", "actions"] });
+      // Also invalidate coach state to ensure the component re-renders with the latest data
+      queryClient.invalidateQueries({ queryKey: ["user", "coachState"] });
     },
   });
 

@@ -13,6 +13,7 @@ import {
   getCoachingPhaseDisplayName,
   getCoachingPhaseColor,
 } from "@/enums/coachingPhase";
+import { getGetToKnowYouQuestionDisplayName } from "@/enums/getToKnowYouQuestions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -23,6 +24,7 @@ import {
   HeartIcon,
   StarIcon,
   ListIcon,
+  HelpCircleIcon,
 } from "lucide-react";
 
 export const renderCoachState = () => {};
@@ -358,6 +360,28 @@ export const renderCoachStateSection = (
                     coachState.who_you_want_to_be.length > 0 ? (
                       <p className="text-xs text-neutral-700 dark:text-neutral-300 text-right break-words">
                         {coachState.who_you_want_to_be.join(", ")}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
+                        Nothing yet...
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Asked Questions */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <HelpCircleIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
+                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                      Asked Questions
+                    </span>
+                  </div>
+                  <div className="text-right min-w-0 flex-1">
+                    {coachState.asked_questions &&
+                    coachState.asked_questions.length > 0 ? (
+                      <p className="text-xs text-neutral-700 dark:text-neutral-300 text-right break-words">
+                        {coachState.asked_questions.map(question => getGetToKnowYouQuestionDisplayName(question)).join(", ")}
                       </p>
                     ) : (
                       <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">

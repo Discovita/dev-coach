@@ -22,6 +22,7 @@ from services.action_handler.actions import (
     add_user_note,
     update_user_note,
     delete_user_note,
+    update_asked_questions,
 )
 from services.logger import configure_logging
 
@@ -108,6 +109,9 @@ def apply_actions(
         elif action_name == ActionType.DELETE_USER_NOTE.value:
             log.info("\033[94mACTION:\t  Deleting user note\033[0m")
             delete_user_note(coach_state, action.params)
+        elif action_name == ActionType.UPDATE_ASKED_QUESTIONS.value:
+            log.info("\033[94mACTION:\t  Updating asked questions\033[0m")
+            update_asked_questions(coach_state, action.params, coach_message)
         else:
             log.warning(f"Action '{action_name}' is not implemented in apply_actions.")
             continue

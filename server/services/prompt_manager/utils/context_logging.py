@@ -31,3 +31,4 @@ def log_context_stats(prompt_context: PromptContext):
         f"BRAINSTORMING_CATEGORY_CONTEXT: {getattr(prompt_context, 'brainstorming_category_context', None)}"
     )
     log.debug(f"CURRENT_IDENTITY: {getattr(prompt_context, 'current_identity', None)}")
+    log.debug(f"ASKED_QUESTIONS: {getattr(prompt_context, 'asked_questions', None)}")

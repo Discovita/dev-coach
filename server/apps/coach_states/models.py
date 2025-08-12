@@ -6,6 +6,7 @@ from apps.users.models import User
 
 from enums.coaching_phase import CoachingPhase
 from enums.identity_category import IdentityCategory
+from enums.get_to_know_you_questions import GetToKnowYouQuestions
 from django.contrib.postgres.fields import ArrayField
 
 
@@ -71,6 +72,12 @@ class CoachState(models.Model):
         default=list,
         blank=True,
         help_text="List of 'who you want to be' identities provided by the user.",
+    )
+    asked_questions = ArrayField(
+        models.CharField(max_length=255, choices=GetToKnowYouQuestions.choices),
+        default=list,
+        blank=True,
+        help_text="List of questions that have been asked during the Get To Know You phase.",
     )
     metadata = models.JSONField(
         default=dict,
