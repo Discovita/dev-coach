@@ -13,6 +13,7 @@ import {
   getCoachingPhaseDisplayName,
   getCoachingPhaseColor,
 } from "@/enums/coachingPhase";
+import { getGetToKnowYouQuestionDisplayName } from "@/enums/getToKnowYouQuestions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -380,7 +381,7 @@ export const renderCoachStateSection = (
                     {coachState.asked_questions &&
                     coachState.asked_questions.length > 0 ? (
                       <p className="text-xs text-neutral-700 dark:text-neutral-300 text-right break-words">
-                        {coachState.asked_questions.join(", ")}
+                        {coachState.asked_questions.map(question => getGetToKnowYouQuestionDisplayName(question)).join(", ")}
                       </p>
                     ) : (
                       <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">

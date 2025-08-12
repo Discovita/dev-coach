@@ -1,5 +1,6 @@
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { Identity } from "./identity";
+import { GetToKnowYouQuestions } from "@/enums/getToKnowYouQuestions";
 
 /**
  * Current state of the coaching session
@@ -14,7 +15,7 @@ export interface CoachState {
   skipped_identity_categories?: [string] | null;
   who_you_are: [string] | null;
   who_you_want_to_be: [string] | null;
-  asked_questions: [string] | null;
+  asked_questions: GetToKnowYouQuestions[] | null;
   metadata?: {
     [k: string]: unknown;
   };

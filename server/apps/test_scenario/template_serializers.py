@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from enums.get_to_know_you_questions import GetToKnowYouQuestions
 
 
 class ForbidExtraFieldsMixin:
@@ -71,7 +72,7 @@ class TemplateCoachStateSerializer(ForbidExtraFieldsMixin, serializers.Serialize
         help_text="List of 'who you want to be' identities. Required.",
     )
     asked_questions = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.ChoiceField(choices=GetToKnowYouQuestions.choices),
         required=False,
         help_text="List of questions that have been asked during the Get To Know You phase.",
     )

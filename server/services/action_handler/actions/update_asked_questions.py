@@ -3,6 +3,7 @@ from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
 from services.action_handler.models import UpdateAskedQuestionsParams
 from enums.action_type import ActionType
+from enums.get_to_know_you_questions import GetToKnowYouQuestions
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -15,7 +16,9 @@ def update_asked_questions(
     This function tracks which questions have been asked during the Get To Know You phase
     to prevent asking the same question twice.
     """
-    coach_state.asked_questions = params.asked_questions
+    # Convert enum objects to their string values for storage
+    question_values = [question.value for question in params.asked_questions]
+    coach_state.asked_questions = question_values
     coach_state.save()
     
     # Log the action with rich context

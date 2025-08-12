@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { IdentityCategory } from "@/enums/identityCategory";
+import { GetToKnowYouQuestions, getGetToKnowYouQuestionDisplayName } from "@/enums/getToKnowYouQuestions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -239,24 +240,24 @@ const TestScenarioCoachStateForm = ({
         }
         placeholder="Add a trait or aspiration"
       />
-      {/* Asked Questions List */}
-      <CoachStateListField
-        label="Asked Questions"
-        items={value.asked_questions || []}
-        onAdd={(item) =>
-          handleField("asked_questions", [
-            ...(value.asked_questions || []),
-            item,
-          ])
-        }
-        onDelete={(idx) =>
-          handleField(
-            "asked_questions",
-            (value.asked_questions || []).filter((_, i) => i !== idx)
-          )
-        }
-        placeholder="Add a question that was asked"
-      />
+      {/* Asked Questions Multi-select */}
+      <div>
+        <Label className="mb-2">Asked Questions</Label>
+        <MultiSelect
+          options={Object.values(GetToKnowYouQuestions).map(question => ({
+            value: question,
+            label: getGetToKnowYouQuestionDisplayName(question)
+          }))}
+          value={value.asked_questions || []}
+          onValueChange={(vals) =>
+            handleField(
+              "asked_questions",
+              vals as GetToKnowYouQuestions[]
+            )
+          }
+          placeholder="Select questions that have been asked"
+        />
+      </div>
     </div>
   );
 };

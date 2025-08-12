@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
-from enums.identity_category import IdentityCategory
+from typing import List, Optional
 from enums.coaching_phase import CoachingPhase
+from enums.identity_category import IdentityCategory
+from enums.get_to_know_you_questions import GetToKnowYouQuestions
 from enums.identity_state import IdentityState
 
 
@@ -197,7 +199,7 @@ class DeleteUserNoteParams(BaseModel):
 
 
 class UpdateAskedQuestionsParams(BaseModel):
-    asked_questions: list[str] = Field(
+    asked_questions: List[GetToKnowYouQuestions] = Field(
         ...,
         description="List of questions that have been asked during the Get To Know You phase",
     )

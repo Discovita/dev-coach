@@ -1,5 +1,6 @@
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { IdentityCategory } from "@/enums/identityCategory";
+import { GetToKnowYouQuestions } from "@/enums/getToKnowYouQuestions";
 import { ActionType } from "@/enums/actionType";
 
 export interface TestScenarioUser {
@@ -28,7 +29,7 @@ export interface TestScenarioCoachState {
   skipped_identity_categories?: IdentityCategory[];
   who_you_are?: string[];
   who_you_want_to_be?: string[];
-  asked_questions?: string[];
+  asked_questions?: GetToKnowYouQuestions[];
   current_identity?: string;
 }
 
