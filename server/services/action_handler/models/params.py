@@ -194,3 +194,13 @@ class DeleteUserNoteParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class UpdateAskedQuestionsParams(BaseModel):
+    asked_questions: list[str] = Field(
+        ...,
+        description="List of questions that have been asked during the Get To Know You phase",
+    )
+
+    class Config:
+        extra = "forbid"

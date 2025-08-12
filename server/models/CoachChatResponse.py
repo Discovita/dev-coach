@@ -13,6 +13,7 @@ from services.action_handler.models.actions import (
     UnskipIdentityCategoryAction,
     UpdateWhoYouAreAction,
     UpdateWhoYouWantToBeAction,
+    UpdateAskedQuestionsAction,
 )
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
 
@@ -61,4 +62,7 @@ class CoachChatResponse(BaseModel):
     )
     update_who_you_want_to_be: Optional[UpdateWhoYouWantToBeAction] = Field(
         default=None, description="Perform the update_who_you_want_to_be action."
+    )
+    update_asked_questions: Optional[UpdateAskedQuestionsAction] = Field(
+        default=None, description="Perform the update_asked_questions action."
     )

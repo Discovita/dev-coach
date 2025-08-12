@@ -16,3 +16,4 @@ from .unskip_identity_category import unskip_identity_category
 from .add_user_note import add_user_note
 from .update_user_note import update_user_note
 from .delete_user_note import delete_user_note
+from .update_asked_questions import update_asked_questions

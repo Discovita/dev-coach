@@ -239,6 +239,24 @@ const TestScenarioCoachStateForm = ({
         }
         placeholder="Add a trait or aspiration"
       />
+      {/* Asked Questions List */}
+      <CoachStateListField
+        label="Asked Questions"
+        items={value.asked_questions || []}
+        onAdd={(item) =>
+          handleField("asked_questions", [
+            ...(value.asked_questions || []),
+            item,
+          ])
+        }
+        onDelete={(idx) =>
+          handleField(
+            "asked_questions",
+            (value.asked_questions || []).filter((_, i) => i !== idx)
+          )
+        }
+        placeholder="Add a question that was asked"
+      />
     </div>
   );
 };

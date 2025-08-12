@@ -70,6 +70,11 @@ class TemplateCoachStateSerializer(ForbidExtraFieldsMixin, serializers.Serialize
         child=serializers.CharField(),
         help_text="List of 'who you want to be' identities. Required.",
     )
+    asked_questions = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        help_text="List of questions that have been asked during the Get To Know You phase.",
+    )
     skipped_identity_categories = serializers.ListField(
         child=serializers.CharField(),
         required=False,

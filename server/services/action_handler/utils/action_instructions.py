@@ -30,6 +30,7 @@ from services.action_handler.models.actions import (
     AddUserNoteAction,
     UpdateUserNoteAction,
     DeleteUserNoteAction,
+    UpdateAskedQuestionsAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -106,6 +107,10 @@ ACTION_PARAMS = {
     ActionType.DELETE_USER_NOTE: {
         "description": "Delete one or more user notes by ID. Each ID must correspond to a user note.",
         "model": DeleteUserNoteAction,
+    },
+    ActionType.UPDATE_ASKED_QUESTIONS: {
+        "description": "Update the list of questions that have been asked during the Get To Know You phase. You must pass the complete list of all questions that have been asked, not just the ones that have changed.",
+        "model": UpdateAskedQuestionsAction,
     },
 }
 

@@ -14,6 +14,7 @@ export interface CoachState {
   skipped_identity_categories?: [string] | null;
   who_you_are: [string] | null;
   who_you_want_to_be: [string] | null;
+  asked_questions: [string] | null;
   metadata?: {
     [k: string]: unknown;
   };

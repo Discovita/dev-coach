@@ -28,6 +28,7 @@ export interface TestScenarioCoachState {
   skipped_identity_categories?: IdentityCategory[];
   who_you_are?: string[];
   who_you_want_to_be?: string[];
+  asked_questions?: string[];
   current_identity?: string;
 }
 

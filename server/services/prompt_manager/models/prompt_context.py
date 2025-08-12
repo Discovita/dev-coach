@@ -22,3 +22,4 @@ class PromptContext(BaseModel):
     current_phase: Optional[str]
     brainstorming_category_context: Optional[str]
     current_identity: Optional[str]
+    asked_questions: Optional[str]
