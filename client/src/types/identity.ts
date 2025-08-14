@@ -17,6 +17,8 @@ export interface Identity {
   notes?: string[];
   /** Category this identity belongs to */
   category: IdentityCategory;
+  /** Current state of the identity (optional) */
+  state?: string;
   /** Created timestamp (optional) */
   created_at?: string;
   /** Updated timestamp (optional) */

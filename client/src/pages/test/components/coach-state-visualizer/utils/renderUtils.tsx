@@ -4,7 +4,9 @@ import { copyToClipboard } from "./dataUtils";
 import { Button } from "@/components/ui/button";
 import { Action } from "@/types/action";
 import ActionItem from "@/pages/test/components/coach-state-visualizer/utils/ActionItem";
+import IdentityItem from "@/pages/test/components/coach-state-visualizer/utils/IdentityItem";
 import { CoachState } from "@/types/coachState";
+import { Identity } from "@/types/identity";
 import {
   getIdentityCategoryDisplayName,
   getIdentityCategoryColor,
@@ -70,6 +72,58 @@ export const renderActionsSection = (
         <div className="flex flex-col gap-2 p-4 max-h-full overflow-y-auto bg-gold-50 dark:bg-neutral-700">
           {actions.map((action: Action, index: number) => (
             <ActionItem key={index} action={action} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Renders the Identities section in a beautiful, organized layout
+ * Displays all identities in a structured, visually appealing way with expandable details
+ */
+export const renderIdentitiesSection = (
+  title: string,
+  identities: Identity[],
+  sectionKey: string,
+  isExpanded: boolean,
+  toggleSection: (section: string) => void
+): React.ReactElement | null => {
+  if (!identities || identities.length === 0) return null;
+
+  return (
+    <div className="_IdentitiesSection mb-4 border rounded-md overflow-hidden border-gold-600">
+      <div
+        className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
+        onClick={() => toggleSection(sectionKey)}
+      >
+        <h3 className="m-0 text-base font-semibold text-gold-700 dark:text-gold-200">
+          {title} ({identities.length})
+        </h3>
+        <div className="flex items-center gap-2">
+          <Button
+            className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(identities);
+            }}
+          >
+            Copy
+          </Button>
+          <span
+            className={`text-xs transition-transform ${
+              isExpanded ? "" : "rotate-[-90deg]"
+            }`}
+          >
+            ▼
+          </span>
+        </div>
+      </div>
+      {isExpanded && (
+        <div className="flex flex-col gap-3 p-4 max-h-full overflow-y-auto bg-gold-50 dark:bg-neutral-700">
+          {identities.map((identity: Identity, index: number) => (
+            <IdentityItem key={index} identity={identity} />
           ))}
         </div>
       )}

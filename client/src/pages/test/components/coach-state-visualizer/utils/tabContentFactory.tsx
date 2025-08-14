@@ -6,6 +6,7 @@ import {
   renderActionsSection,
   renderFinalPrompt,
   renderCoachStateSection,
+  renderIdentitiesSection,
 } from "./renderUtils";
 
 import { useCoachState } from "@/hooks/use-coach-state";
@@ -18,6 +19,7 @@ import { useTestScenarioUserFinalPrompt } from "@/hooks/test-scenario/use-test-s
 import { useTestScenarioUserActions } from "@/hooks/test-scenario/use-test-scenario-user-actions";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
 import { useTestScenarioUserChatMessages } from "@/hooks/test-scenario/use-test-scenario-user-chat-messages";
+import IdentityItem from "./IdentityItem";
 
 /**
  * TabContent component
@@ -103,30 +105,31 @@ export const TabContent: React.FC<{
     case TabName.IDENTITIES:
       return (
         <>
-          {renderJsonSection(
+          {/* Render confirmed identities using the new styled component */}
+          {renderIdentitiesSection(
             "Confirmed Identities",
             identities || [],
             "identities",
-            expandedSections["identities"],
+            expandedSections["identities"] ?? true, // Default to expanded
             toggleSection
           )}
 
-          {renderJsonSection(
-            "Proposed Identity",
-            coachState?.proposed_identity
-              ? (coachState.proposed_identity as unknown as Record<
-                  string,
-                  unknown
-                >)
-              : null,
-            "proposedIdentity",
-            expandedSections["proposedIdentity"],
-            toggleSection
+          {/* Render proposed identity if it exists */}
+          {coachState?.proposed_identity && (
+            <div className="mb-4">
+              <h3 className="text-base font-semibold text-gold-800 dark:text-gold-200 mb-3">
+                Proposed Identity
+              </h3>
+              <IdentityItem identity={coachState.proposed_identity} />
+            </div>
           )}
 
           {(!identities || identities.length === 0) &&
             !coachState?.proposed_identity &&
-            renderEmptyState("No identities created yet.")}
+            renderEmptyState(
+              "No identities created yet.",
+              "Identities will appear here as they are created during the coaching process."
+            )}
         </>
       );
 
@@ -228,17 +231,31 @@ export const TestScenarioTabContent: React.FC<{
     case TabName.IDENTITIES:
       return (
         <>
-          {renderJsonSection(
-            "Identities",
+          {/* Render confirmed identities using the new styled component */}
+          {renderIdentitiesSection(
+            "Confirmed Identities",
             identities || [],
             "identities",
-            expandedSections["identities"],
+            expandedSections["identities"] ?? true, // Default to expanded
             toggleSection
+          )}
+
+          {/* Render proposed identity if it exists */}
+          {coachState?.proposed_identity && (
+            <div className="mb-4">
+              <h3 className="text-base font-semibold text-gold-800 dark:text-gold-200 mb-3">
+                Proposed Identity
+              </h3>
+              <IdentityItem identity={coachState.proposed_identity} />
+            </div>
           )}
 
           {(!identities || identities.length === 0) &&
             !coachState?.proposed_identity &&
-            renderEmptyState("No identities created yet.")}
+            renderEmptyState(
+              "No identities created yet.",
+              "Identities will appear here as they are created during the coaching process."
+            )}
         </>
       );
 
