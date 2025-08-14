@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   TestScenario,
@@ -146,6 +147,90 @@ const TestScenarioEditor = ({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
 
+  // Update state when scenario prop changes
+  useEffect(() => {
+    if (scenario) {
+      // Update general section
+      setName(scenario.name || "");
+      setDescription(scenario.description || "");
+
+      // Update user section
+      const user = scenario.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.user
+          ? (scenario.template.user as TestScenarioUser)
+          : undefined;
+      setFirstName(user?.first_name || "");
+      setLastName(user?.last_name || "");
+
+      // Update coach state section
+      if (
+        scenario.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.coach_state
+      ) {
+        setCoachState(scenario.template.coach_state as TestScenarioCoachState);
+      } else {
+        setCoachState({});
+      }
+
+      // Update identities section
+      if (
+        scenario.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.identities
+      ) {
+        setIdentities(scenario.template.identities as TestScenarioIdentity[]);
+      } else {
+        setIdentities([]);
+      }
+
+      // Update chat messages section
+      if (
+        scenario.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.chat_messages
+      ) {
+        setChatMessages(scenario.template.chat_messages as TestScenarioChatMessage[]);
+      } else {
+        setChatMessages([]);
+      }
+
+      // Update user notes section
+      if (
+        scenario.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.user_notes
+      ) {
+        setUserNotes(scenario.template.user_notes as TestScenarioUserNote[]);
+      } else {
+        setUserNotes([]);
+      }
+
+      // Update actions section
+      if (
+        scenario.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.actions
+      ) {
+        setActions(scenario.template.actions as TestScenarioAction[]);
+      } else {
+        setActions([]);
+      }
+    } else {
+      // Reset all state when scenario is null (creating new scenario)
+      setName("");
+      setDescription("");
+      setFirstName("");
+      setLastName("");
+      setCoachState({});
+      setIdentities([]);
+      setChatMessages([]);
+      setUserNotes([]);
+      setActions([]);
+    }
+  }, [scenario]);
+
   const handleGeneralChange = (fields: {
     name: string;
     description: string;
@@ -197,9 +282,17 @@ const TestScenarioEditor = ({
       className="w-7xl p-6 bg-white rounded-lg shadow mb-8"
       onSubmit={handleSubmit}
     >
-      <h2 className="text-2xl font-semibold mb-4">
-        {scenario ? "Edit Test Scenario" : "Create New Test Scenario"}
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">
+          {scenario ? "Edit Test Scenario" : "Create New Test Scenario"}
+        </h2>
+        {scenario && (
+          <Badge variant="secondary" className="text-sm px-3 py-1.5">
+            <span className="text-gold-600 mr-1">Editing:</span>
+            <span className="font-semibold">{scenario.name}</span>
+          </Badge>
+        )}
+      </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
