@@ -88,6 +88,7 @@ log.critical("Critical message")
 
 # Use custom log levels
 log.fine("Fine-level message")
+log.action("Action-level message")
 log.step("Step-level message")
 log.success("Success message")
 ```
@@ -100,6 +101,7 @@ The logger provides three custom log levels in addition to Python's standard lev
 | ----------- | ------ | ------------------------------------------------------------------------------------- |
 | DEBUG       | 10     | Detailed debugging information                                                        |
 | **FINE**    | **15** | Less verbose than DEBUG, but more detailed than INFO                                  |
+| **ACTION**  | **20** | Action operations being performed (with bright blue formatting)                       |
 | INFO        | 20     | Confirmation that things are working as expected                                      |
 | **SUCCESS** | **22** | Successful operations (with green formatting)                                         |
 | **STEP**    | **25** | Major steps in program execution (with purple formatting)                             |
@@ -169,6 +171,7 @@ The logger automatically formats console output with color-coded levels:
 
 - **DEBUG**: Gray
 - **FINE**: Blue
+- **ACTION**: Bright Blue
 - **INFO**: Green
 - **SUCCESS**: Green with ★ symbol (includes separator lines)
 - **STEP**: Purple

@@ -224,7 +224,7 @@ class AIModel(models.TextChoices):
         Default is GPT_4O.
         """
         if not model_name:
-            return cls.GPT_4_1
+            return cls.GPT_4O
         return cls.from_string(model_name)
 
 # -----------------------------------------------------------------------------

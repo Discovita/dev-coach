@@ -25,6 +25,18 @@ def fine(self, message, *args, **kwargs):
 logging.Logger.fine = fine
 
 # ------------------------------------------------------
+#              Define the ACTION level
+# ------------------------------------------------------
+ACTION_LEVEL = 20
+logging.addLevelName(ACTION_LEVEL, "ACTION")
+
+def action(self, message, *args, **kwargs):
+    if self.isEnabledFor(ACTION_LEVEL):
+        self._log(ACTION_LEVEL, message, args, **kwargs)
+
+logging.Logger.action = action
+
+# ------------------------------------------------------
 #              Define the SUCCESS level
 # ------------------------------------------------------
 SUCCESS_LEVEL = 22
@@ -55,6 +67,7 @@ class ConsoleFormatter(logging.Formatter):
     level_formats = {
         logging.DEBUG: "\x1b[38;21mDEBUG\x1b[0m:\t  %(message)s",  # Grey Level
         FINE_LEVEL: "\x1b[34mFINE\x1b[0m:\t  %(message)s",  # Blue Level
+        ACTION_LEVEL: "\x1b[94mACTION\x1b[0m:\t  %(message)s",  # Bright Blue Level
         logging.INFO: "\x1b[32mINFO\x1b[0m:\t  %(message)s",  # Green Level
         SUCCESS_LEVEL: "\x1b[32m★ SUCCESS\x1b[0m:  \x1b[32m%(message)s\x1b[0m",  # Green Level and Message with star
         STEP_LEVEL: "\x1b[35mSTEP\x1b[0m:\t  \x1b[35m%(message)s\x1b[0m",  # Purple Level and Message

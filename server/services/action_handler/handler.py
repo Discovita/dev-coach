@@ -3,27 +3,7 @@ from enums.action_type import ActionType
 from apps.coach_states.models import CoachState
 from apps.chat_messages.models import ChatMessage
 from models.CoachChatResponse import CoachChatResponse
-from services.action_handler.actions import (
-    create_identity,
-    update_identity,
-    update_identity_name,
-    update_identity_affirmation,
-    update_identity_visualization,
-    accept_identity,
-    accept_identity_refinement,
-    add_identity_note,
-    transition_phase,
-    select_identity_focus,
-    set_current_identity,
-    skip_identity_category,
-    unskip_identity_category,
-    update_who_you_are,
-    update_who_you_want_to_be,
-    add_user_note,
-    update_user_note,
-    delete_user_note,
-    update_asked_questions,
-)
+from services.action_handler.actions import *
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
