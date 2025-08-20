@@ -5,6 +5,9 @@ from services.action_handler.models.actions import (
     SetCurrentIdentityAction,
     CreateIdentityAction,
     UpdateIdentityAction,
+    UpdateIdentityNameAction,
+    UpdateIdentityAffirmationAction,
+    UpdateIdentityVisualizationAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
     TransitionPhaseAction,
@@ -15,6 +18,7 @@ from services.action_handler.models.actions import (
     UpdateWhoYouWantToBeAction,
     UpdateAskedQuestionsAction,
 )
+
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
 
 
@@ -27,17 +31,20 @@ class CoachChatResponse(BaseModel):
 
     message: str = Field(..., description="Coach's response message")
 
-    select_identity_focus: Optional[SelectIdentityFocusAction] = Field(
-        default=None, description="Perform the select_identity_focus action."
-    )
-    set_current_identity: Optional[SetCurrentIdentityAction] = Field(
-        default=None, description="Perform the set_current_identity action."
-    )
     create_identity: Optional[CreateIdentityAction] = Field(
         default=None, description="Perform the create_identity action."
     )
     update_identity: Optional[UpdateIdentityAction] = Field(
         default=None, description="Perform the update_identity action."
+    )
+    update_identity_name: Optional[UpdateIdentityNameAction] = Field(
+        default=None, description="Perform the update_identity_name action."
+    )
+    update_identity_affirmation: Optional[UpdateIdentityAffirmationAction] = Field(
+        default=None, description="Perform the update_identity_affirmation action."
+    )
+    update_identity_visualization: Optional[UpdateIdentityVisualizationAction] = Field(
+        default=None, description="Perform the update_identity_visualization action."
     )
     accept_identity: Optional[AcceptIdentityAction] = Field(
         default=None, description="Perform the accept_identity action."
@@ -45,11 +52,14 @@ class CoachChatResponse(BaseModel):
     accept_identity_refinement: Optional[AcceptIdentityRefinementAction] = Field(
         default=None, description="Perform the accept_identity_refinement action."
     )
+    add_identity_note: Optional[AddIdentityNoteAction] = Field(
+        default=None, description="Perform the add_identity_note action."
+    )
     transition_phase: Optional[TransitionPhaseAction] = Field(
         default=None, description="Perform the transition_phase action."
     )
-    add_identity_note: Optional[AddIdentityNoteAction] = Field(
-        default=None, description="Perform the add_identity_note action."
+    select_identity_focus: Optional[SelectIdentityFocusAction] = Field(
+        default=None, description="Perform the select_identity_focus action."
     )
     skip_identity_category: Optional[SkipIdentityCategoryAction] = Field(
         default=None, description="Perform the skip_identity_category action."
@@ -65,4 +75,7 @@ class CoachChatResponse(BaseModel):
     )
     update_asked_questions: Optional[UpdateAskedQuestionsAction] = Field(
         default=None, description="Perform the update_asked_questions action."
+    )
+    set_current_identity: Optional[SetCurrentIdentityAction] = Field(
+        default=None, description="Perform the set_current_identity action."
     )

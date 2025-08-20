@@ -29,11 +29,11 @@ class ActionType(models.TextChoices):
     UNSKIP_IDENTITY_CATEGORY = "unskip_identity_category", "Unskip Identity Category"
     UPDATE_WHO_YOU_ARE = "update_who_you_are", "Update Who You Are"
     UPDATE_WHO_YOU_WANT_TO_BE = "update_who_you_want_to_be", "Update Who You Want to Be"
+    UPDATE_ASKED_QUESTIONS = "update_asked_questions", "Update Asked Questions"
+    SET_CURRENT_IDENTITY = "set_current_identity", "Set Current Identity"
     ADD_USER_NOTE = "add_user_note", "Add User Note"
     UPDATE_USER_NOTE = "update_user_note", "Update User Note"
     DELETE_USER_NOTE = "delete_user_note", "Delete User Note"
-    SET_CURRENT_IDENTITY = "set_current_identity", "Set Current Identity"
-    UPDATE_ASKED_QUESTIONS = "update_asked_questions", "Update Asked Questions"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""
