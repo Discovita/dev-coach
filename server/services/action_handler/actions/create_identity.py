@@ -36,7 +36,6 @@ def create_identity(
         name=params.name,
         notes=[params.note],
         category=params.category,
-        state="accepted",
     )
 
     # Log the action with rich context

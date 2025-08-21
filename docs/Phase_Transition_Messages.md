@@ -47,3 +47,33 @@ The instructions for the first message of the phase should be present in each pr
 
 "Fantastic work, {user_name}! We've successfully brainstormed identities across all the key areas.
 What we've just done can be a lot for some. Here's what I'd like you to do - I'd like you to take some time to reflect, a day, a week, on your list and see what comes to you in your quiet moments. Let it sink into your subconscious. Taking this time to really think about your Identities will really help prepare you for the next phase. Is that something you'd be willing to do?"
+
+## Identity Refinement
+
+### First Message
+
+- This is dictated in the Doer of Things context in the Identity Brainstorming
+
+### Transition
+
+- "Excellent work, {user_name}! You've created some truly inspiring identity names. Now that you have these powerful identities, let's take the next step to really internalize them and build your confidence in embodying these roles. The next phase will help you affirm and strengthen your belief in these identities so they become a natural part of how you see yourself. Are you ready? 
+
+## Identity Affirmation
+
+### First Message
+
+- "Welcome to the Identity Affirmation phase! This is where we'll strengthen your belief in your chosen identities and build your confidence to embody them in your daily life."
+
+### Transition
+
+- "Wonderful! You've done incredible work affirming your identities and building your confidence. Now let's take this to the next level by creating vivid mental pictures of how these identities will show up in your real life. The next phase will help you visualize yourself living out these identities in specific situations, making them even more tangible and actionable. Are you ready to bring your identities to life through visualization?"
+
+## Identity Visualization
+
+### First Message
+
+- "Welcome to the Identity Visualization phase! This is where we'll create vivid mental images of you living out your affirmed identities in real-world scenarios."
+
+### Transition
+
+- "Amazing work, {user_name}! You've successfully completed the identity creation journey. You now have powerful, affirmed identities with clear visualizations of how they'll manifest in your life. These identities are ready to guide you in your daily decisions and help you become the person you want to be. Is there anything else you'd like to explore or discuss about your coaching journey?"

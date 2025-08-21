@@ -13,6 +13,8 @@ class CoachingPhase(models.TextChoices):
     IDENTITY_WARMUP = "identity_warm_up", "Identity Warm-Up"
     IDENTITY_BRAINSTORMING = "identity_brainstorming", "Identity Brainstorming"
     IDENTITY_REFINEMENT = "identity_refinement", "Identity Refinement"
+    IDENTITY_AFFIRMATION = "identity_affirmation", "Identity Affirmation"
+    IDENTITY_VISUALIZATION = "identity_visualization", "Identity Visualization"
 
     @classmethod
     def from_string(cls, value: str) -> "CoachingPhase":

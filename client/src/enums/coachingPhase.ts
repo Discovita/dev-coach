@@ -10,6 +10,8 @@ export enum CoachingPhase {
   IDENTITY_WARMUP = "identity_warm_up",
   IDENTITY_BRAINSTORMING = "identity_brainstorming",
   IDENTITY_REFINEMENT = "identity_refinement",
+  IDENTITY_AFFIRMATION = "identity_affirmation",
+  IDENTITY_VISUALIZATION = "identity_visualization",
 }
 
 /**
@@ -22,6 +24,8 @@ export const COACHING_PHASE_DISPLAY_NAMES: Record<CoachingPhase, string> = {
   [CoachingPhase.IDENTITY_WARMUP]: "Identity Warmup",
   [CoachingPhase.IDENTITY_BRAINSTORMING]: "Identity Brainstorming",
   [CoachingPhase.IDENTITY_REFINEMENT]: "Identity Refinement",
+  [CoachingPhase.IDENTITY_AFFIRMATION]: "Identity Affirmation",
+  [CoachingPhase.IDENTITY_VISUALIZATION]: "Identity Visualization",
 };
 
 /**
@@ -40,6 +44,10 @@ export const COACHING_PHASE_COLORS: Record<CoachingPhase, string> = {
     "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
   [CoachingPhase.IDENTITY_REFINEMENT]:
     "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
+  [CoachingPhase.IDENTITY_AFFIRMATION]:
+    "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
+  [CoachingPhase.IDENTITY_VISUALIZATION]:
+    "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200",
 };
 
 /**
