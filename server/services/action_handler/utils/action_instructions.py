@@ -21,6 +21,7 @@ from services.action_handler.models.actions import (
     UpdateIdentityAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
+    AcceptIdentityAffirmationAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
@@ -71,6 +72,10 @@ ACTION_PARAMS = {
     ActionType.ACCEPT_IDENTITY_REFINEMENT: {
         "description": "Mark an Identity as refinement_complete.",
         "model": AcceptIdentityRefinementAction,
+    },
+    ActionType.ACCEPT_IDENTITY_AFFIRMATION: {
+        "description": "Mark an Identity as affirmation_complete.",
+        "model": AcceptIdentityAffirmationAction,
     },
     ActionType.TRANSITION_PHASE: {
         "description": "Move to the next Coaching Phase.",
