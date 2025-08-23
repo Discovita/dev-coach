@@ -109,6 +109,13 @@ class AcceptIdentityRefinementParams(BaseModel):
         extra = "forbid"
 
 
+class AcceptIdentityAffirmationParams(BaseModel):
+    id: str = Field(..., description="ID of identity to mark as affirmation complete")
+
+    class Config:
+        extra = "forbid"
+
+
 class TransitionPhaseParams(BaseModel):
     to_phase: CoachingPhase = Field(..., description="State to transition to")
 

@@ -10,6 +10,7 @@ from services.action_handler.models.actions import (
     UpdateIdentityVisualizationAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
+    AcceptIdentityAffirmationAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
@@ -51,6 +52,9 @@ class CoachChatResponse(BaseModel):
     )
     accept_identity_refinement: Optional[AcceptIdentityRefinementAction] = Field(
         default=None, description="Perform the accept_identity_refinement action."
+    )
+    accept_identity_affirmation: Optional[AcceptIdentityAffirmationAction] = Field(
+        default=None, description="Perform the accept_identity_affirmation action."
     )
     add_identity_note: Optional[AddIdentityNoteAction] = Field(
         default=None, description="Perform the add_identity_note action."

@@ -22,6 +22,10 @@ class ActionType(models.TextChoices):
         "accept_identity_refinement",
         "Accept Identity Refinement",
     )
+    ACCEPT_IDENTITY_AFFIRMATION = (
+        "accept_identity_affirmation",
+        "Accept Identity Affirmation",
+    )
     ADD_IDENTITY_NOTE = "add_identity_note", "Add Identity Note"
     TRANSITION_PHASE = "transition_phase", "Transition Phase"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"
