@@ -22,6 +22,7 @@ class ContextKey(models.TextChoices):
     ASKED_QUESTIONS = "asked_questions", "Asked Questions"
     REFINEMENT_IDENTITIES = "refinement_identities", "Refinement Identities"
     AFFIRMATION_IDENTITIES = "affirmation_identities", "Affirmation Identities"
+    VISUALIZATION_IDENTITIES = "visualization_identities", "Visualization Identities"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":
