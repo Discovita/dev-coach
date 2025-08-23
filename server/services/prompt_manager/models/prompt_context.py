@@ -23,3 +23,4 @@ class PromptContext(BaseModel):
     brainstorming_category_context: Optional[str]
     current_identity: Optional[str]
     asked_questions: Optional[str]
+    refinement_identities: Optional[str]
