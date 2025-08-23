@@ -62,18 +62,18 @@ What we've just done can be a lot for some. Here's what I'd like you to do - I'd
 
 ### First Message
 
-- "Welcome to the Identity Affirmation phase! This is where we'll strengthen your belief in your chosen identities and build your confidence to embody them in your daily life."
+- "Now that you have your inspiring identity names, let's craft powerful 'I Am' statements that will reinforce each identity and create emotional anchoring for your transformation. These statements will clarify the essence of each identity and serve as daily reminders of who you're becoming."
 
 ### Transition
 
-- "Wonderful! You've done incredible work affirming your identities and building your confidence. Now let's take this to the next level by creating vivid mental pictures of how these identities will show up in your real life. The next phase will help you visualize yourself living out these identities in specific situations, making them even more tangible and actionable. Are you ready to bring your identities to life through visualization?"
+- "Excellent work! You've created powerful 'I Am' statements that truly resonate with you. Now let's bring these identities to life visually. The next phase will help you create vivid mental pictures of yourself embodying each identity - what you're wearing, where you are, and how you feel. These visual representations will make stepping into your identities effortless and natural. Are you ready to visualize yourself living out these powerful identities?"
 
 ## Identity Visualization
 
 ### First Message
 
-- "Welcome to the Identity Visualization phase! This is where we'll create vivid mental images of you living out your affirmed identities in real-world scenarios."
+- "Let's create visual representations of each identity to strengthen your embodiment process. For each identity, we'll explore three key questions: What is the setting? What are you wearing? And what emotion are you radiating? These visual anchors will make your transformation feel concrete and accessible."
 
 ### Transition
 
-- "Amazing work, {user_name}! You've successfully completed the identity creation journey. You now have powerful, affirmed identities with clear visualizations of how they'll manifest in your life. These identities are ready to guide you in your daily decisions and help you become the person you want to be. Is there anything else you'd like to explore or discuss about your coaching journey?"
+- "Incredible work, {user_name}! You've successfully completed the identity creation journey. You now have powerful 'I Am' statements and vivid visual representations of each identity. These visual anchors will serve as daily reminders of who you truly are, making stepping into your identities effortless. Your identities are now ready to guide you in your daily decisions and help you become the person you want to be. Is there anything else you'd like to explore or discuss about your coaching journey?"

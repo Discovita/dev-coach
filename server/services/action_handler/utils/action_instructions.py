@@ -41,7 +41,7 @@ ACTION_PARAMS = {
         "model": SelectIdentityFocusAction,
     },
     ActionType.SET_CURRENT_IDENTITY: {
-        "description": "Set the current identity being refined in the Identity Refinement Phase. Use this when you want to work on refining a specific users Identity",
+        "description": "Set the current Identity to focus on for targeted changes",
         "model": SetCurrentIdentityAction,
     },
     ActionType.CREATE_IDENTITY: {
@@ -65,15 +65,15 @@ ACTION_PARAMS = {
         "model": UpdateIdentityAction,
     },
     ActionType.ACCEPT_IDENTITY: {
-        "description": "Accept an Identity as valid or complete.",
+        "description": "Mark an Identity as accepted.",
         "model": AcceptIdentityAction,
     },
     ActionType.ACCEPT_IDENTITY_REFINEMENT: {
-        "description": "Mark an Identity as refinement complete.",
+        "description": "Mark an Identity as refinement_complete.",
         "model": AcceptIdentityRefinementAction,
     },
     ActionType.TRANSITION_PHASE: {
-        "description": "Transition the coaching state to a new state.",
+        "description": "Move to the next Coaching Phase.",
         "model": TransitionPhaseAction,
     },
     ActionType.ADD_IDENTITY_NOTE: {
