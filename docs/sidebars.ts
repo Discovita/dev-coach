@@ -35,6 +35,58 @@ const sidebars: SidebarsConfig = {
         // 'core-systems/identities', // TODO: Create this file
       ],
     },
+    {
+      type: 'category',
+      label: 'API Reference',
+      items: [
+        'api/overview',
+        {
+          type: 'category',
+          label: 'Authentication',
+          items: [
+            'api/authentication/auth',
+            // 'api/authentication/tokens', // TODO: Create this file
+            // 'api/authentication/permissions', // TODO: Create this file
+          ],
+        },
+        // TODO: Add Endpoints category when files are created
+        // {
+        //   type: 'category',
+        //   label: 'Endpoints',
+        //   items: [
+        //     'api/endpoints/users',
+        //     'api/endpoints/coaching',
+        //     'api/endpoints/admin',
+        //   ],
+        // },
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Database',
+      items: [
+        'database/overview',
+        {
+          type: 'category',
+          label: 'Models',
+          items: [
+            'database/models/users',
+            // 'database/models/coaching', // TODO: Create this file
+            // 'database/models/system', // TODO: Create this file
+          ],
+        },
+        // TODO: Add Schema category when files are created
+        // {
+        //   type: 'category',
+        //   label: 'Schema',
+        //   items: [
+        //     'database/schema/tables',
+        //     'database/schema/relationships',
+        //     'database/schema/indexes',
+        //   ],
+        // },
+      ],
+    },
     // TODO: Add these categories when the files are created
     // {
     //   type: 'category',
