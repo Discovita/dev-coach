@@ -6,6 +6,7 @@ from .update_identity_visualization import update_identity_visualization
 from .accept_identity import accept_identity
 from .accept_identity_refinement import accept_identity_refinement
 from .accept_identity_affirmation import accept_identity_affirmation
+from .accept_identity_visualization import accept_identity_visualization
 from .add_identity_note import add_identity_note
 from .transition_phase import transition_phase
 from .select_identity_focus import select_identity_focus 

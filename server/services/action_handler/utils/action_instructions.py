@@ -22,6 +22,7 @@ from services.action_handler.models.actions import (
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
     AcceptIdentityAffirmationAction,
+    AcceptIdentityVisualizationAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
@@ -76,6 +77,10 @@ ACTION_PARAMS = {
     ActionType.ACCEPT_IDENTITY_AFFIRMATION: {
         "description": "Mark an Identity as affirmation_complete.",
         "model": AcceptIdentityAffirmationAction,
+    },
+    ActionType.ACCEPT_IDENTITY_VISUALIZATION: {
+        "description": "Mark an Identity as visualization_complete.",
+        "model": AcceptIdentityVisualizationAction,
     },
     ActionType.TRANSITION_PHASE: {
         "description": "Move to the next Coaching Phase.",

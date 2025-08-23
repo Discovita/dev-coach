@@ -10,6 +10,7 @@ from .params import (
     AcceptIdentityParams,
     AcceptIdentityRefinementParams,
     AcceptIdentityAffirmationParams,
+    AcceptIdentityVisualizationParams,
     TransitionPhaseParams,
     AddIdentityNoteParams,
     SkipIdentityCategoryParams,
@@ -108,6 +109,15 @@ class AcceptIdentityRefinementAction(BaseModel):
 class AcceptIdentityAffirmationAction(BaseModel):
     params: AcceptIdentityAffirmationParams = Field(
         ..., description="Parameters for marking an identity as affirmation complete."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class AcceptIdentityVisualizationAction(BaseModel):
+    params: AcceptIdentityVisualizationParams = Field(
+        ..., description="Parameters for marking an identity as visualization complete."
     )
 
     class Config:
