@@ -32,3 +32,4 @@ def log_context_stats(prompt_context: PromptContext):
     )
     log.debug(f"CURRENT_IDENTITY: {getattr(prompt_context, 'current_identity', None)}")
     log.debug(f"ASKED_QUESTIONS: {getattr(prompt_context, 'asked_questions', None)}")
+    log.debug(f"REFINEMENT_IDENTITIES: {getattr(prompt_context, 'refinement_identities', None)}")

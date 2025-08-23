@@ -20,6 +20,7 @@ class ContextKey(models.TextChoices):
     BRAINSTORMING_CATEGORY_CONTEXT = "brainstorming_category_context", "Brainstorming Category Context"
     CURRENT_IDENTITY = "current_identity", "Current Identity"
     ASKED_QUESTIONS = "asked_questions", "Asked Questions"
+    REFINEMENT_IDENTITIES = "refinement_identities", "Refinement Identities"
 
     @classmethod
     def from_string(cls, value: str) -> "ContextKey":
