@@ -16,7 +16,7 @@ services:
   docs:
     build:
       context: ../docs
-      dockerfile: Dockerfile.local
+      dockerfile: docker/Dockerfile.local
     environment:
       - NODE_ENV=development
     command: npm start

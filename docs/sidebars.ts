@@ -21,8 +21,8 @@ const sidebars: SidebarsConfig = {
       label: 'Getting Started',
       items: [
         'getting-started/overview',
-        'getting-started/installation',
-        'getting-started/quick-start',
+        // 'getting-started/installation', // TODO: Create this file
+        // 'getting-started/quick-start', // TODO: Create this file
       ],
     },
     {
@@ -30,30 +30,31 @@ const sidebars: SidebarsConfig = {
       label: 'Core Systems',
       items: [
         'core-systems/prompt-manager',
-        'core-systems/action-handler',
-        'core-systems/coach-phases',
-        'core-systems/identities',
+        // 'core-systems/action-handler', // TODO: Create this file
+        // 'core-systems/coach-phases', // TODO: Create this file
+        // 'core-systems/identities', // TODO: Create this file
       ],
     },
-    {
-      type: 'category',
-      label: 'Development',
-      items: [
-        'development/adding-actions',
-        'development/adding-phases',
-        'development/adding-context-keys',
-        'development/api-reference',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Deployment',
-      items: [
-        'deployment/setup',
-        'deployment/render-deployment',
-        'deployment/environment-variables',
-      ],
-    },
+    // TODO: Add these categories when the files are created
+    // {
+    //   type: 'category',
+    //   label: 'Development',
+    //   items: [
+    //     'development/adding-actions',
+    //     'development/adding-phases',
+    //     'development/adding-context-keys',
+    //     'development/api-reference',
+    //   ],
+    // },
+    // {
+    //   type: 'category',
+    //   label: 'Deployment',
+    //   items: [
+    //     'deployment/setup',
+    //     'deployment/render-deployment',
+    //     'deployment/environment-variables',
+    //   ],
+    // },
   ],
 };
 

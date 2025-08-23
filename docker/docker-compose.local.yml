@@ -19,7 +19,7 @@ services:
   docs:
     build:
       context: ../docs
-      dockerfile: Dockerfile.local
+      dockerfile: docker/Dockerfile.local
     environment:
       - NODE_ENV=development
     command: npm start
@@ -49,7 +49,7 @@ x-fresh-build: &fresh-build
   docs:
     build:
       context: ../docs
-      dockerfile: Dockerfile.local
+      dockerfile: docker/Dockerfile.local
       no_cache: true
       args:
         - FRESH_BUILD=${FRESH_BUILD:-$(date +%s)}

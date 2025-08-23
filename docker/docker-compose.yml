@@ -51,7 +51,7 @@ services:
   docs:
     build:
       context: ../docs
-      dockerfile: Dockerfile.local
+      dockerfile: docker/Dockerfile.local
     working_dir: /docs
     volumes:
       - ../docs:/docs
