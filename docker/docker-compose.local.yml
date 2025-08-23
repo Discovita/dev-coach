@@ -16,6 +16,13 @@ services:
       - VITE_COACH_BASE_URL=http://localhost:8000/api/v1
       - VITE_ENV=LOCAL
     command: npm run local
+  docs:
+    build:
+      context: ../docs
+      dockerfile: Dockerfile.local
+    environment:
+      - NODE_ENV=development
+    command: npm start
   celery:
     build:
       context: ../server
@@ -36,6 +43,13 @@ x-fresh-build: &fresh-build
     build:
       context: ../client
       dockerfile: docker/Dockerfile.local
+      no_cache: true
+      args:
+        - FRESH_BUILD=${FRESH_BUILD:-$(date +%s)}
+  docs:
+    build:
+      context: ../docs
+      dockerfile: Dockerfile.local
       no_cache: true
       args:
         - FRESH_BUILD=${FRESH_BUILD:-$(date +%s)}

@@ -11,32 +11,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'AI-Powered Coaching',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Dev Coach uses advanced AI to provide personalized life coaching, helping users 
+        create and maintain multiple identities for different areas of their lives.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Identity Management',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Create and manage multiple identities for career, relationships, health, and more. 
+        Each identity has its own goals, strategies, and progress tracking.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Structured Phases',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Follow a proven coaching methodology through structured phases, from initial 
+        assessment to daily practice and progress tracking.
       </>
     ),
   },
