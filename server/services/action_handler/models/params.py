@@ -116,6 +116,13 @@ class AcceptIdentityAffirmationParams(BaseModel):
         extra = "forbid"
 
 
+class AcceptIdentityVisualizationParams(BaseModel):
+    id: str = Field(..., description="ID of identity to mark as visualization complete")
+
+    class Config:
+        extra = "forbid"
+
+
 class TransitionPhaseParams(BaseModel):
     to_phase: CoachingPhase = Field(..., description="State to transition to")
 
