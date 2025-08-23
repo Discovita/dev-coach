@@ -19,5 +19,5 @@ def get_current_identity_context(coach_state: CoachState) -> str:
         if identity.notes:
             notes_str = "\n".join([f"- {note}" for note in identity.notes])
             current_identity_str += f"**Notes:**\n{notes_str}\n"
-        return coach_state.current_identity.name
+        return current_identity_str
     return None
