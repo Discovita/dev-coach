@@ -4,14 +4,14 @@ sidebar_position: 7
 
 # Accept Identity Refinement
 
-The `accept_identity_refinement` action marks an [Identity](../database/models/identity) as refinement_complete.
+ The `accept_identity_refinement` action marks an [Identity](/docs/database/models/identity) as refinement_complete.
 
 ## Action Details
 
 **Action Type**: `accept_identity_refinement`  
 **Enum Value**: `ActionType.ACCEPT_IDENTITY_REFINEMENT`  
 **Handler Function**: `accept_identity_refinement()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

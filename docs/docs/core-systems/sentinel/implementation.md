@@ -4,7 +4,7 @@
 
 ### 1. UserNote Model
 
-The `UserNote` model was created specifically for the Sentinel Memory System to store extracted user information. For detailed information about the model structure, see the [UserNote database model documentation](../../database/models/user-note).
+The `UserNote` model was created specifically for the Sentinel Memory System to store extracted user information. For detailed information about the model structure, see the [UserNote database model documentation](/docs/database/models/user-note).
 
 | Field            | Type          | Description                                                   |
 | ---------------- | ------------- | ------------------------------------------------------------- |

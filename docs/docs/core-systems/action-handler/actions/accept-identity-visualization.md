@@ -4,14 +4,14 @@ sidebar_position: 9
 
 # Accept Identity Visualization
 
-The `accept_identity_visualization` action marks an [Identity](../database/models/identity) as visualization_complete.
+The `accept_identity_visualization` action marks an [Identity](/docs/database/models/identity) as visualization_complete.
 
 ## Action Details
 
 **Action Type**: `accept_identity_visualization`  
 **Enum Value**: `ActionType.ACCEPT_IDENTITY_VISUALIZATION`  
 **Handler Function**: `accept_identity_visualization()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

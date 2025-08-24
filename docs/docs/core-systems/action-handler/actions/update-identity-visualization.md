@@ -4,14 +4,14 @@ sidebar_position: 5
 
 # Update Identity Visualization
 
-The `update_identity_visualization` action updates only the visualization of an existing [Identity](../database/models/identity).
+The `update_identity_visualization` action updates only the visualization of an existing [Identity](/docs/database/models/identity).
 
 ## Action Details
 
 **Action Type**: `update_identity_visualization`  
 **Enum Value**: `ActionType.UPDATE_IDENTITY_VISUALIZATION`  
 **Handler Function**: `update_identity_visualization()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

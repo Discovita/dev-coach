@@ -4,7 +4,7 @@ sidebar_position: 21
 
 # Delete User Note
 
-The `delete_user_note` action removes [UserNote](../database/models/user-note) entries.
+The `delete_user_note` action removes [UserNote](/docs/database/models/user-note) entries.
 
 > **⚠️ Sentinel Only**: This action is used exclusively by the [Sentinel Memory System](../../sentinel/overview) to remove outdated user information. It is not available for use by the main coaching AI.
 
@@ -13,11 +13,11 @@ The `delete_user_note` action removes [UserNote](../database/models/user-note) e
 **Action Type**: `delete_user_note`  
 **Enum Value**: `ActionType.DELETE_USER_NOTE`  
 **Handler Function**: `delete_user_note()`  
-**Models Used**: [UserNote](../database/models/user-note), [Action](../database/models/action)
+**Models Used**: [UserNote](/docs/database/models/user-note), [Action](/docs/database/models/action)
 
 ## What It Does
 
-Deletes one or more [UserNote](../database/models/user-note) entries by ID.
+Deletes one or more [UserNote](/docs/database/models/user-note) entries by ID.
 
 ## Parameters
 
@@ -27,7 +27,7 @@ Deletes one or more [UserNote](../database/models/user-note) entries by ID.
 
 ## Implementation Steps
 
-1. **Note Deletion**: Deletes the specified [UserNote](../database/models/user-note) entries
+1. **Note Deletion**: Deletes the specified [UserNote](/docs/database/models/user-note) entries
 2. **Action Logging**: Records the action with details
 
 ## Example Usage

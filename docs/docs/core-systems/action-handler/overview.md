@@ -36,7 +36,7 @@ ACTION_REGISTRY = {
 2. **Action Validation**: Each action is validated against its parameter model
 3. **Handler Execution**: The appropriate handler function is called with validated parameters
 4. **State Updates**: Database models are updated according to the action logic
-5. **Action Logging**: All actions are logged to the [Action](../database/models/action) model
+5. **Action Logging**: All actions are logged to the [Action](../../database/models/action) model
 
 ## Integration with Prompt Manager
 

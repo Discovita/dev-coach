@@ -4,14 +4,14 @@ sidebar_position: 17
 
 # Update Who You Want to Be
 
-The `update_who_you_want_to_be` action updates the user's aspirational identities in the [CoachState](../database/models/coach-state).
+The `update_who_you_want_to_be` action updates the user's aspirational identities in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `update_who_you_want_to_be`  
 **Enum Value**: `ActionType.UPDATE_WHO_YOU_WANT_TO_BE`  
 **Handler Function**: `update_who_you_want_to_be()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Action](/docs/database/models/action)
 
 ## What It Does
 

@@ -4,14 +4,14 @@ sidebar_position: 8
 
 # Accept Identity Affirmation
 
-The `accept_identity_affirmation` action marks an [Identity](../database/models/identity) as affirmation_complete.
+The `accept_identity_affirmation` action marks an [Identity](/docs/database/models/identity) as affirmation_complete.
 
 ## Action Details
 
 **Action Type**: `accept_identity_affirmation`  
 **Enum Value**: `ActionType.ACCEPT_IDENTITY_AFFIRMATION`  
 **Handler Function**: `accept_identity_affirmation()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

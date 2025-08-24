@@ -4,18 +4,18 @@ sidebar_position: 13
 
 # Set Current Identity
 
-The `set_current_identity` action sets the current identity being refined in the [CoachState](../database/models/coach-state).
+The `set_current_identity` action sets the current identity being refined in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `set_current_identity`  
 **Enum Value**: `ActionType.SET_CURRENT_IDENTITY`  
 **Handler Function**: `set_current_identity()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 
-Sets the `current_identity` field of the user's coach state to point to a specific [Identity](../database/models/identity) for targeted refinement during the Identity Refinement phase.
+Sets the `current_identity` field of the user's coach state to point to a specific [Identity](/docs/database/models/identity) for targeted refinement during the Identity Refinement phase.
 
 ## Parameters
 
@@ -26,7 +26,7 @@ Sets the `current_identity` field of the user's coach state to point to a specif
 ## Implementation Steps
 
 1. **Identity Validation**: Verifies the identity exists
-2. **Current Identity Update**: Updates the `current_identity` field in the [CoachState](../database/models/coach-state)
+2. **Current Identity Update**: Updates the `current_identity` field in the [CoachState](/docs/database/models/coach-state)
 3. **Save**: Saves the updated coach state
 4. **Action Logging**: Records the action with details
 

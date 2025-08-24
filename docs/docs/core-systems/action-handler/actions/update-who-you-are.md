@@ -4,14 +4,14 @@ sidebar_position: 16
 
 # Update Who You Are
 
-The `update_who_you_are` action updates the user's self-description identities in the [CoachState](../database/models/coach-state).
+The `update_who_you_are` action updates the user's self-description identities in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `update_who_you_are`  
 **Enum Value**: `ActionType.UPDATE_WHO_YOU_ARE`  
 **Handler Function**: `update_who_you_are()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Action](/docs/database/models/action)
 
 ## What It Does
 

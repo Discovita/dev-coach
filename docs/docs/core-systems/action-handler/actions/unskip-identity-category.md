@@ -4,14 +4,14 @@ sidebar_position: 15
 
 # Unskip Identity Category
 
-The `unskip_identity_category` action removes an identity category from the skipped categories list in the [CoachState](../database/models/coach-state).
+The `unskip_identity_category` action removes an identity category from the skipped categories list in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `unskip_identity_category`  
 **Enum Value**: `ActionType.UNSKIP_IDENTITY_CATEGORY`  
 **Handler Function**: `unskip_identity_category()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Action](/docs/database/models/action)
 
 ## What It Does
 

@@ -4,14 +4,14 @@ sidebar_position: 6
 
 # Accept Identity
 
-The `accept_identity` action marks an [Identity](../database/models/identity) as accepted by setting its state to 'accepted'.
+The `accept_identity` action marks an [Identity](/docs/database/models/identity) as accepted by setting its state to 'accepted'.
 
 ## Action Details
 
 **Action Type**: `accept_identity`  
 **Enum Value**: `ActionType.ACCEPT_IDENTITY`  
 **Handler Function**: `accept_identity()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

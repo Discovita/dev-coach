@@ -4,14 +4,14 @@ sidebar_position: 11
 
 # Transition Phase
 
-The `transition_phase` action updates the current coaching phase in the [CoachState](../database/models/coach-state).
+The `transition_phase` action updates the current coaching phase in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `transition_phase`  
 **Enum Value**: `ActionType.TRANSITION_PHASE`  
 **Handler Function**: `transition_phase()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Action](/docs/database/models/action)
 
 ## What It Does
 
@@ -25,7 +25,7 @@ Updates the `current_phase` field of the user's coach state to move between coac
 
 ## Implementation Steps
 
-1. **Phase Update**: Updates the `current_phase` field in the [CoachState](../database/models/coach-state)
+1. **Phase Update**: Updates the `current_phase` field in the [CoachState](/docs/database/models/coach-state)
 2. **Save**: Saves the updated coach state
 3. **Action Logging**: Records the action with old and new phase labels
 

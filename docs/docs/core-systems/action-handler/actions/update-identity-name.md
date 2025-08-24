@@ -4,14 +4,14 @@ sidebar_position: 3
 
 # Update Identity Name
 
-The `update_identity_name` action updates only the name of an existing [Identity](../database/models/identity).
+The `update_identity_name` action updates only the name of an existing [Identity](/docs/database/models/identity).
 
 ## Action Details
 
 **Action Type**: `update_identity_name`  
 **Enum Value**: `ActionType.UPDATE_IDENTITY_NAME`  
 **Handler Function**: `update_identity_name()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

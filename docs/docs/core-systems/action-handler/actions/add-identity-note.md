@@ -4,14 +4,14 @@ sidebar_position: 10
 
 # Add Identity Note
 
-The `add_identity_note` action adds a note to an existing [Identity](../database/models/identity).
+The `add_identity_note` action adds a note to an existing [Identity](/docs/database/models/identity).
 
 ## Action Details
 
 **Action Type**: `add_identity_note`  
 **Enum Value**: `ActionType.ADD_IDENTITY_NOTE`  
 **Handler Function**: `add_identity_note()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

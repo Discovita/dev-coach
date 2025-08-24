@@ -53,13 +53,13 @@ The core service that analyzes messages and extracts notes. Located in `server/s
 
 ### Sentinel Prompts
 
-Sentinel prompts are stored in the same [Prompt table](../../database/models/prompt) as all other system prompts, but with a special `prompt_type` of `SENTINEL`. These prompts control how the Sentinel AI analyzes messages and extracts user information.
+Sentinel prompts are stored in the same [Prompt table](/docs/database/models/prompt) as all other system prompts, but with a special `prompt_type` of `SENTINEL`. These prompts control how the Sentinel AI analyzes messages and extracts user information.
 
 > **Note**: Sentinel prompts are not available for editing through the main frontend interface. They are managed directly in the database and are specifically designed for the Sentinel system's note extraction functionality.
 
 ### User Notes
 
-Structured notes about users stored in the database. For detailed information about the UserNote model, see the [User Notes documentation](../../database/models/user-note).
+Structured notes about users stored in the database. For detailed information about the UserNote model, see the [User Notes documentation](/docs/database/models/user-note).
 
 ### Celery Task
 
@@ -96,8 +96,8 @@ These actions are marked as "Sentinel Only" in the Action Handler documentation 
 
 ## Related Documentation
 
-- [User Notes Model](../../database/models/user-note) - Database structure for storing user notes
-- [Chat Messages API](../../api/endpoints/chat-messages) - How messages are processed
+- [User Notes Model](/docs/database/models/user-note) - Database structure for storing user notes
+- [Coach API](/docs/api/endpoints/coach) - How messages are processed
 - [Prompt Manager Overview](../prompt-manager/overview) - How notes are included in prompts
 - [Action Handler Overview](../action-handler/overview) - How note actions are processed
 

@@ -4,14 +4,14 @@ sidebar_position: 14
 
 # Skip Identity Category
 
-The `skip_identity_category` action adds an identity category to the skipped categories list in the [CoachState](../database/models/coach-state).
+The `skip_identity_category` action adds an identity category to the skipped categories list in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `skip_identity_category`  
 **Enum Value**: `ActionType.SKIP_IDENTITY_CATEGORY`  
 **Handler Function**: `skip_identity_category()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Action](/docs/database/models/action)
 
 ## What It Does
 

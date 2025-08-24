@@ -4,14 +4,14 @@ sidebar_position: 18
 
 # Update Asked Questions
 
-The `update_asked_questions` action updates the list of questions asked during the Get To Know You phase in the [CoachState](../database/models/coach-state).
+The `update_asked_questions` action updates the list of questions asked during the Get To Know You phase in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `update_asked_questions`  
 **Enum Value**: `ActionType.UPDATE_ASKED_QUESTIONS`  
 **Handler Function**: `update_asked_questions()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Action](/docs/database/models/action)
 
 ## What It Does
 

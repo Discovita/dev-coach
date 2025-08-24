@@ -100,11 +100,11 @@ const config: Config = {
             },
             {
               label: "Core Systems",
-              to: "/docs/core-systems/prompt-manager",
+              to: "/docs/core-systems/prompt-manager/overview",
             },
             {
               label: "Action Handler",
-              to: "/docs/core-systems/action-handler",
+              to: "/docs/core-systems/action-handler/overview",
             },
           ],
         },

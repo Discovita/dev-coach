@@ -4,14 +4,14 @@ sidebar_position: 2
 
 # Update Identity
 
-The `update_identity` action updates multiple fields of an existing [Identity](../database/models/identity).
+The `update_identity` action updates multiple fields of an existing [Identity](/docs/database/models/identity).
 
 ## Action Details
 
 **Action Type**: `update_identity`  
 **Enum Value**: `ActionType.UPDATE_IDENTITY`  
 **Handler Function**: `update_identity()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

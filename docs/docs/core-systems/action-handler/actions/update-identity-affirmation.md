@@ -4,14 +4,14 @@ sidebar_position: 4
 
 # Update Identity Affirmation
 
-The `update_identity_affirmation` action updates only the affirmation of an existing [Identity](../database/models/identity).
+The `update_identity_affirmation` action updates only the affirmation of an existing [Identity](/docs/database/models/identity).
 
 ## Action Details
 
 **Action Type**: `update_identity_affirmation`  
 **Enum Value**: `ActionType.UPDATE_IDENTITY_AFFIRMATION`  
 **Handler Function**: `update_identity_affirmation()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 

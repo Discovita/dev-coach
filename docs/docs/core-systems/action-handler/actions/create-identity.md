@@ -4,14 +4,14 @@ sidebar_position: 1
 
 # Create Identity
 
-The `create_identity` action creates a new [Identity](../database/models/identity) for the user.
+The `create_identity` action creates a new [Identity](/docs/database/models/identity) for the user.
 
 ## Action Details
 
 **Action Type**: `create_identity`  
 **Enum Value**: `ActionType.CREATE_IDENTITY`  
 **Handler Function**: `create_identity()`  
-**Models Used**: [Identity](../database/models/identity), [Action](../database/models/action)
+**Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
 ## What It Does
 
@@ -28,12 +28,12 @@ Creates a new identity and links it to the user. The action includes duplicate p
 ## Implementation Steps
 
 1. **Duplicate Check**: Checks if an identity with the same name already exists for the user (case-insensitive)
-2. **Identity Creation**: If no duplicate exists, creates a new [Identity](../database/models/identity) with:
+2. **Identity Creation**: If no duplicate exists, creates a new [Identity](/docs/database/models/identity) with:
    - User association
    - Name
    - Initial notes (as a list)
    - Category
-3. **Action Logging**: Records the action in the [Action](../database/models/action) model
+3. **Action Logging**: Records the action in the [Action](/docs/database/models/action) model
 
 ## Example Usage
 

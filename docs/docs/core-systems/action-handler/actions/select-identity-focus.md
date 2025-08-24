@@ -4,14 +4,14 @@ sidebar_position: 12
 
 # Select Identity Focus
 
-The `select_identity_focus` action updates the identity category focus in the [CoachState](../database/models/coach-state).
+The `select_identity_focus` action updates the identity category focus in the [CoachState](/docs/database/models/coach-state).
 
 ## Action Details
 
 **Action Type**: `select_identity_focus`  
 **Enum Value**: `ActionType.SELECT_IDENTITY_FOCUS`  
 **Handler Function**: `select_identity_focus()`  
-**Models Used**: [CoachState](../database/models/coach-state), [Action](../database/models/action)
+**Models Used**: [CoachState](/docs/database/models/coach-state), [Action](/docs/database/models/action)
 
 ## What It Does
 
@@ -25,7 +25,7 @@ Updates the `identity_focus` field of the user's coach state to specify which id
 
 ## Implementation Steps
 
-1. **Focus Update**: Updates the `identity_focus` field in the [CoachState](../database/models/coach-state)
+1. **Focus Update**: Updates the `identity_focus` field in the [CoachState](/docs/database/models/coach-state)
 2. **Save**: Saves the updated coach state
 3. **Action Logging**: Records the action with old and new focus labels
 
