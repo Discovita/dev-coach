@@ -1,4 +1,4 @@
-# Users
+# Test Users
 
 ## Base URL
 
@@ -6,25 +6,35 @@
 
 ---
 
+## Overview
+
+The TestUserViewSet provides admin-only endpoints for accessing and managing test scenario user data. These endpoints mirror the functionality of the regular UserViewSet but allow admin users to access data for specific users by ID, making them essential for testing, debugging, and scenario management.
+
+**Important**: All endpoints require admin/superuser privileges and a specific user ID in the URL path.
+
+---
+
 ## Endpoints
 
-### 1. Get Current User Profile
+### 1. Get Test User Profile
 
-- **URL:** `/users/me/`
+- **URL:** `/users/{user_id}/profile/`
 - **Method:** `GET`
-- **Description:** Returns the current authenticated user's profile data.
-- **Authentication:** Required
+- **Description:** Get profile data for a specific test scenario user.
+- **Authentication:** Required (Admin/Superuser only)
 - **Response:**
   - `200 OK`: User profile object.
+  - `403 Forbidden`: Not authorized (not admin/superuser).
+  - `404 Not Found`: User not found.
 
 #### Example Response
 
 ```json
 {
   "id": "uuid-string",
-  "email": "user@example.com",
-  "first_name": "John",
-  "last_name": "Doe",
+  "email": "testuser@example.com",
+  "first_name": "Test",
+  "last_name": "User",
   "is_active": true,
   "is_superuser": false,
   "is_staff": false,
@@ -38,23 +48,25 @@
 
 ---
 
-### 2. Get Complete User Data
+### 2. Get Test User Complete Data
 
-- **URL:** `/users/me/complete/`
+- **URL:** `/users/{user_id}/complete/`
 - **Method:** `GET`
-- **Description:** Returns current user data and ensures chat history contains the initial bot message if empty.
-- **Authentication:** Required
+- **Description:** Get complete data for a test scenario user, ensuring the chat history contains the initial bot message if empty.
+- **Authentication:** Required (Admin/Superuser only)
 - **Response:**
   - `200 OK`: Complete user object with chat history initialized.
+  - `403 Forbidden`: Not authorized (not admin/superuser).
+  - `404 Not Found`: User not found.
 
 #### Example Response
 
 ```json
 {
   "id": "uuid-string",
-  "email": "user@example.com",
-  "first_name": "John",
-  "last_name": "Doe",
+  "email": "testuser@example.com",
+  "first_name": "Test",
+  "last_name": "User",
   "is_active": true,
   "is_superuser": false,
   "is_staff": false,
@@ -103,15 +115,16 @@
 
 ---
 
-### 3. Get User's Coach State
+### 3. Get Test User Coach State
 
-- **URL:** `/users/me/coach-state/`
+- **URL:** `/users/{user_id}/coach-state/`
 - **Method:** `GET`
-- **Description:** Returns the authenticated user's current coach state.
-- **Authentication:** Required
+- **Description:** Get the coach state for a test scenario user.
+- **Authentication:** Required (Admin/Superuser only)
 - **Response:**
   - `200 OK`: Coach state object.
-  - `404 Not Found`: If the user doesn't have a coach state.
+  - `403 Forbidden`: Not authorized (not admin/superuser).
+  - `404 Not Found`: User or coach state not found.
 
 #### Example Response
 
@@ -133,14 +146,16 @@
 
 ---
 
-### 4. Get User's Identities
+### 4. Get Test User Identities
 
-- **URL:** `/users/me/identities/`
+- **URL:** `/users/{user_id}/identities/`
 - **Method:** `GET`
-- **Description:** Returns all identities associated with the authenticated user.
-- **Authentication:** Required
+- **Description:** Get the identities for a test scenario user.
+- **Authentication:** Required (Admin/Superuser only)
 - **Response:**
   - `200 OK`: Array of identity objects.
+  - `403 Forbidden`: Not authorized (not admin/superuser).
+  - `404 Not Found`: User not found.
 
 #### Example Response
 
@@ -175,14 +190,16 @@
 
 ---
 
-### 5. Get User's Actions
+### 5. Get Test User Actions
 
-- **URL:** `/users/me/actions/`
+- **URL:** `/users/{user_id}/actions/`
 - **Method:** `GET`
-- **Description:** Returns all actions performed by the authenticated user, ordered by most recent first.
-- **Authentication:** Required
+- **Description:** Get the actions for a test scenario user, ordered by most recent first.
+- **Authentication:** Required (Admin/Superuser only)
 - **Response:**
   - `200 OK`: Array of action objects.
+  - `403 Forbidden`: Not authorized (not admin/superuser).
+  - `404 Not Found`: User not found.
 
 #### Example Response
 
@@ -206,41 +223,23 @@
       "content": "Great! Let's move to the next phase...",
       "timestamp": "2024-06-01T12:00:00Z"
     },
-    "test_scenario": null
-  },
-  {
-    "id": "uuid-string",
-    "user": "user-uuid",
-    "action_type": "CREATE_IDENTITY",
-    "action_type_display": "Create Identity",
-    "parameters": {
-      "identity_name": "Creative Visionary",
-      "category": "PASSIONS"
-    },
-    "result_summary": "Created new identity: Creative Visionary",
-    "timestamp": "2024-06-01T11:00:00Z",
-    "timestamp_formatted": "2024-06-01 11:00:00",
-    "coach_message": {
-      "id": "uuid-string",
-      "role": "COACH",
-      "content": "I've created a new identity for you...",
-      "timestamp": "2024-06-01T11:00:00Z"
-    },
-    "test_scenario": null
+    "test_scenario": "scenario-uuid"
   }
 ]
 ```
 
 ---
 
-### 6. Get User's Chat Messages
+### 6. Get Test User Chat Messages
 
-- **URL:** `/users/me/chat-messages/`
+- **URL:** `/users/{user_id}/chat-messages/`
 - **Method:** `GET`
-- **Description:** Returns the authenticated user's chat messages. If the chat history is empty, adds the initial bot message and returns it. Returns the 20 most recent messages in chronological order.
-- **Authentication:** Required
+- **Description:** Get the chat messages for a test scenario user. If the chat history is empty, adds the initial bot message and returns it.
+- **Authentication:** Required (Admin/Superuser only)
 - **Response:**
   - `200 OK`: Array of chat message objects.
+  - `403 Forbidden`: Not authorized (not admin/superuser).
+  - `404 Not Found`: User not found.
 
 #### Example Response
 
@@ -269,55 +268,43 @@
 
 ---
 
-### 7. Reset User Data
+## Use Cases
 
-- **URL:** `/users/me/reset-chat-messages/`
-- **Method:** `POST`
-- **Description:** Resets (deletes) all chat messages, identities, user notes, and actions for the authenticated user, and resets their CoachState to initial values. Adds the initial bot message back to the chat history if available.
-- **Authentication:** Required
-- **Response:**
-  - `200 OK`: Array of chat message objects ordered by newest first (containing only the initial message if one was added).
+### Testing and Debugging
+- **Scenario Testing**: Access specific test user data to verify coaching flows
+- **Debugging**: Inspect user state, actions, and chat history for troubleshooting
+- **Development**: Test new features with specific user scenarios
 
-#### Example Response
+### Test Scenario Management
+- **Data Inspection**: View complete user data including identities and coach state
+- **State Verification**: Check coaching phase progression and identity development
+- **Action Tracking**: Monitor actions performed during coaching sessions
 
-```json
-[
-  {
-    "id": "uuid-string",
-    "role": "COACH",
-    "content": "Welcome to Dev Coach! I'm here to help you...",
-    "timestamp": "2024-06-01T12:00:00Z"
-  }
-]
-```
-
-**Note:** If no initial message is configured, the response will be an empty array `[]`.
+### Admin Tools
+- **User Monitoring**: Track test user progress and coaching session state
+- **Data Validation**: Verify test scenario data integrity
+- **Performance Analysis**: Analyze coaching session effectiveness
 
 ---
 
 ## Field Reference
 
-For detailed field information on models returned by these endpoints, see:
+For detailed field information on models used in these endpoints, see:
 
-- **[User Fields](../models/user.md)** - Fields returned in user profile responses
-- **[Coach State Fields](../models/coach-state.md)** - Fields returned in coach state responses
-- **[Identity Fields](../models/identity.md)** - Fields returned in identity responses
-- **[Action Fields](../models/action.md)** - Fields returned in action responses
-- **[Chat Message Fields](../models/chat-message.md)** - Fields returned in chat message responses
+- **[User Fields](../models/user.md)** - User model fields and structure
+- **[Coach State Fields](../models/coach-state.md)** - Coach state structure
+- **[Identity Fields](../models/identity.md)** - Identity model structure
+- **[Action Fields](../models/action.md)** - Action model structure
+- **[Chat Message Fields](../models/chat-message.md)** - Chat message structure
 
 ---
 
 ## Notes
 
-- All endpoints require authentication. See the authentication documentation for details.
-- The `/users/me/complete/` endpoint automatically initializes chat history if empty.
-- The `/users/me/chat-messages/` endpoint returns the 20 most recent messages in chronological order.
-- The `/users/me/reset-chat-messages/` endpoint performs a complete reset of user data and should be used with caution.
-- Test scenario endpoints require admin/superuser privileges and are used for test data management.
-- Field values for enums must match the choices defined in their respective enum files:
-  - `current_phase`: see `enums/coaching_phase.py`
-  - `identity_focus`: see `enums/identity_category.py`
-  - `action_type`: see `enums/action_type.py`
-  - `role`: see `enums/message_role.py`
-  - `state`: see `enums/identity_state.py`
+- All endpoints require admin/superuser privileges for security.
+- These endpoints mirror the regular UserViewSet functionality but operate on specific users by ID.
+- Test scenario users are typically created as part of test scenario instantiation.
+- The endpoints automatically handle initial message creation for empty chat histories.
+- Actions are ordered by timestamp (most recent first) for easy analysis.
+- These endpoints are essential for test scenario management and debugging.
 - Update this document whenever the API changes.

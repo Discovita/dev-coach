@@ -4,65 +4,68 @@ sidebar_position: 1
 
 # API Overview
 
-The Dev Coach system provides a comprehensive REST API for managing coaching sessions, user data, and system configuration.
-
-## Base URL
-
-- **Local Development**: `http://localhost:8000/api/v1`
-- **Development Environment**: `https://your-dev-domain.com/api/v1`
-- **Production**: `https://your-production-domain.com/api/v1`
+The Dev Coach system provides a comprehensive REST API for managing coaching sessions, user data, and system administration. The API is built with Django REST Framework and uses JWT token-based authentication.
 
 ## Authentication
 
-The API uses Django's built-in authentication system with session-based authentication for web clients and token-based authentication for mobile/desktop applications.
+The API uses JWT (JSON Web Token) authentication via `djangorestframework-simplejwt`. All authenticated requests must include the JWT token in the Authorization header:
 
-### Authentication Methods
+```
+Authorization: Bearer <your-jwt-token>
+```
 
-1. **Session Authentication** (Web)
-   - Uses Django's session framework
-   - Automatic CSRF protection
-   - Suitable for web applications
+### Token Configuration
 
-2. **Token Authentication** (API)
-   - Uses Django REST Framework tokens
-   - Include token in Authorization header: `Authorization: Token <your-token>`
-   - Suitable for mobile/desktop applications
+- **Access Token Lifetime**: 1 day
+- **Refresh Token Lifetime**: 30 days
+- **Token Type**: JWT (JSON Web Token)
 
 ## API Structure
 
 The API is organized into the following main areas:
 
-### User Management
-- **Authentication**: Login, logout, password reset
-- **User Profiles**: User information and preferences
-- **Registration**: User signup and verification
+### Core Functionality
 
-### Coaching System
-- **Coach State**: Current coaching phase and progress
-- **Chat Messages**: Conversation history and management
-- **Identities**: User-created identities and their data
+- **[Authentication](./endpoints/authentication.md)** - User registration, login, and password management
+- **[Users](./endpoints/users.md)** - User profile management and data access
+- **[Coach](./endpoints/coach.md)** - Main coaching conversation processing and state management
 
 ### System Administration
-- **Prompts**: AI prompt management and versioning
-- **Actions**: System action definitions and handlers
-- **Context Keys**: Data context management
 
-### Test Scenarios
-- **Test Data**: Development and testing utilities
-- **Scenario Management**: Test scenario creation and execution
+- **[Core](./endpoints/core.md)** - System enums and configuration data
+- **[Prompts](./endpoints/prompts.md)** - AI prompt management and versioning
+- **[Actions](./endpoints/actions.md)** - Action tracking and history
+
+### Testing and Development
+
+- **[Test Users](./endpoints/test-users.md)** - Admin access to user data for testing
+- **[Test Scenarios](./endpoints/test-scenarios.md)** - Test scenario creation and management
 
 ## Response Format
 
-All API responses follow a consistent JSON format:
+API responses follow a consistent format, though the exact structure varies by endpoint:
+
+### Success Responses
+
+Most endpoints return data directly or with a `success` field:
 
 ```json
 {
-  "status": "success",
+  "success": true,
   "data": {
     // Response data here
-  },
-  "message": "Optional message",
-  "timestamp": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### Error Responses
+
+Error responses include detailed information:
+
+```json
+{
+  "success": false,
+  "error": "Error message describing the issue"
 }
 ```
 
@@ -78,49 +81,12 @@ The API uses standard HTTP status codes:
 - **404**: Not Found
 - **500**: Internal Server Error
 
-Error responses include detailed information:
-
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid input data",
-    "details": {
-      "field": "email",
-      "issue": "Invalid email format"
-    }
-  },
-  "timestamp": "2024-01-01T00:00:00Z"
-}
-```
-
-## Rate Limiting
-
-API endpoints are rate-limited to prevent abuse:
-
-- **Authentication endpoints**: 5 requests per minute
-- **General endpoints**: 100 requests per minute
-- **Admin endpoints**: 50 requests per minute
-
-## Versioning
-
-The API uses URL-based versioning (e.g., `/api/v1/`). Breaking changes will be introduced in new versions while maintaining backward compatibility for a reasonable period.
-
-## SDKs and Libraries
-
-Official SDKs and libraries are available for:
-
-- **JavaScript/TypeScript**: For web and Node.js applications
-- **Python**: For backend integrations and scripts
-- **React Hooks**: Custom hooks for React applications
-
 ## Getting Started
 
-1. **Authentication**: Start with the [Authentication Guide](./authentication.md)
-2. **User Management**: Learn about [User Operations](./users.md)
-3. **Coaching API**: Explore [Coach State Management](./coaching.md)
-4. **Admin API**: Access [System Administration](./admin.md)
+1. **Authentication**: Start with [User Registration and Login](./endpoints/authentication.md)
+2. **User Management**: Access [User Profile Data](./endpoints/users.md)
+3. **Coaching**: Begin [Coaching Conversations](./endpoints/coach.md)
+4. **System Admin**: Manage [Prompts and Configuration](./endpoints/prompts.md)
 
 ## Interactive Documentation
 
@@ -132,4 +98,4 @@ For interactive API exploration, you can use:
 
 ---
 
-Next, explore the [Authentication Guide](./authentication.md) or dive into [User Management](./users.md).
+Next, explore the [Authentication Guide](./endpoints/authentication.md) or dive into [User Management](./endpoints/users.md).

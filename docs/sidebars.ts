@@ -42,14 +42,18 @@ const sidebars: SidebarsConfig = {
       label: "API Reference",
       items: [
         "api/overview",
-        "api/authentication/auth",
         {
           type: "category",
           label: "Endpoints",
           items: [
+            "api/endpoints/authentication",
+            "api/endpoints/coach",
             "api/endpoints/users",
-            // 'api/endpoints/coaching',
-            // 'api/endpoints/admin',
+            "api/endpoints/core",
+            "api/endpoints/prompts",
+            "api/endpoints/test-users",
+            "api/endpoints/test-scenarios",
+            "api/endpoints/actions",
           ],
         },
       ],
@@ -62,11 +66,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Models",
-          items: [
-            "database/models/users",
-            // 'database/models/coaching', // TODO: Create this file
-            // 'database/models/system', // TODO: Create this file
-          ],
+          items: ["database/models/users"],
         },
         // TODO: Add Schema category when files are created
         // {
@@ -80,26 +80,6 @@ const sidebars: SidebarsConfig = {
         // },
       ],
     },
-    // TODO: Add these categories when the files are created
-    // {
-    //   type: 'category',
-    //   label: 'Development',
-    //   items: [
-    //     'development/adding-actions',
-    //     'development/adding-phases',
-    //     'development/adding-context-keys',
-    //     'development/api-reference',
-    //   ],
-    // },
-    // {
-    //   type: 'category',
-    //   label: 'Deployment',
-    //   items: [
-    //     'deployment/setup',
-    //     'deployment/render-deployment',
-    //     'deployment/environment-variables',
-    //   ],
-    // },
   ],
 };
 

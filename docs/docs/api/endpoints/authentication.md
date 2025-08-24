@@ -1,8 +1,30 @@
-# Authentication API Documentation
+# Authentication
 
 ## Base URL
 
 `/auth/`
+
+---
+
+## Overview
+
+The Dev Coach API provides JWT token-based authentication for user registration, login, and password management. The system uses `djangorestframework-simplejwt` for token generation and validation.
+
+---
+
+## Authentication Methods
+
+### JWT Token Authentication
+
+The system uses JWT (JSON Web Tokens) for secure authentication. Tokens are returned upon successful login or registration and must be included in subsequent API requests.
+
+#### Using JWT Tokens
+
+Include the token in the Authorization header:
+
+```
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+```
 
 ---
 
@@ -84,7 +106,7 @@
 ```json
 {
   "success": false,
-  "error": "No active account found with the given credentials."
+  "error": "Invalid email or password"
 }
 ```
 
@@ -120,7 +142,7 @@
 ```json
 {
   "success": false,
-  "error": "Invalid email format"
+  "error": "Enter a valid email address"
 }
 ```
 
@@ -157,7 +179,83 @@
 ```json
 {
   "success": false,
-  "error": "Invalid or expired verification token"
+  "error": "Invalid verification link"
+}
+```
+
+---
+
+## Security Features
+
+### Password Requirements
+
+The system enforces the following password requirements:
+
+- **Minimum Length**: 8 characters
+- **Uppercase Letter**: Must contain at least one uppercase letter
+- **Number**: Must contain at least one number
+- **Special Character**: Must contain at least one special character (`!@#$%^&*(),.?":{}|<>`)
+
+### Token Configuration
+
+- **Access Token Lifetime**: 1 day
+- **Refresh Token Lifetime**: 30 days
+- **Token Type**: JWT (JSON Web Token)
+
+### Email Verification
+
+- **Token Expiry**: 24 hours
+- **Email Service**: AWS SES (Simple Email Service)
+- **Reset URL Format**: `{FRONTEND_URL}/reset-password?token={token}`
+
+---
+
+## Error Responses
+
+### Common Error Messages
+
+#### Invalid Credentials
+
+```json
+{
+  "success": false,
+  "error": "Invalid email or password"
+}
+```
+
+#### Password Validation Errors
+
+```json
+{
+  "success": false,
+  "error": "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character"
+}
+```
+
+#### Email Validation Errors
+
+```json
+{
+  "success": false,
+  "error": "Enter a valid email address"
+}
+```
+
+#### Token Expired
+
+```json
+{
+  "success": false,
+  "error": "Verification link has expired"
+}
+```
+
+#### Invalid Token
+
+```json
+{
+  "success": false,
+  "error": "Invalid verification link"
 }
 ```
 
@@ -175,7 +273,8 @@ For detailed field information on models used in these endpoints, see:
 
 - All endpoints return responses with a `success` boolean field indicating operation status.
 - JWT tokens are returned for successful authentication operations.
-- Password reset tokens have expiration times for security.
+- Password reset tokens expire after 24 hours for security.
 - Email verification is handled through the password reset flow.
 - Error messages are user-friendly and don't reveal sensitive information.
 - The system uses atomic transactions for user creation to ensure data consistency.
+- Update this document whenever the API changes.
