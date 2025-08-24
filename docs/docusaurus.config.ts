@@ -47,23 +47,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: "./sidebars.ts",
-          editUrl:
-            'https://github.com/Discovita/dev-coach/tree/main/docs/docs',
-        },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ["rss", "atom"],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/Discovita/dev-coach/tree/main/docs/blog',
-          // Useful options to enforce blogging best practices
-          onInlineTags: "warn",
-          onInlineAuthors: "warn",
-          onUntruncatedBlogPosts: "warn",
+          editUrl: "https://github.com/Discovita/dev-coach/edit/main/docs",
         },
         theme: {
           customCss: "./src/css/custom.css",
@@ -78,6 +62,12 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
+    // Set dark theme as default
+    colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
+    },
     navbar: {
       title: "Dev Coach Docs",
       logo: {
@@ -91,7 +81,6 @@ const config: Config = {
           position: "left",
           label: "Documentation",
         },
-        { to: "/blog", label: "Blog", position: "left" },
         {
           href: "https://github.com/Discovita/dev-coach",
           label: "GitHub",
