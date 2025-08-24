@@ -39,3 +39,21 @@ GIT_USER=<Your GitHub username> yarn deploy
 ```
 
 If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+
+# Docs to make
+- All views.
+- All models
+- Explain Sentry
+    - How it works
+    - Celery setup
+    - Actions it can take
+    - How the user notes are used in prompts
+    - Cross reference with Prompt Manager
+- Explan Action Handler
+    - All Actions and exactly what they do
+        - Cross reference with models
+- Explain Prompt Manager
+    - All Context Keys
+        - IB Context prompts
+- Explain Testing
+- Coaching Philosophy

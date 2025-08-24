@@ -27,11 +27,8 @@ class AuthViewSet(viewsets.GenericViewSet):
     Endpoints:
     - register: Create new user account
     - login: Authenticate user and get tokens
-    - verify_email: Verify user's email address
-    - resend_verification: Resend verification email
     - forgot_password: Initiate password reset
     - reset_password: Complete password reset
-    - lti_launch: Handle LTI launch requests
     """
 
     @decorators.action(

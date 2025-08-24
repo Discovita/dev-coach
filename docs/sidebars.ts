@@ -1,4 +1,4 @@
-import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
+import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -15,62 +15,55 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   // Coach documentation sidebar
   coachSidebar: [
-    'intro',
+    "intro",
     {
-      type: 'category',
-      label: 'Getting Started',
+      type: "category",
+      label: "The Coach",
       items: [
-        'getting-started/overview',
-        // 'getting-started/installation', // TODO: Create this file
-        // 'getting-started/quick-start', // TODO: Create this file
+        "coach/philosophy",
+        "coach/techniques-and-approaches",
+        "coach/integration-and-application",
+        "coach/identity-categories",
+        "coach/phases",
       ],
     },
     {
-      type: 'category',
-      label: 'Core Systems',
+      type: "category",
+      label: "Core Systems",
       items: [
-        'core-systems/prompt-manager',
+        "core-systems/prompt-manager",
         // 'core-systems/action-handler', // TODO: Create this file
         // 'core-systems/coach-phases', // TODO: Create this file
         // 'core-systems/identities', // TODO: Create this file
       ],
     },
     {
-      type: 'category',
-      label: 'API Reference',
+      type: "category",
+      label: "API Reference",
       items: [
-        'api/overview',
+        "api/overview",
+        "api/authentication/auth",
         {
-          type: 'category',
-          label: 'Authentication',
+          type: "category",
+          label: "Endpoints",
           items: [
-            'api/authentication/auth',
-            // 'api/authentication/tokens', // TODO: Create this file
-            // 'api/authentication/permissions', // TODO: Create this file
+            "api/endpoints/users",
+            // 'api/endpoints/coaching',
+            // 'api/endpoints/admin',
           ],
         },
-        // TODO: Add Endpoints category when files are created
-        // {
-        //   type: 'category',
-        //   label: 'Endpoints',
-        //   items: [
-        //     'api/endpoints/users',
-        //     'api/endpoints/coaching',
-        //     'api/endpoints/admin',
-        //   ],
-        // },
       ],
     },
     {
-      type: 'category',
-      label: 'Database',
+      type: "category",
+      label: "Database",
       items: [
-        'database/overview',
+        "database/overview",
         {
-          type: 'category',
-          label: 'Models',
+          type: "category",
+          label: "Models",
           items: [
-            'database/models/users',
+            "database/models/users",
             // 'database/models/coaching', // TODO: Create this file
             // 'database/models/system', // TODO: Create this file
           ],
