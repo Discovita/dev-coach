@@ -67,25 +67,7 @@ flowchart TD
     E --> F[Return Complete Context]
 ```
 
-**Context Keys Available**:
-
-- `user_name`: User's display name
-- `identities`: All user identities formatted as text
-- `number_of_identities`: Count of user's identities
-- `identity_focus`: Currently focused identity
-- `who_you_are`: User's self-description
-- `who_you_want_to_be`: User's aspirational description
-- `focused_identities`: List of focused identities
-- `user_notes`: User's personal notes
-- `current_message`: The user's current message
-- `previous_message`: The previous message in conversation
-- `current_phase`: Current coaching phase name
-- `brainstorming_category_context`: Context for identity brainstorming
-- `current_identity`: Currently selected identity
-- `asked_questions`: Questions previously asked
-- `refinement_identities`: Identities in refinement phase
-- `affirmation_identities`: Identities with affirmations
-- `visualization_identities`: Identities with visualizations
+**Context Keys**: See the [Context Keys](../context-keys/overview) section for a complete list of available context keys and their data sources.
 
 ### Step 4: Format Template with Context
 
