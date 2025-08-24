@@ -66,7 +66,16 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Models",
-          items: ["database/models/users"],
+          items: [
+            "database/models/users",
+            "database/models/coach-state",
+            "database/models/identity",
+            "database/models/chat-message",
+            "database/models/prompt",
+            "database/models/action",
+            "database/models/test-scenario",
+            "database/models/user-note",
+          ],
         },
         // TODO: Add Schema category when files are created
         // {
