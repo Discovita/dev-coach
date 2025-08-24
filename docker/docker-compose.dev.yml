@@ -13,6 +13,13 @@ services:
       - VITE_COACH_BASE_URL=http://localhost:8000/api/v1
       - VITE_ENV=DEVELOPMENT
     command: npm run dev
+  docs:
+    build:
+      context: ../docs
+      dockerfile: docker/Dockerfile.local
+    environment:
+      - NODE_ENV=development
+    command: npm start
   celery:
     build:
       context: ../server
