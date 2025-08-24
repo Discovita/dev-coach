@@ -291,11 +291,11 @@ The TestUserViewSet provides admin-only endpoints for accessing and managing tes
 
 For detailed field information on models used in these endpoints, see:
 
-- **[User Fields](../models/user.md)** - User model fields and structure
-- **[Coach State Fields](../models/coach-state.md)** - Coach state structure
-- **[Identity Fields](../models/identity.md)** - Identity model structure
-- **[Action Fields](../models/action.md)** - Action model structure
-- **[Chat Message Fields](../models/chat-message.md)** - Chat message structure
+- **[User Fields](../../database/models/users)** - User model fields and structure
+- **[Coach State Fields](../../database/models/coach-state)** - Coach state structure
+- **[Identity Fields](../../database/models/identity)** - Identity model structure
+- **[Action Fields](../../database/models/action)** - Action model structure
+- **[Chat Message Fields](../../database/models/chat-message)** - Chat message structure
 
 ---
 

@@ -168,10 +168,10 @@ Same format as the main process-message endpoint.
 
 For detailed field information on models used in these endpoints, see:
 
-- **[Coach State Fields](../models/coach-state.md)** - Coach state structure
-- **[Identity Fields](../models/identity.md)** - Identity model structure
-- **[Chat Message Fields](../models/chat-message.md)** - Chat message structure
-- **[Action Fields](../models/action.md)** - Action model structure
+- **[Coach State Fields](../../database/models/coach-state)** - Coach state structure
+- **[Identity Fields](../../database/models/identity)** - Identity model structure
+- **[Chat Message Fields](../../database/models/chat-message)** - Chat message structure
+- **[Action Fields](../../database/models/action)** - Action model structure
 
 ---
 

@@ -72,4 +72,4 @@ This approach eliminates the common experience of feeling unmotivated or blocked
 
 ---
 
-**Next**: Learn about the [Core Systems](../core-systems/prompt-manager.md) that power this coaching methodology.
+ **Next**: Learn about the [Core Systems](../core-systems/prompt-manager/overview) that power this coaching methodology.

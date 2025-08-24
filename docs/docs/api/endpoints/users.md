@@ -299,11 +299,11 @@
 
 For detailed field information on models returned by these endpoints, see:
 
-- **[User Fields](../models/user.md)** - Fields returned in user profile responses
-- **[Coach State Fields](../models/coach-state.md)** - Fields returned in coach state responses
-- **[Identity Fields](../models/identity.md)** - Fields returned in identity responses
-- **[Action Fields](../models/action.md)** - Fields returned in action responses
-- **[Chat Message Fields](../models/chat-message.md)** - Fields returned in chat message responses
+- **[User Fields](../../database/models/users)** - Fields returned in user profile responses
+- **[Coach State Fields](../../database/models/coach-state)** - Fields returned in coach state responses
+- **[Identity Fields](../../database/models/identity)** - Fields returned in identity responses
+- **[Action Fields](../../database/models/action)** - Fields returned in action responses
+- **[Chat Message Fields](../../database/models/chat-message)** - Fields returned in chat message responses
 
 ---
 

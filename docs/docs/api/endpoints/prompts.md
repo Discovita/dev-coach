@@ -264,7 +264,7 @@
 
 For detailed field information on the Prompt model, see:
 
-- **[Prompt Fields](../models/prompt.md)** - Prompt model fields and structure
+- **[Prompt Fields](../../database/models/prompt)** - Prompt model fields and structure
 
 ---
 

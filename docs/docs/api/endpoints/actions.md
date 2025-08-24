@@ -261,9 +261,9 @@ Each action type has specific parameters that define what the action does:
 
 For detailed field information on models used in these endpoints, see:
 
-- **[Action Fields](../models/action.md)** - Action model structure
-- **[Chat Message Fields](../models/chat-message.md)** - Chat message structure
-- **[User Fields](../models/user.md)** - User model structure
+- **[Action Fields](../../database/models/action)** - Action model structure
+- **[Chat Message Fields](../../database/models/chat-message)** - Chat message structure
+- **[User Fields](../../database/models/users)** - User model structure
 
 ---
 

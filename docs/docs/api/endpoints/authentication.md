@@ -265,7 +265,7 @@ The system enforces the following password requirements:
 
 For detailed field information on models used in these endpoints, see:
 
-- **[User Fields](../models/user.md)** - User model fields and structure
+- **[User Fields](../../database/models/users)** - User model fields and structure
 
 ---
 

@@ -395,12 +395,12 @@ Same format as the retrieve endpoint.
 
 For detailed field information on models used in these endpoints, see:
 
-- **[Test Scenario Fields](../models/test-scenario.md)** - Test scenario model structure
-- **[User Fields](../models/user.md)** - User model structure
-- **[Coach State Fields](../models/coach-state.md)** - Coach state structure
-- **[Identity Fields](../models/identity.md)** - Identity model structure
-- **[Chat Message Fields](../models/chat-message.md)** - Chat message structure
-- **[Action Fields](../models/action.md)** - Action model structure
+- **[Test Scenario Fields](../../database/models/test-scenario)** - Test scenario model structure
+- **[User Fields](../../database/models/users)** - User model structure
+- **[Coach State Fields](../../database/models/coach-state)** - Coach state structure
+- **[Identity Fields](../../database/models/identity)** - Identity model structure
+- **[Chat Message Fields](../../database/models/chat-message)** - Chat message structure
+- **[Action Fields](../../database/models/action)** - Action model structure
 
 ---
 

@@ -40,17 +40,17 @@ Dev Coach is built on several interconnected systems:
 
 To get started with Dev Coach:
 
-1. [Installation Guide](./getting-started/installation.md)
-2. [Quick Start Tutorial](./getting-started/quick-start.md)
-3. [System Overview](./getting-started/overview.md)
+1. [Coach Philosophy](./coach/philosophy) - Understand the coaching methodology
+2. [Core Systems Overview](./core-systems/prompt-manager/overview) - Learn about the technical architecture
+3. [API Reference](./api/overview) - Explore the available endpoints
 
 ## For Developers
 
 If you're contributing to or extending Dev Coach:
 
-1. [Adding New Actions](./development/adding-actions.md)
-2. [Adding New Phases](./development/adding-phases.md)
-3. [API Reference](./development/api-reference.md)
+1. [How to Add New Actions](./how-to/how-to-add-a-new-coach-action) - Step-by-step guide
+2. [How to Add New Phases](./how-to/how-to-add-a-new-coach-phase) - Adding new coaching phases
+3. [Database Models](./database/models/users) - Understanding the data structure
 
 ## Support
 
@@ -60,4 +60,4 @@ If you're contributing to or extending Dev Coach:
 
 ---
 
-Ready to dive in? Start with the [Getting Started](./getting-started/overview.md) section to learn more about how Dev Coach works.
+Ready to dive in? Start with the [Coach Philosophy](./coach/philosophy) section to learn more about how Dev Coach works.

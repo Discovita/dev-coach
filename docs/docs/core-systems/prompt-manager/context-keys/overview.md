@@ -169,9 +169,4 @@ To add a new context key:
 
 ## Related Documentation
 
-- [User Context](./user-context.md): Basic user information
-- [Identity Context](./identity-context.md): Identity-related data
-- [Coaching Context](./coaching-context.md): Coaching state information
-- [Conversation Context](./conversation-context.md): Chat history data
-- [Process Context](./process-context.md): Process-specific information
-- [Phase-Specific Context](./phases/): Context that varies by coaching phase
+For detailed information about specific context keys, see the individual context key documentation in the sidebar.

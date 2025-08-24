@@ -140,4 +140,4 @@ The coach's challenge involves helping clients find language that feels empoweri
 
 ---
 
-**Next**: Learn about the [Core Systems](../core-systems/prompt-manager.md) that power this coaching methodology.
+**Next**: Learn about the [Core Systems](../core-systems/prompt-manager/overview) that power this coaching methodology.
