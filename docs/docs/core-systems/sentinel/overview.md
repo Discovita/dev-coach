@@ -1,4 +1,4 @@
-# Sentinel Memory System
+# Memory System
 
 The Sentinel Memory System provides long-term, evolving memory for the Discovita Dev Coach chatbot. It automatically extracts and stores important information about users as they interact with the chatbot, enabling the coach to remember key facts and context across sessions.
 
@@ -100,3 +100,13 @@ These actions are marked as "Sentinel Only" in the Action Handler documentation 
 - [Chat Messages API](../../api/endpoints/chat-messages) - How messages are processed
 - [Prompt Manager Overview](../prompt-manager/overview) - How notes are included in prompts
 - [Action Handler Overview](../action-handler/overview) - How note actions are processed
+
+## References
+
+- [Celery Django Integration Docs](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html)
+- [Django Signals](https://docs.djangoproject.com/en/stable/topics/signals/)
+- [Celery Task Best Practices](https://docs.celeryq.dev/en/stable/userguide/tasks.html)
+
+---
+
+**This system enables the Discovita Dev Coach to remember and leverage important user information, providing a more personalized and effective coaching experience.**

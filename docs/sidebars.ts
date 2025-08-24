@@ -81,7 +81,10 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Sentinel",
-          items: ["core-systems/sentinel/overview"],
+          items: [
+            "core-systems/sentinel/overview",
+            "core-systems/sentinel/implementation",
+          ],
         },
         {
           type: "category",
@@ -169,6 +172,11 @@ const sidebars: SidebarsConfig = {
           ],
         },
       ],
+    },
+    {
+      type: "category",
+      label: "Testing",
+      items: ["testing/overview"],
     },
     {
       type: "category",

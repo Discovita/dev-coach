@@ -28,6 +28,7 @@ prompt = Prompt.objects.filter(
 The Prompt Manager assembles the complete prompt by combining:
 
 - **System Context**: Core coaching guidelines (prepended)
+- **User Notes**: Extracted user information from the [Sentinel Memory System](../sentinel/overview)
 - **Template Content**: The selected prompt template with context data
 - **Action Instructions**: What actions the AI can perform
 - **Recent Messages**: Conversation history
@@ -176,25 +177,31 @@ The `Prompt` model contains:
        prompt_body = prompt_body.format(**prompt_context.model_dump())
    ```
 
-5. **Add System Context**
+5. **Add User Notes**
+
+   ```python
+   coach_prompt = prepend_user_notes(coach_prompt, coach_state)
+   ```
+
+6. **Add System Context**
 
    ```python
    coach_prompt = prepend_system_context(coach_prompt)
    ```
 
-6. **Add Action Instructions**
+7. **Add Action Instructions**
 
    ```python
    coach_prompt = append_action_instructions(coach_prompt, prompt.allowed_actions)
    ```
 
-7. **Add Recent Messages**
+8. **Add Recent Messages**
 
    ```python
    coach_prompt = append_recent_messages(coach_prompt, coach_state)
    ```
 
-8. **Format for AI Provider**
+9. **Format for AI Provider**
    ```python
    coach_prompt, response_format = format_for_provider(
        prompt, prompt_context, provider, response_format_model
@@ -205,6 +212,7 @@ The `Prompt` model contains:
 
 ```
 [System Context]
+[User Notes]
 [Formatted Template with Context Data]
 [Action Instructions]
 [Recent Messages]
