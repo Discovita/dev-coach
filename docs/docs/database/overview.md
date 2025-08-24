@@ -2,16 +2,16 @@
 sidebar_position: 1
 ---
 
-# Database Overview
+# Overview
 
-The Dev Coach system uses PostgreSQL as its primary database, with a well-structured schema designed to support the coaching workflow, user management, and system administration.
+The Dev Coach system uses PostgreSQL as its primary database, with a well-structured schema designed to support the coaching workflow, user management, conversation tracking, and test scenario isolation.
 
 ## Database Technology
 
 - **Database**: PostgreSQL 17.1
-- **ORM**: Django ORM
+- **ORM**: Django ORM with custom managers
 - **Migrations**: Django migrations for schema management
-- **Backup Strategy**: Automated daily backups with point-in-time recovery
+- **Extensions**: PostgreSQL ArrayField for list storage
 
 ## Database Architecture
 
@@ -19,147 +19,127 @@ The database is organized into logical modules that correspond to Django apps:
 
 ```
 dev_coach_db/
-├── users/                    # User management
-├── coach_states/            # Coaching session state
-├── chat_messages/           # Conversation history
-├── identities/              # User identities
-├── prompts/                 # AI prompt management
-├── actions/                 # System actions
-├── test_scenario/           # Testing utilities
-└── user_notes/              # User notes and annotations
+├── users/                    # User management and authentication
+├── coach_states/            # Coaching session state and progress
+├── chat_messages/           # Conversation history and message tracking
+├── identities/              # User identity creation and management
+├── prompts/                 # AI prompt templates and versioning
+├── actions/                 # System action tracking and audit trails
+├── test_scenario/           # Test scenario isolation and management
+└── user_notes/              # User notes extracted by Sentinel agent
 ```
 
-## Core Tables
+## Core Models
 
 ### User Management
-- **users_user**: Core user accounts and profiles
-- **users_userprofile**: Extended user information
-- **authentication_verification**: Email verification tokens
+
+- **[User](./models/users.md)**: Core user accounts with email-based authentication
+- **[CoachState](./models/coach-state.md)**: Current coaching session state and progress tracking
 
 ### Coaching System
-- **coach_states_coachstate**: Current coaching state and progress
-- **chat_messages_chatmessage**: All conversation messages
-- **identities_identity**: User-created identities
-- **user_notes_usernote**: User annotations and notes
+
+- **[Identity](./models/identity.md)**: User-created identities with affirmations and visualizations
+- **[ChatMessage](./models/chat-message.md)**: Complete conversation history with role tracking
+- **[Action](./models/action.md)**: System actions with parameters and result tracking
+- **[UserNote](./models/user-note.md)**: Long-term user memory extracted by Sentinel agent
 
 ### System Administration
-- **prompts_prompt**: AI prompt templates and versions
-- **actions_action**: System action definitions
-- **actions_actionresult**: Action execution results
 
-### Testing
-- **test_scenario_testscenario**: Test scenario definitions
-- **test_scenario_testscenariouser**: Test user data
-- **test_scenario_testscenariochatmessage**: Test conversation data
+- **[Prompt](./models/prompt.md)**: AI prompt templates with version control and action permissions
+- **[TestScenario](./models/test-scenario.md)**: Test scenario templates for development and testing
 
 ## Key Relationships
 
-### User → Coach State
-- One-to-one relationship
-- Each user has exactly one coach state
-- Tracks current phase, progress, and session data
+### User-Centric Design
 
-### User → Identities
-- One-to-many relationship
-- Users can have multiple identities
-- Each identity represents a different life area
+- **User → CoachState**: One-to-one relationship for session state
+- **User → Identity**: One-to-many relationship for multiple life area identities
+- **User → ChatMessage**: One-to-many relationship for conversation history
+- **User → Action**: One-to-many relationship for action audit trails
+- **User → UserNote**: One-to-many relationship for long-term memory
 
-### User → Chat Messages
-- One-to-many relationship
-- All conversation history is preserved
-- Messages include metadata for context
+### Identity Management
 
-### Coach State → Chat Messages
-- Many-to-many relationship through sessions
-- Messages are grouped by coaching sessions
-- Enables conversation threading and context
+- **Identity → CoachState**: Current and proposed identity tracking
+- **Identity Categories**: 10 life areas (career, health, relationships, etc.)
+- **Identity States**: Proposed, accepted, refinement complete
+
+### Conversation Flow
+
+- **ChatMessage → Action**: Messages trigger specific actions
+- **ChatMessage → UserNote**: Messages generate user insights
+- **Message Roles**: User and coach message differentiation
+
+### Test Scenario Isolation
+
+- **TestScenario → All Models**: Complete test data isolation
+- **Optional Foreign Keys**: All models support test scenario linking
 
 ## Data Integrity
 
 ### Foreign Key Constraints
-- All relationships are properly constrained
-- Cascade deletes where appropriate
-- Referential integrity maintained
+
+- All relationships are properly constrained with appropriate cascade rules
+- Cascade deletes for dependent data (user deletion removes all related data)
+- SET NULL for optional relationships (test scenario isolation)
 
 ### Unique Constraints
-- Email addresses are unique across users
-- Username uniqueness enforced
-- Business logic constraints (e.g., one active coach state per user)
 
-### Check Constraints
+- Email addresses are unique across users
+- One coach state per user
+- Unique version per coaching phase for prompts
+- Unique scenario names for test scenarios
+
+### Business Logic Constraints
+
 - Email format validation
-- Phase transition validation
-- Data range validation
+- Phase transition validation (coaching phases)
+- Role validation (user/coach messages)
+- State validation (identity states)
 
 ## Performance Considerations
 
 ### Indexing Strategy
-- **Primary Keys**: Auto-incrementing integers
+
+- **Primary Keys**: UUID primary keys with automatic indexing
 - **Foreign Keys**: Indexed for join performance
-- **Search Fields**: Full-text search on messages and notes
-- **Time-based Queries**: Indexed on created_at/updated_at
+- **Timestamp Indexes**: Time-based queries for all models
+- **Composite Indexes**: User + timestamp, user + category, user + role
+- **Search Indexes**: Full-text search on message content and user notes
 
 ### Query Optimization
+
 - Select_related for foreign key joins
-- Prefetch_related for reverse foreign keys
-- Database-level query optimization
-- Connection pooling for high concurrency
+- Prefetch_related for reverse relationships
+- Database-level constraints for data integrity
+- Efficient array field operations for PostgreSQL
 
-## Backup and Recovery
+## Schema Design Principles
 
-### Backup Strategy
-- **Daily Full Backups**: Complete database snapshots
-- **Hourly Incremental**: Transaction log backups
-- **Point-in-Time Recovery**: 30-day retention
-- **Cross-Region Replication**: Disaster recovery
+### 1. **User-Centric Design**
 
-### Recovery Procedures
-- **Automated Recovery**: Self-healing for common issues
-- **Manual Recovery**: Step-by-step procedures for complex scenarios
-- **Data Validation**: Integrity checks after recovery
+- All data is organized around the User model
+- One-to-one relationships for user state management
+- One-to-many relationships for user-generated content
 
-## Security
+### 2. **Coaching Workflow Support**
 
-### Data Protection
-- **Encryption at Rest**: AES-256 encryption
-- **Encryption in Transit**: TLS 1.3 for all connections
-- **Access Control**: Role-based permissions
-- **Audit Logging**: All data access logged
+- Phase-based progression tracking
+- Identity creation and refinement workflow
+- Conversation history preservation
+- Action tracking for audit trails
 
-### Privacy Compliance
-- **GDPR Compliance**: Right to be forgotten
-- **Data Retention**: Configurable retention policies
-- **Anonymization**: PII removal capabilities
-- **Consent Management**: User consent tracking
+### 3. **Test Scenario Isolation**
 
-## Development Workflow
+- All models support test scenario isolation
+- Optional foreign key to TestScenario model
 
-### Local Development
-- **Docker PostgreSQL**: Containerized development database
-- **Migration Management**: Django migrations for schema changes
-- **Seed Data**: Fixtures for development and testing
-- **Database Reset**: Clean slate for development
+### 4. **Extensibility**
 
-### Testing
-- **Test Database**: Isolated test environment
-- **Fixtures**: Predefined test data sets
-- **Factory Classes**: Dynamic test data generation
-- **Transaction Rollback**: Clean test isolation
-
-## Monitoring and Maintenance
-
-### Health Monitoring
-- **Connection Pooling**: Monitor connection usage
-- **Query Performance**: Slow query detection
-- **Disk Usage**: Storage monitoring and alerts
-- **Replication Lag**: Monitor read replica health
-
-### Maintenance Tasks
-- **VACUUM**: Regular table maintenance
-- **ANALYZE**: Statistics updates
-- **Index Rebuilding**: Performance optimization
-- **Log Rotation**: Archive old logs
+- JSON fields for flexible metadata storage
+- Array fields for list-based data
+- Version control for prompts and configurations
 
 ---
 
-Next, explore the [User Models](./models/users.md) or dive into [Coaching Models](./models/coaching.md).
+Next, explore the [Database Models](./models/users.md) or dive into the [Schema Documentation](./schema/overview.md).

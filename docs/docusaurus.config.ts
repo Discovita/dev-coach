@@ -28,6 +28,11 @@ const config: Config = {
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
 
+  // Enable Mermaid diagrams
+  markdown: {
+    mermaid: true,
+  },
+
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
@@ -66,6 +71,9 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
+
+  // Add Mermaid theme
+  themes: ["@docusaurus/theme-mermaid"],
 
   themeConfig: {
     // Replace with your project's social card
@@ -130,6 +138,15 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+    },
+    // Mermaid configuration
+    mermaid: {
+      theme: { light: "neutral", dark: "dark" },
+      options: {
+        maxTextSize: 500,
+        fontSize: 12,
+        fontFamily: "Arial, sans-serif",
+      },
     },
   } satisfies Preset.ThemeConfig,
 };

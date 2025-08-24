@@ -32,6 +32,20 @@ const sidebars: SidebarsConfig = {
       label: "Core Systems",
       items: [
         "core-systems/prompt-manager",
+        {
+          type: "category",
+          label: "Prompt Manager System",
+          items: [
+            "core-systems/prompt-manager/overview",
+            "core-systems/prompt-manager/construction-process",
+            "core-systems/prompt-manager/database-integration",
+            "core-systems/prompt-manager/context-management",
+            "core-systems/prompt-manager/action-system",
+            "core-systems/prompt-manager/provider-formatting",
+            "core-systems/prompt-manager/system-context",
+            "core-systems/prompt-manager/templates",
+          ],
+        },
         // 'core-systems/action-handler', // TODO: Create this file
         // 'core-systems/coach-phases', // TODO: Create this file
         // 'core-systems/identities', // TODO: Create this file
@@ -75,6 +89,15 @@ const sidebars: SidebarsConfig = {
             "database/models/action",
             "database/models/test-scenario",
             "database/models/user-note",
+          ],
+        },
+        {
+          type: "category",
+          label: "Schema",
+          items: [
+            "database/schema/overview",
+            "database/schema/relationships",
+            "database/schema/indexes",
           ],
         },
         // TODO: Add Schema category when files are created
