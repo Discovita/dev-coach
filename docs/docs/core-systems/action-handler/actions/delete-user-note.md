@@ -6,6 +6,8 @@ sidebar_position: 21
 
 The `delete_user_note` action removes [UserNote](../database/models/user-note) entries.
 
+> **⚠️ Sentinel Only**: This action is used exclusively by the [Sentinel Memory System](../../sentinel/overview) to remove outdated user information. It is not available for use by the main coaching AI.
+
 ## Action Details
 
 **Action Type**: `delete_user_note`  

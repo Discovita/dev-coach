@@ -2,124 +2,229 @@
 sidebar_position: 1
 ---
 
-# Prompt Manager Overview
+# Overview
 
-The Prompt Manager is the core system responsible for constructing, formatting, and managing AI prompts used during coaching sessions. It serves as the bridge between the user's current coaching state and the AI service, ensuring that each prompt contains the appropriate context, instructions, and formatting for optimal AI responses.
+The Prompt Manager is responsible for two main tasks:
 
-## Purpose
+1. **Pull the right prompt** from the database based on the user's current coaching phase
+2. **Assemble the complete prompt** to pass to the AI model
 
-The Prompt Manager handles three critical functions:
+## How It Works
 
-1. **Dynamic Prompt Selection**: Retrieves the appropriate prompt template based on the user's current coaching phase
-2. **Context Assembly**: Gathers all relevant user data, chat history, and coaching state information
-3. **Prompt Construction**: Formats the final prompt with proper context, instructions, and provider-specific formatting
+### 1. Prompt Selection
 
-## System Architecture
+The Prompt Manager queries the database to find the most recent active prompt for the user's current coaching phase:
+
+```python
+coach_state = CoachState.objects.get(user=user)
+prompt = Prompt.objects.filter(
+    coaching_phase=coach_state.current_phase,
+    is_active=True
+).order_by("-version").first()
+```
+
+### 2. Prompt Assembly
+
+The Prompt Manager assembles the complete prompt by combining:
+
+- **System Context**: Core coaching guidelines (prepended)
+- **Template Content**: The selected prompt template with context data
+- **Action Instructions**: What actions the AI can perform
+- **Recent Messages**: Conversation history
+
+## Process Flow
 
 ```mermaid
 graph TD
-    A[User Message] --> B[Coach ViewSet]
-    B --> C[Prompt Manager]
-    C --> D[Database: Prompts Table]
-    C --> E[Context Gathering]
-    C --> F[Action Instructions]
-    C --> G[System Context]
-    C --> H[Provider Formatting]
-    D --> I[Final Prompt]
-    E --> I
-    F --> I
-    G --> I
-    H --> I
-    I --> J[AI Service]
-    J --> K[AI Response]
-    K --> L[Response Message]
-    K --> M[Actions]
-    L --> N[User]
-    M --> O[Action Handler]
+    A[User Message] --> B[Get CoachState]
+    B --> C[Query Database for Prompt]
+    C --> D[Gather Context Data]
+    D --> E[Assemble Complete Prompt]
+    E --> F[Send to AI Model]
 ```
 
-## Key Components
+## Prompt Templates
 
-### 1. PromptManager Class
+### Template Structure
 
-The main orchestrator that coordinates all prompt construction activities. Located in `server/services/prompt_manager/manager.py`.
+Templates are stored in the database and use Python string formatting with placeholders:
 
-### 2. Database Integration
+```markdown
+You are helping {{user_name}} with {{current_phase}}.
 
-- **Prompts Table**: Stores prompt templates with versioning
-- **CoachState**: Provides current coaching phase and user progress
-- **Context Keys**: Defines what data should be included in prompts
+Current Identities: {{identities}}
 
-### 3. Context Management
+Focus: {{identity_focus}}
+```
 
-- **PromptContext Model**: Pydantic model defining all available context fields
-- **Context Gathering**: Utilities that fetch specific data from the database
-- **Context Keys**: Enumeration of all available context data points
+### Context Placeholders
 
-### 4. Action System Integration
+Templates use placeholders that get replaced with actual data:
 
-- **Allowed Actions**: Controls what actions the AI can perform
-- **Action Instructions**: Provides JSON schemas for action execution
-- **Dynamic Response Format**: Builds provider-specific response schemas
+| Placeholder          | Description                |
+| -------------------- | -------------------------- |
+| `{{user_name}}`      | User's display name        |
+| `{{identities}}`     | All user identities        |
+| `{{current_phase}}`  | Current coaching phase     |
+| `{{identity_focus}}` | Currently focused identity |
 
-### 5. Provider Formatting
+For a complete list of available context keys, see the [Context Keys documentation](context-keys/overview).
 
-- **AI Provider Detection**: Determines the target AI service (OpenAI, Anthropic)
-- **Provider-Specific Formatting**: Applies appropriate formatting rules
-- **Response Schema Integration**: Includes response format requirements
+### Template Rendering
 
-## Core Flow
+Templates are rendered using Python's string formatting:
 
-1. **User sends message** to the coach endpoint
-2. **Coach ViewSet** receives the message and calls PromptManager
-3. **PromptManager** retrieves the user's CoachState
-4. **Database query** selects the appropriate prompt based on current phase
-5. **Context gathering** collects all required user data and chat history
-6. **Prompt construction** assembles the final prompt with all components
-7. **Provider formatting** applies AI-specific formatting rules
-8. **Final prompt** is returned to the calling service
-9. **AI service** receives the final prompt and generates response (handled by AI Service)
-10. **Action handler** processes any actions returned by the AI (handled by Action Handler Service)
+```python
+if callable(getattr(prompt_body, "format", None)):
+    prompt_body = prompt_body.format(**prompt_context.model_dump())
+```
 
-## Version Management
+## System Context
 
-The system supports prompt versioning to enable:
+The System Context provides core coaching guidelines that are prepended to every prompt:
 
-- **Iterative improvement** of prompts
-- **A/B testing** of different prompt versions
-- **Rollback capability** to previous versions
-- **Development workflow** for testing new prompts
+```python
+system_context = Prompt.objects.filter(
+    coaching_phase=CoachingPhase.SYSTEM_CONTEXT,
+    is_active=True
+).order_by("-version").first()
 
-## Integration Points
+if system_context:
+    return f"{system_context.body}\n{system_message}"
+```
 
-### With Coach State
+**Key Characteristics:**
 
-- Reads current coaching phase
-- Accesses user progress and preferences
-- Retrieves chat history and context
+- **No Context Keys**: Uses no dynamic content or placeholders
+- **Static Text**: Contains only static coaching guidelines
+- **Global Application**: Applied to all coaching interactions
 
-### With Action Handler
+## Provider Formatting
 
-- Provides allowed actions list and response schemas
-- Action execution is handled by the Action Handler service (documented separately)
+The system applies provider-specific formatting before sending to AI models:
 
-### With AI Services
+```python
+def format_for_provider(prompt, prompt_context, provider, response_format):
+    prompt_body = prompt.body
 
-- Sends constructed prompts
-- Receives AI responses
-- AI service integration is handled by the AI Service (documented separately)
+    # Format template with context
+    if callable(getattr(prompt_body, "format", None)):
+        prompt_body = prompt_body.format(**prompt_context.model_dump())
 
-### With Database
+    # Provider-specific formatting
+    if provider == AIProvider.OPENAI:
+        pass  # No additional formatting needed
+    elif provider == AIProvider.ANTHROPIC:
+        response_format_schema = response_format.model_json_schema()
+        prompt_body += f"\n\nYour response must be in the form of a JSON object.\n{response_format_schema}"
 
-- Queries prompt templates
-- Retrieves user data and context
-- Manages prompt versioning
+    return prompt_body, response_format
+```
 
-## Benefits
+## Database Integration
 
-- **Centralized prompt management** for consistent coaching experience
-- **Dynamic context assembly** ensures relevant information is always included
-- **Provider flexibility** supports multiple AI services
-- **Version control** enables prompt iteration and improvement
-- **Action control** ensures AI responses are properly structured
-- **Modular design** allows for easy extension and maintenance
+### Prompt Model
+
+The `Prompt` model contains:
+
+**Core Fields:**
+
+- `coaching_phase`: Which coaching phase this prompt is for
+- `version`: Version number (auto-incremented)
+- `body`: The actual prompt template with placeholders
+- `is_active`: Whether this version is active
+
+**Configuration Fields:**
+
+- `required_context_keys`: List of context keys needed for this prompt
+- `allowed_actions`: List of actions the AI can perform
+- `prompt_type`: Type of prompt (coach, sentinel, system)
+
+### Version Management
+
+- **Automatic Versioning**: New prompts get the next version number
+- **Active Version**: Only one version per coaching phase can be active
+- **Unique Constraint**: `(coaching_phase, version)` must be unique
+
+## Complete Assembly Process
+
+1. **Get User's CoachState**
+
+   ```python
+   coach_state = CoachState.objects.get(user=user)
+   ```
+
+2. **Find the Right Prompt**
+
+   ```python
+   prompt = Prompt.objects.filter(
+       coaching_phase=coach_state.current_phase,
+       is_active=True
+   ).order_by("-version").first()
+   ```
+
+3. **Gather Context Data**
+
+   ```python
+   prompt_context = gather_prompt_context(prompt, coach_state)
+   ```
+
+4. **Format Template**
+
+   ```python
+   if callable(getattr(prompt_body, "format", None)):
+       prompt_body = prompt_body.format(**prompt_context.model_dump())
+   ```
+
+5. **Add System Context**
+
+   ```python
+   coach_prompt = prepend_system_context(coach_prompt)
+   ```
+
+6. **Add Action Instructions**
+
+   ```python
+   coach_prompt = append_action_instructions(coach_prompt, prompt.allowed_actions)
+   ```
+
+7. **Add Recent Messages**
+
+   ```python
+   coach_prompt = append_recent_messages(coach_prompt, coach_state)
+   ```
+
+8. **Format for AI Provider**
+   ```python
+   coach_prompt, response_format = format_for_provider(
+       prompt, prompt_context, provider, response_format_model
+   )
+   ```
+
+## Final Prompt Structure
+
+```
+[System Context]
+[Formatted Template with Context Data]
+[Action Instructions]
+[Recent Messages]
+```
+
+## Error Handling
+
+- **No prompt found**: Raises `ValueError`
+- **Missing context**: Logs warnings, continues with available data
+- **No allowed actions**: Uses all available actions as fallback
+- **No system context**: Continues without system context
+
+## Integration
+
+- **Input**: User message and CoachState
+- **Output**: Complete formatted prompt for AI model
+- **Dependencies**: Database (prompts table), Context Keys, Action Handler
+
+For detailed information about specific components, see:
+
+- [Context Keys](context-keys/overview) - Available context data
+- [Action Handler](../action-handler/overview) - Action execution
+- [Prompts API](../../api/endpoints/prompts) - Prompt management

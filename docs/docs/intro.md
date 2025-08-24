@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Introduction to Dev Coach
+# Introduction
 
 Welcome to the Dev Coach documentation! Dev Coach is a sophisticated life coaching chatbot system developed by Discovita that helps users create and maintain multiple identities for different areas of their lives.
 

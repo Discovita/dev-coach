@@ -36,12 +36,6 @@ const sidebars: SidebarsConfig = {
           label: "Prompt Manager",
           items: [
             "core-systems/prompt-manager/overview",
-            "core-systems/prompt-manager/construction-process",
-            "core-systems/prompt-manager/database-integration",
-            "core-systems/prompt-manager/action-system",
-            "core-systems/prompt-manager/provider-formatting",
-            "core-systems/prompt-manager/system-context",
-            "core-systems/prompt-manager/templates",
             {
               type: "category",
               label: "Context Keys",
@@ -86,6 +80,11 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "Sentinel",
+          items: ["core-systems/sentinel/overview"],
+        },
+        {
+          type: "category",
           label: "Action Handler",
           items: [
             "core-systems/action-handler/overview",
@@ -118,9 +117,6 @@ const sidebars: SidebarsConfig = {
             },
           ],
         },
-        // 'core-systems/action-handler', // TODO: Create this file
-        // 'core-systems/coach-phases', // TODO: Create this file
-        // 'core-systems/identities', // TODO: Create this file
       ],
     },
     {
@@ -172,16 +168,16 @@ const sidebars: SidebarsConfig = {
             "database/schema/indexes",
           ],
         },
-        // TODO: Add Schema category when files are created
-        // {
-        //   type: 'category',
-        //   label: 'Schema',
-        //   items: [
-        //     'database/schema/tables',
-        //     'database/schema/relationships',
-        //     'database/schema/indexes',
-        //   ],
-        // },
+      ],
+    },
+    {
+      type: "category",
+      label: "How-To's",
+      items: [
+        "how-to/overview",
+        "how-to/how-to-add-a-new-context-key",
+        "how-to/how-to-add-a-new-coach-phase",
+        "how-to/how-to-add-a-new-coach-action",
       ],
     },
   ],

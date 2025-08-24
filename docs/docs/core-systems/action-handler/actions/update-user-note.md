@@ -6,6 +6,8 @@ sidebar_position: 20
 
 The `update_user_note` action updates existing [UserNote](../database/models/user-note) entries.
 
+> **⚠️ Sentinel Only**: This action is used exclusively by the [Sentinel Memory System](../../sentinel/overview) to update user information extracted from chat messages. It is not available for use by the main coaching AI.
+
 ## Action Details
 
 **Action Type**: `update_user_note`  

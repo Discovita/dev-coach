@@ -6,6 +6,8 @@ sidebar_position: 19
 
 The `add_user_note` action creates new [UserNote](../database/models/user-note) entries for the user.
 
+> **⚠️ Sentinel Only**: This action is used exclusively by the [Sentinel Memory System](../../sentinel/overview) to store user information extracted from chat messages. It is not available for use by the main coaching AI.
+
 ## Action Details
 
 **Action Type**: `add_user_note`  
