@@ -176,7 +176,12 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Testing",
-      items: ["testing/overview"],
+      items: [
+        "testing/overview",
+        "testing/scenario-management",
+        "testing/running-scenarios",
+        "testing/freeze-session",
+      ],
     },
     {
       type: "category",
