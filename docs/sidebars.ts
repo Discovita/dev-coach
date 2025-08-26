@@ -192,6 +192,15 @@ const sidebars: SidebarsConfig = {
         "how-to/how-to-add-a-new-coach-action",
       ],
     },
+    {
+      type: "category",
+      label: "Development",
+      items: [
+        "development/overview",
+        "development/docker-configuration",
+        "development/common-commands",
+      ],
+    },
   ],
 };
 
