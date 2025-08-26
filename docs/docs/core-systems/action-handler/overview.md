@@ -11,9 +11,9 @@ The Action Handler System processes and executes actions returned by the AI serv
 The Action Handler System consists of:
 
 1. **Action Registry**: Maps action types to their handler functions
-2. **Action Handlers**: Individual functions that perform specific operations
+2. **Action Handlers**: Individual functions that perform specific operations (see [Individual Action Handlers](./actions))
 3. **Action Models**: Pydantic models that define action parameters
-4. **Action Logging**: Records all actions for audit and debugging purposes
+4. **Action Logging**: Records all actions for audit and debugging purposes (see [Action Database Model](../../database/models/action))
 
 ## Core Components
 
@@ -57,6 +57,8 @@ Every action is logged with:
 - **Coach Message**: The message that triggered the action
 - **Test Scenario**: Associated test scenario (if applicable)
 
+For detailed information about action logging and retrieval, see the [Actions API Reference](../../api/endpoints/actions).
+
 ## Error Handling
 
 The system includes comprehensive error handling:
@@ -65,3 +67,9 @@ The system includes comprehensive error handling:
 - **Database Integrity**: Maintains referential integrity across related models
 - **Graceful Degradation**: Continues processing other actions if one fails
 - **Detailed Logging**: Records errors for debugging and monitoring
+
+## Related Documentation
+
+- [Actions API Reference](../../api/endpoints/actions) - API endpoints for viewing and managing actions
+- [Action Database Model](../../database/models/action) - Database model structure and relationships
+- [Individual Action Handlers](./actions) - Detailed documentation for each action handler
