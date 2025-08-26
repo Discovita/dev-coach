@@ -453,6 +453,4 @@ docker compose exec db psql -U dev_coach_database_user -d local_dev_coach
 
 ## Next Steps
 
-- [Local Development Setup](./local-setup.md) - Complete local development guide
-- [Dev Environment Setup](./dev-setup.md) - Development with remote database
 - [Docker Configuration](./docker-configuration.md) - Understanding the Docker setup

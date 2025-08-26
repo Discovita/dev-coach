@@ -94,5 +94,4 @@ This ensures that any changes you make to the scenario are immediately reflected
 ## Related Documentation
 
 - [Overview](./overview) - Understanding test scenarios and the development workflow
-- [Running Scenarios](./running-scenarios) - How to use scenarios for testing
 - [Test Scenario API Reference](../api/endpoints/test-scenarios) - Backend API details

@@ -178,11 +178,10 @@ To begin using the test scenario system:
 
 _Figure 1: The main test scenario management interface showing the scenario table with available actions_
 
-For detailed instructions on each step, see:
+See also:
 
 - [Scenario Management](./scenario-management) - Creating and editing scenarios
-- [Running Scenarios](./running-scenarios) - Using scenarios for testing
-- [Freeze Session](./freeze-session) - Capturing live sessions as scenarios
+- [Coach State Visualization](./coach-state-visualization) - Real-time state monitoring
 
 ## Related Documentation
 

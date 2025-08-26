@@ -78,6 +78,4 @@ Need access to the `.env` file? Email `caseywschmid@gmail.com` and it will be sh
 
 ## Next Steps
 
-- [Local Development Setup](./local-setup.md) - Get started with local development
-- [Dev Environment Setup](./dev-setup.md) - Set up development with remote database
 - [Common Commands](./common-commands.md) - Essential development commands
