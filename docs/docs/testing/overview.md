@@ -21,6 +21,23 @@ Test scenarios are stored as JSON templates that can be instantiated to create a
 
 ## System Architecture
 
+### Session Types and Architecture
+
+There is a distinction in the code between a test scenario session and the logged-in user session. By default, all users will have access to the regular logged-in user session. It is the Admin users that have access to the Coach State Viewers and the associated testing endpoints which allow calling the coach endpoints with specific user ID's.
+
+> **Architectural Decision**: The system maintains two separate sets of components and endpoints despite significant code duplication:
+
+- **Test Scenario System**: Uses `TestScenarioCoachStateVisualizer` and test user endpoints (`/test-user/{userId}/...`)
+- **Regular User System**: Uses `CoachStateVisualizer` and authenticated user endpoints (`/user/me/...`)
+
+> **Rationale**: While the test scenario system could theoretically replace the regular user system (since it allows passing any user ID), the decision was made to maintain both for future flexibility:
+
+- **Development Phase**: Test endpoints and visualizers are used almost exclusively
+- **Production Phase**: Authenticated user endpoints will likely be more appropriate for normal users
+- **Code Duplication**: Accepted as a trade-off for architectural flexibility during uncertain development direction
+
+> **🎯 This approach allows the system to evolve without committing to a specific architecture too early in the development process.**
+
 ### Backend Components
 
 #### TestScenario Model

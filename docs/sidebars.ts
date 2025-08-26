@@ -179,6 +179,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "testing/overview",
         "testing/scenario-management",
+        "testing/coach-state-visualization",
       ],
     },
     {
