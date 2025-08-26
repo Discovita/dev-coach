@@ -413,4 +413,3 @@ For detailed field information on models used in these endpoints, see:
 - Test users are automatically assigned unique emails if conflicts exist.
 - All test users have the password "Coach123!" for consistency.
 - Scenario reset completely recreates all related data from the template.
-- Update this document whenever the API changes.

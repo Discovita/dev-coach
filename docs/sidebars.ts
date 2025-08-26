@@ -179,8 +179,6 @@ const sidebars: SidebarsConfig = {
       items: [
         "testing/overview",
         "testing/scenario-management",
-        "testing/running-scenarios",
-        "testing/freeze-session",
       ],
     },
     {
