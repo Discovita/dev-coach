@@ -178,7 +178,7 @@ This phase serves as a critical checkpoint between refinement and affirmation. A
 
 ### The Critical Question
 
-- **“Is this identity something you want to focus on, nurture, and pursue?”**
+- **“Is this Identity integral to your being, something you want to focus on, nurture, and pursue?”**
 
 Ask and answer this for every identity in the constellation. The aim is to ensure each identity reflects real priority and intention, not merely a compelling label.
 
