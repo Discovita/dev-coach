@@ -24,7 +24,17 @@ const sidebars: SidebarsConfig = {
         "coach/techniques-and-approaches",
         "coach/integration-and-application",
         "coach/identity-categories",
-        "coach/phases",
+        {
+          type: "category",
+          label: "Phases",
+          items: [
+            "coach/philosophy",
+            "coach/techniques-and-approaches",
+            "coach/integration-and-application",
+            "coach/identity-categories",
+            "coach/phases",
+          ],
+        },
       ],
     },
     {
@@ -194,11 +204,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Development",
+      label: "Coach Development",
       items: [
         "development/overview",
         "development/docker-configuration",
         "development/common-commands",
+      ],
+    },
+    {
+      type: "category",
+      label: "Contributing",
+      items: [
+        "contribute/linking-guidelines",
       ],
     },
   ],

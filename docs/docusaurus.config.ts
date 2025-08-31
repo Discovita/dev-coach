@@ -48,6 +48,13 @@ const config: Config = {
         docs: {
           sidebarPath: "./sidebars.ts",
           editUrl: "https://github.com/Discovita/dev-coach/edit/main/docs",
+          // Add remark/rehype plugins for path alias processing
+          remarkPlugins: [
+            // You can add custom remark plugins here for path processing
+          ],
+          rehypePlugins: [
+            // You can add custom rehype plugins here for path processing
+          ],
         },
         theme: {
           customCss: "./src/css/custom.css",
