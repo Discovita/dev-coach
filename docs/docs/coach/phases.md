@@ -223,9 +223,41 @@ Ask and answer this for every identity in the constellation. The aim is to ensur
 
 ## Identity Affirmation
 
-Once the identity names feel inspiring and complete, the methodology moves into crafting powerful affirmations that reinforce each identity. These "I Am" statements serve multiple functions: they clarify the essence of each identity, provide daily reminders of who the client is becoming, and create emotional anchoring for the transformation process.
+Once the identity names feel inspiring and complete, the methodology moves into crafting powerful affirmations that reinforce each identity. These "I Am" statements serve as personal triggers and reminders that help clients embody their identities in daily life. The affirmations create emotional anchoring for the transformation process and provide accessible touchstones for identity activation.
 
 For each identity, the coach helps clients develop statements that capture not just what they do, but who they are and how they approach their area of focus. These statements typically include the identity name, core characteristics, specific behaviors or approaches, and the desired outcome or impact.
+
+### Exploratory Approach
+
+Start with open-ended exploration. The goal is to understand the client's authentic vision for this identity. Some approaches:
+
+- **"How do you want to show up with this identity?"**
+- **"Tell me what [Identity Name] means to you"**
+- **"When you think about being a [Identity Name], what comes up for you?"**
+- **"What does it look like when you're living as a [Identity Name]?"**
+
+### Following the Client's Language
+
+Listen carefully for the client's own words, values, and vision. The affirmation should reflect their authentic voice and relationship to the identity, not generic interpretations. Pay attention to:
+
+- **The specific words and phrases they use**
+- **What energizes them when they talk about this identity**
+- **How they naturally describe showing up in this role**
+- **What feels meaningful and important to them about this identity**
+
+The coach should ask follow-up questions to deepen understanding before moving to affirmation crafting.
+
+### Crafting Affirmations
+
+Affirmations should feel like something the client can comfortably "put on" - accessible, inspiring, and authentic to their voice.
+
+#### Key Principles
+
+- **Spiritual and inspiring, not intimidating**
+- **Accessible** - Clients should feel they can step into this identity today
+- **Simple language** - Avoid complex vocabulary
+- **Shorter statements** - More memorable and impactful
+- **Not resume-like** - Focus on being rather than achievements
 
 ### Example "I Am" Statements
 
@@ -237,9 +269,22 @@ For each identity, the coach helps clients develop statements that capture not j
 
 ### The Refinement Process
 
-The process includes multiple rounds of revision based on the client's emotional response to the statements. The coach instructs clients to read each statement aloud and notice their bodily sensations. Statements that feel "dull, forced, or not quite right" get refined until they create "energy, brightness, possibility, and heart openness."
+The process includes multiple rounds of revision based on the client's emotional and physical response to the statements. The coach instructs clients to:
+
+1. **Read each statement aloud**
+2. **Notice their emotional response**
+
+Statements that feel "dull, forced, or not quite right" need refinement until they create "energy, brightness, possibility, and heart openness."
 
 In one example, a client initially resonated with "I am a Fearless Adventurer" but realized upon reflection that "Fearless" felt inauthentic since they do experience fear. Through collaboration with the coach, this evolved into "I am a Bold Explorer. I embrace life with curiosity and courage, moving through fear to discover new worlds." This shift from denying fear to acknowledging and moving through it created much stronger emotional resonance.
+
+## Process Flow
+
+1. **Ask the foundation question**: "How do you want to show up with this identity?"
+2. **Listen for the client's authentic language** and vision
+3. **Draft initial affirmation** using simple, powerful language
+4. **Test the emotional response** by having client read aloud
+5. **Refine based on feedback** until it creates energy and resonance
 
 ---
 
