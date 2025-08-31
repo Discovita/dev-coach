@@ -170,9 +170,54 @@ The coach systematically reviews each identity, asking whether it feels "excitin
 
 This phase also involves consolidating similar identities and ensuring the constellation feels complete without being overwhelming. The coach helps clients identify which identities might nest under others and whether any essential aspects of their lives remain unaddressed.
 
-### Final Selection Criteria
+---
 
-At the end, the coach relists the final list of all identities and asks the question "does this identity feel critical to your being, is it something you want to focus on, nurture and pursue." If the answer is yes, it stays; if the answer is no, the coach can help the client evolve the identity so it is a yes or bring it to nest under another more central and imperative identity.
+## Identity Commitment
+
+This phase serves as a critical checkpoint between refinement and affirmation. After elevating names and organizing the constellation, the client evaluates each identity for genuine commitment and focus. Only identities that pass this checkpoint advance to affirmation work.
+
+### The Critical Question
+
+- **“Is this Identity integral to your being, something you want to focus on, nurture, and pursue?”**
+
+Ask and answer this for every identity in the constellation. The aim is to ensure each identity reflects real priority and intention, not merely a compelling label.
+
+### Decision Flow for Each Identity
+
+- **Yes — Keep and advance**
+  - The identity remains in the active constellation and proceeds to affirmation.
+- **No — Choose one of the following**
+  - **Nest it under a parent identity**
+    - Keep the concept as flavor/context, not as a standalone identity.
+    - It can inform future language in “I Am” statements and daily embodiment.
+    - Example: **Chef → nested under Magical Healer**. The client recognizes “it’s the Magical Healer that’s cooking dinner, not a separate Chef.”
+  - **Eliminate it entirely**
+    - Remove identities that do not belong in the client’s current life focus.
+
+### Missing Identity Check
+
+- After evaluating all identities, ask: **“Is anything missing?”**
+- Clients sometimes discover an important domain or role wasn’t represented in earlier phases.
+  - Examples: **Investor** (clear part of life not previously named); noticing a new essential identity like **Helper** and determining whether it belongs as a focus, nests under another, or is better addressed later (e.g., in shadow work).
+
+### Common Pitfalls and Guidance
+
+- **People-pleasing/helper patterns** often arise at this stage. If an identity feels driven by external approval rather than genuine desire, consider eliminating it or nesting appropriately rather than promoting it to active focus.
+- This phase is not about perfect logic—it’s about honest prioritization. If a name is powerful but the client doesn’t want to live it, it should not advance.
+
+### Transition Criteria
+
+- Only identities explicitly marked **Yes** proceed to `Identity Affirmation`.
+- Nested items are retained as notes and inspiration, not as standalone identities.
+- Eliminated items are removed from the active identity map.
+
+**Leigh Ann Would Say...**
+
+> “You don’t need to make affirmations about an identity that you don’t want to pursue.”
+>
+> “When you nest, it’s for clarity—so you know it’s the Magical Healer that’s cooking dinner, not a Chef.”
+>
+> “Before moving on, ask what’s missing—you might have an identity like Investor that didn’t surface earlier.”
 
 ---
 
