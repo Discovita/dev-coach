@@ -210,6 +210,7 @@ The system supports various action types that represent different coaching opera
 Each action type has specific parameters that define what the action does:
 
 #### CREATE_IDENTITY Parameters
+
 ```json
 {
   "identity_name": "string",
@@ -220,6 +221,7 @@ Each action type has specific parameters that define what the action does:
 ```
 
 #### TRANSITION_PHASE Parameters
+
 ```json
 {
   "from_phase": "string",
@@ -228,6 +230,7 @@ Each action type has specific parameters that define what the action does:
 ```
 
 #### UPDATE_IDENTITY Parameters
+
 ```json
 {
   "identity_id": "string",
@@ -241,16 +244,19 @@ Each action type has specific parameters that define what the action does:
 ## Use Cases
 
 ### Admin Interface
+
 - **Action History**: View all actions performed by the system
 - **User Investigation**: Examine specific user's coaching journey
 - **System Monitoring**: Track coaching system performance and usage
 
 ### Debugging and Development
+
 - **Conversation Reconstruction**: Understand what actions were triggered by specific messages
 - **Action Validation**: Verify that actions are being performed correctly
 - **Test Scenario Analysis**: Examine actions in test scenarios
 
 ### User Experience
+
 - **Progress Tracking**: Users can see what actions have been performed on their behalf
 - **Transparency**: Understand what the coaching system is doing
 - **Accountability**: Track coaching system decisions and actions
@@ -261,9 +267,9 @@ Each action type has specific parameters that define what the action does:
 
 For detailed field information on models used in these endpoints, see:
 
-- **[Action Fields](../../database/models/action)** - Action model structure
-- **[Chat Message Fields](../../database/models/chat-message)** - Chat message structure
-- **[User Fields](../../database/models/users)** - User model structure
+- **[Action Fields](/docs/database/models/action)** - Action model structure
+- **[Chat Message Fields](/docs/database/models/chat-message)** - Chat message structure
+- **[User Fields](/docs/database/models/users)** - User model structure
 
 ---
 
