@@ -94,3 +94,24 @@ The Component Renderer System allows the Coach to dynamically show interactive U
   }
 }
 ```
+
+## Routing Component Interactions
+
+Two viable options exist for handling user interactions triggered by components:
+
+- Reuse existing process-message endpoints (recommended):
+  - Extend the request to optionally include `{ action, params }` in addition to `message`.
+  - Validate via the Action Handler and execute through the existing registry.
+  - Benefits: single execution path, consistent logging, phase allowlisting.
+
+- Universal component endpoint (alternative):
+  - Single endpoint that accepts `{ action, params }` and routes to the same Action Handler.
+  - Useful if you prefer to keep component payloads fully separate from typed message requests.
+
+In both approaches, component actions should be regular actions in the Action Handler, and components should carry typed actions/params from the backend to minimize frontend logic.
+
+## Naming Convention for Component Actions
+
+- Use `SHOW_XXX_COMPONENT` for any action that instructs the frontend to render a component.
+- Examples: `SHOW_CANNED_RESPONSE_COMPONENT`, `SHOW_IDENTITY_ACCEPTANCE_COMPONENT`.
+- Keep these actions phase-scoped via the prompt’s allowed actions.
