@@ -39,6 +39,7 @@ export function useTestScenarioUserChatMessages(userId: string) {
       return sendTestScenarioUserMessage(userId, content, model);
     },
     onSuccess: (response: CoachResponse, variables) => {
+      console.log("[useTestScenarioUserChatMessages] onSuccess", response);
       // Ensure messages query doesn't refetch right now
       queryClient.cancelQueries({
         queryKey: ["testScenarioUser", userId, "chatMessages"],
