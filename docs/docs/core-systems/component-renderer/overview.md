@@ -115,3 +115,22 @@ In both approaches, component actions should be regular actions in the Action Ha
 - Use `SHOW_XXX_COMPONENT` for any action that instructs the frontend to render a component.
 - Examples: `SHOW_CANNED_RESPONSE_COMPONENT`, `SHOW_IDENTITY_ACCEPTANCE_COMPONENT`.
 - Keep these actions phase-scoped via the prompt’s allowed actions.
+
+## Multi-Action Buttons (Optional, Future-Proofing)
+
+Buttons execute one or more actions per click. Standardize on a single request format: an `actions` array. The backend provides the payload, and the frontend posts it unchanged to the same process-message flow.
+
+- Standard payload:
+  - `{ "actions": [{ "action": string, "params": object }, ...] }`
+
+### Execution semantics
+- Validate every requested action against the current phase’s allowed actions.
+- Execute sequentially via the Action Handler registry.
+- Recommended: wrap in a transaction and stop on first failure; return an error that includes the index of the failing action.
+- Log each action to the `Action` table as usual.
+
+### Request serializer support
+- Extend the process-message request to accept either:
+  - `message` (existing), or
+  - `actions` (array of `{ action, params }`).
+- Enforce “exactly one of” these modes.
