@@ -19,6 +19,15 @@ class CoachRequestSerializer(serializers.Serializer):
         allow_blank=True,
         help_text="Optional model name. If not provided, uses default.",
     )
+    actions = serializers.ListField(
+        required=False,
+        allow_empty=False,
+        child=serializers.DictField(),
+        help_text=(
+            "List of actions to execute in order. Each item should be an object "
+            "with 'action' (str) and 'params' (object). Can be sent alongside message."
+        ),
+    )
 
     def get_model(self) -> "AIModel":
         """
@@ -26,6 +35,32 @@ class CoachRequestSerializer(serializers.Serializer):
         Uses the model_name if provided, otherwise returns the default model (GPT-4o).
         """
         return AIModel.get_or_default(self.validated_data.get("model_name"))
+
+    def validate(self, attrs):
+        """
+        Require at least one of the following fields:
+        - message: string-based user input
+        - actions: array of { action: str, params: object }
+        """
+        message = attrs.get("message")
+        actions = attrs.get("actions")
+
+        if not message and not actions:
+            raise serializers.ValidationError(
+                {"non_field_errors": ["Provide at least one of: 'message' or 'actions'."]}
+            )
+
+        if actions is not None:
+            # Lightweight structure checks; deep validation happens in the Action Handler
+            for idx, item in enumerate(actions):
+                if not isinstance(item, dict):
+                    raise serializers.ValidationError({"actions": f"Item {idx} must be an object."})
+                if "action" not in item or not isinstance(item.get("action"), str):
+                    raise serializers.ValidationError({"actions": f"Item {idx} must include 'action' (str)."})
+                if "params" not in item:
+                    raise serializers.ValidationError({"actions": f"Item {idx} must include 'params' (object)."})
+
+        return attrs
 
 
 class CoachResponseSerializer(serializers.Serializer):
@@ -43,4 +78,8 @@ class CoachResponseSerializer(serializers.Serializer):
     message = serializers.CharField(help_text="Coach's response message.")
     final_prompt = serializers.CharField(
         help_text="The final prompt used to generate the coach's response."
+    )
+    component = serializers.JSONField(
+        required=False,
+        help_text="Optional component configuration for frontend rendering.",
     )
