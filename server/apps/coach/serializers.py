@@ -41,22 +41,6 @@ class CoachResponseSerializer(serializers.Serializer):
     """
 
     message = serializers.CharField(help_text="Coach's response message.")
-    coach_state = serializers.JSONField(
-        help_text="Updated state of the coaching session."
-    )
     final_prompt = serializers.CharField(
         help_text="The final prompt used to generate the coach's response."
-    )
-    actions = serializers.ListField(
-        child=serializers.DictField(),
-        default=list,
-        help_text="Actions performed (list of dicts, can be empty).",
-    )
-    chat_history = serializers.ListField(
-        child=serializers.DictField(),
-        help_text="The latest chat history (list of messages, most recent last)."
-    )
-    identities = serializers.ListField(
-        child=serializers.DictField(),
-        help_text="The user's current identities (list of identity dicts)."
     )

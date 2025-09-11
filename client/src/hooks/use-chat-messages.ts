@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchChatMessages, resetChatMessages } from "@/api/user";
 import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
+import { Message } from "@/types/message";
 
 /**
  * useChatMessages hook
@@ -42,31 +43,45 @@ export function useChatMessages() {
       return apiClient.sendMessage(content, model ?? "");
     },
     // On success, update all relevant caches with the response
-    onSuccess: (response: CoachResponse) => {
-      console.log("Chat message sent successfully:", response);
-      if (response.chat_history) {
-        queryClient.setQueryData(
-          ["user", "chatMessages"],
-          response.chat_history
-        );
-      }
-      if (response.identities) {
-        queryClient.setQueryData(["user", "identities"], response.identities);
-      }
-      if (response.coach_state) {
-        queryClient.setQueryData(["user", "coachState"], response.coach_state);
-      }
-      // Cache the latest final_prompt for use in components
+    onSuccess: (response: CoachResponse, variables) => {
+      // Append user (dedup) and coach messages to cache without invalidating messages
+      queryClient.setQueryData<Message[] | undefined>(
+        ["user", "chatMessages"],
+        (old) => {
+          const current = old ?? [];
+          const last = current[current.length - 1];
+          const hasUserAlready =
+            !!last && last.role === "user" && last.content === variables.content;
+
+          const maybeUserAppended = hasUserAlready
+            ? current
+            : [
+                ...current,
+                {
+                  role: "user",
+                  content: variables.content,
+                  timestamp: new Date().toISOString(),
+                } as Message,
+              ];
+
+          const maybeCoachAppended = response.message
+            ? [
+                ...maybeUserAppended,
+                {
+                  role: "coach",
+                  content: response.message,
+                  timestamp: new Date().toISOString(),
+                } as Message,
+              ]
+            : maybeUserAppended;
+
+          return maybeCoachAppended;
+        }
+      );
+
       if (response.final_prompt !== undefined) {
-        queryClient.setQueryData(
-          ["user", "finalPrompt"],
-          response.final_prompt
-        );
+        queryClient.setQueryData(["user", "finalPrompt"], response.final_prompt);
       }
-      // Invalidate actions cache to trigger refetch of latest actions from database
-      queryClient.invalidateQueries({ queryKey: ["user", "actions"] });
-      // Also invalidate coach state to ensure the component re-renders with the latest data
-      queryClient.invalidateQueries({ queryKey: ["user", "coachState"] });
     },
   });
 

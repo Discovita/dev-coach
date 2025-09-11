@@ -1,4 +1,4 @@
-from typing import List, Tuple, Callable, Any
+from typing import List, Tuple
 from enums.action_type import ActionType
 from apps.coach_states.models import CoachState
 from apps.chat_messages.models import ChatMessage

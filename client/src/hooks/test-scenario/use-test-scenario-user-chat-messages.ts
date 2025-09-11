@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchTestScenarioUserChatMessages } from "@/api/testScenarioUser";
 import { sendTestScenarioUserMessage } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
+import { Message } from "@/types/message";
 
 /**
  * useTestScenarioUserChatMessages
@@ -28,34 +29,69 @@ export function useTestScenarioUserChatMessages(userId: string) {
    * On success, updates the chatMessages, identities, and coachState caches for the test user.
    */
   const updateMutation = useMutation({
-    mutationFn: async ({ content, model }: { content: string; model?: string }) => {
+    mutationFn: async ({
+      content,
+      model,
+    }: {
+      content: string;
+      model?: string;
+    }) => {
       return sendTestScenarioUserMessage(userId, content, model);
     },
-    onSuccess: (response: CoachResponse) => {
-      // Update all relevant caches for the test user
-      if (response.chat_history) {
-        queryClient.setQueryData(
-          ["testScenarioUser", userId, "chatMessages"],
-          response.chat_history
-        );
-      }
-      if (response.identities) {
-        queryClient.setQueryData(["testScenarioUser", userId, "identities"], response.identities);
-      }
-      if (response.coach_state) {
-        // Update the coach state cache with the new data
-        queryClient.setQueryData(["testScenarioUser", userId, "coachState"], response.coach_state);
-      }
+    onSuccess: (response: CoachResponse, variables) => {
+      // Ensure messages query doesn't refetch right now
+      queryClient.cancelQueries({
+        queryKey: ["testScenarioUser", userId, "chatMessages"],
+      });
+
+      // Append the user's message (if not already present) and the coach's reply
+      queryClient.setQueryData<Message[] | undefined>(
+        ["testScenarioUser", userId, "chatMessages"],
+        (old) => {
+          const current = old ?? [];
+          const userMsg: Message = {
+            role: "user",
+            content: variables.content,
+            timestamp: new Date().toISOString(),
+          };
+          const coachMsg: Message | null = response.message
+            ? {
+                role: "coach",
+                content: response.message,
+                timestamp: new Date().toISOString(),
+              }
+            : null;
+
+          // Avoid duplicate user bubble if one already exists at the end (due to prior optimistic UI)
+          const last = current[current.length - 1];
+          const hasUserAlready =
+            !!last && last.role === "user" && last.content === variables.content;
+
+          const next: Message[] = hasUserAlready ? [...current] : [...current, userMsg];
+          return coachMsg ? [...next, coachMsg] : next;
+        }
+      );
+
+      // Append coach message to chat cache without invalidating to avoid flicker
+      // (Handled together above)
+
       if (response.final_prompt !== undefined) {
         queryClient.setQueryData(
           ["testScenarioUser", userId, "finalPrompt"],
           response.final_prompt
         );
       }
-      // Invalidate actions cache to trigger refetch of latest actions from database
-      queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId, "actions"] });
-      // Also invalidate coach state to ensure the component re-renders with the latest data
-      queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId, "coachState"] });
+
+      // Still refresh other test-user datasets, but keep messages stable
+      queryClient.invalidateQueries({
+        queryKey: ["testScenarioUser", userId, "actions"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["testScenarioUser", userId, "coachState"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["testScenarioUser", userId, "identities"],
+      });
     },
   });
 
@@ -70,4 +106,4 @@ export function useTestScenarioUserChatMessages(userId: string) {
     isPending: updateMutation.status === "pending",
     isUpdateError: updateMutation.isError,
   };
-} 
+}
