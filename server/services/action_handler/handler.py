@@ -28,10 +28,10 @@ ACTION_REGISTRY = {
     ActionType.UNSKIP_IDENTITY_CATEGORY.value: unskip_identity_category,
     ActionType.UPDATE_WHO_YOU_ARE.value: update_who_you_are,
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value: update_who_you_want_to_be,
-    ActionType.ADD_USER_NOTE.value: add_user_note,
-    ActionType.UPDATE_USER_NOTE.value: update_user_note,
-    ActionType.DELETE_USER_NOTE.value: delete_user_note,
     ActionType.UPDATE_ASKED_QUESTIONS.value: update_asked_questions,
+    ActionType.ADD_USER_NOTE.value: add_user_note,  # Sentinel actions
+    ActionType.UPDATE_USER_NOTE.value: update_user_note,  # Sentinel actions
+    ActionType.DELETE_USER_NOTE.value: delete_user_note,  # Sentinel actions
 }
 
 
