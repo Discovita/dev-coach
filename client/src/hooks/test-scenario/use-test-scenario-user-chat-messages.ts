@@ -23,6 +23,13 @@ export function useTestScenarioUserChatMessages(userId: string) {
     retry: false,
   });
 
+  // Get the current component config (set by mutations)
+  const { data: componentConfig } = useQuery({
+    queryKey: ["testScenarioUser", userId, "componentConfig"],
+    queryFn: () => null, // This will be set by mutations
+    enabled: !!userId,
+  });
+
   /**
    * Mutation for sending a chat message as the test scenario user.
    * Accepts an object with content (string) and optional model (string).
@@ -39,7 +46,7 @@ export function useTestScenarioUserChatMessages(userId: string) {
       return sendTestScenarioUserMessage(userId, content, model);
     },
     onSuccess: (response: CoachResponse, variables) => {
-      console.log("[useTestScenarioUserChatMessages] onSuccess", response);
+      console.log("[useTestScenarioUserChatMessages] Response:", response);
       // Ensure messages query doesn't refetch right now
       queryClient.cancelQueries({
         queryKey: ["testScenarioUser", userId, "chatMessages"],
@@ -83,6 +90,12 @@ export function useTestScenarioUserChatMessages(userId: string) {
         );
       }
 
+      // Handle component config - ALWAYS set it (even if null)
+      queryClient.setQueryData(
+        ["testScenarioUser", userId, "componentConfig"],
+        response.component || null
+      );
+
       // Still refresh other test-user datasets, but keep messages stable
       queryClient.invalidateQueries({
         queryKey: ["testScenarioUser", userId, "actions"],
@@ -98,6 +111,7 @@ export function useTestScenarioUserChatMessages(userId: string) {
 
   return {
     chatMessages: data,
+    componentConfig,
     isLoading,
     isError,
     refetchChatMessages: refetch,

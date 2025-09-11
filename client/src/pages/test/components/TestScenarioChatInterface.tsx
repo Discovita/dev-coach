@@ -29,6 +29,7 @@ export const TestScenarioChatInterface: React.FC<{ userId: string; scenarioId: s
   // Get chat messages for the test user (with optimistic UI support)
   const {
     chatMessages,
+    componentConfig,
     isLoading,
     isError,
     updateChatMessages,
@@ -118,6 +119,8 @@ export const TestScenarioChatInterface: React.FC<{ userId: string; scenarioId: s
         handleIdentityChoice={handleIdentityChoice}
         messagesEndRef={messagesEndRef}
         coachState={coachState}
+        componentConfig={componentConfig}
+        onSelectComponentOption={handleSendMessage}
       />
       <TestScenarioChatControls
         isProcessingMessage={isPending}

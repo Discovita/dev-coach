@@ -1,5 +1,6 @@
 import React from "react";
 import { CoachMessage } from "@/pages/chat/components/CoachMessage";
+import { CoachMessageWithComponent } from "@/pages/chat/components/CoachMessageWithComponent";
 import { UserMessage } from "@/pages/chat/components/UserMessage";
 import { IdentityChoice } from "@/pages/chat/components/IdentityChoice";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
@@ -24,6 +25,10 @@ interface ChatMessagesProps {
   coachState?: CoachState;
   handleIdentityChoice: (response: string) => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  /** Latest component config to render for the newest coach message (or null) */
+  componentConfig?: import("@/types/coachResponse").ComponentConfig | null;
+  /** Handler for component button selection (sends the label as a message) */
+  onSelectComponentOption?: (label: string) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -32,24 +37,38 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   coachState,
   handleIdentityChoice,
   messagesEndRef,
+  componentConfig,
+  onSelectComponentOption,
 }) => {
   return (
     <div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto p-6 bg-gold-50  dark:bg-[#333333]">
       {messages.map((message: Message, index: number) => (
         <div key={index}>
           {message.role === "coach" ? (
-            <CoachMessage>
-              <MarkdownRenderer content={message.content} />
-              {index === messages.length - 1 &&
-                coachState?.proposed_identity &&
-                !isProcessingMessage && (
-                  <IdentityChoice
-                    identity={coachState.proposed_identity}
-                    onChoiceSelected={handleIdentityChoice}
-                    disabled={isProcessingMessage}
-                  />
-                )}
-            </CoachMessage>
+            index === messages.length - 1 &&
+            !!componentConfig &&
+            !isProcessingMessage ? (
+              <CoachMessageWithComponent
+                componentConfig={componentConfig}
+                onSelect={(label) => onSelectComponentOption && onSelectComponentOption(label)}
+                disabled={isProcessingMessage}
+              >
+                <MarkdownRenderer content={message.content} />
+              </CoachMessageWithComponent>
+            ) : (
+              <CoachMessage>
+                <MarkdownRenderer content={message.content} />
+                {index === messages.length - 1 &&
+                  coachState?.proposed_identity &&
+                  !isProcessingMessage && (
+                    <IdentityChoice
+                      identity={coachState.proposed_identity}
+                      onChoiceSelected={handleIdentityChoice}
+                      disabled={isProcessingMessage}
+                    />
+                  )}
+              </CoachMessage>
+            )
           ) : message.role === "user" ? (
             <UserMessage>{message.content}</UserMessage>
           ) : (

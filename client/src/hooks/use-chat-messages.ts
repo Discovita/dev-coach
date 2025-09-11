@@ -26,6 +26,12 @@ export function useChatMessages() {
     queryFn: fetchChatMessages,
   });
 
+  // Get the current component config (set by mutations)
+  const { data: componentConfig } = useQuery({
+    queryKey: ["user", "componentConfig"],
+    queryFn: () => null, // This will be set by mutations
+  });
+
   /**
    * Mutation for sending a chat message to the backend.
    * Accepts an object with content (string) and optional model (string).
@@ -82,6 +88,12 @@ export function useChatMessages() {
       if (response.final_prompt !== undefined) {
         queryClient.setQueryData(["user", "finalPrompt"], response.final_prompt);
       }
+
+      // Handle component config - ALWAYS set it (even if null)
+      queryClient.setQueryData(
+        ["user", "componentConfig"],
+        response.component || null
+      );
     },
   });
 
@@ -113,6 +125,7 @@ export function useChatMessages() {
 
   return {
     chatMessages: data,
+    componentConfig,
     isLoading,
     isError,
     refetchChatMessages: refetch,

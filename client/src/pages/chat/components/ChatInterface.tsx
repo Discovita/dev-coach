@@ -19,6 +19,7 @@ export const ChatInterface: React.FC = () => {
   // Get chat messages and updateChatMessages mutation from the custom hook
   const {
     chatMessages,
+    componentConfig,
     isLoading,
     isError,
     updateChatMessages,
@@ -107,6 +108,8 @@ export const ChatInterface: React.FC = () => {
         handleIdentityChoice={handleIdentityChoice}
         messagesEndRef={messagesEndRef}
         coachState={coachState}
+        componentConfig={componentConfig}
+        onSelectComponentOption={handleSendMessage}
       />
       <ChatControls
         isProcessingMessage={updateStatus === "pending"}

@@ -7,22 +7,22 @@ The Component Renderer System allows the Coach to dynamically show interactive U
 ## Architecture Approach
 
 ### Action-Based Component Selection
-- **Coach Control**: The Coach decides to show a component by performing a specific action (e.g., `show_button_group`, `show_identity_acceptance`)
+- **Coach Control**: The Coach decides to show a component by performing a specific action (e.g., `show_introduction_canned_response_component`)
 - **Phase-Based Control**: Each coaching phase can be configured with allowed component actions, controlling what components the Coach can show
 - **Parameter Control**: Component actions include parameters that define the component's behavior and appearance
 
 ### Component Types & Use Cases
 
-#### CannedResponse Component
-- **Action**: `show_canned_response`
-- **Use Case**: Pre-written response buttons for user convenience
+#### CannedResponse Component (Introduction Phase)
+- **Action**: `show_introduction_canned_response_component`
+- **Use Case**: Pre-written response buttons for user convenience, shown for EVERY question in the Introduction script
 - **Example**: 
   ```text
   Does that make sense?
   [Yes] [No] [Tell me more please]
   ```
-- **Parameters**: `{ buttons: [{ label: string, message: string, id: string }] }`
-- **Behavior**: Clicking a button sends the message as if the user typed it
+- **Parameters**: `{ show_introduction_canned_response_component: true }` (no per-button params for this component)
+- **Behavior**: Clicking a button sends the button label as the message (no additional actions)
 
 #### IdentityAcceptance Component  
 - **Action**: `show_identity_acceptance`
@@ -37,23 +37,26 @@ The Component Renderer System allows the Coach to dynamically show interactive U
 ## Implementation Strategy
 
 ### Universal Component Architecture
-- **Single Frontend Component**: One `UniversalComponent` that handles all component types
-- **Universal API Endpoint**: Single `/coach/component-action/` endpoint for all component interactions
-- **Minimal Frontend Impact**: Adding new component types requires no frontend changes
-- **Flexible Parameters**: Component data structure can be anything the backend needs
+- **Single Extras Renderer**: A `CoachMessageWithExtras` component that mirrors `CoachMessage` and renders extras when present
+- **Minimal Frontend Impact**: Adding new component types requires minimal/no changes to message list plumbing
+- **Flexible Parameters**: Component data structure is a simplified `ComponentConfig`
 
 ### Backend Changes
-1. **New Component Actions**: Add actions like `show_canned_response`, `show_identity_acceptance`, etc.
-2. **Action Parameters**: Each component action includes parameters defining the component's props
-3. **Phase Configuration**: Configure which component actions are allowed per coaching phase
-4. **Universal Component API**: Single endpoint that handles all component interactions
-5. **Component Action Handler**: Process component interactions and route to appropriate logic
+1. **New Component Action**: `SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT`
+2. **Action Parameters**: `ShowIntroductionCannedResponseComponentParams` with `show_introduction_canned_response_component: boolean`
+3. **Phase Configuration**: Allowlist this action in the Introduction phase prompts
+4. **Process via Existing Endpoints**: Reuse existing `process-message` endpoints (no new endpoint)
+5. **Handler Return Value**: Action handlers return a `ComponentConfig` when a UI should be shown; `apply_actions` collects and returns it
 
 ### Frontend Changes
-1. **Universal Component**: Single component that renders based on `component_type`
-2. **Component Detection**: Detect component actions in coach responses and render accordingly
-3. **Universal Submit**: All component interactions go through one API endpoint
-4. **Message Integration**: Components appear alongside coach messages when present
+1. **Types**: `CoachResponse` extended with optional `component: ComponentConfig`
+2. **Component Config Storage**: 
+   - Store only the latest component config in query cache as `componentConfig`
+   - ALWAYS set `componentConfig` on every response (either the component or `null`)
+   - Query keys: `["user", "componentConfig"]` and `["testScenarioUser", userId, "componentConfig"]`
+3. **Hook Integration**: Both `useChatMessages` and `useTestScenarioUserChatMessages` expose `componentConfig`
+4. **Message Integration**: In `ChatMessages`, render the last coach bubble using `CoachMessageWithExtras` if `componentConfig` exists and the UI is not processing
+5. **Universal Rendering (v1)**: For canned responses, render buttons from `componentConfig.buttons`; clicking sends the `label` as the message via existing send flow
 
 ## Benefits
 - **Coach Control**: LLM decides when to show components based on context
@@ -64,20 +67,19 @@ The Component Renderer System allows the Coach to dynamically show interactive U
 - **Minimal Frontend Complexity**: Single component and API endpoint for all interactions
 - **Scalable Design**: Adding new component types requires no frontend changes
 - **Universal Interface**: All components use the same interaction pattern
+- **Clean State Management**: `componentConfig` is always explicit (component or null), no stale configs
+- **Latest-Only Rendering**: Components only appear on the most recent coach message, keeping history clean
 
 ## Component Data Structure Examples
 
-### Canned Response Component
+### Canned Response Component (Simplified Payload)
 ```json
 {
-  "component_type": "canned_response",
-  "component_data": {
-    "buttons": [
-      { "label": "Yes", "message": "Yes, that makes sense", "id": "yes_001" },
-      { "label": "No", "message": "No, I need more explanation", "id": "no_001" },
-      { "label": "Tell me more", "message": "Can you tell me more about that?", "id": "more_001" }
-    ]
-  }
+  "buttons": [
+    { "label": "Yes" },
+    { "label": "No" },
+    { "label": "Tell me more" }
+  ]
 }
 ```
 
@@ -95,25 +97,56 @@ The Component Renderer System allows the Coach to dynamically show interactive U
 }
 ```
 
+## Component Config Storage & Detection
+
+### Storage Strategy
+The frontend uses a "latest-only" approach for component configs:
+
+1. **Query Cache Storage**: Component configs are stored in TanStack Query cache with keys:
+   - Regular users: `["user", "componentConfig"]`
+   - Test scenario users: `["testScenarioUser", userId, "componentConfig"]`
+
+2. **Always Explicit**: Every API response sets `componentConfig` to either:
+   - The component data (when present)
+   - `null` (when no component in response)
+
+3. **Automatic Cleanup**: New responses automatically replace/clear previous component configs
+
+### Detection Logic
+Components are rendered only when:
+- `componentConfig` exists (not null)
+- It's the last message in the conversation
+- The message is from the coach
+- The UI is not currently processing a message
+
+### Implementation Details
+```typescript
+// In hooks' onSuccess:
+queryClient.setQueryData(
+  ["user", "componentConfig"],
+  response.component || null  // Always set, even if null
+);
+
+// In ChatMessages:
+const hasComponent = componentConfig && !isProcessingMessage;
+const isLastCoachMessage = index === messages.length - 1 && message.role === "coach";
+
+if (isLastCoachMessage && hasComponent) {
+  return <CoachMessageWithExtras componentConfig={componentConfig} />
+}
+```
+
 ## Routing Component Interactions
 
-Two viable options exist for handling user interactions triggered by components:
+We reuse the existing `process-message` endpoints for all interactions.
 
-- Reuse existing process-message endpoints (recommended):
-  - Extend the request to optionally include `{ action, params }` in addition to `message`.
-  - Validate via the Action Handler and execute through the existing registry.
-  - Benefits: single execution path, consistent logging, phase allowlisting.
-
-- Universal component endpoint (alternative):
-  - Single endpoint that accepts `{ action, params }` and routes to the same Action Handler.
-  - Useful if you prefer to keep component payloads fully separate from typed message requests.
-
-In both approaches, component actions should be regular actions in the Action Handler, and components should carry typed actions/params from the backend to minimize frontend logic.
+- For canned responses, buttons send only the `message` (the button label).
+- The request serializer also supports an `actions` array for future components that need it; the payload is forwarded to the Action Handler.
 
 ## Naming Convention for Component Actions
 
 - Use `SHOW_XXX_COMPONENT` for any action that instructs the frontend to render a component.
-- Examples: `SHOW_CANNED_RESPONSE_COMPONENT`, `SHOW_IDENTITY_ACCEPTANCE_COMPONENT`.
+- Example: `SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT`.
 - Keep these actions phase-scoped via the prompt’s allowed actions.
 
 ## Multi-Action Buttons (Optional, Future-Proofing)
