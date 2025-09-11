@@ -126,14 +126,22 @@ class CoachViewSet(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
         # Step 6: Add the coach response to the chat history
-        coach_message = add_chat_message(request.user, response.message, MessageRole.COACH)
-        new_state, actions = apply_actions(coach_state, response, coach_message)
+        coach_message = add_chat_message(
+            request.user, response.message, MessageRole.COACH
+        )
+        new_state, actions, component_config = apply_actions(
+            coach_state, response, coach_message
+        )
         log.debug(f"Actions: {actions}")
-        
+
         response_data = {
             "message": response.message,
             "final_prompt": coach_prompt,
         }
+
+        # Add component config if present
+        if component_config:
+            response_data["component"] = component_config.model_dump()
         # Step 9: Serialize the response
         serializer = CoachResponseSerializer(data=response_data)
         serializer.is_valid(raise_exception=True)
@@ -198,36 +206,26 @@ class CoachViewSet(
         response: CoachChatResponse = ai_service.generate(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
-        coach_message = add_chat_message(acting_user, response.message, MessageRole.COACH)
-        new_state, actions = apply_actions(coach_state, response, coach_message)
-        coach_state_serializer = CoachStateSerializer(new_state)
+        coach_message = add_chat_message(
+            acting_user, response.message, MessageRole.COACH
+        )
+        new_state, actions, component_config = apply_actions(
+            coach_state, response, coach_message
+        )
         log.debug(f"Actions: {actions}")
-
-        large_chat_history_query_set = ChatMessage.objects.filter(
-            user=acting_user
-        ).order_by("-timestamp")[:20]
-        large_chat_history = list(reversed(large_chat_history_query_set))
-        chat_history_serialized = ChatMessageSerializer(
-            large_chat_history, many=True
-        ).data
-
-        identities = Identity.objects.filter(user=acting_user)
-        identities_serialized = IdentitySerializer(identities, many=True).data
 
         response_data = {
             "message": response.message,
-            "coach_state": coach_state_serializer.data,
             "final_prompt": coach_prompt,
-            "actions": actions,
-            "chat_history": chat_history_serialized,
-            "identities": identities_serialized,
         }
+
+        # Add component config if present
+        if component_config:
+            response_data["component"] = component_config.model_dump()
+        # Step 9: Serialize the response
         serializer = CoachResponseSerializer(data=response_data)
+        serializer.is_valid(raise_exception=True)
         if not serializer.is_valid():
             log.error(f"Serializer errors: {serializer.errors}")
-            log.error(f"Coach state serializer data: {coach_state_serializer.data}")
-            log.error(
-                f"Coach state serializer data type: {type(coach_state_serializer.data)}"
-            )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)

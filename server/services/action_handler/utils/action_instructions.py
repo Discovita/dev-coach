@@ -33,6 +33,7 @@ from services.action_handler.models.actions import (
     UpdateUserNoteAction,
     DeleteUserNoteAction,
     UpdateAskedQuestionsAction,
+    ShowCannedResponseComponentAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -121,6 +122,10 @@ ACTION_PARAMS = {
     ActionType.UPDATE_ASKED_QUESTIONS: {
         "description": "Update the list of questions that have been asked during the Get To Know You phase. You must pass the complete list of all questions that have been asked, not just the ones that have changed.",
         "model": UpdateAskedQuestionsAction,
+    },
+    ActionType.SHOW_CANNED_RESPONSE_COMPONENT: {
+        "description": "Show a canned response component to the user with pre-written response buttons for convenience. Use this when asking questions where users might benefit from quick response options.",
+        "model": ShowCannedResponseComponentAction,
     },
 }
 

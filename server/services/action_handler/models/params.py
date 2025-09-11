@@ -220,3 +220,12 @@ class UpdateAskedQuestionsParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class ShowCannedResponseComponentParams(BaseModel):
+    show_canned_response_component: bool = Field(
+        ..., description="Whether to show the canned response component"
+    )
+
+    class Config:
+        extra = "forbid"
