@@ -222,9 +222,9 @@ class UpdateAskedQuestionsParams(BaseModel):
         extra = "forbid"
 
 
-class ShowCannedResponseComponentParams(BaseModel):
-    show_canned_response_component: bool = Field(
-        ..., description="Whether to show the canned response component"
+class ShowIntroductionCannedResponseComponentParams(BaseModel):
+    show_introduction_canned_response_component: bool = Field(
+        ..., description="Whether to show the introduction canned response component"
     )
 
     class Config:

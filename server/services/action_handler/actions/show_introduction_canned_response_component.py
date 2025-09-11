@@ -2,23 +2,24 @@ from apps.coach_states.models import CoachState
 from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
 from enums.action_type import ActionType
-from services.action_handler.models.params import ShowCannedResponseComponentParams
+from services.action_handler.models.params import ShowIntroductionCannedResponseComponentParams
 from models.components.ComponentConfig import ComponentConfig, ComponentButton
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
 
 
-def show_canned_response_component(
+def show_introduction_canned_response_component(
     coach_state: CoachState,
-    params: ShowCannedResponseComponentParams,
+    params: ShowIntroductionCannedResponseComponentParams,
     coach_message: ChatMessage,
 ):
     """
-    Show canned response component to the user.
+    Show introduction canned response component to the user.
 
     This action builds a component configuration that will be rendered
-    on the frontend, providing pre-written response buttons for user convenience.
+    on the frontend, providing pre-written response buttons for user convenience
+    during the introduction phase.
     """
     log.info(f"Showing canned response component for user {coach_state.user.id}")
 
@@ -36,7 +37,7 @@ def show_canned_response_component(
     # Log the action
     Action.objects.create(
         user=coach_state.user,
-        action_type=ActionType.SHOW_CANNED_RESPONSE_COMPONENT.value,
+        action_type=ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value,
         parameters=params.model_dump(),
         result_summary=f"Showed canned response component with {len(buttons)} buttons",
         coach_message=coach_message,

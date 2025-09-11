@@ -33,7 +33,7 @@ ACTION_REGISTRY = {
     ActionType.ADD_USER_NOTE.value: add_user_note,  # Sentinel actions
     ActionType.UPDATE_USER_NOTE.value: update_user_note,  # Sentinel actions
     ActionType.DELETE_USER_NOTE.value: delete_user_note,  # Sentinel actions
-    ActionType.SHOW_CANNED_RESPONSE_COMPONENT.value: show_canned_response_component,
+    ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
 }
 
 

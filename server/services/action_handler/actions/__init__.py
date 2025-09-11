@@ -19,4 +19,4 @@ from .add_user_note import add_user_note
 from .update_user_note import update_user_note
 from .delete_user_note import delete_user_note
 from .update_asked_questions import update_asked_questions
-from .show_canned_response_component import show_canned_response_component
+from .show_introduction_canned_response_component import show_introduction_canned_response_component

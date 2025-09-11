@@ -23,7 +23,7 @@ from services.action_handler.models.actions import (
     UpdateUserNoteAction,
     DeleteUserNoteAction,
     UpdateAskedQuestionsAction,
-    ShowCannedResponseComponentAction,
+    ShowIntroductionCannedResponseComponentAction,
 )
 
 from services.logger import configure_logging
@@ -52,7 +52,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.UPDATE_USER_NOTE: UpdateUserNoteAction,
     ActionType.DELETE_USER_NOTE: DeleteUserNoteAction,
     ActionType.UPDATE_ASKED_QUESTIONS: UpdateAskedQuestionsAction,
-    ActionType.SHOW_CANNED_RESPONSE_COMPONENT: ShowCannedResponseComponentAction,
+    ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT: ShowIntroductionCannedResponseComponentAction,
 }
 
 
