@@ -54,7 +54,7 @@ The Component Renderer System allows the Coach to dynamically show interactive U
    - Store only the latest component config in query cache as `componentConfig`
    - ALWAYS set `componentConfig` on every response (either the component or `null`)
    - Query keys: `["user", "componentConfig"]` and `["testScenarioUser", userId, "componentConfig"]`
-3. **Hook Integration**: Both `useChatMessages` and `useTestScenarioUserChatMessages` expose `componentConfig`
+3. **Hook Integration**: Both `useChatMessages` and `useTestScenarioChatMessages` expose `componentConfig`
 4. **Message Integration**: In `ChatMessages`, render the last coach bubble using `CoachMessageWithExtras` if `componentConfig` exists and the UI is not processing
 5. **Universal Rendering (v1)**: For canned responses, render buttons from `componentConfig.buttons`; clicking sends the button's `actions` array via existing send flow
 

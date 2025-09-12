@@ -18,7 +18,7 @@ import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-sc
 import { useTestScenarioUserFinalPrompt } from "@/hooks/test-scenario/use-test-scenario-user-final-prompt";
 import { useTestScenarioUserActions } from "@/hooks/test-scenario/use-test-scenario-user-actions";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
-import { useTestScenarioUserChatMessages } from "@/hooks/test-scenario/use-test-scenario-user-chat-messages";
+import { useTestScenarioChatMessages } from "@/hooks/test-scenario/use-test-scenario-chat-messages";
 import IdentityItem from "./IdentityItem";
 
 /**
@@ -172,7 +172,7 @@ export const TestScenarioTabContent: React.FC<{
   const finalPrompt = useTestScenarioUserFinalPrompt(testUserId);
   const { actions } = useTestScenarioUserActions(testUserId);
   const { identities } = useTestScenarioUserIdentities(testUserId); // <-- FIX: get identities here
-  const { chatMessages } = useTestScenarioUserChatMessages(testUserId);
+  const { chatMessages } = useTestScenarioChatMessages(testUserId);
 
   switch (tabName) {
     case TabName.STATE:

@@ -1,23 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchTestScenarioUserChatMessages } from "@/api/testScenarioUser";
+import { fetchTestScenarioChatMessages } from "@/api/testScenarioUser";
 import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
+import { CoachRequest } from "@/types/coachRequest";
 import { Message } from "@/types/message";
 
 /**
- * useTestScenarioUserChatMessages
+ * useTestScenarioChatMessages
  * Handles fetching and updating a test scenario user's chat messages using TanStack Query.
  * Implements optimistic UI and mutation logic similar to useChatMessages.
  *
  * @param userId - The id of the test scenario user
  */
-export function useTestScenarioUserChatMessages(userId: string) {
+export function useTestScenarioChatMessages(userId: string) {
   const queryClient = useQueryClient();
 
   // Fetch the test user's chat messages
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["testScenarioUser", userId, "chatMessages"],
-    queryFn: () => fetchTestScenarioUserChatMessages(userId),
+    queryFn: () => fetchTestScenarioChatMessages(userId),
     enabled: !!userId,
     staleTime: 1000 * 60 * 10,
     retry: false,
@@ -32,21 +33,15 @@ export function useTestScenarioUserChatMessages(userId: string) {
 
   /**
    * Mutation for sending a chat message as the test scenario user.
-   * Accepts an object with content (string) and optional model (string).
+   * Accepts a CoachRequest object with message, model_name, and optional actions.
    * On success, updates the chatMessages, identities, and coachState caches for the test user.
    */
   const updateMutation = useMutation({
-    mutationFn: async ({
-      content,
-      model,
-    }: {
-      content: string;
-      model?: string;
-    }) => {
-      return apiClient.sendTestScenarioMessage(userId, content, model);
+    mutationFn: async (request: CoachRequest) => {
+      return apiClient.sendTestScenarioMessage(request);
     },
     onSuccess: (response: CoachResponse, variables) => {
-      console.log("[useTestScenarioUserChatMessages] Response:", response);
+      console.log("[useTestScenarioChatMessages] Response:", response);
       // Ensure messages query doesn't refetch right now
       queryClient.cancelQueries({
         queryKey: ["testScenarioUser", userId, "chatMessages"],
@@ -59,7 +54,7 @@ export function useTestScenarioUserChatMessages(userId: string) {
           const current = old ?? [];
           const userMsg: Message = {
             role: "user",
-            content: variables.content,
+            content: variables.message,
             timestamp: new Date().toISOString(),
           };
           const coachMsg: Message | null = response.message
@@ -75,7 +70,7 @@ export function useTestScenarioUserChatMessages(userId: string) {
           const hasUserAlready =
             !!last &&
             last.role === "user" &&
-            last.content === variables.content;
+            last.content === variables.message;
 
           const next: Message[] = hasUserAlready
             ? [...current]

@@ -6,10 +6,11 @@ import { ConversationResetter } from "./ConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
 import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
 import { User } from "@/types/user";
+import { CoachRequest } from "@/types/coachRequest";
 
 interface ChatControlsProps {
   isProcessingMessage: boolean;
-  onSendMessage: (msg: string) => void;
+  onSendMessage: (request: CoachRequest) => void;
 }
 
 export const ChatControls: React.FC<ChatControlsProps> = ({
@@ -60,7 +61,7 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
     (e: React.FormEvent) => {
       e.preventDefault();
       if (inputMessage.trim()) {
-        onSendMessage(inputMessage);
+        onSendMessage({ message: inputMessage });
         setInputMessage("");
         setTimeout(resizeTextarea, 0);
       }

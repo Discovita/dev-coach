@@ -11,6 +11,7 @@ class CoachRequestSerializer(serializers.Serializer):
     Fields:
     - message: The user's message to the coach (required).
     - model_name: (Optional) The name of the AI model to use. If not provided, defaults to GPT-4o.
+    - user_id: (Optional) The user ID to act as (admin only). If not provided, uses request.user.
     """
 
     message = serializers.CharField(help_text="User's message to the coach.")
@@ -18,6 +19,10 @@ class CoachRequestSerializer(serializers.Serializer):
         required=False,
         allow_blank=True,
         help_text="Optional model name. If not provided, uses default.",
+    )
+    user_id = serializers.IntegerField(
+        required=False,
+        help_text="Optional user ID to act as (admin only). If not provided, uses request.user.",
     )
     actions = serializers.ListField(
         required=False,

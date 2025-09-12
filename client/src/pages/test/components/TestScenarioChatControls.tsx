@@ -4,10 +4,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { TestScenarioConversationResetter } from "@/pages/test/components/TestScenarioConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
+import { CoachRequest } from "@/types/coachRequest";
+
+
 
 interface TestScenarioChatControlsProps {
   isProcessingMessage: boolean;
-  onSendMessage: (msg: string) => void;
+  onSendMessage: (request: CoachRequest) => void;
   scenarioId: string;
   testUserId: string; // Add testUserId prop
   onResetSuccess?: () => void;
@@ -59,7 +62,7 @@ export const TestScenarioChatControls: React.FC<
     (e: React.FormEvent) => {
       e.preventDefault();
       if (inputMessage.trim()) {
-        onSendMessage(inputMessage);
+        onSendMessage({ message: inputMessage });
         setInputMessage("");
         setTimeout(resizeTextarea, 0);
       }

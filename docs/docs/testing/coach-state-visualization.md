@@ -61,7 +61,7 @@ The `CoachStateVisualizer` fetches data using these hooks:
 The `TestScenarioCoachStateVisualizer` uses specialized test scenario hooks:
 
 - **useTestScenarioUserCoachState(testUserId)**: Fetches coach state from `/test-user/{userId}/coach-state/`
-- **useTestScenarioUserChatMessages(testUserId)**: Fetches chat history from `/test-user/{userId}/chat-messages/`
+- **useTestScenarioChatMessages(testUserId)**: Fetches chat history from `/test-user/{userId}/chat-messages/`
 - **useTestScenarioUserIdentities(testUserId)**: Fetches identities from `/test-user/{userId}/identities/`
 - **useTestScenarioUserActions(testUserId)**: Fetches actions from `/test-user/{userId}/actions/`
 - **useTestScenarioUserFinalPrompt(testUserId)**: Retrieves the latest final prompt from cache
@@ -82,7 +82,7 @@ The `TestScenarioCoachStateVisualizer` uses specialized test scenario hooks:
 | Endpoint                             | Method | Description              | Used By                         |
 | ------------------------------------ | ------ | ------------------------ | ------------------------------- |
 | `/test-user/{userId}/coach-state/`   | GET    | Test user coaching state | useTestScenarioUserCoachState   |
-| `/test-user/{userId}/chat-messages/` | GET    | Test user chat history   | useTestScenarioUserChatMessages |
+| `/test-user/{userId}/chat-messages/` | GET    | Test user chat history   | useTestScenarioChatMessages |
 | `/test-user/{userId}/identities/`    | GET    | Test user identities     | useTestScenarioUserIdentities   |
 | `/test-user/{userId}/actions/`       | GET    | Test user actions        | useTestScenarioUserActions      |
 

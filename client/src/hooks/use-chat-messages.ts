@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchChatMessages, resetChatMessages } from "@/api/user";
 import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
+import { CoachRequest } from "@/types/coachRequest";
 import { Message } from "@/types/message";
 
 /**
@@ -34,19 +35,13 @@ export function useChatMessages() {
 
   /**
    * Mutation for sending a chat message to the backend.
-   * Accepts an object with content (string) and optional model (string).
+   * Accepts a CoachRequest object with message, model_name, and optional actions.
    * On success, updates the chatMessages, identities, and coachState caches.
    */
   const updateMutation = useMutation({
     // mutationFn sends the message to the backend
-    mutationFn: async ({
-      content,
-      model,
-    }: {
-      content: string;
-      model?: string;
-    }) => {
-      return apiClient.sendMessage(content, model ?? "");
+    mutationFn: async (request: CoachRequest) => {
+      return apiClient.sendMessage(request);
     },
     // On success, update all relevant caches with the response
     onSuccess: (response: CoachResponse, variables) => {
@@ -57,7 +52,7 @@ export function useChatMessages() {
           const current = old ?? [];
           const last = current[current.length - 1];
           const hasUserAlready =
-            !!last && last.role === "user" && last.content === variables.content;
+            !!last && last.role === "user" && last.content === variables.message;
 
           const maybeUserAppended = hasUserAlready
             ? current
@@ -65,7 +60,7 @@ export function useChatMessages() {
                 ...current,
                 {
                   role: "user",
-                  content: variables.content,
+                  content: variables.message,
                   timestamp: new Date().toISOString(),
                 } as Message,
               ];

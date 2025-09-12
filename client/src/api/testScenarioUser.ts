@@ -74,7 +74,7 @@ export async function fetchTestScenarioUserActions(userId: string) {
  * Fetch chat messages for a test scenario user (admin only).
  * Calls /test-user/{userId}/chat-messages/
  */
-export async function fetchTestScenarioUserChatMessages(userId: string) {
+export async function fetchTestScenarioChatMessages(userId: string) {
   const response = await authFetch(
     `${COACH_BASE_URL}/test-user/${userId}/chat-messages`,
     {}

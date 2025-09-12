@@ -2,11 +2,15 @@ import React from "react";
 import { CoachMessage } from "@/pages/chat/components/CoachMessage";
 import { CoachMessageWithComponent } from "@/pages/chat/components/CoachMessageWithComponent";
 import { UserMessage } from "@/pages/chat/components/UserMessage";
-import { IdentityChoice } from "@/pages/chat/components/IdentityChoice";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { LoadingBubbles } from "@/pages/chat/components/LoadingBubbles";
 import { Message } from "@/types/message";
-import { CoachState } from "@/types/coachState";
+import { CoachRequest } from "@/types/coachRequest";
+
+/** 
+ * ChatMessages component is used to render the chat messages in both the 
+ * 
+ */
 
 /**
  * Props for ChatMessages
@@ -22,20 +26,16 @@ import { CoachState } from "@/types/coachState";
 interface ChatMessagesProps {
   messages: Message[];
   isProcessingMessage: boolean;
-  coachState?: CoachState;
-  handleIdentityChoice: (response: string) => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   /** Latest component config to render for the newest coach message (or null) */
   componentConfig?: import("@/types/componentConfig").ComponentConfig | null;
-  /** Handler for component button selection (sends the label as a message) */
-  onSelectComponentOption?: (label: string) => void;
+  /** Handler for component button selection (sends a CoachRequest) */
+  onSelectComponentOption?: (request: CoachRequest) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
   isProcessingMessage,
-  coachState,
-  handleIdentityChoice,
   messagesEndRef,
   componentConfig,
   onSelectComponentOption,
@@ -51,7 +51,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               <CoachMessageWithComponent
                 componentConfig={componentConfig}
                 onSelect={(label) =>
-                  onSelectComponentOption && onSelectComponentOption(label)
+                  onSelectComponentOption && onSelectComponentOption({ message: label })
                 }
                 disabled={isProcessingMessage}
               >
@@ -60,15 +60,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             ) : (
               <CoachMessage>
                 <MarkdownRenderer content={message.content} />
-                {index === messages.length - 1 &&
-                  coachState?.proposed_identity &&
-                  !isProcessingMessage && (
-                    <IdentityChoice
-                      identity={coachState.proposed_identity}
-                      onChoiceSelected={handleIdentityChoice}
-                      disabled={isProcessingMessage}
-                    />
-                  )}
               </CoachMessage>
             )
           ) : message.role === "user" ? (
