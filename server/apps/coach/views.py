@@ -7,7 +7,7 @@ from apps.coach_states.models import CoachState
 from apps.chat_messages.utils import add_chat_message, get_initial_message
 from enums.message_role import MessageRole
 from models.CoachChatResponse import CoachChatResponse
-from services.action_handler.handler import apply_actions
+from services.action_handler.handler import apply_coach_actions
 from rest_framework.decorators import action
 from services.prompt_manager.manager import PromptManager
 from services.ai import AIServiceFactory
@@ -85,10 +85,6 @@ class CoachViewSet(
         component_actions = serializer.validated_data.get("actions", [])
         model = serializer.get_model()
 
-        # Log incoming component actions if present
-        if component_actions:
-            log.info(f"Incoming component actions from user: {component_actions}")
-
         # Step 2: Ensure chat history starts with the initial bot message if empty
         chat_history_qs = ChatMessage.objects.filter(user=request.user)
         if not chat_history_qs.exists():
@@ -107,7 +103,9 @@ class CoachViewSet(
                 {"detail": "Coach state not found."}, status=status.HTTP_404_NOT_FOUND
             )
 
-        # Step 5: Build the prompt using the PromptManager
+        # Step 5: Apply the component actions
+
+        # Step 6: Build the prompt using the PromptManager
         prompt_manager = PromptManager()
         coach_prompt, response_format = prompt_manager.create_chat_prompt(
             user=request.user, model=model
@@ -126,14 +124,16 @@ class CoachViewSet(
         response: CoachChatResponse = ai_service.generate(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
-        # Step 6: Add the coach response to the chat history
+        # Step 7: Add the coach response to the chat history
         coach_message = add_chat_message(
             request.user, response.message, MessageRole.COACH
         )
-        new_state, actions, component_config = apply_actions(
+        new_state, actions, component_config = apply_coach_actions(
             coach_state, response, coach_message
         )
         log.debug(f"Actions: {actions}")
+        log.debug(f"New State: {new_state}")
+        log.debug(f"Component Config: {component_config}")
 
         response_data = {
             "message": response.message,
@@ -143,7 +143,7 @@ class CoachViewSet(
         # Add component config if present
         if component_config:
             response_data["component"] = component_config.model_dump()
-        # Step 9: Serialize the response
+        # Step 8: Serialize the response
         serializer = CoachResponseSerializer(data=response_data)
         serializer.is_valid(raise_exception=True)
         if not serializer.is_valid():
@@ -158,38 +158,42 @@ class CoachViewSet(
         """
         try:
             log.info(f"Processing Request: {request.data}")
-            log.info(f"Request user: {request.user} (is_staff: {request.user.is_staff}, is_superuser: {request.user.is_superuser})")
-            
+            log.info(
+                f"Request user: {request.user} (is_staff: {request.user.is_staff}, is_superuser: {request.user.is_superuser})"
+            )
+
             if not request.user.is_staff and not request.user.is_superuser:
                 log.warning(f"Unauthorized access attempt by user {request.user}")
                 return Response({"detail": "Not authorized."}, status=403)
-            
+
             # Step 1: Parse and validate the incoming request
             serializer = CoachRequestSerializer(data=request.data)
             if not serializer.is_valid():
                 log.error(f"Serializer validation failed: {serializer.errors}")
-                return Response({"detail": "Invalid request data.", "errors": serializer.errors}, status=400)
-            
+                return Response(
+                    {"detail": "Invalid request data.", "errors": serializer.errors},
+                    status=400,
+                )
+
             user_id = serializer.validated_data.get("user_id")
             if not user_id:
                 log.error("user_id is missing from request")
                 return Response({"detail": "user_id is required."}, status=400)
-            
+
             from django.contrib.auth import get_user_model
+
             User = get_user_model()
             try:
                 acting_user = User.objects.get(pk=user_id)
                 log.info(f"Found acting user: {acting_user}")
             except User.DoesNotExist:
                 log.error(f"User with id {user_id} not found")
-                return Response({"detail": f"User with id {user_id} not found."}, status=404)
+                return Response(
+                    {"detail": f"User with id {user_id} not found."}, status=404
+                )
             message = serializer.validated_data["message"]
             component_actions = serializer.validated_data.get("actions", [])
             model = serializer.get_model()
-
-            # Log incoming component actions if present
-            if component_actions:
-                log.info(f"Incoming component actions from user: {component_actions}")
 
             # Step 2: Ensure chat history starts with the initial bot message if empty
             chat_history_qs = ChatMessage.objects.filter(user=acting_user)
@@ -207,10 +211,13 @@ class CoachViewSet(
             except CoachState.DoesNotExist:
                 log.error(f"Coach state not found for user {acting_user}")
                 return Response(
-                    {"detail": "Coach state not found."}, status=status.HTTP_404_NOT_FOUND
+                    {"detail": "Coach state not found."},
+                    status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Step 5: Build the prompt using the PromptManager
+            # Step 5: Apply the component actions
+
+            # Step 6: Build the prompt using the PromptManager
             prompt_manager = PromptManager()
             coach_prompt, response_format = prompt_manager.create_chat_prompt(
                 user=acting_user, model=model
@@ -227,7 +234,7 @@ class CoachViewSet(
             coach_message = add_chat_message(
                 acting_user, response.message, MessageRole.COACH
             )
-            new_state, actions, component_config = apply_actions(
+            new_state, actions, component_config = apply_coach_actions(
                 coach_state, response, coach_message
             )
             log.debug(f"Actions: {actions}")
@@ -240,14 +247,16 @@ class CoachViewSet(
             # Add component config if present
             if component_config:
                 response_data["component"] = component_config.model_dump()
-            # Step 9: Serialize the response
+            # Step 8: Serialize the response
             serializer = CoachResponseSerializer(data=response_data)
             serializer.is_valid(raise_exception=True)
             if not serializer.is_valid():
                 log.error(f"Serializer errors: {serializer.errors}")
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
-            log.error(f"Unexpected error in process_message_for_user: {str(e)}", exc_info=True)
+            log.error(
+                f"Unexpected error in process_message_for_user: {str(e)}", exc_info=True
+            )
             return Response({"detail": f"Internal server error: {str(e)}"}, status=500)

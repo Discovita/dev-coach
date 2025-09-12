@@ -20,7 +20,8 @@ class ComponentButton(BaseModel):
 
     label: str = Field(..., description="Button label shown to the user")
     actions: Optional[List[ComponentAction]] = Field(
-        default=None, description="List of actions to perform when this button is clicked"
+        default=None,
+        description="List of actions to perform when this button is clicked",
     )
 
 
