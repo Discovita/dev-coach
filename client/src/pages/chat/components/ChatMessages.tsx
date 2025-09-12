@@ -50,8 +50,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             !isProcessingMessage ? (
               <CoachMessageWithComponent
                 componentConfig={componentConfig}
-                onSelect={(label) =>
-                  onSelectComponentOption && onSelectComponentOption({ message: label })
+                onSelect={(request: CoachRequest) =>
+                  onSelectComponentOption && onSelectComponentOption({ message: request.message, actions: request.actions })
                 }
                 disabled={isProcessingMessage}
               >

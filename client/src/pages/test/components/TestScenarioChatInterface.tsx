@@ -78,9 +78,16 @@ export const TestScenarioChatInterface: React.FC<{
   const handleSendMessage = useCallback(
     async (request: CoachRequest) => {
       if (!request.message.trim() || updateStatus === "pending") return;
-      await updateChatMessages(request);
+      
+      // For test scenarios, always include the user_id to enable admin impersonation
+      const requestWithUserId: CoachRequest = {
+        ...request,
+        user_id: userId,
+      };
+      
+      await updateChatMessages(requestWithUserId);
     },
-    [updateChatMessages, updateStatus]
+    [updateChatMessages, updateStatus, userId]
   );
 
   // Enhanced onResetSuccess: invalidate chat and coach state queries, then call parent callback

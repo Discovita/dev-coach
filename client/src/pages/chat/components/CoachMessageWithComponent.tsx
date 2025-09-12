@@ -1,5 +1,6 @@
 import React from "react";
 import { ComponentConfig } from "@/types/componentConfig";
+import { CoachRequest } from "@/types/coachRequest";
 
 export interface CoachMessageWithComponentProps {
   /**
@@ -14,9 +15,9 @@ export interface CoachMessageWithComponentProps {
 
   /**
    * Callback when a button is clicked
-   * @param label The button label to send as a message
+   * @param request The CoachRequest object containing the message and actions
    */
-  onSelect: (label: string) => void;
+  onSelect: (request: CoachRequest) => void;
 
   /**
    * Whether buttons should be disabled (e.g., while processing)
@@ -38,7 +39,7 @@ export const CoachMessageWithComponent: React.FC<
           {componentConfig.buttons.map((button, index) => (
             <button
               key={index}
-              onClick={() => onSelect(button.label)}
+              onClick={() => onSelect({ message: button.label, actions: button.actions })}
               disabled={disabled}
               className="px-3 py-1.5 text-sm font-medium rounded-md bg-gold-500 text-black hover:bg-gold-600 hover:text-gold-50 transition-colors cursor-pointer"
             >

@@ -2,7 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
-class Action(BaseModel):
+class ComponentAction(BaseModel):
     """
     Represents a single action to be performed.
     Used to define what happens when a button is clicked.
@@ -19,8 +19,8 @@ class ComponentButton(BaseModel):
     """
 
     label: str = Field(..., description="Button label shown to the user")
-    actions: Optional[List[Action]] = Field(
-        ..., description="List of actions to perform when this button is clicked"
+    actions: Optional[List[ComponentAction]] = Field(
+        default=None, description="List of actions to perform when this button is clicked"
     )
 
 

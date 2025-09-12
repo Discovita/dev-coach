@@ -62,12 +62,15 @@ export const TestScenarioChatControls: React.FC<
     (e: React.FormEvent) => {
       e.preventDefault();
       if (inputMessage.trim()) {
-        onSendMessage({ message: inputMessage });
+        onSendMessage({ 
+          message: inputMessage,
+          user_id: testUserId
+        });
         setInputMessage("");
         setTimeout(resizeTextarea, 0);
       }
     },
-    [inputMessage, onSendMessage, resizeTextarea]
+    [inputMessage, onSendMessage, resizeTextarea, testUserId]
   );
 
   const handleKeyDown = useCallback(

@@ -20,13 +20,13 @@ class CoachRequestSerializer(serializers.Serializer):
         allow_blank=True,
         help_text="Optional model name. If not provided, uses default.",
     )
-    user_id = serializers.IntegerField(
+    user_id = serializers.UUIDField(
         required=False,
         help_text="Optional user ID to act as (admin only). If not provided, uses request.user.",
     )
     actions = serializers.ListField(
         required=False,
-        allow_empty=False,
+        allow_empty=True,
         child=serializers.DictField(),
         help_text=(
             "List of actions to execute in order. Each item should be an object "

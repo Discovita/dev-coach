@@ -2,8 +2,14 @@ from apps.coach_states.models import CoachState
 from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
 from enums.action_type import ActionType
-from services.action_handler.models.params import ShowIntroductionCannedResponseComponentParams
-from models.components.ComponentConfig import ComponentConfig, ComponentButton
+from services.action_handler.models.params import (
+    ShowIntroductionCannedResponseComponentParams,
+)
+from models.components.ComponentConfig import (
+    ComponentConfig,
+    ComponentButton,
+    ComponentAction,
+)
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -27,7 +33,14 @@ def show_introduction_canned_response_component(
     # For now, we'll create some basic canned response buttons
     # In the future, these could be customized based on the current phase or context
     buttons = [
-        ComponentButton(label="Yes"),
+        ComponentButton(
+            label="Yes",
+            actions=[
+                ComponentAction(
+                    action="test_action", params={"test_param": "test_value"}
+                )
+            ],
+        ),
         ComponentButton(label="No"),
         ComponentButton(label="Tell me more"),
     ]
@@ -51,5 +64,5 @@ def show_introduction_canned_response_component(
     log.info(
         f"Successfully showed canned response component with {len(buttons)} buttons"
     )
-    
+
     return component
