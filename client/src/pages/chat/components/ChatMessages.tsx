@@ -26,7 +26,7 @@ interface ChatMessagesProps {
   handleIdentityChoice: (response: string) => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   /** Latest component config to render for the newest coach message (or null) */
-  componentConfig?: import("@/types/coachResponse").ComponentConfig | null;
+  componentConfig?: import("@/types/componentConfig").ComponentConfig | null;
   /** Handler for component button selection (sends the label as a message) */
   onSelectComponentOption?: (label: string) => void;
 }
@@ -50,7 +50,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             !isProcessingMessage ? (
               <CoachMessageWithComponent
                 componentConfig={componentConfig}
-                onSelect={(label) => onSelectComponentOption && onSelectComponentOption(label)}
+                onSelect={(label) =>
+                  onSelectComponentOption && onSelectComponentOption(label)
+                }
                 disabled={isProcessingMessage}
               >
                 <MarkdownRenderer content={message.content} />

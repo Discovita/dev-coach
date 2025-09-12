@@ -2,22 +2,25 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
+class Action(BaseModel):
+    """
+    Represents a single action to be performed.
+    Used to define what happens when a button is clicked.
+    """
+
+    action: str = Field(..., description="The action type to perform")
+    params: dict = Field(..., description="Parameters for the action")
+
+
 class ComponentButton(BaseModel):
     """
     Represents a single button presented to the user.
-    Action and params are optional. If they are not provided, the button will send the message as if the user typed it. The label will be sent as the message.
+    Contains a list of actions to be performed when the button is clicked.
     """
 
-    label: str = Field(
-        ..., description="Button label shown to the user (also used as the message)"
-    )
-    action: Optional[str] = Field(
-        default=None,
-        description="Optional action to perform (not needed for simple message sending)",
-    )
-    params: Optional[dict] = Field(
-        default=None,
-        description="Optional parameters for the action (not needed for simple message sending)",
+    label: str = Field(..., description="Button label shown to the user")
+    actions: Optional[List[Action]] = Field(
+        ..., description="List of actions to perform when this button is clicked"
     )
 
 

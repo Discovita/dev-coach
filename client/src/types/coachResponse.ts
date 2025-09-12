@@ -1,12 +1,4 @@
-export interface ComponentButton {
-  label: string;
-  action?: string;
-  params?: Record<string, unknown>;
-}
-
-export interface ComponentConfig {
-  buttons: ComponentButton[];
-}
+import { ComponentConfig } from "./componentConfig";
 
 export interface CoachResponse {
   message: string;
