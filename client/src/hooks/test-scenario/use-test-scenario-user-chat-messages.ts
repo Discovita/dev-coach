@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchTestScenarioUserChatMessages } from "@/api/testScenarioUser";
-import { sendTestScenarioUserMessage } from "@/api/coach";
+import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
 import { Message } from "@/types/message";
 
@@ -43,7 +43,7 @@ export function useTestScenarioUserChatMessages(userId: string) {
       content: string;
       model?: string;
     }) => {
-      return sendTestScenarioUserMessage(userId, content, model);
+      return apiClient.sendTestScenarioMessage(userId, content, model);
     },
     onSuccess: (response: CoachResponse, variables) => {
       console.log("[useTestScenarioUserChatMessages] Response:", response);
@@ -73,9 +73,13 @@ export function useTestScenarioUserChatMessages(userId: string) {
           // Avoid duplicate user bubble if one already exists at the end (due to prior optimistic UI)
           const last = current[current.length - 1];
           const hasUserAlready =
-            !!last && last.role === "user" && last.content === variables.content;
+            !!last &&
+            last.role === "user" &&
+            last.content === variables.content;
 
-          const next: Message[] = hasUserAlready ? [...current] : [...current, userMsg];
+          const next: Message[] = hasUserAlready
+            ? [...current]
+            : [...current, userMsg];
           return coachMsg ? [...next, coachMsg] : next;
         }
       );

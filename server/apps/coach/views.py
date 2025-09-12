@@ -4,7 +4,6 @@ from rest_framework import viewsets, status
 from rest_framework.request import Request
 from apps.coach.serializers import CoachRequestSerializer, CoachResponseSerializer
 from apps.coach_states.models import CoachState
-from apps.coach_states.serializer import CoachStateSerializer
 from apps.chat_messages.utils import add_chat_message, get_initial_message
 from enums.message_role import MessageRole
 from models.CoachChatResponse import CoachChatResponse
@@ -14,9 +13,6 @@ from services.prompt_manager.manager import PromptManager
 from services.ai import AIServiceFactory
 from apps.chat_messages.models import ChatMessage
 from services.logger import configure_logging
-from apps.chat_messages.serializer import ChatMessageSerializer
-from apps.identities.serializer import IdentitySerializer
-from apps.identities.models import Identity
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -86,7 +82,12 @@ class CoachViewSet(
         serializer = CoachRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message = serializer.validated_data["message"]
+        component_actions = serializer.validated_data.get("actions", [])
         model = serializer.get_model()
+
+        # Log incoming component actions if present
+        if component_actions:
+            log.info(f"Incoming component actions from user: {component_actions}")
 
         # Step 2: Ensure chat history starts with the initial bot message if empty
         chat_history_qs = ChatMessage.objects.filter(user=request.user)
@@ -172,7 +173,12 @@ class CoachViewSet(
         serializer = CoachRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message = serializer.validated_data["message"]
+        component_actions = serializer.validated_data.get("actions", [])
         model = serializer.get_model()
+
+        # Log incoming component actions if present
+        if component_actions:
+            log.info(f"Incoming component actions from user: {component_actions}")
 
         # Step 2: Ensure chat history starts with the initial bot message if empty
         chat_history_qs = ChatMessage.objects.filter(user=acting_user)

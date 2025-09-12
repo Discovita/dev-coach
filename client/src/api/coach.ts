@@ -26,19 +26,26 @@ export class ApiClient {
     }
     return response.json();
   }
-}
-
-/**
- * Send a message as a test scenario user (admin only).
- * Calls /coach/process-message-for-user
- */
-export async function sendTestScenarioUserMessage(userId: string, message: string, model?: string) {
-  const response = await authFetch(`${COACH_BASE_URL}/coach/process-message-for-user`, {
-    method: "POST",
-    body: JSON.stringify({ user_id: userId, message, model }),
-  });
-  if (!response.ok) throw new Error("Failed to send message as test scenario user");
-  return response.json();
+  /**
+   * Send a message as a test scenario user (admin only).
+   * Calls /coach/process-message-for-user
+   */
+  async sendTestScenarioMessage(
+    userId: string,
+    message: string,
+    model?: string
+  ) {
+    const response = await authFetch(
+      `${COACH_BASE_URL}/coach/process-message-for-user`,
+      {
+        method: "POST",
+        body: JSON.stringify({ user_id: userId, message, model }),
+      }
+    );
+    if (!response.ok)
+      throw new Error("Failed to send message as test scenario user");
+    return response.json();
+  }
 }
 
 export const apiClient = new ApiClient();
