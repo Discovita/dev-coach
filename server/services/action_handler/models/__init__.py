@@ -21,6 +21,7 @@ from .params import (
     DeleteUserNoteParams,
     UpdateAskedQuestionsParams,
     ShowIntroductionCannedResponseComponentParams,
+    ShowAcceptIAMComponentParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -45,6 +46,7 @@ from .actions import (
     DeleteUserNoteAction,
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
+    ShowAcceptIAMComponentAction,
 )
 
 __all__ = [
@@ -70,6 +72,7 @@ __all__ = [
     "DeleteUserNoteParams",
     "UpdateAskedQuestionsParams",
     "ShowIntroductionCannedResponseComponentParams",
+    "ShowAcceptIAMComponentParams",
     "SelectIdentityFocusAction",
     "SetCurrentIdentityAction",
     "CreateIdentityAction",
@@ -92,4 +95,5 @@ __all__ = [
     "DeleteUserNoteAction",
     "UpdateAskedQuestionsAction",
     "ShowIntroductionCannedResponseComponentAction",
+    "ShowAcceptIAMComponentAction",
 ]

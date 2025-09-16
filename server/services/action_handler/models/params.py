@@ -229,3 +229,13 @@ class ShowIntroductionCannedResponseComponentParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class ShowAcceptIAMComponentParams(BaseModel):
+    id: str = Field(..., description="ID of identity for affirmation acceptance component")
+    affirmation: str = Field(
+        ..., description="Affirmation to propose to the user for acceptance"
+    )
+
+    class Config:
+        extra = "forbid"

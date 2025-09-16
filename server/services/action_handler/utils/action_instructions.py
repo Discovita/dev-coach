@@ -34,6 +34,7 @@ from services.action_handler.models.actions import (
     DeleteUserNoteAction,
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
+    ShowAcceptIAMComponentAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -126,6 +127,10 @@ ACTION_PARAMS = {
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT: {
         "description": "Show an introduction canned response component to the user with pre-written response buttons for convenience during the introduction phase. Use this when asking the user any questions. The way this gets used is when you ask the user a question, set this to true and the component will be shown to the user allowing them to answer more easily.",
         "model": ShowIntroductionCannedResponseComponentAction,
+    },
+    ActionType.SHOW_ACCEPT_I_AM_COMPONENT: {
+        "description": "Show an 'Accept I Am' component asking the user to accept the proposed affirmation or keep working on it. Pass the identity id and the proposed affirmation.",
+        "model": ShowAcceptIAMComponentAction,
     },
 }
 

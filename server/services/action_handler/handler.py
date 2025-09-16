@@ -30,13 +30,17 @@ ACTION_REGISTRY = {
     ActionType.UPDATE_WHO_YOU_ARE.value: update_who_you_are,
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value: update_who_you_want_to_be,
     ActionType.UPDATE_ASKED_QUESTIONS.value: update_asked_questions,
-    ActionType.ADD_USER_NOTE.value: add_user_note,  # Sentinel actions
-    ActionType.UPDATE_USER_NOTE.value: update_user_note,  # Sentinel actions
-    ActionType.DELETE_USER_NOTE.value: delete_user_note,  # Sentinel actions
+    # Sentinel actions (not logged in the Action Table)
+    ActionType.ADD_USER_NOTE.value: add_user_note,
+    ActionType.UPDATE_USER_NOTE.value: update_user_note,
+    ActionType.DELETE_USER_NOTE.value: delete_user_note,
+    # Component actions
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
+    ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
 }
 
 
+# TODO: No longer sending actions to the frontend via the API response. They can be removed.
 def apply_coach_actions(
     coach_state: CoachState, response: CoachChatResponse, coach_message: ChatMessage
 ) -> Tuple[CoachState, List[str], Optional[ComponentConfig]]:
@@ -129,7 +133,6 @@ def apply_component_actions(
         - component_config will be None unless an action handler returns a ComponentConfig
     """
     log.debug(f"Component actions: {component_actions}")
-    actions = []
     component_config = None
 
     for component_action in component_actions:
@@ -139,9 +142,6 @@ def apply_component_actions(
         if not action_type:
             log.warning(f"Component action missing 'action' field: {component_action}")
             continue
-
-        # Add to actions list for logging/tracking
-        actions.append({"type": action_type, "params": action_params})
 
         # Get the handler function from the registry
         handler_func = ACTION_REGISTRY.get(action_type)
@@ -166,10 +166,10 @@ def apply_component_actions(
             ActionType.UPDATE_USER_NOTE.value,
             ActionType.DELETE_USER_NOTE.value,
         ]:
-            # These actions don't take user_message as a parameter
+            # These Sentinel actions don't take user_message as a parameter
             result = handler_func(coach_state, action_params)
         else:
-            # All other actions take user_message as a parameter
+            # All other actions take user_message as a parameter because they get logged in the Action Table
             result = handler_func(coach_state, action_params, user_message)
 
         # Check if the action handler returned a ComponentConfig
@@ -181,4 +181,4 @@ def apply_component_actions(
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()
-    return coach_state, actions, component_config
+    return coach_state, component_config

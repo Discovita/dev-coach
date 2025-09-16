@@ -22,6 +22,7 @@ from .params import (
     DeleteUserNoteParams,
     UpdateAskedQuestionsParams,
     ShowIntroductionCannedResponseComponentParams,
+    ShowAcceptIAMComponentParams,
 )
 
 
@@ -218,6 +219,15 @@ class UpdateAskedQuestionsAction(BaseModel):
 class ShowIntroductionCannedResponseComponentAction(BaseModel):
     params: ShowIntroductionCannedResponseComponentParams = Field(
         ..., description="Parameters for showing the canned response component."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class ShowAcceptIAMComponentAction(BaseModel):
+    params: ShowAcceptIAMComponentParams = Field(
+        ..., description="Parameters for showing the accept 'I am' component."
     )
 
     class Config:

@@ -7,7 +7,7 @@ from apps.coach_states.models import CoachState
 from apps.chat_messages.utils import add_chat_message, get_initial_message
 from enums.message_role import MessageRole
 from models.CoachChatResponse import CoachChatResponse
-from services.action_handler.handler import apply_coach_actions
+from services.action_handler.handler import apply_coach_actions, apply_component_actions
 from rest_framework.decorators import action
 from services.prompt_manager.manager import PromptManager
 from services.ai import AIServiceFactory
@@ -104,6 +104,10 @@ class CoachViewSet(
             )
 
         # Step 5: Apply the component actions
+        if component_actions:
+            new_state, component_config = apply_component_actions(
+                coach_state, component_actions, request.user
+            )
 
         # Step 6: Build the prompt using the PromptManager
         prompt_manager = PromptManager()
@@ -131,7 +135,7 @@ class CoachViewSet(
         new_state, actions, component_config = apply_coach_actions(
             coach_state, response, coach_message
         )
-        log.debug(f"Actions: {actions}")
+        log.debug(f"Coach Actions: {actions}")
         log.debug(f"New State: {new_state}")
         log.debug(f"Component Config: {component_config}")
 

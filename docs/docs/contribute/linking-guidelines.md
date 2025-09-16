@@ -19,7 +19,6 @@ Use absolute paths starting with `/docs/` for all internal documentation links. 
 **❌ Avoid:**
 
 ```markdown
-- [Action Fields](docs/database/models/action)
 - [Prompt Manager Overview](../../core-systems/prompt-manager/overview)
 - [API Endpoints](../endpoints/actions)
 ```

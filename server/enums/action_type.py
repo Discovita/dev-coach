@@ -43,6 +43,7 @@ class ActionType(models.TextChoices):
     UPDATE_USER_NOTE = "update_user_note", "Update User Note"
     DELETE_USER_NOTE = "delete_user_note", "Delete User Note"
     SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT = "show_introduction_canned_response_component", "Show Introduction Canned Response Component"
+    SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component", "Show Accept I Am Component"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""
