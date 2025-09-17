@@ -26,6 +26,7 @@ class CoachRequestSerializer(serializers.Serializer):
     )
     actions = serializers.ListField(
         required=False,
+        allow_null=True,
         allow_empty=True,
         child=serializers.DictField(),
         help_text=(
@@ -52,18 +53,28 @@ class CoachRequestSerializer(serializers.Serializer):
 
         if not message and not actions:
             raise serializers.ValidationError(
-                {"non_field_errors": ["Provide at least one of: 'message' or 'actions'."]}
+                {
+                    "non_field_errors": [
+                        "Provide at least one of: 'message' or 'actions'."
+                    ]
+                }
             )
 
         if actions is not None:
             # Lightweight structure checks; deep validation happens in the Action Handler
             for idx, item in enumerate(actions):
                 if not isinstance(item, dict):
-                    raise serializers.ValidationError({"actions": f"Item {idx} must be an object."})
+                    raise serializers.ValidationError(
+                        {"actions": f"Item {idx} must be an object."}
+                    )
                 if "action" not in item or not isinstance(item.get("action"), str):
-                    raise serializers.ValidationError({"actions": f"Item {idx} must include 'action' (str)."})
+                    raise serializers.ValidationError(
+                        {"actions": f"Item {idx} must include 'action' (str)."}
+                    )
                 if "params" not in item:
-                    raise serializers.ValidationError({"actions": f"Item {idx} must include 'params' (object)."})
+                    raise serializers.ValidationError(
+                        {"actions": f"Item {idx} must include 'params' (object)."}
+                    )
 
         return attrs
 

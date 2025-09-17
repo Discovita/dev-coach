@@ -10,7 +10,6 @@ from services.logger import configure_logging
 log = configure_logging(__name__, log_level="DEBUG")
 
 # Registry mapping ActionType values to their handler functions
-# This eliminates the need for the large if-elif chain and makes adding new actions automatic
 ACTION_REGISTRY = {
     ActionType.CREATE_IDENTITY.value: create_identity,
     ActionType.UPDATE_IDENTITY.value: update_identity,
@@ -34,16 +33,15 @@ ACTION_REGISTRY = {
     ActionType.ADD_USER_NOTE.value: add_user_note,
     ActionType.UPDATE_USER_NOTE.value: update_user_note,
     ActionType.DELETE_USER_NOTE.value: delete_user_note,
-    # Component actions
+    # Component actions (return ComponentConfig)
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
 }
 
 
-# TODO: No longer sending actions to the frontend via the API response. They can be removed.
 def apply_coach_actions(
     coach_state: CoachState, response: CoachChatResponse, coach_message: ChatMessage
-) -> Tuple[CoachState, List[str], Optional[ComponentConfig]]:
+) -> Tuple[CoachState, Optional[ComponentConfig]]:
     """
     Applies all non-None actions from a CoachChatResponse to a CoachState object and returns the updated state.
     Each action is represented as an optional field on the response model.
@@ -51,11 +49,10 @@ def apply_coach_actions(
     Supported actions are defined in services.action_handler.actions and enums.action_type.
 
     Returns:
-        Tuple of (updated_coach_state, actions_list, component_config)
+        Tuple of (updated_coach_state, component_config)
         - component_config will be None unless an action handler returns a ComponentConfig
     """
     log.debug(f"Response: {response}")
-    actions = []
     component_config = None
 
     for action_name, value in response.model_dump(exclude_none=True).items():
@@ -72,9 +69,6 @@ def apply_coach_actions(
         if params is not None and hasattr(params, "model_dump"):
             params = params.model_dump()
 
-        # NOTE: the front end "Action" interface is dependent on this structure
-        actions.append({"type": action_name, "params": params})
-
         # Get the handler function from the registry
         handler_func = ACTION_REGISTRY.get(action_name)
 
@@ -87,7 +81,6 @@ def apply_coach_actions(
             action_type = ActionType.from_string(action_name)
             log.action(action_type.label)
         except ValueError:
-            # Fallback if we can't find the enum
             log.action(f"Executing {action_name}")
 
         # Execute the action handler
@@ -96,10 +89,10 @@ def apply_coach_actions(
             ActionType.UPDATE_USER_NOTE.value,
             ActionType.DELETE_USER_NOTE.value,
         ]:
-            # These actions don't take coach_message as a parameter
+            # These Sentinel actions don't take coach_message as a parameter because they are not logged in the Action table
             result = handler_func(coach_state, action.params)
         else:
-            # All other actions take coach_message as a parameter
+            # All other actions take coach_message as a parameter because they are tied to the ChatMessage by foreign key in the Action table
             result = handler_func(coach_state, action.params, coach_message)
 
         # Check if the action handler returned a ComponentConfig
@@ -111,17 +104,18 @@ def apply_coach_actions(
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()
-    return coach_state, actions, component_config
+    return coach_state, component_config
 
 
 def apply_component_actions(
     coach_state: CoachState,
     component_actions: List[ComponentAction],
     user_message: ChatMessage,
-) -> Tuple[CoachState, List[str], Optional[ComponentConfig]]:
+) -> Tuple[CoachState, Optional[ComponentConfig]]:
     """
     Applies actions from component interactions (e.g., button clicks) to a CoachState object.
     This is similar to apply_actions but handles the different input format from component interactions.
+    It is not currently programatically controlled, but it is the intention of this program to only perform actions that perform database updates. Sentinel actions and any actions that return ComponentConfig are not handled here.
 
     Args:
         coach_state: The current coach state
@@ -129,11 +123,9 @@ def apply_component_actions(
         user_message: The user chat message that triggered the component interaction
 
     Returns:
-        Tuple of (updated_coach_state, actions_list, component_config)
-        - component_config will be None unless an action handler returns a ComponentConfig
+        updated_coach_state
     """
     log.debug(f"Component actions: {component_actions}")
-    component_config = None
 
     for component_action in component_actions:
         action_type = component_action.action
@@ -166,19 +158,16 @@ def apply_component_actions(
             ActionType.UPDATE_USER_NOTE.value,
             ActionType.DELETE_USER_NOTE.value,
         ]:
-            # These Sentinel actions don't take user_message as a parameter
+            # These Sentinel actions don't take user_message as a parameter because they are not logged in the Action table
             result = handler_func(coach_state, action_params)
         else:
-            # All other actions take user_message as a parameter because they get logged in the Action Table
+            # All other actions take user_message as a parameter because they get logged in the Action table
             result = handler_func(coach_state, action_params, user_message)
-
-        # Check if the action handler returned a ComponentConfig
-        if isinstance(result, ComponentConfig):
-            component_config = result
-            log.debug(f"Component action '{action_type}' returned ComponentConfig")
 
         log.action(f"COMPONENT PARAMS:\t  {action_params}")
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()
-    return coach_state, component_config
+
+    # Returning the updated coach state however, it is not currently used in the process_message endpoints.
+    return coach_state

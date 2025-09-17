@@ -12,115 +12,90 @@ from rest_framework.decorators import action
 from services.prompt_manager.manager import PromptManager
 from services.ai import AIServiceFactory
 from apps.chat_messages.models import ChatMessage
+from django.contrib.auth import get_user_model
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 
 """
-Admin Impersonation Pattern for Test Scenarios
----------------------------------------------
+Admin Impersonation – Current Implementation Overview
+----------------------------------------------------
 
-Purpose:
-    Allow admin users to simulate/test chatbot flows as a test user (from a TestScenario), even though the admin is the one authenticated.
-    This is essential for running scenario-based tests and debugging without manual user switching.
+Scope:
+    The system supports admin-only impersonation via a dedicated endpoint, not by adding
+    impersonation parameters to general user endpoints.
 
-Problem:
-    By default, all endpoints use `request.user` for actions (creating messages, identities, etc.).
-    When an admin is logged in, this would associate all new data with the admin, not the test user from the scenario.
+Notes:
+    - Component actions in the admin endpoint are applied to the acting user's CoachState,
+      with the admin user passed as the executor/auditor.
+    - All access and impersonation attempts are logged for auditability.
 
-Solution (Impersonation Pattern):
-    - Allow admin users to specify a `user_id` or `test_scenario_id` in the request body.
-    - If the requester is an admin (`is_staff` or `is_superuser`), use the specified test user for all downstream actions (instead of `request.user`).
-    - Otherwise, default to `request.user`.
-    - This enables admins to "impersonate" a test user for the duration of the request, ensuring all created/modified data is associated with the correct test user and scenario.
-
-Implementation:
-    1. In each relevant view (e.g., process_message), determine the acting user:
-        acting_user = request.user
-        if request.user.is_staff:
-            if 'user_id' in request.data:
-                acting_user = User.objects.get(id=request.data['user_id'])
-            elif 'test_scenario_id' in request.data:
-                scenario = TestScenario.objects.get(id=request.data['test_scenario_id'])
-                acting_user = User.objects.get(test_scenario=scenario)
-    2. Use `acting_user` everywhere instead of `request.user` for all business logic and object creation.
-    3. Only allow this override for admin users (never for regular users).
-    4. Log all impersonation actions for auditability.
-
-Security Considerations:
-    - Only trusted admin users should be able to impersonate others.
-    - Always check permissions before allowing impersonation.
-    - Consider logging impersonation events for traceability.
-
-Benefits:
-    - Enables robust scenario-based testing and debugging.
-    - Prevents accidental data pollution by associating test data with the correct user/scenario.
-    - Makes it easy to automate or manually test any phase of the chatbot flow.
+Security:
+    - Only admins may use impersonation.
+    - Requests without a valid 'user_id' or with a non-existent user are rejected.
 """
 
 
 class CoachViewSet(
     viewsets.GenericViewSet,
 ):
-    """
-    Handle user input and get coach response for the chatbot.
-    Step-by-step:
-    1. Require authentication (JWT or session)
-    2. Parse and validate the incoming request (CoachRequestSerializer)
-    3. Retrieve the user's CoachState from the database
-    4. Build the prompt and call the OpenAI service
-    5. Parse the LLM response (Pydantic model), extract actions
-    6. Apply actions to update the CoachState and related models
-    7. Return the response using CoachResponseSerializer
-    """
+    """Endpoints for processing coach messages, including admin impersonation."""
 
     permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=["post"], url_path="process-message")
     def process_message(self, request: Request):
-        # Step 1: Parse and validate the incoming request
+        """
+        Process a message for the authenticated user.
+
+        Behavior:
+            - Ensure initial coach message for the user if chat is empty.
+            - Add the provided user message to the user's chat history.
+            - Retrieve the user's CoachState.
+            - Apply component actions (if provided) to the user's CoachState.
+            - Build prompt (PromptManager) and fetch the user's last 5 chat messages.
+            - Generate response (AIServiceFactory).
+            - Add coach response to the user's chat history.
+            - Apply coach actions; may include component configuration.
+            - Serialize and return.
+
+        Response:
+            - CoachResponseSerializer with:
+                - 'message' (str)
+                - 'final_prompt' (str)
+                - 'component' (object) optional
+        """
         serializer = CoachRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message = serializer.validated_data["message"]
         component_actions = serializer.validated_data.get("actions", [])
         model = serializer.get_model()
 
-        # Step 2: Ensure chat history starts with the initial bot message if empty
         chat_history_qs = ChatMessage.objects.filter(user=request.user)
         if not chat_history_qs.exists():
             initial_message = get_initial_message()
             if initial_message:
                 add_chat_message(request.user, initial_message, MessageRole.COACH)
 
-        # Step 3: Add the user message to the chat history (async)
         add_chat_message(request.user, message, MessageRole.USER)
 
-        # Step 4: Retrieve the user's CoachState
-        try:
-            coach_state = CoachState.objects.get(user=request.user)
-        except CoachState.DoesNotExist:
-            return Response(
-                {"detail": "Coach state not found."}, status=status.HTTP_404_NOT_FOUND
-            )
+        # NOTE: CoachState is guaranteed to exist because we use Django Signals to create one when a user is created
+        # see apps.coach_states.signals.py
+        coach_state = CoachState.objects.get(user=request.user)
 
-        # Step 5: Apply the component actions
         if component_actions:
-            new_state, component_config = apply_component_actions(
-                coach_state, component_actions, request.user
-            )
+            apply_component_actions(coach_state, component_actions, request.user)
 
-        # Step 6: Build the prompt using the PromptManager
         prompt_manager = PromptManager()
+
         coach_prompt, response_format = prompt_manager.create_chat_prompt(
             user=request.user, model=model
         )
-        # Get the last 5 messages from the chat history
+
         chat_history_for_prompt_query_set = ChatMessage.objects.filter(
             user=request.user
-        ).order_by("-timestamp")[
-            :5
-        ]  # Get the 5 newest messages
-        # Convert queryset to list in chronological order (oldest to newest)
+        ).order_by("-timestamp")[:5]
+
         chat_history_for_prompt = list(reversed(chat_history_for_prompt_query_set))
 
         ai_service = AIServiceFactory.create(model)
@@ -128,13 +103,15 @@ class CoachViewSet(
         response: CoachChatResponse = ai_service.generate(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
-        # Step 7: Add the coach response to the chat history
+
         coach_message = add_chat_message(
             request.user, response.message, MessageRole.COACH
         )
+
         new_state, actions, component_config = apply_coach_actions(
             coach_state, response, coach_message
         )
+
         log.debug(f"Coach Actions: {actions}")
         log.debug(f"New State: {new_state}")
         log.debug(f"Component Config: {component_config}")
@@ -144,10 +121,9 @@ class CoachViewSet(
             "final_prompt": coach_prompt,
         }
 
-        # Add component config if present
         if component_config:
             response_data["component"] = component_config.model_dump()
-        # Step 8: Serialize the response
+
         serializer = CoachResponseSerializer(data=response_data)
         serializer.is_valid(raise_exception=True)
         if not serializer.is_valid():
@@ -159,6 +135,23 @@ class CoachViewSet(
     def process_message_for_user(self, request: Request):
         """
         Process a message as if sent by a specific user (admin only).
+
+        Behavior:
+            - Ensure initial coach message for the acting user if chat is empty.
+            - Add the provided message to the acting user's chat history.
+            - Retrieve the acting user's CoachState.
+            - Apply component actions (if provided) to the acting user's CoachState (admin as executor).
+            - Build prompt (PromptManager) and fetch the acting user's last 5 chat messages.
+            - Generate response (AIServiceFactory).
+            - Add coach response to the acting user's chat history.
+            - Apply coach actions; may include component configuration.
+            - Serialize and return.
+
+        Response:
+            - CoachResponseSerializer with:
+                - 'message' (str)
+                - 'final_prompt' (str)
+                - 'component' (object) optional
         """
         try:
             log.info(f"Processing Request: {request.data}")
@@ -170,7 +163,6 @@ class CoachViewSet(
                 log.warning(f"Unauthorized access attempt by user {request.user}")
                 return Response({"detail": "Not authorized."}, status=403)
 
-            # Step 1: Parse and validate the incoming request
             serializer = CoachRequestSerializer(data=request.data)
             if not serializer.is_valid():
                 log.error(f"Serializer validation failed: {serializer.errors}")
@@ -180,13 +172,17 @@ class CoachViewSet(
                 )
 
             user_id = serializer.validated_data.get("user_id")
+            # user_id not required in the serializer, but it is required in this endpoint
             if not user_id:
                 log.error("user_id is missing from request")
                 return Response({"detail": "user_id is required."}, status=400)
-
-            from django.contrib.auth import get_user_model
+            message = serializer.validated_data["message"]
+            component_actions = serializer.validated_data.get("actions", [])
+            model = serializer.get_model()
 
             User = get_user_model()
+            # try/except block here because the admin may have passed in a user_id that doesn't exist
+            # TODO: The validation for the user_id should be moved to the serializer
             try:
                 acting_user = User.objects.get(pk=user_id)
                 log.info(f"Found acting user: {acting_user}")
@@ -195,37 +191,28 @@ class CoachViewSet(
                 return Response(
                     {"detail": f"User with id {user_id} not found."}, status=404
                 )
-            message = serializer.validated_data["message"]
-            component_actions = serializer.validated_data.get("actions", [])
-            model = serializer.get_model()
 
-            # Step 2: Ensure chat history starts with the initial bot message if empty
+            # Get the acting user's chat history. If it doesn't exist, create it with the initial message
             chat_history_qs = ChatMessage.objects.filter(user=acting_user)
             if not chat_history_qs.exists():
                 initial_message = get_initial_message()
                 if initial_message:
                     add_chat_message(acting_user, initial_message, MessageRole.COACH)
 
-            # Step 3: Add the user message to the chat history (async)
             add_chat_message(acting_user, message, MessageRole.USER)
 
-            # Step 4: Retrieve the user's CoachState
-            try:
-                coach_state = CoachState.objects.get(user=acting_user)
-            except CoachState.DoesNotExist:
-                log.error(f"Coach state not found for user {acting_user}")
-                return Response(
-                    {"detail": "Coach state not found."},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
+            # NOTE: CoachState is guaranteed to exist because we use Django Signals to create one when a user is created
+            # see apps.coach_states.signals.py
+            coach_state = CoachState.objects.get(user=acting_user)
 
-            # Step 5: Apply the component actions
+            if component_actions:
+                apply_component_actions(coach_state, component_actions, request.user)
 
-            # Step 6: Build the prompt using the PromptManager
             prompt_manager = PromptManager()
             coach_prompt, response_format = prompt_manager.create_chat_prompt(
                 user=acting_user, model=model
             )
+
             chat_history_for_prompt_query_set = ChatMessage.objects.filter(
                 user=acting_user
             ).order_by("-timestamp")[:5]
@@ -235,23 +222,27 @@ class CoachViewSet(
             response: CoachChatResponse = ai_service.generate(
                 coach_prompt, chat_history_for_prompt, response_format, model
             )
+
             coach_message = add_chat_message(
                 acting_user, response.message, MessageRole.COACH
             )
+
             new_state, actions, component_config = apply_coach_actions(
                 coach_state, response, coach_message
             )
-            log.debug(f"Actions: {actions}")
+
+            log.debug(f"Coach Actions: {actions}")
+            log.debug(f"New State: {new_state}")
+            log.debug(f"Component Config: {component_config}")
 
             response_data = {
                 "message": response.message,
                 "final_prompt": coach_prompt,
             }
 
-            # Add component config if present
             if component_config:
                 response_data["component"] = component_config.model_dump()
-            # Step 8: Serialize the response
+
             serializer = CoachResponseSerializer(data=response_data)
             serializer.is_valid(raise_exception=True)
             if not serializer.is_valid():
