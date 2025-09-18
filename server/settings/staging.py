@@ -9,11 +9,11 @@ DEBUG = False
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["PROD_DB_NAME"],
-        "USER": os.environ["PROD_DB_USER"],
-        "PASSWORD": os.environ["PROD_DB_PASSWORD"],
-        "HOST": os.environ["PROD_DB_HOST"],
-        "PORT": os.environ["PROD_DB_PORT"],
+        "NAME": os.environ["STAGING_DB_NAME"],
+        "USER": os.environ["STAGING_DB_USER"],
+        "PASSWORD": os.environ["STAGING_DB_PASSWORD"],
+        "HOST": os.environ["STAGING_DB_HOST"],
+        "PORT": os.environ["STAGING_DB_PORT"],
     }
 }
 
@@ -40,7 +40,7 @@ DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 
 
-CELERY_BROKER_URL = os.environ["PROD_REDIS_URL"]
+CELERY_BROKER_URL = os.environ["STAGING_REDIS_URL"]
 CELERY_RESULT_BACKEND = None  # Or 'redis://...' if you want to store results
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TIMEZONE = "UTC"

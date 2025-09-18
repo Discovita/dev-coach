@@ -157,20 +157,7 @@ WSGI_APPLICATION = "wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# Use SQLite for local development for simplicity and zero setup.
-# The database file will be created at the project root as db.sqlite3.
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-#     }
-# }
-
-# To use a different database (e.g., Postgres), comment out the above and uncomment below:
-DATABASES = {
-    "default": env.db("DJANGO_DATABASE_DEV_URL", default=""),
-}
+# Specific database configurations are in the associated environment settings files
 
 
 # Password validation
