@@ -28,6 +28,7 @@ htmlcov/
 .venv
 venv/
 ENV/
+backups/
 
 # Node
 node_modules/
