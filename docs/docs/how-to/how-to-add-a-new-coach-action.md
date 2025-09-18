@@ -1,6 +1,7 @@
 # How to Add a New Coach Action
 
 1. **Add the action name to the `ActionType` enum in `server/enums/action_type.py`.**
+   - **For component actions**: Use the naming convention `SHOW_XXX_COMPONENT` (e.g., `SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT`)
 
 2. **Create a Pydantic model for the actions parameters in `server/services/action_handler/models/params.py`.**
 
@@ -35,6 +36,16 @@
 
    - Add your action in a new file titled `<your_function_name>.py`
    - Write your function in the file manipulating the database or whatever else you need to do.
+   - **For component actions** (following `SHOW_XXX_COMPONENT` naming): Import and use ComponentConfig models:
+     ```python
+     from models.components.ComponentConfig import (
+         ComponentConfig,
+         ComponentButton,
+         ComponentAction,
+     )
+     # Build your component and return it
+     return ComponentConfig(buttons=[...])
+     ```
    - **IMPORTANT**: Your action function must log the action to the Action table. Follow this pattern:
      ```python
      from apps.actions.models import Action
@@ -72,3 +83,4 @@
     - Use the same structure as existing action docs
     - Update `docs/sidebars.ts` to include your new action in the "Action Handler" -> "Actions" section
     - Update `docs/docs/core-systems/action-handler/overview.md` to include your new action in the actions table
+

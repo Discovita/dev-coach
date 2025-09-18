@@ -20,4 +20,5 @@ export enum ActionType {
   SKIP_IDENTITY_CATEGORY = "skip_identity_category",
   UNSKIP_IDENTITY_CATEGORY = "unskip_identity_category",
   UPDATE_ASKED_QUESTIONS = "update_asked_questions",
+  SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component",
 }

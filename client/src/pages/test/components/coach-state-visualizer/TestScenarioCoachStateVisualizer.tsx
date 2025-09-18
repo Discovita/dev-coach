@@ -7,7 +7,7 @@ import { TestScenarioTabContent } from "./utils/tabContentFactory";
 import { usePrevious } from "@/hooks/use-previous"; // Update this import path
 // Only import test-scenario hooks
 import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-scenario-user-coach-state";
-import { useTestScenarioUserChatMessages } from "@/hooks/test-scenario/use-test-scenario-user-chat-messages";
+import { useTestScenarioChatMessages } from "@/hooks/test-scenario/use-test-scenario-chat-messages";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
 import { useTestScenarioUserFinalPrompt } from "@/hooks/test-scenario/use-test-scenario-user-final-prompt";
 import { useTestScenarioUserActions } from "@/hooks/test-scenario/use-test-scenario-user-actions";
@@ -25,7 +25,7 @@ export const TestScenarioCoachStateVisualizer: React.FC<
     isLoading: isCoachStateLoading,
     isError: isCoachStateError,
   } = useTestScenarioUserCoachState(testUserId);
-  const { chatMessages } = useTestScenarioUserChatMessages(testUserId);
+  const { chatMessages } = useTestScenarioChatMessages(testUserId);
   useTestScenarioUserIdentities(testUserId);
   const finalPrompt = useTestScenarioUserFinalPrompt(testUserId);
   const {

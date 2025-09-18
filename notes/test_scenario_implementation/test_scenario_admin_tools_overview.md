@@ -42,7 +42,7 @@ This document summarizes the major changes and new features added to support **a
 
 - **Hooks Directory:** `client/src/hooks/test-scenario/`
 - **Hooks Implemented:**
-  - `useTestScenarioUserChatMessages` — Fetch/send chat messages (with optimistic UI)
+  - `useTestScenarioChatMessages` — Fetch/send chat messages (with optimistic UI)
   - `useTestScenarioUserCoachState` — Fetch coach state
   - `useTestScenarioUserIdentities` — Fetch identities
   - `useTestScenarioUserActions` — Get actions from cache

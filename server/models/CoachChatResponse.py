@@ -19,6 +19,8 @@ from services.action_handler.models.actions import (
     UpdateWhoYouAreAction,
     UpdateWhoYouWantToBeAction,
     UpdateAskedQuestionsAction,
+    ShowIntroductionCannedResponseComponentAction,
+    ShowAcceptIAMComponentAction,
 )
 
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
@@ -86,4 +88,10 @@ class CoachChatResponse(BaseModel):
     )
     set_current_identity: Optional[SetCurrentIdentityAction] = Field(
         default=None, description="Perform the set_current_identity action."
+    )
+    show_introduction_canned_response_component: Optional[ShowIntroductionCannedResponseComponentAction] = Field(
+        default=None, description="Show the introduction canned response component."
+    )
+    show_accept_i_am_component: Optional[ShowAcceptIAMComponentAction] = Field(
+        default=None, description="Show the Accept I Am component."
     )

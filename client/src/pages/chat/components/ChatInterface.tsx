@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { ChatControls } from "@/pages/chat/components/ChatControls";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
-import { useCoachState } from "@/hooks/use-coach-state";
+import { CoachRequest } from "@/types/coachRequest";
 
 /**
  * ChatInterface component
@@ -19,6 +19,7 @@ export const ChatInterface: React.FC = () => {
   // Get chat messages and updateChatMessages mutation from the custom hook
   const {
     chatMessages,
+    componentConfig,
     isLoading,
     isError,
     updateChatMessages,
@@ -27,24 +28,28 @@ export const ChatInterface: React.FC = () => {
     isPending, // Whether a message is being sent
   } = useChatMessages();
 
-  const { coachState } = useCoachState();
-
   // Compose the messages to display, including the pending message if any
   // Always sort by timestamp to ensure correct order, as backend/hook may not guarantee order
   const displayedMessages = React.useMemo(() => {
-    let messages: { role: string; content: string; timestamp: string }[] = chatMessages || [];
-    if (isPending && pendingMessage?.content) {
+    let messages: { role: string; content: string; timestamp: string }[] =
+      chatMessages || [];
+    if (isPending && pendingMessage?.message) {
       messages = [
         ...messages,
         {
           role: "user",
-          content: pendingMessage.content,
+          content: pendingMessage.message,
           timestamp: new Date().toISOString(), // Temporary timestamp
         },
       ];
     }
     // Sort by timestamp ascending (oldest first)
-    return messages.slice().sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    return messages
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
   }, [chatMessages, isPending, pendingMessage]);
 
   // Scroll to bottom when messages change
@@ -67,20 +72,11 @@ export const ChatInterface: React.FC = () => {
 
   // Handler for sending a message
   const handleSendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || updateStatus === "pending") return;
-      // Call updateChatMessages with the new argument structure
-      await updateChatMessages({ content });
+    async (request: CoachRequest) => {
+      if (!request.message.trim() || updateStatus === "pending") return;
+      await updateChatMessages(request);
     },
     [updateChatMessages, updateStatus]
-  );
-
-  // Handler for identity choice (if used)
-  const handleIdentityChoice = useCallback(
-    (response: string) => {
-      handleSendMessage(response);
-    },
-    [handleSendMessage]
   );
 
   // If loading, show a loading state (optional)
@@ -104,9 +100,9 @@ export const ChatInterface: React.FC = () => {
       <ChatMessages
         messages={displayedMessages}
         isProcessingMessage={updateStatus === "pending"}
-        handleIdentityChoice={handleIdentityChoice}
         messagesEndRef={messagesEndRef}
-        coachState={coachState}
+        componentConfig={componentConfig}
+        onSelectComponentOption={handleSendMessage}
       />
       <ChatControls
         isProcessingMessage={updateStatus === "pending"}

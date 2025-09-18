@@ -220,3 +220,22 @@ class UpdateAskedQuestionsParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class ShowIntroductionCannedResponseComponentParams(BaseModel):
+    show_introduction_canned_response_component: bool = Field(
+        ..., description="Whether to show the introduction canned response component"
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class ShowAcceptIAMComponentParams(BaseModel):
+    id: str = Field(..., description="ID of identity for affirmation acceptance component")
+    affirmation: str = Field(
+        ..., description="Affirmation to propose to the user for acceptance"
+    )
+
+    class Config:
+        extra = "forbid"

@@ -93,7 +93,7 @@ A scenario template is a JSON object describing the initial state for all releva
 ### 3.3 Frontend: Test Scenario UI & Hooks
 - **Hooks Directory:** `client/src/hooks/test-scenario/`
 - **Hooks Implemented:**
-  - `useTestScenarioUserChatMessages` — Fetch/send chat messages (with optimistic UI)
+  - `useTestScenarioChatMessages` — Fetch/send chat messages (with optimistic UI)
   - `useTestScenarioUserCoachState` — Fetch coach state
   - `useTestScenarioUserIdentities` — Fetch identities
   - `useTestScenarioUserActions` — Get actions from cache

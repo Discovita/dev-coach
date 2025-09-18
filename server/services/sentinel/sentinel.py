@@ -7,7 +7,7 @@ from services.ai.ai_service_factory import AIServiceFactory
 from services.logger import configure_logging
 from services.prompt_manager.manager import PromptManager
 from models.SentinelChatResponse import SentinelChatResponse
-from services.action_handler.handler import apply_actions
+from services.action_handler.handler import apply_coach_actions
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -43,5 +43,5 @@ class Sentinel:
         response: SentinelChatResponse = ai_service.call_sentinel(
             sentinel_prompt, response_format, self.model
         )
-        apply_actions(self.coach_state, response, chat_message)
+        apply_coach_actions(self.coach_state, response, chat_message)
         log.debug(f"Sentinel Response: {response}")

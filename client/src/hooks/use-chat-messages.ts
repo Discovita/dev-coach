@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchChatMessages, resetChatMessages } from "@/api/user";
 import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
+import { CoachRequest } from "@/types/coachRequest";
+import { Message } from "@/types/message";
 
 /**
  * useChatMessages hook
@@ -25,48 +27,68 @@ export function useChatMessages() {
     queryFn: fetchChatMessages,
   });
 
+  // Get the current component config (set by mutations)
+  const { data: componentConfig } = useQuery({
+    queryKey: ["user", "componentConfig"],
+    queryFn: () => null, // This will be set by mutations
+  });
+
   /**
    * Mutation for sending a chat message to the backend.
-   * Accepts an object with content (string) and optional model (string).
+   * Accepts a CoachRequest object with message, model_name, and optional actions.
    * On success, updates the chatMessages, identities, and coachState caches.
    */
   const updateMutation = useMutation({
     // mutationFn sends the message to the backend
-    mutationFn: async ({
-      content,
-      model,
-    }: {
-      content: string;
-      model?: string;
-    }) => {
-      return apiClient.sendMessage(content, model ?? "");
+    mutationFn: async (request: CoachRequest) => {
+      return apiClient.sendMessage(request);
     },
     // On success, update all relevant caches with the response
-    onSuccess: (response: CoachResponse) => {
-      console.log("Chat message sent successfully:", response);
-      if (response.chat_history) {
-        queryClient.setQueryData(
-          ["user", "chatMessages"],
-          response.chat_history
-        );
-      }
-      if (response.identities) {
-        queryClient.setQueryData(["user", "identities"], response.identities);
-      }
-      if (response.coach_state) {
-        queryClient.setQueryData(["user", "coachState"], response.coach_state);
-      }
-      // Cache the latest final_prompt for use in components
+    onSuccess: (response: CoachResponse, variables) => {
+      // Append user (dedup) and coach messages to cache without invalidating messages
+      queryClient.setQueryData<Message[] | undefined>(
+        ["user", "chatMessages"],
+        (old) => {
+          const current = old ?? [];
+          const last = current[current.length - 1];
+          const hasUserAlready =
+            !!last && last.role === "user" && last.content === variables.message;
+
+          const maybeUserAppended = hasUserAlready
+            ? current
+            : [
+                ...current,
+                {
+                  role: "user",
+                  content: variables.message,
+                  timestamp: new Date().toISOString(),
+                } as Message,
+              ];
+
+          const maybeCoachAppended = response.message
+            ? [
+                ...maybeUserAppended,
+                {
+                  role: "coach",
+                  content: response.message,
+                  timestamp: new Date().toISOString(),
+                } as Message,
+              ]
+            : maybeUserAppended;
+
+          return maybeCoachAppended;
+        }
+      );
+
       if (response.final_prompt !== undefined) {
-        queryClient.setQueryData(
-          ["user", "finalPrompt"],
-          response.final_prompt
-        );
+        queryClient.setQueryData(["user", "finalPrompt"], response.final_prompt);
       }
-      // Invalidate actions cache to trigger refetch of latest actions from database
-      queryClient.invalidateQueries({ queryKey: ["user", "actions"] });
-      // Also invalidate coach state to ensure the component re-renders with the latest data
-      queryClient.invalidateQueries({ queryKey: ["user", "coachState"] });
+
+      // Handle component config - ALWAYS set it (even if null)
+      queryClient.setQueryData(
+        ["user", "componentConfig"],
+        response.component || null
+      );
     },
   });
 
@@ -98,6 +120,7 @@ export function useChatMessages() {
 
   return {
     chatMessages: data,
+    componentConfig,
     isLoading,
     isError,
     refetchChatMessages: refetch,
