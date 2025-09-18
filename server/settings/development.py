@@ -24,7 +24,7 @@ WHITENOISE_ROOT = STATIC_ROOT  # Use the same absolute path
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_INDEX_FILE = True
 
-CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_BROKER_URL = "redis://redis:6379/0" # Local Redis instance
 CELERY_RESULT_BACKEND = None  # Or 'redis://...' if you want to store results
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TIMEZONE = "UTC"
