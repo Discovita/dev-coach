@@ -8,6 +8,7 @@ from apps.chat_messages.utils import add_chat_message, get_initial_message
 from enums.message_role import MessageRole
 from models.CoachChatResponse import CoachChatResponse
 from services.action_handler.handler import apply_coach_actions, apply_component_actions
+from models.components.ComponentConfig import ComponentAction
 from rest_framework.decorators import action
 from services.prompt_manager.manager import PromptManager
 from services.ai import AIServiceFactory
@@ -68,7 +69,7 @@ class CoachViewSet(
         serializer = CoachRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message = serializer.validated_data["message"]
-        component_actions = serializer.validated_data.get("actions", [])
+        request_component_actions = serializer.validated_data.get("actions", [])
         model = serializer.get_model()
 
         chat_history_qs = ChatMessage.objects.filter(user=request.user)
@@ -77,14 +78,18 @@ class CoachViewSet(
             if initial_message:
                 add_chat_message(request.user, initial_message, MessageRole.COACH)
 
-        add_chat_message(request.user, message, MessageRole.USER)
+        user_chat_message = add_chat_message(request.user, message, MessageRole.USER)
 
         # NOTE: CoachState is guaranteed to exist because we use Django Signals to create one when a user is created
         # see apps.coach_states.signals.py
         coach_state = CoachState.objects.get(user=request.user)
 
-        if component_actions:
-            apply_component_actions(coach_state, component_actions, request.user)
+        if request_component_actions:
+            component_actions = [
+                ComponentAction(**action) if isinstance(action, dict) else action
+                for action in request_component_actions
+            ]
+            apply_component_actions(coach_state, component_actions, user_chat_message)
 
         prompt_manager = PromptManager()
 
@@ -176,7 +181,7 @@ class CoachViewSet(
                 log.error("user_id is missing from request")
                 return Response({"detail": "user_id is required."}, status=400)
             message = serializer.validated_data["message"]
-            component_actions = serializer.validated_data.get("actions", [])
+            request_component_actions = serializer.validated_data.get("actions", [])
             model = serializer.get_model()
 
             User = get_user_model()
@@ -198,14 +203,22 @@ class CoachViewSet(
                 if initial_message:
                     add_chat_message(acting_user, initial_message, MessageRole.COACH)
 
-            add_chat_message(acting_user, message, MessageRole.USER)
+            acting_user_chat_message = add_chat_message(
+                acting_user, message, MessageRole.USER
+            )
 
             # NOTE: CoachState is guaranteed to exist because we use Django Signals to create one when a user is created
             # see apps.coach_states.signals.py
             coach_state = CoachState.objects.get(user=acting_user)
 
-            if component_actions:
-                apply_component_actions(coach_state, component_actions, request.user)
+            if request_component_actions:
+                component_actions = [
+                    ComponentAction(**action) if isinstance(action, dict) else action
+                    for action in request_component_actions
+                ]
+                apply_component_actions(
+                    coach_state, component_actions, acting_user_chat_message
+                )
 
             prompt_manager = PromptManager()
             coach_prompt, response_format = prompt_manager.create_chat_prompt(
