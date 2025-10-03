@@ -36,6 +36,7 @@ ACTION_REGISTRY = {
     # Component actions (return ComponentConfig)
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
+    ActionType.SHOW_WARMUP_TEXT_COMPONENT.value: show_warmup_text_component,
 }
 
 

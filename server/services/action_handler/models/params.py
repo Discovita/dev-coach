@@ -239,3 +239,12 @@ class ShowAcceptIAMComponentParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class ShowWarmupTextComponentParams(BaseModel):
+    enabled: bool = Field(
+        ..., description="Whether to show the warmup text component"
+    )
+
+    class Config:
+        extra = "forbid"

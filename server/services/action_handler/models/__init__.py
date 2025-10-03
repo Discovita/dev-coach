@@ -22,6 +22,7 @@ from .params import (
     UpdateAskedQuestionsParams,
     ShowIntroductionCannedResponseComponentParams,
     ShowAcceptIAMComponentParams,
+    ShowWarmupTextComponentParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -47,6 +48,7 @@ from .actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
+    ShowWarmupTextComponentAction,
 )
 
 __all__ = [
@@ -73,6 +75,7 @@ __all__ = [
     "UpdateAskedQuestionsParams",
     "ShowIntroductionCannedResponseComponentParams",
     "ShowAcceptIAMComponentParams",
+    "ShowWarmupTextComponentParams",
     "SelectIdentityFocusAction",
     "SetCurrentIdentityAction",
     "CreateIdentityAction",
@@ -96,4 +99,5 @@ __all__ = [
     "UpdateAskedQuestionsAction",
     "ShowIntroductionCannedResponseComponentAction",
     "ShowAcceptIAMComponentAction",
+    "ShowWarmupTextComponentAction",
 ]

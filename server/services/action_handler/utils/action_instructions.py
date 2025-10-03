@@ -35,6 +35,7 @@ from services.action_handler.models.actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
+    ShowWarmupTextComponentAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -131,6 +132,10 @@ ACTION_PARAMS = {
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT: {
         "description": "Show an 'Accept I Am' component asking the user to accept the proposed affirmation or keep working on it. Pass the identity id and the proposed affirmation.",
         "model": ShowAcceptIAMComponentAction,
+    },
+    ActionType.SHOW_WARMUP_TEXT_COMPONENT: {
+        "description": "Show a warmup text block (markdown) before/after the coach message. Use for adding the users who_you_are and who_you_want_to_be information to the coach message.",
+        "model": ShowWarmupTextComponentAction,
     },
 }
 

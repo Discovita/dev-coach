@@ -5,9 +5,16 @@ export interface ComponentAction {
 
 export interface ComponentButton {
   label: string;
-  actions: ComponentAction[];
+  actions?: ComponentAction[];
+}
+
+export interface ComponentText {
+  text: string; // markdown
+  location: "before" | "after";
+  source: string;
 }
 
 export interface ComponentConfig {
-  buttons: ComponentButton[];
+  texts?: ComponentText[];
+  buttons?: ComponentButton[];
 }

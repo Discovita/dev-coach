@@ -23,6 +23,7 @@ from .params import (
     UpdateAskedQuestionsParams,
     ShowIntroductionCannedResponseComponentParams,
     ShowAcceptIAMComponentParams,
+    ShowWarmupTextComponentParams,
 )
 
 
@@ -228,6 +229,15 @@ class ShowIntroductionCannedResponseComponentAction(BaseModel):
 class ShowAcceptIAMComponentAction(BaseModel):
     params: ShowAcceptIAMComponentParams = Field(
         ..., description="Parameters for showing the accept 'I am' component."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class ShowWarmupTextComponentAction(BaseModel):
+    params: ShowWarmupTextComponentParams = Field(
+        ..., description="Parameters for showing the warmup text component."
     )
 
     class Config:

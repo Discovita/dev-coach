@@ -21,6 +21,7 @@ from services.action_handler.models.actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
+    ShowWarmupTextComponentAction,
 )
 
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
@@ -94,4 +95,7 @@ class CoachChatResponse(BaseModel):
     )
     show_accept_i_am_component: Optional[ShowAcceptIAMComponentAction] = Field(
         default=None, description="Show the Accept I Am component."
+    )
+    show_warmup_text_component: Optional[ShowWarmupTextComponentAction] = Field(
+        default=None, description="Show the warmup text component."
     )
