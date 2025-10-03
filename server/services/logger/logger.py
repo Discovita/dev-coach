@@ -27,7 +27,7 @@ logging.Logger.fine = fine
 # ------------------------------------------------------
 #              Define the ACTION level
 # ------------------------------------------------------
-ACTION_LEVEL = 20
+ACTION_LEVEL = 21
 logging.addLevelName(ACTION_LEVEL, "ACTION")
 
 def action(self, message, *args, **kwargs):
