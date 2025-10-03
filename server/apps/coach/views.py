@@ -108,11 +108,10 @@ class CoachViewSet(
             request.user, response.message, MessageRole.COACH
         )
 
-        new_state, actions, component_config = apply_coach_actions(
+        new_state, component_config = apply_coach_actions(
             coach_state, response, coach_message
         )
 
-        log.debug(f"Coach Actions: {actions}")
         log.debug(f"New State: {new_state}")
         log.debug(f"Component Config: {component_config}")
 
@@ -227,11 +226,10 @@ class CoachViewSet(
                 acting_user, response.message, MessageRole.COACH
             )
 
-            new_state, actions, component_config = apply_coach_actions(
+            new_state, component_config = apply_coach_actions(
                 coach_state, response, coach_message
             )
 
-            log.debug(f"Coach Actions: {actions}")
             log.debug(f"New State: {new_state}")
             log.debug(f"Component Config: {component_config}")
 
