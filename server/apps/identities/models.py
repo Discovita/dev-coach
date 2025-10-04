@@ -47,7 +47,7 @@ class Identity(models.Model):
     state = models.CharField(
         max_length=32,
         choices=IdentityState.choices,
-        default=IdentityState.ACCEPTED,
+        default=IdentityState.PROPOSED,
         help_text="Current state of the identity (proposed, accepted, refinement complete).",
         null=True,
         blank=True,
