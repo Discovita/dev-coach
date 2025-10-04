@@ -257,3 +257,12 @@ class ShowWarmupTextComponentParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class ShowBrainstormingIdentitiesParams(BaseModel):
+    enabled: bool = Field(
+        ..., description="Whether to show the brainstorming identities component"
+    )
+
+    class Config:
+        extra = "forbid"

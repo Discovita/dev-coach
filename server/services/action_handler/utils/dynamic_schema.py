@@ -27,6 +27,7 @@ from services.action_handler.models.actions import (
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
     ShowWarmupTextComponentAction,
+    ShowBrainstormingIdentitiesAction,
 )
 
 from services.logger import configure_logging
@@ -59,6 +60,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT: ShowIntroductionCannedResponseComponentAction,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT: ShowAcceptIAMComponentAction,
     ActionType.SHOW_WARMUP_TEXT_COMPONENT: ShowWarmupTextComponentAction,
+    ActionType.SHOW_BRAINSTORMING_IDENTITIES: ShowBrainstormingIdentitiesAction,
 }
 
 

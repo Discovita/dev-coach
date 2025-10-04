@@ -40,6 +40,17 @@ class ComponentText(BaseModel):
     source: str = Field(..., description="Source label for this text block")
 
 
+class ComponentIdentity(BaseModel):
+    """
+    Represents a single identity for display in components.
+    Contains the essential information needed to display an identity.
+    """
+
+    id: str = Field(..., description="Unique identifier for the identity")
+    name: str = Field(..., description="Name of the identity")
+    category: str = Field(..., description="Category of the identity")
+
+
 class ComponentConfig(BaseModel):
     """
     Configuration for frontend components. The frontend will determine
@@ -52,4 +63,8 @@ class ComponentConfig(BaseModel):
     )
     buttons: List[ComponentButton] = Field(
         ..., description="List of buttons to display"
+    )
+    identities: Optional[List[ComponentIdentity]] = Field(
+        default=None,
+        description="Optional list of identities to display in the component",
     )

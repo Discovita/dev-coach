@@ -14,7 +14,14 @@ export interface ComponentText {
   source: string;
 }
 
+export interface ComponentIdentity {
+  id: string;
+  name: string;
+  category: string;
+}
+
 export interface ComponentConfig {
   texts?: ComponentText[];
   buttons?: ComponentButton[];
+  identities?: ComponentIdentity[];
 }

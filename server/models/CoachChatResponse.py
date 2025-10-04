@@ -23,6 +23,7 @@ from services.action_handler.models.actions import (
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
     ShowWarmupTextComponentAction,
+    ShowBrainstormingIdentitiesAction,
 )
 
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
@@ -103,4 +104,7 @@ class CoachChatResponse(BaseModel):
     )
     show_warmup_text_component: Optional[ShowWarmupTextComponentAction] = Field(
         default=None, description="Show the warmup text component."
+    )
+    show_brainstorming_identities: Optional[ShowBrainstormingIdentitiesAction] = Field(
+        default=None, description="Show the brainstorming identities component."
     )

@@ -24,6 +24,7 @@ from .params import (
     ShowIntroductionCannedResponseComponentParams,
     ShowAcceptIAMComponentParams,
     ShowWarmupTextComponentParams,
+    ShowBrainstormingIdentitiesParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -51,6 +52,7 @@ from .actions import (
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
     ShowWarmupTextComponentAction,
+    ShowBrainstormingIdentitiesAction,
 )
 
 __all__ = [
@@ -79,6 +81,7 @@ __all__ = [
     "ShowIntroductionCannedResponseComponentParams",
     "ShowAcceptIAMComponentParams",
     "ShowWarmupTextComponentParams",
+    "ShowBrainstormingIdentitiesParams",
     "SelectIdentityFocusAction",
     "SetCurrentIdentityAction",
     "CreateIdentityAction",
@@ -104,4 +107,5 @@ __all__ = [
     "ShowIntroductionCannedResponseComponentAction",
     "ShowAcceptIAMComponentAction",
     "ShowWarmupTextComponentAction",
+    "ShowBrainstormingIdentitiesAction",
 ]

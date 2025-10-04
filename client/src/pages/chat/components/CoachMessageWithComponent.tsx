@@ -1,7 +1,95 @@
 import React from "react";
-import { ComponentConfig, ComponentText } from "@/types/componentConfig";
+import { ComponentConfig, ComponentText, ComponentIdentity } from "@/types/componentConfig";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { CoachRequest } from "@/types/coachRequest";
+import { getIdentityCategoryColor } from "@/enums/identityCategory";
+import { 
+  FaDollarSign, 
+  FaPiggyBank, 
+  FaUser, 
+  FaDumbbell, 
+  FaHeart, 
+  FaRegCheckSquare
+} from "react-icons/fa";
+
+
+import { MdFamilyRestroom } from "react-icons/md";
+import { BsStars } from "react-icons/bs";
+import { AiOutlineSun } from "react-icons/ai";
+
+
+
+/**
+ * Maps identity categories to their corresponding icons
+ */
+const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  'passions_and_talents': BsStars,
+  'maker_of_money': FaDollarSign,
+  'keeper_of_money': FaPiggyBank,
+  'spiritual': AiOutlineSun,
+  'personal_appearance': FaUser,
+  'physical_expression': FaDumbbell,
+  'familial_relations': MdFamilyRestroom,
+  'romantic_relation': FaHeart,
+  'doer_of_things': FaRegCheckSquare,
+};
+
+const getCategoryIcon = (category: string) => {
+  const normalizedCategory = category.toLowerCase();
+  
+  // Direct match first
+  if (CATEGORY_ICON_MAP[normalizedCategory]) {
+    return CATEGORY_ICON_MAP[normalizedCategory];
+  }
+  
+  // Fallback to partial matching for flexibility
+  for (const [key, icon] of Object.entries(CATEGORY_ICON_MAP)) {
+    if (normalizedCategory.includes(key.split('_')[0]) || 
+        key.split('_').some(part => normalizedCategory.includes(part))) {
+      return icon;
+    }
+  }
+  
+  // Default fallback
+  return FaUser;
+};
+
+/**
+ * Renders a single identity as a badge
+ */
+const IdentityBadge: React.FC<{ identity: ComponentIdentity }> = ({ identity }) => {
+  const IconComponent = getCategoryIcon(identity.category);
+  const colorClasses = getIdentityCategoryColor(identity.category);
+  
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colorClasses}`}>
+      <IconComponent className="w-3 h-3" />
+      <span className="font-medium">{identity.name}</span>
+    </div>
+  );
+};
+
+/**
+ * Renders a list of identities as badges
+ */
+const IdentitiesRenderer: React.FC<{ identities: ComponentIdentity[] }> = ({ identities }) => {
+  if (!identities || identities.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mb-3 p-3 bg-gold-50 dark:bg-gray-800 rounded-lg">
+      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Your Current Identities:
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {identities.map((identity) => (
+          <IdentityBadge key={identity.id} identity={identity} />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -148,12 +236,20 @@ export const CoachMessageWithComponent: React.FC<
 > = ({ children, componentConfig, onSelect, disabled }) => {
   const allTexts = componentConfig.texts || [];
   const textsBySource = groupTextsBySource(allTexts);
+  const identities = componentConfig.identities || [];
+  const hasButtons = componentConfig.buttons && componentConfig.buttons.length > 0;
 
   return (
-    <div className="_CoachMessageWithComponent mb-4 p-3.5 pr-4 pl-4 rounded-t-[18px] rounded-br-[18px] rounded-bl-[6px] w-fit max-w-[100%] leading-[1.5] shadow-sm animate-fadeIn break-words mr-auto bg-gold-200 border-l-[3px] border-l-gold-600 dark:bg-transparent dark:border-r-[1px] dark:border-r-gold-600 dark:border-t-[1px] dark:border-t-gold-600 dark:border-b-[1px] dark:border-b-gold-600 dark:text-gold-200">
+    <div className={`_CoachMessageWithComponent mb-4 p-3.5 pr-4 pl-4 rounded-t-[18px] rounded-br-[18px] rounded-bl-[6px] ${hasButtons ? 'w-fit max-w-[100%]' : 'w-fit max-w-[75%]'} leading-[1.5] shadow-sm animate-fadeIn break-words mr-auto bg-gold-200 border-l-[3px] border-l-gold-600 dark:bg-transparent dark:border-r-[1px] dark:border-r-gold-600 dark:border-t-[1px] dark:border-t-gold-600 dark:border-b-[1px] dark:border-b-gold-600 dark:text-gold-200`}>
+      {/* Render identities if they exist */}
+      {identities.length > 0 && (
+        <IdentitiesRenderer identities={identities} />
+      )}
+
       <ContentRenderer textsBySource={textsBySource}>
         {children}
       </ContentRenderer>
+
 
       {/* Render component buttons if they exist */}
       {componentConfig.buttons && componentConfig.buttons.length > 0 && (
