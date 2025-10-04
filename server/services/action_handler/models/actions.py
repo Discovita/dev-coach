@@ -3,6 +3,7 @@ from .params import (
     SelectIdentityFocusParams,
     SetCurrentIdentityParams,
     CreateIdentityParams,
+    CreateMultipleIdentitiesParams,
     UpdateIdentityNameParams,
     UpdateIdentityAffirmationParams,
     UpdateIdentityVisualizationParams,
@@ -49,6 +50,15 @@ class SetCurrentIdentityAction(BaseModel):
 class CreateIdentityAction(BaseModel):
     params: CreateIdentityParams = Field(
         ..., description="Parameters for creating a new identity."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class CreateMultipleIdentitiesAction(BaseModel):
+    params: CreateMultipleIdentitiesParams = Field(
+        ..., description="Parameters for creating multiple identities."
     )
 
     class Config:

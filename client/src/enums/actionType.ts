@@ -3,6 +3,7 @@
  */
 export enum ActionType {
   CREATE_IDENTITY = "create_identity",
+  CREATE_MULTIPLE_IDENTITIES = "create_multiple_identities",
   UPDATE_IDENTITY = "update_identity",
   UPDATE_IDENTITY_NAME = "update_identity_name",
   UPDATE_IDENTITY_AFFIRMATION = "update_identity_affirmation",

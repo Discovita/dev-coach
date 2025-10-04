@@ -12,6 +12,7 @@ log = configure_logging(__name__, log_level="DEBUG")
 # Registry mapping ActionType values to their handler functions
 ACTION_REGISTRY = {
     ActionType.CREATE_IDENTITY.value: create_identity,
+    ActionType.CREATE_MULTIPLE_IDENTITIES.value: create_multiple_identities,
     ActionType.UPDATE_IDENTITY.value: update_identity,
     ActionType.UPDATE_IDENTITY_NAME.value: update_identity_name,
     ActionType.UPDATE_IDENTITY_AFFIRMATION.value: update_identity_affirmation,

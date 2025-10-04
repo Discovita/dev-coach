@@ -4,6 +4,7 @@ from services.action_handler.models.actions import (
     SelectIdentityFocusAction,
     SetCurrentIdentityAction,
     CreateIdentityAction,
+    CreateMultipleIdentitiesAction,
     UpdateIdentityAction,
     UpdateIdentityNameAction,
     UpdateIdentityAffirmationAction,
@@ -38,6 +39,9 @@ class CoachChatResponse(BaseModel):
 
     create_identity: Optional[CreateIdentityAction] = Field(
         default=None, description="Perform the create_identity action."
+    )
+    create_multiple_identities: Optional[CreateMultipleIdentitiesAction] = Field(
+        default=None, description="Perform the create_multiple_identities action."
     )
     update_identity: Optional[UpdateIdentityAction] = Field(
         default=None, description="Perform the update_identity action."
@@ -90,6 +94,7 @@ class CoachChatResponse(BaseModel):
     set_current_identity: Optional[SetCurrentIdentityAction] = Field(
         default=None, description="Perform the set_current_identity action."
     )
+    # Components
     show_introduction_canned_response_component: Optional[ShowIntroductionCannedResponseComponentAction] = Field(
         default=None, description="Show the introduction canned response component."
     )

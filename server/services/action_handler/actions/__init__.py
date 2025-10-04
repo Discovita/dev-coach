@@ -1,4 +1,5 @@
 from .create_identity import create_identity
+from .create_multiple_identities import create_multiple_identities
 from .update_identity import update_identity
 from .update_identity_name import update_identity_name
 from .update_identity_affirmation import update_identity_affirmation

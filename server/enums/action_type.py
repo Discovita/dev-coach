@@ -7,6 +7,7 @@ class ActionType(models.TextChoices):
     """
 
     CREATE_IDENTITY = "create_identity", "Create Identity"
+    CREATE_MULTIPLE_IDENTITIES = "create_multiple_identities", "Create Multiple Identities"
     UPDATE_IDENTITY = "update_identity", "Update Identity"
     UPDATE_IDENTITY_NAME = "update_identity_name", "Update Identity Name"
     UPDATE_IDENTITY_AFFIRMATION = (

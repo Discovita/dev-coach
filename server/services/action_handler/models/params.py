@@ -42,6 +42,15 @@ class CreateIdentityParams(BaseModel):
         extra = "forbid"
 
 
+class CreateMultipleIdentitiesParams(BaseModel):
+    identities: list[CreateIdentityParams] = Field(
+        ..., description="List of identities to create, each with name, note, and category"
+    )
+
+    class Config:
+        extra = "forbid"
+
+
 class UpdateIdentityNameParams(BaseModel):
     id: str = Field(..., description="ID of identity to update")
     name: str = Field(..., description="New name for the identity")
@@ -187,7 +196,7 @@ class AddUserNoteParams(BaseModel):
 
 
 class UpdateUserNoteItem(BaseModel):
-    id: str = Field(..., description="ID of the user note to update")
+    id: str = Field(..., description="UUID of the user note to update")
     note: str = Field(..., description="The new note text")
 
     class Config:
