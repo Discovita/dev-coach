@@ -34,7 +34,13 @@
 - "Does that cover it?"
 - "Anything else here?"
 
-**Move on when**: The user indicates they're done.
+**Continue exploring for more**: Keep asking if there are more, using natural variation:
+- "Any other family roles that feel important?"
+- "Anyone else you show up as in your family?"
+- "Does that cover it?"
+- "Anything else here?"
+
+**Move on ONLY when**: The user indicates they're done.
 
 ## Transitioning to Romantic/Sexual Expression
 
