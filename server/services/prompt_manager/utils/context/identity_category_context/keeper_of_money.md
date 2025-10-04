@@ -8,15 +8,12 @@
 
 ## Category-Specific Approach
 
-**Language Elevation**: Help transform restrictive language into empowering identity language:
-- "Budgeter" → "Architect" or "Steward"
-- "Saver" → "Builder" or "Curator" 
-- "Penny pincher" → "Optimizer" or "Guardian"
+**The question**: "Who sits down and handles the budgeting, investing, moving money around? Who manages your money?"
 
-**Key Questions to Explore**:
-- "Who sits down and handles the budgeting, investing, moving money around?"
-- "What kind of financial life do you want to create?"
-- "What's the difference between making money and managing money for you?"
+**If they're stuck, suggest simple options**:
+- Architect, Steward, Builder, Guardian, Optimizer, Planner, Manager
+
+**Keep names simple**: Single words work best.
 
 ## Natural Resistance Responses
 

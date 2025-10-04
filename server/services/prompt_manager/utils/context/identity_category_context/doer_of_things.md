@@ -8,17 +8,12 @@
 
 ## Category-Specific Approach
 
-**Empowering vs. Burdensome**: The challenge is helping clients find language that feels empowering rather than burdensome for their executive function.
+**The question**: "Who is your Doer of Things? Who handles all the practical stuff in your life?"
 
-**Key Questions to Explore**:
-- "Who is your Doer of Things? Who handles all the practical stuff in your life?"
-- "How can going to the DMV become a self-fulfilling practice instead of something you hate?"
-- "What would make taking care of life's necessities feel like self-love?"
+**If they're stuck, suggest simple options**:
+- Captain, Driver, Executor, Leader, Navigator, Organizer, Manager, Finisher
 
-**Language Elevation**: Transform burden-based language into empowering identity language:
-- "Someone who does chores" → "Captain," "Driver," or "Executor"
-- "Task manager" → "Problem Solver," "Administrator," or "Implementer"
-- "Responsible person" → "Leader," "Navigator," or "Organizer"
+**Keep names simple**: Single words work best.
 
 ## Natural Resistance Responses
 

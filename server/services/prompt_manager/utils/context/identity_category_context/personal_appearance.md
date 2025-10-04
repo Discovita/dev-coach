@@ -8,17 +8,12 @@
 
 ## Category-Specific Approach
 
-**Empowering vs. Superficial**: Help clients claim this aspect in an empowering way that aligns with their values, rather than dismissing it as superficial.
+**The question**: "How do you want to show up in the world? What do you want people to take in when you walk into a room?"
 
-**Key Questions to Explore**:
-- "How do you want to show up in the world?"
-- "What do you want people to take in when you walk into a room?"
-- "This includes how you keep your home—what aesthetic feels most 'you'?"
+**If they're stuck, suggest simple options**:
+- Natural, Polished, Classic, Elegant, Casual, Bold, Authentic, Refined
 
-**Language Elevation**: Transform dismissive language into empowering identity language:
-- "I don't care about looks" → "Natural" or "Authentic"
-- "Low maintenance" → "Effortless" or "Streamlined"
-- "Just practical" → "Functional" or "Classic"
+**Keep names simple**: Single words work best.
 
 ## Natural Resistance Responses
 

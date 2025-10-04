@@ -8,17 +8,12 @@
 
 ## Category-Specific Approach
 
-**Vulnerable Territory**: Create safety for exploring this often sensitive area while maintaining appropriate boundaries. Some feel immediate clarity while others experience uncertainty.
+**The question**: "What's your lover energy? How do you want to show up in intimate relationships?"
 
-**Key Questions to Explore**:
-- "What's your lover energy? How do you want to show up in intimate relationships?"
-- "What would be the highest vibe word for your romantic identity?"
-- "What kind of partner energy do you want to cultivate?"
+**If they're stuck, suggest simple options**:
+- Lover, Partner, Companion, Romantic, Beloved, Playful, Sacred, Passionate
 
-**Language Elevation**: Keep identities simple but elevated:
-- "Wife/Husband" → "Partner," "Lover," or "Companion"
-- "Girlfriend/Boyfriend" → "Romantic," "Beloved," or "Divine"
-- Generic terms → Simple but inspiring versions
+**Keep names simple**: Single words work best.
 
 ## Natural Resistance Responses
 

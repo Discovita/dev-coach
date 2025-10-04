@@ -8,14 +8,12 @@
 
 ## Category-Specific Approach
 
-**Complete Belief System Neutrality**: Never advocate for any particular spiritual path. Honor all authentic expressions and focus on what serves their peace and connection.
+**The question**: "How do you relate to something greater than yourself? What provides meaning and connection in your life?"
 
-**Key Questions to Explore**:
-- "What provides meaning and connection in your life?"
-- "How do you relate to something greater than yourself?"
-- "What gives you a sense of peace, surrender, or grace?"
+**If they're stuck, suggest simple options** (maintain complete neutrality - honor all belief systems):
+- Seeker, Believer, Student, Spiritual, Faithful, Connected, Grounded, Philosopher
 
-**Language Considerations**: Help them find terms that match their actual experience, not borrowed or imposed concepts. Use their own language and terminology.
+**Keep names simple**: Single words work best. Use their own language and terminology.
 
 ## Natural Resistance Responses
 
