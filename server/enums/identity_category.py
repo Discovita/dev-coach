@@ -15,6 +15,8 @@ class IdentityCategory(models.TextChoices):
     FAMILY = "familial_relations", "Familial Relations"
     ROMANTIC = "romantic_relation", "Romantic Relation"
     ACTION = "doer_of_things", "Doer of Things"
+    # NOTE: This is not a real identity category, it is used to trigger special instructions during the IB phase for the completion of the IB phase. It has its own specific identity category context used for this.
+    REVIEW = "review", "Review"
 
     @classmethod
     def from_string(cls, value: str) -> "IdentityCategory":
