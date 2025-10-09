@@ -5,6 +5,9 @@ import { ConversationExporter } from "@/pages/chat/components/ConversationExport
 import { TestScenarioConversationResetter } from "@/pages/test/components/TestScenarioConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
 import { CoachRequest } from "@/types/coachRequest";
+import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
+import { CoachState } from "@/types/coachState";
+import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
 
 
 
@@ -21,6 +24,13 @@ export const TestScenarioChatControls: React.FC<
 > = ({ isProcessingMessage, onSendMessage, scenarioId, testUserId, onResetSuccess }) => {
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Read coach state from cache to determine whether to show bulletin
+  const coachState = useReactiveQueryData<CoachState>([
+    "testScenarioUser",
+    testUserId,
+    "coachState",
+  ]);
 
 
 
@@ -87,6 +97,7 @@ export const TestScenarioChatControls: React.FC<
 
   return (
     <div className="_TestScenarioChatControls bg-gold-200 dark:bg-[#333333] p-4">
+      <WarmupBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}
