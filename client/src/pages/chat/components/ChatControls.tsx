@@ -9,6 +9,8 @@ import { User } from "@/types/user";
 import { CoachRequest } from "@/types/coachRequest";
 import { CoachState } from "@/types/coachState";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
+import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
+import { useIdentities } from "@/hooks/use-identities";
 
 interface ChatControlsProps {
   isProcessingMessage: boolean;
@@ -27,6 +29,7 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
 
   // Read coach state from cache to determine whether to show bulletin
   const coachState = useReactiveQueryData<CoachState>(["user", "coachState"]);
+  const { identities } = useIdentities();
 
   /**
    * Resizes the textarea to fit content, up to a max height.
@@ -89,6 +92,7 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
   return (
     <div className="_ChatControls bg-gold-200 dark:bg-[#333333] p-4">
       <WarmupBulletin coachState={coachState} />
+      <BrainstormingBulletin coachState={coachState} identities={identities} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}
