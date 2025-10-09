@@ -2,106 +2,106 @@ import React from "react";
 import {
   ComponentConfig,
   ComponentText,
-  ComponentIdentity,
+  // ComponentIdentity,
 } from "@/types/componentConfig";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { CoachRequest } from "@/types/coachRequest";
-import { getIdentityCategoryColor } from "@/enums/identityCategory";
-import {
-  FaDollarSign,
-  FaPiggyBank,
-  FaUser,
-  FaDumbbell,
-  FaHeart,
-  FaRegCheckSquare,
-} from "react-icons/fa";
+// import { getIdentityCategoryColor } from "@/enums/identityCategory";
+// import {
+//   FaDollarSign,
+//   FaPiggyBank,
+//   FaUser,
+//   FaDumbbell,
+//   FaHeart,
+//   FaRegCheckSquare,
+// } from "react-icons/fa";
 
-import { MdFamilyRestroom } from "react-icons/md";
-import { BsStars } from "react-icons/bs";
-import { AiOutlineSun } from "react-icons/ai";
+// import { MdFamilyRestroom } from "react-icons/md";
+// import { BsStars } from "react-icons/bs";
+// import { AiOutlineSun } from "react-icons/ai";
 
 /**
  * Maps identity categories to their corresponding icons
  */
-const CATEGORY_ICON_MAP: Record<
-  string,
-  React.ComponentType<{ className?: string }>
-> = {
-  passions_and_talents: BsStars,
-  maker_of_money: FaDollarSign,
-  keeper_of_money: FaPiggyBank,
-  spiritual: AiOutlineSun,
-  personal_appearance: FaUser,
-  physical_expression: FaDumbbell,
-  familial_relations: MdFamilyRestroom,
-  romantic_relation: FaHeart,
-  doer_of_things: FaRegCheckSquare,
-};
+// const CATEGORY_ICON_MAP: Record<
+//   string,
+//   React.ComponentType<{ className?: string }>
+// > = {
+//   passions_and_talents: BsStars,
+//   maker_of_money: FaDollarSign,
+//   keeper_of_money: FaPiggyBank,
+//   spiritual: AiOutlineSun,
+//   personal_appearance: FaUser,
+//   physical_expression: FaDumbbell,
+//   familial_relations: MdFamilyRestroom,
+//   romantic_relation: FaHeart,
+//   doer_of_things: FaRegCheckSquare,
+// };
 
-const getCategoryIcon = (category: string) => {
-  const normalizedCategory = category.toLowerCase();
+// const getCategoryIcon = (category: string) => {
+//   const normalizedCategory = category.toLowerCase();
 
-  // Direct match first
-  if (CATEGORY_ICON_MAP[normalizedCategory]) {
-    return CATEGORY_ICON_MAP[normalizedCategory];
-  }
+//   // Direct match first
+//   if (CATEGORY_ICON_MAP[normalizedCategory]) {
+//     return CATEGORY_ICON_MAP[normalizedCategory];
+//   }
 
-  // Fallback to partial matching for flexibility
-  for (const [key, icon] of Object.entries(CATEGORY_ICON_MAP)) {
-    if (
-      normalizedCategory.includes(key.split("_")[0]) ||
-      key.split("_").some((part) => normalizedCategory.includes(part))
-    ) {
-      return icon;
-    }
-  }
+//   // Fallback to partial matching for flexibility
+//   for (const [key, icon] of Object.entries(CATEGORY_ICON_MAP)) {
+//     if (
+//       normalizedCategory.includes(key.split("_")[0]) ||
+//       key.split("_").some((part) => normalizedCategory.includes(part))
+//     ) {
+//       return icon;
+//     }
+//   }
 
-  // Default fallback
-  return FaUser;
-};
+//   // Default fallback
+//   return FaUser;
+// };
 
 /**
  * Renders a single identity as a badge
  */
-const IdentityBadge: React.FC<{ identity: ComponentIdentity }> = ({
-  identity,
-}) => {
-  const IconComponent = getCategoryIcon(identity.category);
-  const colorClasses = getIdentityCategoryColor(identity.category);
+// const IdentityBadge: React.FC<{ identity: ComponentIdentity }> = ({
+//   identity,
+// }) => {
+//   const IconComponent = getCategoryIcon(identity.category);
+//   const colorClasses = getIdentityCategoryColor(identity.category);
 
-  return (
-    <div
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colorClasses}`}
-    >
-      <IconComponent className="w-3 h-3" />
-      <span className="font-medium">{identity.name}</span>
-    </div>
-  );
-};
+//   return (
+//     <div
+//       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colorClasses}`}
+//     >
+//       <IconComponent className="w-3 h-3" />
+//       <span className="font-medium">{identity.name}</span>
+//     </div>
+//   );
+// };
 
 /**
  * Renders a list of identities as badges
  */
-const IdentitiesRenderer: React.FC<{ identities: ComponentIdentity[] }> = ({
-  identities,
-}) => {
-  if (!identities || identities.length === 0) {
-    return null;
-  }
+// const IdentitiesRenderer: React.FC<{ identities: ComponentIdentity[] }> = ({
+//   identities,
+// }) => {
+//   if (!identities || identities.length === 0) {
+//     return null;
+//   }
 
-  return (
-    <div className="mb-3 p-3 bg-gold-50 dark:bg-gray-800 rounded-lg">
-      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Your Current Identities:
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {identities.map((identity) => (
-          <IdentityBadge key={identity.id} identity={identity} />
-        ))}
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div className="mb-3 p-3 bg-gold-50 dark:bg-gray-800 rounded-lg">
+//       <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+//         Your Current Identities:
+//       </div>
+//       <div className="flex flex-wrap gap-2">
+//         {identities.map((identity) => (
+//           <IdentityBadge key={identity.id} identity={identity} />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -113,19 +113,19 @@ export interface CoachMessageWithComponentProps {
 /**
  * Separates texts by their source type for different rendering strategies
  */
-const groupTextsBySource = (texts: ComponentText[]) => {
-  const grouped: Record<string, ComponentText[]> = {};
+// const groupTextsBySource = (texts: ComponentText[]) => {
+//   const grouped: Record<string, ComponentText[]> = {};
 
-  texts.forEach((text) => {
-    const source = text.source || "default";
-    if (!grouped[source]) {
-      grouped[source] = [];
-    }
-    grouped[source].push(text);
-  });
+//   texts.forEach((text) => {
+//     const source = text.source || "default";
+//     if (!grouped[source]) {
+//       grouped[source] = [];
+//     }
+//     grouped[source].push(text);
+//   });
 
-  return grouped;
-};
+//   return grouped;
+// };
 
 /**
  * Handles warmup text merging with main content
@@ -267,9 +267,9 @@ const ContentRenderer: React.FC<{
 export const CoachMessageWithComponent: React.FC<
   CoachMessageWithComponentProps
 > = ({ children, componentConfig, onSelect, disabled }) => {
-  const allTexts = componentConfig.texts || [];
-  const textsBySource = groupTextsBySource(allTexts);
-  const identities = componentConfig.identities || [];
+  // const allTexts = componentConfig.texts || [];
+  // const textsBySource = groupTextsBySource(allTexts);
+  // const identities = componentConfig.identities || [];
   const hasButtons =
     componentConfig.buttons && componentConfig.buttons.length > 0;
 
