@@ -3,6 +3,7 @@ import { ComponentConfig } from "@/types/componentConfig";
 import { CoachRequest } from "@/types/coachRequest";
 import { ComponentType } from "@/enums/componentType";
 import { IntroCannedResponseComponent } from "./IntroCannedResponseComponent";
+import { CombineIdentitiesConfirmation } from "./CombineIdentitiesConfirmation";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -18,6 +19,15 @@ export const CoachMessageWithComponent: React.FC<
     case ComponentType.INTRO_CANNED_RESPONSE:
       return (
         <IntroCannedResponseComponent
+          coachMessage={children}
+          config={componentConfig}
+          onSelect={onSelect}
+          disabled={disabled}
+        />
+      );
+    case ComponentType.COMBINE_IDENTITIES:
+      return (
+        <CombineIdentitiesConfirmation
           coachMessage={children}
           config={componentConfig}
           onSelect={onSelect}
