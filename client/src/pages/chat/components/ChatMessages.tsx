@@ -1,6 +1,6 @@
 import React from "react";
 import { CoachMessage } from "@/pages/chat/components/CoachMessage";
-import { CoachMessageWithComponent } from "@/pages/chat/components/CoachMessageWithComponent";
+import { CoachMessageWithComponent } from "@/pages/chat/components/coach-message-with-component.tsx/CoachMessageWithComponent";
 import { UserMessage } from "@/pages/chat/components/UserMessage";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { LoadingBubbles } from "@/pages/chat/components/LoadingBubbles";

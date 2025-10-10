@@ -250,19 +250,17 @@ class ShowAcceptIAMComponentParams(BaseModel):
         extra = "forbid"
 
 
-class ShowWarmupTextComponentParams(BaseModel):
-    enabled: bool = Field(
-        ..., description="Whether to show the warmup text component"
-    )
+class ShowCombineIdentitiesParams(BaseModel):
+    identity_id_a: str = Field(..., description="ID of the first identity to combine")
+    identity_id_b: str = Field(..., description="ID of the second identity to combine")
 
     class Config:
         extra = "forbid"
 
 
-class ShowBrainstormingIdentitiesParams(BaseModel):
-    enabled: bool = Field(
-        ..., description="Whether to show the brainstorming identities component"
-    )
+class CombineIdentitiesParams(BaseModel):
+    identity_id_a: str = Field(..., description="ID of the first identity to combine")
+    identity_id_b: str = Field(..., description="ID of the second identity to combine")
 
     class Config:
         extra = "forbid"

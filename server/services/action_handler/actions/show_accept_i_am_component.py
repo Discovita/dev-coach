@@ -10,6 +10,7 @@ from models.components.ComponentConfig import (
     ComponentButton,
     ComponentAction,
 )
+from enums.component_type import ComponentType
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -46,7 +47,7 @@ def show_accept_i_am_component(
         ComponentButton(label="Let's keep working on it"),
     ]
 
-    component = ComponentConfig(buttons=buttons)
+    component = ComponentConfig(component_type=ComponentType.ACCEPT_I_AM, buttons=buttons)
 
     # Log the action
     Action.objects.create(

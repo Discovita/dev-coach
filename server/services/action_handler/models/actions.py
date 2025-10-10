@@ -24,8 +24,8 @@ from .params import (
     UpdateAskedQuestionsParams,
     ShowIntroductionCannedResponseComponentParams,
     ShowAcceptIAMComponentParams,
-    ShowWarmupTextComponentParams,
-    ShowBrainstormingIdentitiesParams,
+    ShowCombineIdentitiesParams,
+    CombineIdentitiesParams,
 )
 
 
@@ -246,18 +246,18 @@ class ShowAcceptIAMComponentAction(BaseModel):
         extra = "forbid"
 
 
-class ShowWarmupTextComponentAction(BaseModel):
-    params: ShowWarmupTextComponentParams = Field(
-        ..., description="Parameters for showing the warmup text component."
+class ShowCombineIdentitiesAction(BaseModel):
+    params: ShowCombineIdentitiesParams = Field(
+        ..., description="Parameters for showing the combine identities component."
     )
 
     class Config:
         extra = "forbid"
 
 
-class ShowBrainstormingIdentitiesAction(BaseModel):
-    params: ShowBrainstormingIdentitiesParams = Field(
-        ..., description="Parameters for showing the brainstorming identities component."
+class CombineIdentitiesAction(BaseModel):
+    params: CombineIdentitiesParams = Field(
+        ..., description="Parameters for combining two identities."
     )
 
     class Config:

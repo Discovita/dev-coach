@@ -23,4 +23,6 @@ export enum ActionType {
   UPDATE_ASKED_QUESTIONS = "update_asked_questions",
   SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component",
   SHOW_BRAINSTORMING_IDENTITIES = "show_brainstorming_identities",
+  SHOW_COMBINE_IDENTITIES = "show_combine_identities",
+  COMBINE_IDENTITIES = "combine_identities",
 }

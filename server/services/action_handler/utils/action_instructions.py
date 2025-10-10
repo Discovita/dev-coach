@@ -36,8 +36,8 @@ from services.action_handler.models.actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
-    ShowWarmupTextComponentAction,
-    ShowBrainstormingIdentitiesAction,
+    ShowCombineIdentitiesAction,
+    CombineIdentitiesAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -139,13 +139,13 @@ ACTION_PARAMS = {
         "description": "Show an 'Accept I Am' component asking the user to accept the proposed affirmation or keep working on it. Pass the identity id and the proposed affirmation.",
         "model": ShowAcceptIAMComponentAction,
     },
-    ActionType.SHOW_WARMUP_TEXT_COMPONENT: {
-        "description": "Show a warmup text block (markdown) before/after the coach message. Use for adding the users who_you_are and who_you_want_to_be information to the coach message.",
-        "model": ShowWarmupTextComponentAction,
+    ActionType.SHOW_COMBINE_IDENTITIES: {
+        "description": "Show a component that displays two identities side-by-side with Yes/No buttons to confirm combining them.",
+        "model": ShowCombineIdentitiesAction,
     },
-    ActionType.SHOW_BRAINSTORMING_IDENTITIES: {
-        "description": "Show a component displaying all of the user's current identities. Use this during brainstorming sessions to help the user see what identities they've already created. You should show this any time you create or update an identity.",
-        "model": ShowBrainstormingIdentitiesAction,
+    ActionType.COMBINE_IDENTITIES: {
+        "description": "Combine two identities. Exactly two identities are required. Category-specific rules apply.",
+        "model": CombineIdentitiesAction,
     },
 }
 

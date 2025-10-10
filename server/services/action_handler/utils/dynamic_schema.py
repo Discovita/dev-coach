@@ -26,8 +26,8 @@ from services.action_handler.models.actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
-    ShowWarmupTextComponentAction,
-    ShowBrainstormingIdentitiesAction,
+    ShowCombineIdentitiesAction,
+    CombineIdentitiesAction,
 )
 
 from services.logger import configure_logging
@@ -59,8 +59,8 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.UPDATE_ASKED_QUESTIONS: UpdateAskedQuestionsAction,
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT: ShowIntroductionCannedResponseComponentAction,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT: ShowAcceptIAMComponentAction,
-    ActionType.SHOW_WARMUP_TEXT_COMPONENT: ShowWarmupTextComponentAction,
-    ActionType.SHOW_BRAINSTORMING_IDENTITIES: ShowBrainstormingIdentitiesAction,
+    ActionType.SHOW_COMBINE_IDENTITIES: ShowCombineIdentitiesAction,
+    ActionType.COMBINE_IDENTITIES: CombineIdentitiesAction,
 }
 
 

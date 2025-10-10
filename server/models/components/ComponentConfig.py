@@ -1,5 +1,6 @@
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
+from enums.component_type import ComponentType
 
 
 class ComponentAction(BaseModel):
@@ -48,7 +49,7 @@ class ComponentIdentity(BaseModel):
 
     id: str = Field(..., description="Unique identifier for the identity")
     name: str = Field(..., description="Name of the identity")
-    category: str = Field(..., description="Category of the identity")
+    category: Optional[str] = Field(..., description="Category of the identity")
 
 
 class ComponentConfig(BaseModel):
@@ -57,12 +58,15 @@ class ComponentConfig(BaseModel):
     how to render based on the structure of the data.
     """
 
+    component_type: str = Field(
+        ..., description="Type of component to display (ComponentType value)"
+    )
     texts: Optional[List[ComponentText]] = Field(
         default=None,
         description="Optional list of text blocks to render before/after the coach message",
     )
-    buttons: List[ComponentButton] = Field(
-        ..., description="List of buttons to display"
+    buttons: Optional[List[ComponentButton]] = Field(
+        default=None, description="Optional list of buttons to display"
     )
     identities: Optional[List[ComponentIdentity]] = Field(
         default=None,

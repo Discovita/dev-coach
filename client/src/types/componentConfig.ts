@@ -1,3 +1,5 @@
+import { ComponentType } from "@/enums/componentType";
+
 export interface ComponentAction {
   action: string;
   params: Record<string, unknown>;
@@ -21,6 +23,7 @@ export interface ComponentIdentity {
 }
 
 export interface ComponentConfig {
+  component_type: ComponentType;
   texts?: ComponentText[];
   buttons?: ComponentButton[];
   identities?: ComponentIdentity[];

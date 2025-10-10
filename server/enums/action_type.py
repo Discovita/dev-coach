@@ -40,13 +40,13 @@ class ActionType(models.TextChoices):
     UPDATE_WHO_YOU_WANT_TO_BE = "update_who_you_want_to_be", "Update Who You Want to Be"
     UPDATE_ASKED_QUESTIONS = "update_asked_questions", "Update Asked Questions"
     SET_CURRENT_IDENTITY = "set_current_identity", "Set Current Identity"
+    COMBINE_IDENTITIES = "combine_identities", "Combine Identities"
     ADD_USER_NOTE = "add_user_note", "Add User Note"
     UPDATE_USER_NOTE = "update_user_note", "Update User Note"
     DELETE_USER_NOTE = "delete_user_note", "Delete User Note"
     SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT = "show_introduction_canned_response_component", "Show Introduction Canned Response Component"
     SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component", "Show Accept I Am Component"
-    SHOW_WARMUP_TEXT_COMPONENT = "show_warmup_text_component", "Show Warmup Text Component"
-    SHOW_BRAINSTORMING_IDENTITIES = "show_brainstorming_identities", "Show Brainstorming Identities"
+    SHOW_COMBINE_IDENTITIES = "show_combine_identities", "Show Combine Identities"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""

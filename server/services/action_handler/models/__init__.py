@@ -23,8 +23,8 @@ from .params import (
     UpdateAskedQuestionsParams,
     ShowIntroductionCannedResponseComponentParams,
     ShowAcceptIAMComponentParams,
-    ShowWarmupTextComponentParams,
-    ShowBrainstormingIdentitiesParams,
+    ShowCombineIdentitiesParams,
+    CombineIdentitiesParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -51,8 +51,8 @@ from .actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
-    ShowWarmupTextComponentAction,
-    ShowBrainstormingIdentitiesAction,
+    ShowCombineIdentitiesAction,
+    CombineIdentitiesAction,
 )
 
 __all__ = [
@@ -80,8 +80,8 @@ __all__ = [
     "UpdateAskedQuestionsParams",
     "ShowIntroductionCannedResponseComponentParams",
     "ShowAcceptIAMComponentParams",
-    "ShowWarmupTextComponentParams",
-    "ShowBrainstormingIdentitiesParams",
+    "ShowCombineIdentitiesParams",
+    "CombineIdentitiesParams",
     "SelectIdentityFocusAction",
     "SetCurrentIdentityAction",
     "CreateIdentityAction",
@@ -106,6 +106,6 @@ __all__ = [
     "UpdateAskedQuestionsAction",
     "ShowIntroductionCannedResponseComponentAction",
     "ShowAcceptIAMComponentAction",
-    "ShowWarmupTextComponentAction",
-    "ShowBrainstormingIdentitiesAction",
+    "ShowCombineIdentitiesAction",
+    "CombineIdentitiesAction",
 ]
