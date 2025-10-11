@@ -2,9 +2,53 @@ import React from "react";
 import { ComponentConfig, ComponentIdentity } from "@/types/componentConfig";
 import { CoachRequest } from "@/types/coachRequest";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
+import { getIdentityCategoryColor, getIdentityCategoryLightColor, getIdentityCategoryDarkColor } from "@/enums/identityCategory";
+import {
+  FaDollarSign,
+  FaPiggyBank,
+  FaUser,
+  FaDumbbell,
+  FaHeart,
+  FaRegCheckSquare,
+} from "react-icons/fa";
+import { MdFamilyRestroom } from "react-icons/md";
+import { BsStars } from "react-icons/bs";
+import { AiOutlineSun } from "react-icons/ai";
 
-const IdentityCard: React.FC<{ identity: ComponentIdentity | null }>
-  = ({ identity }) => {
+const CATEGORY_ICON_MAP: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
+  passions_and_talents: BsStars,
+  maker_of_money: FaDollarSign,
+  keeper_of_money: FaPiggyBank,
+  spiritual: AiOutlineSun,
+  personal_appearance: FaUser,
+  physical_expression: FaDumbbell,
+  familial_relations: MdFamilyRestroom,
+  romantic_relation: FaHeart,
+  doer_of_things: FaRegCheckSquare,
+};
+
+const getCategoryIcon = (category: string) => {
+  const normalizedCategory = category.toLowerCase();
+  if (CATEGORY_ICON_MAP[normalizedCategory]) {
+    return CATEGORY_ICON_MAP[normalizedCategory];
+  }
+  for (const [key, icon] of Object.entries(CATEGORY_ICON_MAP)) {
+    if (
+      normalizedCategory.includes(key.split("_")[0]) ||
+      key.split("_").some((part) => normalizedCategory.includes(part))
+    ) {
+      return icon;
+    }
+  }
+  return FaUser;
+};
+
+const IdentityCard: React.FC<{ identity: ComponentIdentity | null }> = ({
+  identity,
+}) => {
   if (!identity) {
     return (
       <div className="flex-1 min-w-[220px] p-4 rounded-lg border border-gray-300/50 dark:border-gray-700 bg-white/70 dark:bg-gray-900/30">
@@ -14,17 +58,23 @@ const IdentityCard: React.FC<{ identity: ComponentIdentity | null }>
     );
   }
 
+  const IconComponent = getCategoryIcon(String(identity.category || ""));
+  const badgeColorClasses = getIdentityCategoryColor(String(identity.category || ""));
+  const lightColorClasses = getIdentityCategoryLightColor(String(identity.category || ""));
+  const darkColorClasses = getIdentityCategoryDarkColor(String(identity.category || ""));
+
   return (
-    <div className="flex-1 min-w-[220px] p-4 rounded-lg border border-gold-400/60 dark:border-gold-600/60 bg-white/90 dark:bg-gray-900/40 shadow-sm">
-      <div className="text-sm uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-1">
-        Identity
-      </div>
-      <div className="text-lg font-semibold text-gray-900 dark:text-gold-200">
-        {identity.name}
+    <div className={`flex-1 min-w-[220px] p-4 rounded-lg border shadow-sm ${lightColorClasses} ${darkColorClasses}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <IconComponent className={`w-4 h-4 ${darkColorClasses.split(' ').filter(cls => cls.startsWith('text-')).join(' ')}`} />
+        <div className={`text-lg font-semibold ${darkColorClasses.split(' ').filter(cls => cls.startsWith('text-')).join(' ')}`}>
+          {identity.name}
+        </div>
       </div>
       {identity.category && (
-        <div className="mt-2 inline-block text-xs px-2 py-0.5 rounded-full bg-gold-100 text-gold-800 dark:bg-gold-900/40 dark:text-gold-200">
-          {identity.category.replace(/_/g, " ")}
+        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${badgeColorClasses}`}>
+          <IconComponent className="w-3 h-3" />
+          <span className="font-medium">{identity.category.replace(/_/g, " ")}</span>
         </div>
       )}
     </div>
@@ -69,7 +119,7 @@ export const CombineIdentitiesConfirmation: React.FC<{
         <IdentityCard identity={identityA} />
 
         <div className="flex items-center justify-center px-2 text-gray-700 dark:text-gray-300 select-none">
-          <span className="hidden sm:block text-base">+</span>          
+          <span className="hidden sm:block text-base">+</span>
         </div>
 
         <IdentityCard identity={identityB} />
@@ -78,15 +128,9 @@ export const CombineIdentitiesConfirmation: React.FC<{
           <span className="text-2xl">=</span>
         </div>
 
-        <div className="flex-1 min-w-[240px] p-4 rounded-lg border-2 border-emerald-400/80 dark:border-emerald-500/80 bg-emerald-50/60 dark:bg-emerald-900/20">
-          <div className="text-sm uppercase tracking-wide text-emerald-700 dark:text-emerald-300 mb-1">
-            Resulting Identity
-          </div>
-          <div className="text-lg font-semibold text-emerald-900 dark:text-emerald-200">
+        <div className="flex-1 min-w-[240px] p-4 rounded-lg border-2 border-gold-400/80 dark:border-gold-500/80 bg-gold-50/60 dark:bg-gold-900/20">
+          <div className="text-lg font-semibold text-gold-900 dark:text-gold-200">
             {combinedName || "<Name will be set>"}
-          </div>
-          <div className="mt-2 text-xs text-emerald-800/80 dark:text-emerald-300/80">
-            The resulting identity name will be set to “{combinedName || "A/B"}”.
           </div>
         </div>
       </div>
@@ -102,8 +146,8 @@ export const CombineIdentitiesConfirmation: React.FC<{
               disabled={disabled}
               className={`${
                 button.label.toLowerCase() === "yes"
-                  ? "bg-emerald-500 hover:bg-emerald-600 text-black"
-                  : "bg-gray-300 hover:bg-gray-400 text-black dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
+                  ? "bg-gold-500 hover:bg-gold-600 text-black"
+                  : "bg-gold-300 hover:bg-gold-400 text-black dark:bg-gold-100 dark:hover:bg-gold-200 dark:text-gold-100"
               } px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer`}
             >
               {button.label}
@@ -114,4 +158,3 @@ export const CombineIdentitiesConfirmation: React.FC<{
     </div>
   );
 };
-
