@@ -25,6 +25,8 @@ export function useCoachState() {
   } = useQuery({
     queryKey: ["user", "coachState"],
     queryFn: fetchCoachState,
+    staleTime: 0, // Reduced to 0 for more responsive updates
+    retry: false,
   });
 
   // Placeholder for update mutation (implement as needed)

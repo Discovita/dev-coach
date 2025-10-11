@@ -25,6 +25,8 @@ export function useIdentities() {
   } = useQuery({
     queryKey: ["user", "identities"],
     queryFn: fetchIdentities,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: false,
   });
 
   // Placeholder for update mutation (implement as needed)
