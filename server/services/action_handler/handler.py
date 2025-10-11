@@ -155,6 +155,21 @@ def apply_component_actions(
             # Fallback if we can't find the enum
             log.action(f"Executing component action: {action_type}")
 
+        # Convert dictionary params to appropriate Pydantic model
+        # Get the parameter model class from the action handler's signature
+        import inspect
+        sig = inspect.signature(handler_func)
+        param_annotations = list(sig.parameters.values())
+        if len(param_annotations) >= 2:  # coach_state, params, [user_message]
+            params_param = param_annotations[1]  # Second parameter is params
+            if params_param.annotation != inspect.Parameter.empty:
+                # It's a Pydantic model, convert the dict to the model
+                try:
+                    action_params = params_param.annotation(**action_params)
+                except Exception as e:
+                    log.error(f"Failed to convert params to {params_param.annotation}: {e}")
+                    continue
+
         # Execute the action handler
         if action_type in [
             ActionType.ADD_USER_NOTE.value,

@@ -69,8 +69,7 @@ export const CombineIdentitiesConfirmation: React.FC<{
         <IdentityCard identity={identityA} />
 
         <div className="flex items-center justify-center px-2 text-gray-700 dark:text-gray-300 select-none">
-          <span className="hidden sm:block text-base">merge</span>
-          <span className="sm:ml-2 text-2xl">→</span>
+          <span className="hidden sm:block text-base">+</span>          
         </div>
 
         <IdentityCard identity={identityB} />

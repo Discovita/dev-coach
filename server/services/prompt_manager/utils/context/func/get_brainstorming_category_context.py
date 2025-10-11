@@ -16,6 +16,7 @@ CATEGORY_CONTEXT_FILES = {
     IdentityCategory.FAMILY: "services/prompt_manager/utils/context/identity_category_context/familial_relations.md",
     IdentityCategory.ROMANTIC: "services/prompt_manager/utils/context/identity_category_context/romantic_relation.md",
     IdentityCategory.ACTION: "services/prompt_manager/utils/context/identity_category_context/doer_of_things.md",
+    IdentityCategory.REVIEW: "services/prompt_manager/utils/context/identity_category_context/review.md",
 }
 
 def get_brainstorming_category_context(coach_state: CoachState) -> str:
