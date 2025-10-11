@@ -12,6 +12,8 @@ import {
   TestScenarioUserNote,
   TestScenarioAction,
 } from "@/types/testScenario";
+import { CoachingPhase } from "@/enums/coachingPhase";
+import { IdentityCategory } from "@/enums/identityCategory";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
 import TestScenarioCoachStateForm from "@/pages/test/components/TestScenarioCoachStateForm";
@@ -258,17 +260,36 @@ const TestScenarioEditor = ({
     }
     try {
       console.log("Identities being sent:", identities);
+      // Build template with required sections and defaults
+      const template: TestScenarioTemplate = {
+        user: { first_name: firstName, last_name: lastName },
+        coach_state: {
+          current_phase: coachState.current_phase || CoachingPhase.INTRODUCTION,
+          identity_focus: coachState.identity_focus || IdentityCategory.PASSIONS_AND_TALENTS,
+          who_you_are: coachState.who_you_are || [],
+          who_you_want_to_be: coachState.who_you_want_to_be || [],
+          ...coachState, // Include any other coach state fields
+        },
+      };
+
+      // Only include optional sections if they have meaningful data
+      if (identities && identities.length > 0) {
+        template.identities = identities;
+      }
+      if (chatMessages && chatMessages.length > 0) {
+        template.chat_messages = chatMessages;
+      }
+      if (userNotes && userNotes.length > 0) {
+        template.user_notes = userNotes;
+      }
+      if (actions && actions.length > 0) {
+        template.actions = actions;
+      }
+
       onSave({
         name,
         description,
-        template: {
-          user: { first_name: firstName, last_name: lastName },
-          coach_state: coachState,
-          identities: identities,
-          chat_messages: chatMessages,
-          user_notes: userNotes,
-          actions: actions,
-        },
+        template,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
