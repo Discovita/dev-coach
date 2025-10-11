@@ -25,6 +25,8 @@ export function useChatMessages() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["user", "chatMessages"],
     queryFn: fetchChatMessages,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: false,
   });
 
   // Get the current component config (set by mutations)
@@ -45,40 +47,46 @@ export function useChatMessages() {
     },
     // On success, update all relevant caches with the response
     onSuccess: (response: CoachResponse, variables) => {
-      // Append user (dedup) and coach messages to cache without invalidating messages
+      console.log("[useChatMessages] Response:", response);
+      // Ensure messages query doesn't refetch right now
+      queryClient.cancelQueries({
+        queryKey: ["user", "chatMessages"],
+      });
+
+      // Append the user's message (if not already present) and the coach's reply
       queryClient.setQueryData<Message[] | undefined>(
         ["user", "chatMessages"],
         (old) => {
           const current = old ?? [];
+          const userMsg: Message = {
+            role: "user",
+            content: variables.message,
+            timestamp: new Date().toISOString(),
+          };
+          const coachMsg: Message | null = response.message
+            ? {
+                role: "coach",
+                content: response.message,
+                timestamp: new Date().toISOString(),
+              }
+            : null;
+
+          // Avoid duplicate user bubble if one already exists at the end (due to prior optimistic UI)
           const last = current[current.length - 1];
           const hasUserAlready =
-            !!last && last.role === "user" && last.content === variables.message;
+            !!last &&
+            last.role === "user" &&
+            last.content === variables.message;
 
-          const maybeUserAppended = hasUserAlready
-            ? current
-            : [
-                ...current,
-                {
-                  role: "user",
-                  content: variables.message,
-                  timestamp: new Date().toISOString(),
-                } as Message,
-              ];
-
-          const maybeCoachAppended = response.message
-            ? [
-                ...maybeUserAppended,
-                {
-                  role: "coach",
-                  content: response.message,
-                  timestamp: new Date().toISOString(),
-                } as Message,
-              ]
-            : maybeUserAppended;
-
-          return maybeCoachAppended;
+          const next: Message[] = hasUserAlready
+            ? [...current]
+            : [...current, userMsg];
+          return coachMsg ? [...next, coachMsg] : next;
         }
       );
+
+      // Append coach message to chat cache without invalidating to avoid flicker
+      // (Handled together above)
 
       if (response.final_prompt !== undefined) {
         queryClient.setQueryData(["user", "finalPrompt"], response.final_prompt);
@@ -89,6 +97,17 @@ export function useChatMessages() {
         ["user", "componentConfig"],
         response.component || null
       );
+
+      // Still refresh other user datasets, but keep messages stable
+      queryClient.invalidateQueries({
+        queryKey: ["user", "actions"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user", "coachState"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user", "identities"],
+      });
     },
   });
 
