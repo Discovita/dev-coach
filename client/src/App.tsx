@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Layout from "@/layout/Layout";
+import PublicLayout from "@/layout/PublicLayout";
 import AuthLayout from "@/layout/AuthLayout";
 import AdminLayout from "@/layout/AdminLayout";
 import Home from "@/pages/home/Home";
@@ -63,11 +63,10 @@ const App = () => {
     <>
       <SessionRestorer />
       <Routes>
-        <Route element={<Layout />}>
+        <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/demo" element={<Demo />} />
         </Route>
       </Routes>
     </>

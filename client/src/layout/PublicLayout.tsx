@@ -1,12 +1,12 @@
-import Navbar from "@/components/Navbar";
+import PublicNavbar from "@/components/PublicNavbar";
 import Footer from "@/components/Footer";
 import { Outlet } from "react-router-dom";
 
-const Layout = () => {
+const PublicLayout = () => {
   return (
     <div className="_Layout flex h-screen w-full flex-col overflow-clip">
       <nav className="relative z-[40] flex-none">
-        <Navbar />
+        <PublicNavbar />
       </nav>
       <main className="_Main flex flex-col grow-1 justify-center overflow-auto dark:bg-[#333333]">
         <div className="flex-1 min-h-0 overflow-y-auto">
@@ -18,4 +18,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default PublicLayout;
