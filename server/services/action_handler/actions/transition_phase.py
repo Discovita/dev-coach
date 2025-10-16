@@ -6,7 +6,7 @@ from enums.action_type import ActionType
 from enums.coaching_phase import CoachingPhase
 from services.logger import configure_logging
 from services.action_handler.utils.update_all_user_identities_to_accepted_state import update_all_user_identities_to_accepted_state
-from services.action_handler.utils import set_current_identity_to_first_pending_refinement
+from services.action_handler.utils import set_current_identity_to_next_pending_refinement
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -22,10 +22,10 @@ def transition_phase(coach_state: CoachState, params: TransitionPhaseParams, coa
     old_phase_label = CoachingPhase(old_phase).label if old_phase else "None"
     new_phase_label = CoachingPhase(params.to_phase).label
     
-    # If moving into Identity Refinement, accept all current identities for this user and set the current identity to the first pending refinement
+    # If moving into Identity Refinement, accept all current identities for this user and set the current identity to the next pending refinement
     if CoachingPhase.IDENTITY_REFINEMENT.value == params.to_phase:
         update_all_user_identities_to_accepted_state(coach_state)
-        set_current_identity_to_first_pending_refinement(coach_state)
+        set_current_identity_to_next_pending_refinement(coach_state)
     
     # Log the action with rich context
     Action.objects.create(
