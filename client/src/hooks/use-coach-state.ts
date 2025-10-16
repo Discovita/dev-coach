@@ -1,5 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { fetchCoachState } from "@/api/user";
+import type { CoachState } from "@/types/coachState";
+
+type UseCoachStateResult = {
+  coachState: CoachState | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetchCoachState: UseQueryResult<CoachState, Error>["refetch"];
+};
 
 /**
  * useCoachState hook
@@ -13,8 +21,8 @@ import { fetchCoachState } from "@/api/user";
  *
  * Used in: Any component that needs to read or update the user's coach state.
  */
-export function useCoachState() {
-  const { data, isLoading, isError, refetch } = useQuery({
+export function useCoachState(): UseCoachStateResult {
+  const { data, isLoading, isError, refetch } = useQuery<CoachState, Error>({
     queryKey: ["user", "coachState"],
     queryFn: fetchCoachState,
     staleTime: 0, // Reduced to 0 for more responsive updates
