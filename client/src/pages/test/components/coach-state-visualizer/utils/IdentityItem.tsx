@@ -22,20 +22,21 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
 
   // Get state display info
   const getStateInfo = (state?: string) => {
+    console.log("state", state);
     switch (state) {
-      case IdentityState.PROPOSED:
+      case IdentityState.PROPOSED.toString():
         return {
           icon: AlertCircleIcon,
           color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
           label: "Proposed",
         };
-      case IdentityState.ACCEPTED:
+      case IdentityState.ACCEPTED.toString():
         return {
           icon: CheckCircleIcon,
           color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
           label: "Accepted",
         };
-      case IdentityState.REFINEMENT_COMPLETE:
+      case IdentityState.REFINEMENT_COMPLETE.toString():
         return {
           icon: StarIcon,
           color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
@@ -60,7 +61,7 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
     (identity.notes && identity.notes.length > 0);
 
   return (
-    <div className="border rounded-md overflow-hidden bg-white dark:bg-neutral-800 shadow">
+    <div className="_IdentityItem border rounded-md overflow-hidden bg-white dark:bg-neutral-800 shadow">
       <div
         className="flex justify-between items-center px-4 py-2 bg-gold-100 dark:bg-gold-900/20 cursor-pointer transition-colors"
         onClick={() => hasExpandableDetails && setIsExpanded(!isExpanded)}

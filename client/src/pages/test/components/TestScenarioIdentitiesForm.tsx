@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TestScenarioIdentity } from "@/types/testScenario";
 import { IdentityCategory } from "@/enums/identityCategory";
+import { IdentityState } from "@/enums/identityState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ interface TestScenarioIdentitiesFormProps {
 const emptyIdentity = (): TestScenarioIdentity => ({
   name: "",
   category: IdentityCategory.PASSIONS_AND_TALENTS,
+  state: IdentityState.PROPOSED,
   affirmation: "",
   visualization: "",
   notes: [],
@@ -110,6 +112,11 @@ export default function TestScenarioIdentitiesForm({
                 <span className="ml-2 text-xs text-neutral-500">
                   [{identity.category}]
                 </span>
+                {identity.state && (
+                  <span className="ml-2 text-xs text-neutral-500">
+                    ({identity.state})
+                  </span>
+                )}
                 {identity.affirmation && (
                   <>
                     <span className="font-semibold ml-2 text-xs italic text-gold-700">
@@ -188,6 +195,26 @@ export default function TestScenarioIdentitiesForm({
                     {cat
                       .replace(/_/g, " ")
                       .replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="mb-2">State</Label>
+            <Select
+              value={draft.state}
+              onValueChange={(v) =>
+                setDraft({ ...draft, state: v as IdentityState })
+              }
+            >
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder="Select state" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(IdentityState).map((st) => (
+                  <SelectItem key={st} value={st}>
+                    {st.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                   </SelectItem>
                 ))}
               </SelectContent>

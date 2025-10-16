@@ -1,4 +1,5 @@
 import { IdentityCategory } from "@/enums/identityCategory";
+import { IdentityState } from "@/enums/identityState";
 
 /**
  * Represents a single identity with its state for test scenario editing.
@@ -18,7 +19,7 @@ export interface Identity {
   /** Category this identity belongs to */
   category: IdentityCategory;
   /** Current state of the identity (optional) */
-  state?: string;
+  state?: IdentityState;
   /** Created timestamp (optional) */
   created_at?: string;
   /** Updated timestamp (optional) */

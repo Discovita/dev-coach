@@ -1,5 +1,6 @@
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { IdentityCategory } from "@/enums/identityCategory";
+import { IdentityState } from "@/enums/identityState";
 import { GetToKnowYouQuestions } from "@/enums/getToKnowYouQuestions";
 import { ActionType } from "@/enums/actionType";
 
@@ -36,6 +37,7 @@ export interface TestScenarioCoachState {
 export interface TestScenarioIdentity {
   name: string;
   category: IdentityCategory;
+  state?: IdentityState;
   affirmation?: string;
   visualization?: string;
   notes?: string[];
