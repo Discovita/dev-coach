@@ -41,6 +41,7 @@ class CoachState(models.Model):
         related_name="current_coach_states",
         help_text="The Identity currently being refined in the Identity Refinement Phase",
     )
+    # TODO: Remove this field as it is no longer used
     proposed_identity = models.ForeignKey(
         Identity,
         null=True,
@@ -49,6 +50,7 @@ class CoachState(models.Model):
         related_name="proposed_coach_states",
         help_text="The currently proposed identity.",
     )
+    # TODO: Rename this field to identity_category_focus
     identity_focus = models.CharField(
         max_length=255,
         choices=IdentityCategory.choices,
