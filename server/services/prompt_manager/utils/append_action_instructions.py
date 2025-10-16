@@ -5,7 +5,7 @@ Used by prompt_manager.manager and other prompt modules to add action instructio
 
 from typing import List, Optional
 from enums.action_type import ActionType
-from services.action_handler.utils.action_instructions import get_action_instructions
+from services.action_handler.utils import get_action_instructions
 
 
 def append_action_instructions(

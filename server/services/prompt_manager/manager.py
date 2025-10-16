@@ -10,7 +10,7 @@ from apps.prompts.models import Prompt
 from apps.users.models import User
 from enums.action_type import ActionType
 from services.prompt_manager import gather_prompt_context, format_for_provider
-from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
+from services.action_handler.utils import build_dynamic_response_format
 from services.prompt_manager.utils import (
     prepend_system_context,
     prepend_user_notes,
