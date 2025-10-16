@@ -20,4 +20,5 @@ def get_current_identity_context(coach_state: CoachState) -> str:
             notes_str = "\n".join([f"- {note}" for note in identity.notes])
             current_identity_str += f"**Notes:**\n{notes_str}\n"
         return current_identity_str
-    return None
+    else:
+        return "No current identity set."
