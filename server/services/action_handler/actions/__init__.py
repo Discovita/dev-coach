@@ -1,10 +1,10 @@
 from .create_identity import create_identity
 from .create_multiple_identities import create_multiple_identities
-from .update_identity import update_identity
+from .update_identity import update_identity # Deprecated in favor of specific update actions
 from .update_identity_name import update_identity_name
 from .update_identity_affirmation import update_identity_affirmation
 from .update_identity_visualization import update_identity_visualization
-from .accept_identity import accept_identity
+from .accept_identity import accept_identity # Deprecated; auto update Identity state to ACCEPTED when moving to Identity Refinement
 from .accept_identity_refinement import accept_identity_refinement
 from .accept_identity_affirmation import accept_identity_affirmation
 from .accept_identity_visualization import accept_identity_visualization
@@ -16,11 +16,45 @@ from .skip_identity_category import skip_identity_category
 from .update_who_you_are import update_who_you_are
 from .update_who_you_want_to_be import update_who_you_want_to_be
 from .unskip_identity_category import unskip_identity_category
-from .add_user_note import add_user_note
-from .update_user_note import update_user_note
-from .delete_user_note import delete_user_note
-from .update_asked_questions import update_asked_questions
-from .show_introduction_canned_response_component import show_introduction_canned_response_component
-from .show_accept_i_am_component import show_accept_i_am_component
-from .show_combine_identities import show_combine_identities
 from .combine_identities import combine_identities
+from .update_asked_questions import update_asked_questions
+
+# SENTINEL ACTIONS
+from .sentinel.add_user_note import add_user_note
+from .sentinel.update_user_note import update_user_note
+from .sentinel.delete_user_note import delete_user_note
+
+# COMPONENT ACTIONS
+from .components.show_introduction_canned_response_component import show_introduction_canned_response_component
+from .components.show_accept_i_am_component import show_accept_i_am_component
+from .components.show_combine_identities import show_combine_identities
+
+
+__all__ = [
+    "create_identity",
+    "create_multiple_identities",
+    "update_identity",
+    "update_identity_name",
+    "update_identity_affirmation",
+    "update_identity_visualization",
+    "accept_identity",
+    "accept_identity_refinement",
+    "accept_identity_affirmation",
+    "accept_identity_visualization",
+    "add_identity_note",
+    "transition_phase",
+    "select_identity_focus",
+    "set_current_identity",
+    "skip_identity_category",
+    "unskip_identity_category",
+    "update_who_you_are",
+    "update_who_you_want_to_be",
+    "update_asked_questions",
+    "show_introduction_canned_response_component",
+    "show_accept_i_am_component",
+    "show_combine_identities",
+    "combine_identities",
+    "add_user_note",
+    "update_user_note",
+    "delete_user_note",
+]
