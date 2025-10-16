@@ -1,3 +1,16 @@
+import React from "react";
+import {
+  FaDollarSign,
+  FaPiggyBank,
+  FaUser,
+  FaDumbbell,
+  FaHeart,
+  FaRegCheckSquare,
+} from "react-icons/fa";
+import { MdFamilyRestroom } from "react-icons/md";
+import { BsStars } from "react-icons/bs";
+import { AiOutlineSun } from "react-icons/ai";
+
 /**
  * Represents the category of an identity.
  * This enum is used to classify identities within the application,
@@ -174,4 +187,41 @@ export const getIdentityCategoryDarkColor = (category: string): string => {
   
   // Fallback to gray
   return "border-gray-300 text-gray-800 dark:border-gray-600 dark:text-gray-200";
+};
+
+/**
+ * Maps identity category values to their corresponding React icon components
+ */
+export const IDENTITY_CATEGORY_ICON_MAP: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
+  passions_and_talents: BsStars,
+  maker_of_money: FaDollarSign,
+  keeper_of_money: FaPiggyBank,
+  spiritual: AiOutlineSun,
+  personal_appearance: FaUser,
+  physical_expression: FaDumbbell,
+  familial_relations: MdFamilyRestroom,
+  romantic_relation: FaHeart,
+  doer_of_things: FaRegCheckSquare,
+};
+
+/**
+ * Helper function to get the appropriate icon component for an identity category
+ */
+export const getIdentityCategoryIcon = (category: string): React.ComponentType<{ className?: string }> => {
+  const normalizedCategory = category.toLowerCase();
+  if (IDENTITY_CATEGORY_ICON_MAP[normalizedCategory]) {
+    return IDENTITY_CATEGORY_ICON_MAP[normalizedCategory];
+  }
+  for (const [key, icon] of Object.entries(IDENTITY_CATEGORY_ICON_MAP)) {
+    if (
+      normalizedCategory.includes(key.split("_")[0]) ||
+      key.split("_").some((part) => normalizedCategory.includes(part))
+    ) {
+      return icon;
+    }
+  }
+  return FaUser;
 };

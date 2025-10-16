@@ -2,52 +2,10 @@ import React from "react";
 import { CoachState } from "@/types/coachState";
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { Identity } from "@/types/identity";
-import { getIdentityCategoryColor } from "@/enums/identityCategory";
-import {
-  FaDollarSign,
-  FaPiggyBank,
-  FaUser,
-  FaDumbbell,
-  FaHeart,
-  FaRegCheckSquare,
-} from "react-icons/fa";
-import { MdFamilyRestroom } from "react-icons/md";
-import { BsStars } from "react-icons/bs";
-import { AiOutlineSun } from "react-icons/ai";
-
-const CATEGORY_ICON_MAP: Record<
-  string,
-  React.ComponentType<{ className?: string }>
-> = {
-  passions_and_talents: BsStars,
-  maker_of_money: FaDollarSign,
-  keeper_of_money: FaPiggyBank,
-  spiritual: AiOutlineSun,
-  personal_appearance: FaUser,
-  physical_expression: FaDumbbell,
-  familial_relations: MdFamilyRestroom,
-  romantic_relation: FaHeart,
-  doer_of_things: FaRegCheckSquare,
-};
-
-const getCategoryIcon = (category: string) => {
-  const normalizedCategory = category.toLowerCase();
-  if (CATEGORY_ICON_MAP[normalizedCategory]) {
-    return CATEGORY_ICON_MAP[normalizedCategory];
-  }
-  for (const [key, icon] of Object.entries(CATEGORY_ICON_MAP)) {
-    if (
-      normalizedCategory.includes(key.split("_")[0]) ||
-      key.split("_").some((part) => normalizedCategory.includes(part))
-    ) {
-      return icon;
-    }
-  }
-  return FaUser;
-};
+import { getIdentityCategoryColor, getIdentityCategoryIcon } from "@/enums/identityCategory";
 
 const IdentityBadge: React.FC<{ identity: Identity }> = ({ identity }) => {
-  const IconComponent = getCategoryIcon(String(identity.category));
+  const IconComponent = getIdentityCategoryIcon(String(identity.category));
   const colorClasses = getIdentityCategoryColor(String(identity.category));
   return (
     <div
