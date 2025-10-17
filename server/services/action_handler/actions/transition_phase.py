@@ -22,7 +22,7 @@ def transition_phase(coach_state: CoachState, params: TransitionPhaseParams, coa
     old_phase_label = CoachingPhase(old_phase).label if old_phase else "None"
     new_phase_label = CoachingPhase(params.to_phase).label
     
-    # If moving into Identity Refinement, accept all current identities for this user and set the current identity to the next pending refinement
+    # If moving into Identity Refinement, accept all current identities for this user and set the current identity to the next (should be first) pending refinement
     if CoachingPhase.IDENTITY_REFINEMENT.value == params.to_phase:
         update_all_user_identities_to_accepted_state(coach_state)
         set_current_identity_to_next_pending_refinement(coach_state)
