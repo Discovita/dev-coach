@@ -2,54 +2,58 @@ import React from "react";
 import { CoachState } from "@/types/coachState";
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { Identity } from "@/types/identity";
-import { 
-  getIdentityCategoryColor, 
+import {
+  getIdentityCategoryColor,
   getIdentityCategoryDisplayName,
-  getIdentityCategoryIcon 
+  getIdentityCategoryIcon,
+  getIdentityCategoryLightColor,
+  getIdentityCategoryDarkColor,
 } from "@/enums/identityCategory";
 
 const IdentityCard: React.FC<{ identity: Identity }> = ({ identity }) => {
   const IconComponent = getIdentityCategoryIcon(String(identity.category));
   const colorClasses = getIdentityCategoryColor(String(identity.category));
-  const categoryDisplayName = getIdentityCategoryDisplayName(String(identity.category));
-  
+  const categoryDisplayName = getIdentityCategoryDisplayName(
+    String(identity.category)
+  );
+
   return (
-    <div className={`p-4 rounded-lg border ${colorClasses}`}>
-      <div className="flex items-center gap-2 mb-3">
-        <IconComponent className="w-5 h-5" />
-        <div>
-          <h3 className="font-semibold text-sm">{identity.name}</h3>
-          <p className="text-xs opacity-75">{categoryDisplayName}</p>
+    <div className="relative p-6">
+      {/* Large Icon positioned to the right */}
+      <div className="absolute top-1/2 right-6 transform -translate-y-1/2">
+        <div className={`p-4 rounded-full ${colorClasses}`}>
+          <IconComponent className="w-12 h-12" />
         </div>
       </div>
       
-      {identity.affirmation && (
-        <div className="mb-3">
-          <p className="text-xs font-medium mb-1">Affirmation:</p>
-          <p className="text-xs italic">{identity.affirmation}</p>
+      {/* Content area */}
+      <div className="pr-20">
+        {/* Header */}
+        <div className="mb-4">
+          <h3 className={`font-bold text-lg mb-1 ${colorClasses} bg-transparent`}>{identity.name}</h3>
+          <p className="text-sm opacity-75 font-medium">{categoryDisplayName}</p>
         </div>
-      )}
-      
-      {identity.visualization && (
-        <div className="mb-3">
-          <p className="text-xs font-medium mb-1">Visualization:</p>
-          <p className="text-xs italic">{identity.visualization}</p>
-        </div>
-      )}
-      
-      {identity.notes && identity.notes.length > 0 && (
-        <div>
-          <p className="text-xs font-medium mb-1">Notes:</p>
-          <ul className="text-xs space-y-1">
-            {identity.notes.map((note, index) => (
-              <li key={index} className="flex items-start gap-1">
-                <span className="text-xs">•</span>
-                <span>{note}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+
+        {/* Affirmation */}
+        {identity.affirmation && (
+          <div className="mb-4">
+            <p className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Affirmation:</p>
+            <p className="text-sm italic leading-relaxed bg-white/50 dark:bg-black/20 p-3 rounded-md border-l-4 border-current">
+              {identity.affirmation}
+            </p>
+          </div>
+        )}
+
+        {/* Visualization */}
+        {identity.visualization && (
+          <div className="mb-4">
+            <p className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Visualization:</p>
+            <p className="text-sm italic leading-relaxed bg-white/50 dark:bg-black/20 p-3 rounded-md border-l-4 border-current">
+              {identity.visualization}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -59,26 +63,19 @@ export const RefinementBulletin: React.FC<{
 }> = ({ coachState }) => {
   const isRefinement =
     coachState?.current_phase === CoachingPhase.IDENTITY_REFINEMENT;
-  
+
   if (!isRefinement) return null;
 
   const currentIdentity = coachState?.current_identity;
 
+  if (!currentIdentity) return null;
+
+  const lightColorClasses = getIdentityCategoryLightColor(String(currentIdentity.category));
+  const darkColorClasses = getIdentityCategoryDarkColor(String(currentIdentity.category));
+
   return (
-    <div className="mb-3 p-3 bg-indigo-100 dark:bg-neutral-800 border border-indigo-400 rounded-md">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-xs font-semibold text-indigo-800 dark:text-indigo-200">
-          Current Identity for Refinement
-        </div>
-      </div>
-      
-      {!currentIdentity ? (
-        <p className="text-xs italic text-neutral-500 dark:text-neutral-400 m-0">
-          No identity selected for refinement.
-        </p>
-      ) : (
-        <IdentityCard identity={currentIdentity} />
-      )}
+    <div className={`mb-3 ${lightColorClasses} border-4 rounded-md ${darkColorClasses}`}>
+      <IdentityCard identity={currentIdentity} />
     </div>
   );
 };
