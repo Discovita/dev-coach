@@ -230,7 +230,88 @@
 
 ---
 
-### 7. Soft Delete Prompt
+### 7. Get Latest Prompt
+
+- **URL:** `/prompts/latest/`
+- **Method:** `GET`
+- **Description:** Get the most recent active prompt for a specific coaching phase.
+- **Authentication:** Required
+- **Query Parameters:**
+  - `coaching_phase` (required): The coaching phase to get the latest prompt for
+- **Response:**
+  - `200 OK`: The most recent active prompt for the specified phase.
+  - `400 Bad Request`: Missing or invalid coaching_phase parameter.
+  - `404 Not Found`: No active prompt found for the specified phase.
+  - `500 Internal Server Error`: Server error.
+
+#### Example Request
+
+```
+GET /prompts/latest/?coaching_phase=introduction
+```
+
+#### Example Response (Success)
+
+```json
+{
+  "id": "uuid-string",
+  "coaching_phase": "introduction",
+  "version": 3,
+  "name": "Latest Welcome Message",
+  "description": "Most recent greeting for new users",
+  "body": "Welcome to Dev Coach! I'm here to help you on your journey...",
+  "required_context_keys": ["user_name", "coaching_phase"],
+  "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
+  "prompt_type": "COACH",
+  "is_active": true,
+  "created_at": "2024-06-01T12:00:00Z",
+  "updated_at": "2024-06-01T12:00:00Z"
+}
+```
+
+#### Example Response (Missing Parameter)
+
+```json
+{
+  "success": false,
+  "error": "Missing required parameter",
+  "detail": "coaching_phase query parameter is required"
+}
+```
+
+#### Example Response (Invalid Coaching Phase)
+
+```json
+{
+  "success": false,
+  "error": "Invalid coaching phase",
+  "detail": "Invalid coaching_phase: invalid_phase. Valid phases: ['system_context', 'introduction', 'get_to_know_you', 'identity_warm_up', 'identity_brainstorming', 'identity_refinement', 'identity_affirmation', 'identity_visualization']"
+}
+```
+
+#### Example Response (No Prompt Found)
+
+```json
+{
+  "success": false,
+  "error": "No prompt found",
+  "detail": "No active prompt found for coaching phase: introduction"
+}
+```
+
+#### Example Response (Server Error)
+
+```json
+{
+  "success": false,
+  "error": "Server error",
+  "detail": "An error occurred while retrieving the latest prompt"
+}
+```
+
+---
+
+### 8. Soft Delete Prompt
 
 - **URL:** `/prompts/{id}/soft_delete/`
 - **Method:** `POST`
