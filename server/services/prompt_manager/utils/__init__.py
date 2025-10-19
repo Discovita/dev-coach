@@ -4,6 +4,7 @@ from .append_user_notes import append_user_notes
 from .context_logging import log_context_stats
 from .format_for_provider import format_for_provider
 from .format_identities import format_identities
+from .format_identities_needing_refinement import format_identities_needing_refinement
 from .format_skipped_categories import format_skipped_categories
 from .prepend_system_context import prepend_system_context
 from .prepend_user_notes import prepend_user_notes
@@ -16,6 +17,7 @@ __all__ = [
     "log_context_stats",
     "format_for_provider",
     "format_identities",
+    "format_identities_needing_refinement",
     "format_skipped_categories",
     "gather_prompt_context",
     "prepend_system_context",
