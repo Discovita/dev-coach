@@ -28,7 +28,7 @@ Deletes one or more [UserNote](/docs/database/models/user-note) entries by ID.
 ## Implementation Steps
 
 1. **Note Deletion**: Deletes the specified [UserNote](/docs/database/models/user-note) entries
-2. **Action Logging**: Records the action with details
+2. **Error Handling**: Silently skips notes that don't exist or don't belong to the user
 
 ## Example Usage
 
@@ -44,7 +44,8 @@ Deletes one or more [UserNote](/docs/database/models/user-note) entries by ID.
 ## Result
 
 - **Success**: Deletes the specified user notes
-- **Logging**: Records the action with result summary: "Deleted user notes"
+- **Error Handling**: Silently skips notes that don't exist or don't belong to the user
+- **No Logging**: This action does not log to the Action table (Sentinel-only action)
 
 ## Related Actions
 

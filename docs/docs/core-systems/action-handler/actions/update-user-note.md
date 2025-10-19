@@ -28,7 +28,7 @@ Updates one or more existing [UserNote](/docs/database/models/user-note) entries
 ## Implementation Steps
 
 1. **Note Updates**: Updates each [UserNote](/docs/database/models/user-note) with the new text
-2. **Action Logging**: Records the action with details
+2. **Error Handling**: Silently skips notes that don't exist or don't belong to the user
 
 ## Example Usage
 
@@ -53,7 +53,8 @@ Updates one or more existing [UserNote](/docs/database/models/user-note) entries
 ## Result
 
 - **Success**: Updates the specified user notes
-- **Logging**: Records the action with result summary: "Updated user notes"
+- **Error Handling**: Silently skips notes that don't exist or don't belong to the user
+- **No Logging**: This action does not log to the Action table (Sentinel-only action)
 
 ## Related Actions
 

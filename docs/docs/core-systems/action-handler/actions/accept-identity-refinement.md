@@ -27,7 +27,8 @@ Sets the state of the specified identity to 'refinement_complete', indicating th
 
 1. **State Update**: Updates the identity's state to `IdentityState.REFINEMENT_COMPLETE`
 2. **Identity Retrieval**: Gets the updated identity for logging
-3. **Action Logging**: Records the action with details
+3. **Current Identity Update**: Sets the current identity to the next pending refinement
+4. **Action Logging**: Records the action with details
 
 ## Example Usage
 
