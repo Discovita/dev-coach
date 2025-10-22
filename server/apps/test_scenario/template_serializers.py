@@ -111,10 +111,10 @@ class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer)
         allow_blank=True,
         help_text="Current state of the identity (proposed, accepted, refinement complete).",
     )
-    affirmation = serializers.CharField(
+    i_am_statement = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Affirmation statement for the identity.",
+        help_text="I Am statement for the identity.",
     )
     visualization = serializers.CharField(
         required=False, allow_blank=True, help_text="Visualization for the identity."

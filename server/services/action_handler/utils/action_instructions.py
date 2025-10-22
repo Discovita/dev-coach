@@ -17,12 +17,12 @@ from services.action_handler.models.actions import (
     CreateIdentityAction,
     CreateMultipleIdentitiesAction,
     UpdateIdentityNameAction,
-    UpdateIdentityAffirmationAction,
+    UpdateIAmAction,
     UpdateIdentityVisualizationAction,
     UpdateIdentityAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
-    AcceptIdentityAffirmationAction,
+    AcceptIAmAction,
     AcceptIdentityVisualizationAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
@@ -63,9 +63,9 @@ ACTION_PARAMS = {
         "description": "Update the name of an existing Identity.",
         "model": UpdateIdentityNameAction,
     },
-    ActionType.UPDATE_IDENTITY_AFFIRMATION: {
-        "description": "Update the affirmation of an existing Identity.",
-        "model": UpdateIdentityAffirmationAction,
+    ActionType.UPDATE_I_AM_STATEMENT: {
+        "description": "Update the 'I Am' statement of an existing Identity.",
+        "model": UpdateIAmAction,
     },
     ActionType.UPDATE_IDENTITY_VISUALIZATION: {
         "description": "Update the visualization of an existing Identity.",
@@ -83,9 +83,9 @@ ACTION_PARAMS = {
         "description": "Mark an Identity as refinement_complete.",
         "model": AcceptIdentityRefinementAction,
     },
-    ActionType.ACCEPT_IDENTITY_AFFIRMATION: {
-        "description": "Mark an Identity as affirmation_complete.",
-        "model": AcceptIdentityAffirmationAction,
+    ActionType.ACCEPT_I_AM_STATEMENT: {
+        "description": "Mark an Identity as i_am_complete.",
+        "model": AcceptIAmAction,
     },
     ActionType.ACCEPT_IDENTITY_VISUALIZATION: {
         "description": "Mark an Identity as visualization_complete.",
@@ -136,7 +136,7 @@ ACTION_PARAMS = {
         "model": ShowIntroductionCannedResponseComponentAction,
     },
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT: {
-        "description": "Show an 'Accept I Am' component asking the user to accept the proposed affirmation or keep working on it. Pass the identity id and the proposed affirmation.",
+        "description": "Show an 'Accept I Am' component asking the user to accept the proposed 'I Am' statement or keep working on it. Pass the identity id and the proposed 'I Am' statement.",
         "model": ShowAcceptIAMComponentAction,
     },
     ActionType.SHOW_COMBINE_IDENTITIES: {

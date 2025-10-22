@@ -18,8 +18,8 @@ def update_identity(coach_state: CoachState, params: UpdateIdentityParams, coach
     update_fields = {}
     if params.name is not None:
         update_fields["name"] = params.name
-    if params.affirmation is not None:
-        update_fields["affirmation"] = params.affirmation
+    if params.i_am_statement is not None:
+        update_fields["i_am_statement"] = params.i_am_statement
     if params.visualization is not None:
         update_fields["visualization"] = params.visualization
     if params.state is not None:
@@ -50,8 +50,8 @@ def update_identity(coach_state: CoachState, params: UpdateIdentityParams, coach
     updated_fields = []
     if params.name is not None:
         updated_fields.append("name")
-    if params.affirmation is not None:
-        updated_fields.append("affirmation")
+    if params.i_am_statement is not None:
+        updated_fields.append("i_am_statement")
     if params.visualization is not None:
         updated_fields.append("visualization")
     if params.state is not None:

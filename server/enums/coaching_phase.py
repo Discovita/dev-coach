@@ -13,7 +13,7 @@ class CoachingPhase(models.TextChoices):
     IDENTITY_WARMUP = "identity_warm_up", "Identity Warm-Up"
     IDENTITY_BRAINSTORMING = "identity_brainstorming", "Identity Brainstorming"
     IDENTITY_REFINEMENT = "identity_refinement", "Identity Refinement"
-    IDENTITY_AFFIRMATION = "identity_affirmation", "Identity Affirmation"
+    I_AM_STATEMENT = "i_am_statement", "I Am Statement"
     IDENTITY_VISUALIZATION = "identity_visualization", "Identity Visualization"
 
     @classmethod

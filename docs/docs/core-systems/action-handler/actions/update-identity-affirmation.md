@@ -9,7 +9,7 @@ The `update_identity_affirmation` action updates only the affirmation of an exis
 ## Action Details
 
 **Action Type**: `update_identity_affirmation`  
-**Enum Value**: `ActionType.UPDATE_IDENTITY_AFFIRMATION`  
+**Enum Value**: `ActionType.UPDATE_I_AM_STATEMENT`  
 **Handler Function**: `update_identity_affirmation()`  
 **Models Used**: [Identity](/docs/database/models/identity), [Action](/docs/database/models/action)
 
@@ -19,10 +19,10 @@ Updates only the affirmation field of an existing identity. This is used during 
 
 ## Parameters
 
-| Parameter     | Type    | Required | Description                      |
-| ------------- | ------- | -------- | -------------------------------- |
-| `id`          | integer | Yes      | The ID of the identity to update |
-| `affirmation` | string  | Yes      | New affirmation for the identity |
+| Parameter        | Type    | Required | Description                           |
+| ---------------- | ------- | -------- | ------------------------------------- |
+| `id`             | integer | Yes      | The ID of the identity to update      |
+| `i_am_statement` | string  | Yes      | New 'I Am' statement for the identity |
 
 ## Implementation Steps
 

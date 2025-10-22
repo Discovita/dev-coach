@@ -12,7 +12,7 @@ class IdentityAdmin(admin.ModelAdmin):
         "id",
         "user",
         "name",
-        "affirmation",
+        "i_am_statement",
         "visualization",
         "state",
         "notes",

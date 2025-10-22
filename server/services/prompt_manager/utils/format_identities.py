@@ -14,8 +14,8 @@ def format_identities(identities: List[Identity]) -> str:
         identity_str += f"**ID:** {identity.id}\n"
         if identity.state:
             identity_str += f"**State:** {identity.state}\n"
-        if identity.affirmation:
-            identity_str += f"**Affirmation:** {identity.affirmation}\n"
+        if identity.i_am_statement:
+            identity_str += f"**I Am Statement:** {identity.i_am_statement}\n"
         if identity.visualization:
             identity_str += f"**Visualization:** {identity.visualization}\n"
         if identity.notes:

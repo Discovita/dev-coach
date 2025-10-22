@@ -10,9 +10,9 @@ class ActionType(models.TextChoices):
     CREATE_MULTIPLE_IDENTITIES = "create_multiple_identities", "Create Multiple Identities"
     UPDATE_IDENTITY = "update_identity", "Update Identity"
     UPDATE_IDENTITY_NAME = "update_identity_name", "Update Identity Name"
-    UPDATE_IDENTITY_AFFIRMATION = (
-        "update_identity_affirmation",
-        "Update Identity Affirmation",
+    UPDATE_I_AM_STATEMENT = (
+        "update_i_am_statement",
+        "Update I Am Statement",
     )
     UPDATE_IDENTITY_VISUALIZATION = (
         "update_identity_visualization",
@@ -23,9 +23,9 @@ class ActionType(models.TextChoices):
         "accept_identity_refinement",
         "Accept Identity Refinement",
     )
-    ACCEPT_IDENTITY_AFFIRMATION = (
-        "accept_identity_affirmation",
-        "Accept Identity Affirmation",
+    ACCEPT_I_AM_STATEMENT = (
+        "accept_i_am_statement",
+        "Accept I Am Statement",
     )
     ACCEPT_IDENTITY_VISUALIZATION = (
         "accept_identity_visualization",

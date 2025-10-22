@@ -2,11 +2,11 @@ from .create_identity import create_identity
 from .create_multiple_identities import create_multiple_identities
 from .update_identity import update_identity # Deprecated in favor of specific update actions
 from .update_identity_name import update_identity_name
-from .update_identity_affirmation import update_identity_affirmation
+from .update_i_am_statement import update_i_am_statement
 from .update_identity_visualization import update_identity_visualization
 from .accept_identity import accept_identity # Deprecated; auto update Identity state to ACCEPTED when moving to Identity Refinement
 from .accept_identity_refinement import accept_identity_refinement
-from .accept_identity_affirmation import accept_identity_affirmation
+from .accept_i_am_statement import accept_i_am_statement
 from .accept_identity_visualization import accept_identity_visualization
 from .add_identity_note import add_identity_note
 from .combine_identities import combine_identities
@@ -35,11 +35,11 @@ __all__ = [
     "create_multiple_identities",
     "update_identity",
     "update_identity_name",
-    "update_identity_affirmation",
+    "update_i_am_statement",
     "update_identity_visualization",
     "accept_identity",
     "accept_identity_refinement",
-    "accept_identity_affirmation",
+    "accept_i_am_statement",
     "accept_identity_visualization",
     "add_identity_note",
     "transition_phase",

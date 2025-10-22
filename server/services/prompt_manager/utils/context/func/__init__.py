@@ -14,7 +14,7 @@ from .get_brainstorming_category_context import get_brainstorming_category_conte
 from .get_current_identity_context import get_current_identity_context
 from .get_asked_questions import get_asked_questions
 from .get_refinement_identities_context import get_refinement_identities_context
-from .get_affirmation_identities_context import get_affirmation_identities_context
+from .get_i_am_identities_context import get_i_am_identities_context
 from .get_visualization_identities_context import get_visualization_identities_context
 
 __all__ = [
@@ -34,6 +34,6 @@ __all__ = [
     "get_current_identity_context",
     "get_asked_questions",
     "get_refinement_identities_context",
-    "get_affirmation_identities_context",
+    "get_i_am_identities_context",
     "get_visualization_identities_context",
 ]

@@ -7,11 +7,11 @@ from services.action_handler.models.actions import (
     CreateMultipleIdentitiesAction,
     UpdateIdentityAction,
     UpdateIdentityNameAction,
-    UpdateIdentityAffirmationAction,
+    UpdateIAmAction,
     UpdateIdentityVisualizationAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
-    AcceptIdentityAffirmationAction,
+    AcceptIAmAction,
     AcceptIdentityVisualizationAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
@@ -49,8 +49,8 @@ class CoachChatResponse(BaseModel):
     update_identity_name: Optional[UpdateIdentityNameAction] = Field(
         default=None, description="Perform the update_identity_name action."
     )
-    update_identity_affirmation: Optional[UpdateIdentityAffirmationAction] = Field(
-        default=None, description="Perform the update_identity_affirmation action."
+    update_i_am_statement: Optional[UpdateIAmAction] = Field(
+        default=None, description="Perform the update_i_am_statement action."
     )
     update_identity_visualization: Optional[UpdateIdentityVisualizationAction] = Field(
         default=None, description="Perform the update_identity_visualization action."
@@ -61,8 +61,8 @@ class CoachChatResponse(BaseModel):
     accept_identity_refinement: Optional[AcceptIdentityRefinementAction] = Field(
         default=None, description="Perform the accept_identity_refinement action."
     )
-    accept_identity_affirmation: Optional[AcceptIdentityAffirmationAction] = Field(
-        default=None, description="Perform the accept_identity_affirmation action."
+    accept_i_am_statement: Optional[AcceptIAmAction] = Field(
+        default=None, description="Perform the accept_i_am_statement action."
     )
     accept_identity_visualization: Optional[AcceptIdentityVisualizationAction] = Field(
         default=None, description="Perform the accept_identity_visualization action."

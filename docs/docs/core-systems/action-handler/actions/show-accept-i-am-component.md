@@ -60,7 +60,7 @@ The returned component includes:
 - **Component Type**: Accept I Am
 - **Buttons**: 
   - "I love it!" with actions:
-    - `UPDATE_IDENTITY_AFFIRMATION` with id and affirmation
+    - `UPDATE_I_AM_STATEMENT` with id and affirmation
     - `ACCEPT_IDENTITY_AFFIRMATION` with id
   - "Let's keep working on it" (no actions)
 

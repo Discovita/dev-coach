@@ -9,7 +9,7 @@ class IdentityState(models.TextChoices):
     PROPOSED = "proposed", "Proposed"
     ACCEPTED = "accepted", "Accepted"
     REFINEMENT_COMPLETE = "refinement_complete", "Refinement Complete"
-    AFFIRMATION_COMPLETE = "affirmation_complete", "Affirmation Complete"
+    I_AM_COMPLETE = "i_am_complete", "I Am Complete"
     VISUALIZATION_COMPLETE = "visualization_complete", "Visualization Complete"
 
     @classmethod

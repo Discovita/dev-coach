@@ -172,8 +172,8 @@ class TestScenarioViewSet(
             # Optional fields
             if identity.state:
                 identity_dict["state"] = identity.state
-            if identity.affirmation:
-                identity_dict["affirmation"] = identity.affirmation
+            if identity.i_am_statement:
+                identity_dict["i_am_statement"] = identity.i_am_statement
             if identity.visualization:
                 identity_dict["visualization"] = identity.visualization
             if identity.notes:

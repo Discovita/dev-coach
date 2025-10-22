@@ -34,7 +34,7 @@ class Identity(models.Model):
         blank=True,
         help_text="A concise label for the identity (e.g., 'Creative Visionary')",
     )
-    affirmation = models.TextField(
+    i_am_statement = models.TextField(
         help_text="An 'I am' statement with a brief description",
         null=True,
         blank=True,

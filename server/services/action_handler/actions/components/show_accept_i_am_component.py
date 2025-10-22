@@ -25,7 +25,7 @@ def show_accept_i_am_component(
     Show the Accept I Am component to the user.
 
     Renders two choices:
-    - "I love it!" which updates the identity affirmation and accepts the affirmation
+    - "I love it!" which updates the identity i_am_statement and accepts the i_am_statement
     - "Let's keep working on it" which sends the label back as the user's message
     """
     log.info(f"Showing Accept I Am component for user {coach_state.user.id}")
@@ -35,11 +35,11 @@ def show_accept_i_am_component(
             label="I love it!",
             actions=[
                 ComponentAction(
-                    action=ActionType.UPDATE_IDENTITY_AFFIRMATION.value,
-                    params={"id": params.id, "affirmation": params.affirmation},
+                    action=ActionType.UPDATE_I_AM_STATEMENT.value,
+                    params={"id": params.id, "i_am_statement": params.i_am_statement},
                 ),
                 ComponentAction(
-                    action=ActionType.ACCEPT_IDENTITY_AFFIRMATION.value,
+                    action=ActionType.ACCEPT_I_AM_STATEMENT.value,
                     params={"id": params.id},
                 ),
             ],

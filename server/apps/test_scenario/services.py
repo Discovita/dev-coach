@@ -66,7 +66,7 @@ def instantiate_test_scenario(
                 name=identity_data.get("name"),
                 category=identity_data.get("category"),
                 state=identity_data.get("state"),
-                affirmation=identity_data.get("affirmation", ""),
+                i_am_statement=identity_data.get("i_am_statement", ""),
                 visualization=identity_data.get("visualization", ""),
                 notes=identity_data.get("notes", []),
             )

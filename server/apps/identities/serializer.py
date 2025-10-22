@@ -17,7 +17,7 @@ class IdentitySerializer(serializers.ModelSerializer):
             "id",
             "user",
             "name",
-            "affirmation",
+            "i_am_statement",
             "visualization",
             "state",
             "notes",

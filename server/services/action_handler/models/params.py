@@ -59,9 +59,9 @@ class UpdateIdentityNameParams(BaseModel):
         extra = "forbid"
 
 
-class UpdateIdentityAffirmationParams(BaseModel):
+class UpdateIAmParams(BaseModel):
     id: str = Field(..., description="ID of identity to update")
-    affirmation: str = Field(
+    i_am_statement: str = Field(
         ..., description="An 'I am' statement with a brief description"
     )
 
@@ -82,7 +82,7 @@ class UpdateIdentityVisualizationParams(BaseModel):
 class UpdateIdentityParams(BaseModel):
     id: str = Field(..., description="ID of identity to update")
     name: str = Field(..., description="New name for the identity")
-    affirmation: str = Field(
+    i_am_statement: str = Field(
         ..., description="An 'I am' statement with a brief description"
     )
     visualization: str = Field(
@@ -118,8 +118,8 @@ class AcceptIdentityRefinementParams(BaseModel):
         extra = "forbid"
 
 
-class AcceptIdentityAffirmationParams(BaseModel):
-    id: str = Field(..., description="ID of identity to mark as affirmation complete")
+class AcceptIAmParams(BaseModel):
+    id: str = Field(..., description="ID of identity to mark as i_am_statement complete")
 
     class Config:
         extra = "forbid"
@@ -241,9 +241,9 @@ class ShowIntroductionCannedResponseComponentParams(BaseModel):
 
 
 class ShowAcceptIAMComponentParams(BaseModel):
-    id: str = Field(..., description="ID of identity for affirmation acceptance component")
-    affirmation: str = Field(
-        ..., description="Affirmation to propose to the user for acceptance"
+    id: str = Field(..., description="ID of identity for i_am_statement acceptance component")
+    i_am_statement: str = Field(
+        ..., description="I Am statement to propose to the user for acceptance"
     )
 
     class Config:

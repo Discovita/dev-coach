@@ -24,5 +24,5 @@ class PromptContext(BaseModel):
     current_identity: Optional[str]
     asked_questions: Optional[str]
     refinement_identities: Optional[str]
-    affirmation_identities: Optional[str]
+    i_am_identities: Optional[str]
     visualization_identities: Optional[str]

@@ -5,12 +5,12 @@ from .params import (
     CreateIdentityParams,
     CreateMultipleIdentitiesParams,
     UpdateIdentityNameParams,
-    UpdateIdentityAffirmationParams,
+    UpdateIAmParams,
     UpdateIdentityVisualizationParams,
     UpdateIdentityParams,
     AcceptIdentityParams,
     AcceptIdentityRefinementParams,
-    AcceptIdentityAffirmationParams,
+    AcceptIAmParams,
     AcceptIdentityVisualizationParams,
     TransitionPhaseParams,
     AddIdentityNoteParams,
@@ -84,9 +84,9 @@ class UpdateIdentityNameAction(BaseModel):
         extra = "forbid"
 
 
-class UpdateIdentityAffirmationAction(BaseModel):
-    params: UpdateIdentityAffirmationParams = Field(
-        ..., description="Parameters for updating an identity's affirmation."
+class UpdateIAmAction(BaseModel):
+    params: UpdateIAmParams = Field(
+        ..., description="Parameters for updating an identity's i_am_statement."
     )
 
     class Config:
@@ -120,9 +120,9 @@ class AcceptIdentityRefinementAction(BaseModel):
         extra = "forbid"
 
 
-class AcceptIdentityAffirmationAction(BaseModel):
-    params: AcceptIdentityAffirmationParams = Field(
-        ..., description="Parameters for marking an identity as affirmation complete."
+class AcceptIAmAction(BaseModel):
+    params: AcceptIAmParams = Field(
+        ..., description="Parameters for marking an identity as i_am_statement complete."
     )
 
     class Config:

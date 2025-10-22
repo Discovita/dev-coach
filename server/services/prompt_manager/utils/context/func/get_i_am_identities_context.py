@@ -5,16 +5,16 @@ from enums.identity_state import IdentityState
 from services.prompt_manager.utils.format_identities import format_identities
 
 
-def get_affirmation_identities_context(coach_state: CoachState) -> str:
+def get_i_am_identities_context(coach_state: CoachState) -> str:
     """
-    Get the User's Identities that are NOT affirmation_complete and format them for insertion into a prompt.
-    This provides a "to do" list of identities that still need affirmation.
+    Get the User's Identities that are NOT i_am_complete and format them for insertion into a prompt.
+    This provides a "to do" list of identities that still need an 'I Am' statement.
     Each Identity is formatted into a markdown-compatible string.
     If no identities remain to be affirmed, returns instructions to move to the next phase.
     """
     user = coach_state.user
-    # Filter to only show identities that are NOT affirmation_complete
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.AFFIRMATION_COMPLETE)
+    # Filter to only show identities that are NOT i_am_complete
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.I_AM_COMPLETE)
 
     # Check if there are any identities left to affirm
     if identities.count() == 0:
