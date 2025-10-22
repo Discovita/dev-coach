@@ -49,5 +49,5 @@ Sets the state of the specified identity to 'refinement_complete', indicating th
 ## Related Actions
 
 - [Accept Identity](accept-identity) - Mark identity as accepted
-- [Accept Identity Affirmation](accept-identity-affirmation) - Mark affirmation as complete
+- [Accept "I Am" Statement](accept-i-am-statement) - Mark "I Am" Statement as complete
 - [Accept Identity Visualization](accept-identity-visualization) - Mark visualization as complete

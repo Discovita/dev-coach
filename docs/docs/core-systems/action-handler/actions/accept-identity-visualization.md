@@ -49,4 +49,4 @@ Sets the state of the specified identity to 'visualization_complete', indicating
 
 - [Accept Identity](accept-identity) - Mark identity as accepted
 - [Accept Identity Refinement](accept-identity-refinement) - Mark refinement as complete
-- [Accept Identity Affirmation](accept-identity-affirmation) - Mark affirmation as complete
+- [Accept "I Am" Statement](accept-i-am-statement) - Mark "I Am" Statement as complete

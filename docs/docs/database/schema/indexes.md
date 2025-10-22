@@ -131,7 +131,7 @@ CREATE INDEX chat_messages_chatmessage_content_gin_idx ON chat_messages_chatmess
 CREATE INDEX user_notes_usernote_note_gin_idx ON user_notes_usernote USING gin(to_tsvector('english', note));
 
 -- Full-text search on identity content
-CREATE INDEX identities_identity_affirmation_gin_idx ON identities_identity USING gin(to_tsvector('english', affirmation));
+CREATE INDEX identities_identity_i_am_statement_gin_idx ON identities_identity USING gin(to_tsvector('english', i_am_statement));
 CREATE INDEX identities_identity_visualization_gin_idx ON identities_identity USING gin(to_tsvector('english', visualization));
 ```
 

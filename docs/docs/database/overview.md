@@ -38,7 +38,7 @@ dev_coach_db/
 
 ### Coaching System
 
-- **[Identity](./models/identity.md)**: User-created identities with affirmations and visualizations
+- **[Identity](./models/identity.md)**: User-created identities with "I Am" Statements and visualizations
 - **[ChatMessage](./models/chat-message.md)**: Complete conversation history with role tracking
 - **[Action](./models/action.md)**: System actions with parameters and result tracking
 - **[UserNote](./models/user-note.md)**: Long-term user memory extracted by Sentinel agent

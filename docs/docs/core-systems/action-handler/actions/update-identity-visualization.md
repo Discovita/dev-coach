@@ -51,5 +51,5 @@ Updates only the visualization field of an existing identity. This is used durin
 ## Related Actions
 
 - [Update Identity](update-identity) - Update multiple identity fields
-- [Update Identity Affirmation](update-identity-affirmation) - Update identity affirmation
+- [Update "I Am" Statement](update-i-am-statement) - Update identity "I Am" Statement
 - [Accept Identity Visualization](accept-identity-visualization) - Mark visualization as complete

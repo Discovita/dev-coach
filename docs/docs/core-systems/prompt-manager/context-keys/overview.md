@@ -31,7 +31,7 @@ Information about the user's identities:
 - `current_identity`: Currently selected identity
 - `focused_identities`: List of focused identities
 - `refinement_identities`: Identities in refinement phase
-- `affirmation_identities`: Identities with affirmations
+- `i_am_identities`: Identities with no "I Am" Statement
 - `visualization_identities`: Identities with visualizations
 
 ### Coaching Context
@@ -69,9 +69,9 @@ Some context keys provide different data depending on the current coaching phase
 
 - `refinement_identities`: Shows identities currently being refined
 
-### Identity Affirmation Phase
+### I Am Statements Phase
 
-- `affirmation_identities`: Shows identities with affirmations
+- `i_am_identities`: Shows identities with no "I Am" Statement
 
 ### Identity Visualization Phase
 

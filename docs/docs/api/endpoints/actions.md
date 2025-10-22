@@ -75,17 +75,17 @@ The ActionViewSet provides read-only access to coaching actions performed by the
   "parameters": {
     "identity_name": "Creative Visionary",
     "category": "PASSIONS",
-    "affirmation": "I am a bold creator, transforming ideas into reality.",
+    "i_am_statement": "I am a bold creator, transforming ideas into reality.",
     "visualization": "I see myself confidently presenting innovative solutions to complex problems, inspiring others with my creative vision."
   },
-  "result_summary": "Created new identity 'Creative Visionary' in PASSIONS category with affirmation and visualization",
+  "result_summary": "Created new identity 'Creative Visionary' in PASSIONS category with 'I Am' statement and visualization",
   "timestamp": "2024-06-01T12:00:00Z",
   "timestamp_formatted": "2024-06-01 12:00:00",
   "coach_message": {
     "id": "message-uuid",
     "user": "user-uuid",
     "role": "COACH",
-    "content": "Based on our conversation about your creative projects and passion for innovation, I've created a new identity for you: 'Creative Visionary'. This identity captures your ability to see possibilities where others see obstacles. Your affirmation is: 'I am a bold creator, transforming ideas into reality.' And your visualization is: 'I see myself confidently presenting innovative solutions to complex problems, inspiring others with my creative vision.' How does this identity resonate with you?",
+    "content": "Based on our conversation about your creative projects and passion for innovation, I've created a new identity for you: 'Creative Visionary'. This identity captures your ability to see possibilities where others see obstacles. Your 'I Am' statement is: 'I am a bold creator, transforming ideas into reality.' And your visualization is: 'I see myself confidently presenting innovative solutions to complex problems, inspiring others with my creative vision.' How does this identity resonate with you?",
     "timestamp": "2024-06-01T12:00:00Z"
   },
   "test_scenario": null
@@ -215,7 +215,7 @@ Each action type has specific parameters that define what the action does:
 {
   "identity_name": "string",
   "category": "string",
-  "affirmation": "string (optional)",
+  "i_am_statement": "string (optional)",
   "visualization": "string (optional)"
 }
 ```

@@ -285,7 +285,7 @@ GET /prompts/latest/?coaching_phase=introduction
 {
   "success": false,
   "error": "Invalid coaching phase",
-  "detail": "Invalid coaching_phase: invalid_phase. Valid phases: ['system_context', 'introduction', 'get_to_know_you', 'identity_warm_up', 'identity_brainstorming', 'identity_refinement', 'identity_affirmation', 'identity_visualization']"
+  "detail": "Invalid coaching_phase: invalid_phase. Valid phases: ['system_context', 'introduction', 'get_to_know_you', 'identity_warm_up', 'identity_brainstorming', 'identity_refinement', 'i_am_statement', 'identity_visualization']"
 }
 ```
 

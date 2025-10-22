@@ -57,7 +57,7 @@ The methodology emphasizes that this should never feel like an interrogation. Th
 
 While maintaining a conversational tone, the phase systematically covers essential areas: background and upbringing, family structure and relationships, current work situation, and hobbies or interests. The most critical element comes at the end: understanding why the client is seeking coaching and what they hope to achieve.
 
-The coach demonstrates genuine curiosity with authentic follow-ups like "Oh, tell me more about that!" or "What was that like for you?" When clients share something meaningful, the coach responds with empathy and thoughtful questions that show understanding rather than generic affirmations.
+The coach demonstrates genuine curiosity with authentic follow-ups like "Oh, tell me more about that!" or "What was that like for you?" When clients share something meaningful, the coach responds with empathy and thoughtful questions that show understanding rather than generic "I Am" statements.
 
 ### Responding to Client Energy
 
@@ -174,7 +174,7 @@ This phase also involves consolidating similar identities and ensuring the const
 
 ## Identity Commitment
 
-This phase serves as a critical checkpoint between refinement and affirmation. After elevating names and organizing the constellation, the client evaluates each identity for genuine commitment and focus. Only identities that pass this checkpoint advance to affirmation work.
+This phase serves as a critical checkpoint between refinement and "I Am" Statements. After elevating names and organizing the constellation, the client evaluates each identity for genuine commitment and focus. Only identities that pass this checkpoint advance to "I Am" Statements work.
 
 ### The Critical Question
 
@@ -185,7 +185,7 @@ Ask and answer this for every identity in the constellation. The aim is to ensur
 ### Decision Flow for Each Identity
 
 - **Yes — Keep and advance**
-  - The identity remains in the active constellation and proceeds to affirmation.
+  - The identity remains in the active constellation and proceeds to "I Am" Statements.
 - **No — Choose one of the following**
   - **Nest it under a parent identity**
     - Keep the concept as flavor/context, not as a standalone identity.
@@ -207,13 +207,13 @@ Ask and answer this for every identity in the constellation. The aim is to ensur
 
 ### Transition Criteria
 
-- Only identities explicitly marked **Yes** proceed to `Identity Affirmation`.
+- Only identities explicitly marked **Yes** proceed to `I Am Statements`.
 - Nested items are retained as notes and inspiration, not as standalone identities.
 - Eliminated items are removed from the active identity map.
 
 **Leigh Ann Would Say...**
 
-> “You don’t need to make affirmations about an identity that you don’t want to pursue.”
+> “You don’t need to make "I Am" statements about an identity that you don’t want to pursue.”
 >
 > “When you nest, it’s for clarity—so you know it’s the Magical Healer that’s cooking dinner, not a Chef.”
 >
@@ -221,9 +221,9 @@ Ask and answer this for every identity in the constellation. The aim is to ensur
 
 ---
 
-## Identity Affirmation
+## I Am Statements
 
-Once the identity names feel inspiring and complete, the methodology moves into crafting powerful affirmations that reinforce each identity. These "I Am" statements serve as personal triggers and reminders that help clients embody their identities in daily life. The affirmations create emotional anchoring for the transformation process and provide accessible touchstones for identity activation.
+Once the identity names feel inspiring and complete, the methodology moves into crafting powerful "I Am" Statements that reinforce each identity. These "I Am" statements serve as personal triggers and reminders that help clients embody their identities in daily life. The "I Am" Statements create emotional anchoring for the transformation process and provide accessible touchstones for identity activation.
 
 For each identity, the coach helps clients develop statements that capture not just what they do, but who they are and how they approach their area of focus. These statements typically include the identity name, core characteristics, specific behaviors or approaches, and the desired outcome or impact.
 
@@ -238,18 +238,18 @@ Start with open-ended exploration. The goal is to understand the client's authen
 
 ### Following the Client's Language
 
-Listen carefully for the client's own words, values, and vision. The affirmation should reflect their authentic voice and relationship to the identity, not generic interpretations. Pay attention to:
+Listen carefully for the client's own words, values, and vision. The "I Am" Statement should reflect their authentic voice and relationship to the identity, not generic interpretations. Pay attention to:
 
 - **The specific words and phrases they use**
 - **What energizes them when they talk about this identity**
 - **How they naturally describe showing up in this role**
 - **What feels meaningful and important to them about this identity**
 
-The coach should ask follow-up questions to deepen understanding before moving to affirmation crafting.
+The coach should ask follow-up questions to deepen understanding before moving to "I Am" Statement crafting.
 
-### Crafting Affirmations
+### Crafting "I Am" Statements
 
-Affirmations should feel like something the client can comfortably "put on" - accessible, inspiring, and authentic to their voice.
+"I Am" Statements should feel like something the client can comfortably "put on" - accessible, inspiring, and authentic to their voice.
 
 #### Key Principles
 
@@ -282,7 +282,7 @@ In one example, a client initially resonated with "I am a Fearless Adventurer" b
 
 1. **Ask the foundation question**: "How do you want to show up with this identity?"
 2. **Listen for the client's authentic language** and vision
-3. **Draft initial affirmation** using simple, powerful language
+3. **Draft initial "I Am" Statement** using simple, powerful language
 4. **Test the emotional response** by having client read aloud
 5. **Refine based on feedback** until it creates energy and resonance
 

@@ -17,7 +17,7 @@ The `update_identity` action updates multiple fields of an existing [Identity](/
 
 Updates specified fields of an existing identity. Only fields provided (not None) in the parameters will be updated. Notes are appended to the existing notes list, not replaced.
 
-> **⚠️ Recommendation**: Use more narrowly focused update functions when possible. LLMs tend to get carried away and update more fields than intended when using this general-purpose action. Consider using [Update Identity Name](update-identity-name), [Update Identity Affirmation](update-identity-affirmation), or [Update Identity Visualization](update-identity-visualization) for specific field updates.
+> **⚠️ Recommendation**: Use more narrowly focused update functions when possible. LLMs tend to get carried away and update more fields than intended when using this general-purpose action. Consider using [Update Identity Name](update-identity-name), [Update "I Am" Statement](update-i-am-statement), or [Update Identity Visualization](update-identity-visualization) for specific field updates.
 
 ## Parameters
 
@@ -25,7 +25,7 @@ Updates specified fields of an existing identity. Only fields provided (not None
 | --------------- | ------- | -------- | ------------------------------------------------- |
 | `id`            | integer | Yes      | The ID of the identity to update                  |
 | `name`          | string  | No       | New name for the identity                         |
-| `affirmation`   | string  | No       | New affirmation for the identity                  |
+| `i_am_statement`   | string  | No       | New "I Am" Statement for the identity                  |
 | `visualization` | string  | No       | New visualization for the identity                |
 | `state`         | string  | No       | New state for the identity                        |
 | `category`      | string  | No       | New category for the identity                     |
@@ -63,5 +63,5 @@ Updates specified fields of an existing identity. Only fields provided (not None
 
 - [Create Identity](create-identity) - Create new identities
 - [Update Identity Name](update-identity-name) - Update only the name
-- [Update Identity Affirmation](update-identity-affirmation) - Update only the affirmation
+- [Update "I Am" Statement](update-i-am-statement) - Update only the "I Am" Statement
 - [Update Identity Visualization](update-identity-visualization) - Update only the visualization

@@ -18,7 +18,7 @@ The Coach system operates through structured coaching phases:
 
 1. **Coaching Phases** - The system walks users through different phases of identity development
 2. **Identity Creation** - Users create specific identities for different life areas (career, health, relationships, etc.)
-3. **Identity Refinement** - Each identity is refined with affirmations and visualizations
+3. **Identity Refinement** - Each identity is refined with 'I Am' statements and visualizations
 4. **Daily Integration** - Users learn to embody these identities in their daily lives
 5. **Progress Tracking** - The system tracks progress and adjusts strategies based on user interactions
 
