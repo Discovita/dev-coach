@@ -38,7 +38,7 @@ export interface TestScenarioIdentity {
   name: string;
   category: IdentityCategory;
   state?: IdentityState;
-  affirmation?: string;
+  i_am_statement?: string;
   visualization?: string;
   notes?: string[];
 }

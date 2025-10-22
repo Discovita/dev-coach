@@ -22,7 +22,7 @@ const emptyIdentity = (): TestScenarioIdentity => ({
   name: "",
   category: IdentityCategory.PASSIONS_AND_TALENTS,
   state: IdentityState.PROPOSED,
-  affirmation: "",
+  i_am_statement: "",
   visualization: "",
   notes: [],
 });
@@ -117,13 +117,13 @@ export default function TestScenarioIdentitiesForm({
                     ({identity.state})
                   </span>
                 )}
-                {identity.affirmation && (
+                {identity.i_am_statement && (
                   <>
                     <span className="font-semibold ml-2 text-xs italic text-gold-700">
-                      Affirmation:
+                      I Am Statement:
                     </span>
                     <span className="ml-2 text-xs italic text-gold-700">
-                      {identity.affirmation}
+                      {identity.i_am_statement}
                     </span>
                   </>
                 )}
@@ -221,11 +221,11 @@ export default function TestScenarioIdentitiesForm({
             </Select>
           </div>
           <div>
-            <Label className="mb-2">Affirmation</Label>
+            <Label className="mb-2">I Am Statement</Label>
             <Input
-              value={draft.affirmation || ""}
+              value={draft.i_am_statement || ""}
               onChange={(e) =>
-                setDraft({ ...draft, affirmation: e.target.value })
+                setDraft({ ...draft, i_am_statement: e.target.value })
               }
               placeholder="e.g. I am curious and open to new ideas."
             />

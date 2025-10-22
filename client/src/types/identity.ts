@@ -10,8 +10,8 @@ export interface Identity {
   id?: string;
   /** Name/label for the identity (required) */
   name: string;
-  /** Affirmation statement (optional) */
-  affirmation?: string;
+  /** I Am statement (optional) */
+  i_am_statement?: string;
   /** Visualization (optional) */
   visualization?: string;
   /** Notes about the identity (optional) */

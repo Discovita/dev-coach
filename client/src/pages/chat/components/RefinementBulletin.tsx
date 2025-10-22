@@ -34,12 +34,12 @@ const IdentityCard: React.FC<{ identity: Identity }> = ({ identity }) => {
           <p className="text-sm opacity-75 font-medium">{categoryDisplayName}</p>
         </div>
 
-        {/* Affirmation */}
-        {identity.affirmation && (
+        {/* I Am Statement */}
+        {identity.i_am_statement && (
           <div className="mb-4">
-            <p className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Affirmation:</p>
+            <p className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">I Am Statement:</p>
             <p className="text-sm italic leading-relaxed bg-white/50 dark:bg-black/20 p-3 rounded-md border-l-4 border-current">
-              {identity.affirmation}
+              {identity.i_am_statement}
             </p>
           </div>
         )}

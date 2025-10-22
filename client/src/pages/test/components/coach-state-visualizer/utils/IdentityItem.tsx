@@ -56,7 +56,7 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
 
   // Check if there are expandable details
   const hasExpandableDetails = 
-    identity.affirmation || 
+    identity.i_am_statement || 
     identity.visualization || 
     (identity.notes && identity.notes.length > 0);
 
@@ -95,14 +95,14 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
             </Badge>
           </div>
 
-          {/* Affirmation */}
-          {identity.affirmation && (
+          {/* I Am Statement */}
+          {identity.i_am_statement && (
             <div className="mb-3">
               <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                <strong>Affirmation:</strong>
+                <strong>I Am Statement:</strong>
               </div>
               <div className="text-xs text-[#333] dark:text-gold-50 italic">
-                "{identity.affirmation}"
+                "{identity.i_am_statement}"
               </div>
             </div>
           )}

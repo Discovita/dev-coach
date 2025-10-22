@@ -7,6 +7,6 @@ export enum IdentityState {
   PROPOSED = "proposed",
   ACCEPTED = "accepted",
   REFINEMENT_COMPLETE = "refinement_complete",
-  AFFIRMATION_COMPLETE = "affirmation_complete",
+  I_AM_COMPLETE = "i_am_complete",
   VISUALIZATION_COMPLETE = "visualization_complete",
 }
