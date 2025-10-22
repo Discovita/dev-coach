@@ -11,11 +11,11 @@ CSRF_TRUSTED_ORIGINS = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["DEV_DB_NAME"],
-        "USER": os.environ["DEV_DB_USER"],
-        "PASSWORD": os.environ["DEV_DB_PASSWORD"],
-        "HOST": os.environ["DEV_DB_HOST"],
-        "PORT": os.environ["DEV_DB_PORT"],
+        "NAME": os.environ["LOCAL_DB_NAME"],
+        "USER": os.environ["LOCAL_DB_USER"],
+        "PASSWORD": os.environ["LOCAL_DB_PASSWORD"],
+        "HOST": os.environ["LOCAL_DB_HOST"],
+        "PORT": os.environ["LOCAL_DB_PORT"],
     }
 }
 

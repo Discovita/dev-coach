@@ -1,3 +1,60 @@
+"""
+Django Management Command: Convert Otter Transcripts to JSON
+
+This command processes HTML transcript files exported from Otter.ai and converts them
+into structured JSON format for use in the Dev Coach system.
+
+USAGE:
+    python manage.py convert_otter_transcript_to_json
+
+REQUIRED DIRECTORY STRUCTURE:
+    services/prompt_manager/prompts/examples/
+    ├── raw_otter_transcripts/          # Place your .html Otter export files here
+    ├── processed_otter_transcripts/    # Auto-generated: cleaned HTML files
+    └── json/                          # Auto-generated: final JSON output files
+
+INPUT FILES:
+    - Place HTML files exported from Otter.ai into the 'raw_otter_transcripts/' directory
+    - Files should be .html format as exported from Otter.ai
+
+OUTPUT FILES:
+    - JSON files with the same name as input files (but .json extension)
+    - Each JSON file contains an array of conversation snippets with:
+        - speaker: Name of the person speaking
+        - timestamp: Time marker from the transcript
+        - content: The actual spoken content
+        - coach_phase: Empty field for manual categorization
+
+PROCESSING STEPS:
+    1. Reads HTML files from raw_otter_transcripts/ directory
+    2. Cleans HTML by removing comments, attributes, and unnecessary tags
+    3. Extracts conversation snippets from <app-conversation-transcript-snippet> elements
+    4. Converts to JSON format and saves to json/ directory
+    5. Skips files that already have corresponding JSON files
+
+EXAMPLE JSON OUTPUT:
+    [
+        {
+            "speaker": "Casey",
+            "timestamp": "00:01:23",
+            "content": "Let's start with your career goals...",
+            "coach_phase": ""
+        },
+        {
+            "speaker": "Client",
+            "timestamp": "00:01:45", 
+            "content": "I want to transition to a leadership role...",
+            "coach_phase": ""
+        }
+    ]
+
+NOTES:
+    - The command will create necessary directories if they don't exist
+    - Existing JSON files are skipped to prevent overwriting
+    - HTML processing removes Otter-specific elements and cleans up formatting
+    - Manual categorization of coach_phase can be done after JSON generation
+"""
+
 import os
 import re
 import json

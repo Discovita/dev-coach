@@ -1,0 +1,1214 @@
+[
+  {
+    "speaker": "Leigh Ann",   
+    "content": "In things too, but I still want to show up and have someone else tell me, yeah, you know, it's the constraints, it's the limitation, it's the path. That's what we're offering. Because there's a million things in self help that you can do, right? And we're offering this very specific lane, and we're constraining you and leading you down the thing. And I was like, it's like a workout class. He's like, Oh, that's a really good analogy. Okay, you know, great, right? Awesome. Yeah. That was like, I think you should ask. I was like, You shouldn't ask me. But I was like, I think you should ask Casey if you think a Claude project could do this. I was like, however, thank you for showing me this, because I'm going to use this to have Claude help me write my deck and help me write all my things so I can put all the context in. And then I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "have a Claude project for this project, 100%"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "right, right? So I have never used it like that. I kind of use all these separate chats where I need to start putting everything in one and, you know, yeah, so I'm excited about that. I can actually probably download like, a lot of my chat GBT conversations and put them in there, and then all all my other stuff and and start having it, you know? Because right now I need to, like, start writing content. I need to, like, do all Download this stuff I'm working on the deck, which I showed Jake. And he was like, Whoa, fuck. You're talking you're talking to me right now, like, I'm exactly the person you're aiming this product at. I was like,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "oh, cool, yeah. So that's awesome. Yeah, very cool. So"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "we need to, however, how do I tell him to use it. That's the that's the thing, because we logged in and, you know, he has the side panel open and he was trying to do something, and it just said, yeah. It said something, no, it had an X on the little side panel. He was"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "probably looking at the network calls. Look at, looking at the back and forth between the API and the website. But, yeah, I don't know. I'm I'm confused about that, because I want to let me hang on. Give me just a second. He told me that about the thing being down, and I went and tried it, and I was able to log in just fine."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Yeah, so let's fix let's get it up and run, get it just to the point where he can log in with his own identity, or with his own identity, with his own login, which I suppose is an identity of sorts, that he can log in with his own login and just start a chat. Because I think I'm just confusing."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Well, to see, okay, so just okay, here, let me, I'll show you. Let me show you something when you go to, when you Oh, actually on it was on the website. Oh,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "you want me to check, okay, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download when you go to, when you go to chat, the chat page pulls up your chat, whatever your chat, that's where you is that where you are? Yeah, okay, great. Okay, so that is, that's your saved, your personally saved chat that you have."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download This is the new one that we did, called start from whatever, because I've been starting over from the beginning to observe the whole process. I'm not running mild chat scenario, because you keep adding new features."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, yeah. They don't worry. They don't work anymore. Yeah? So"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "I don't, so I just keep starting over. Yeah, no,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "that's great. That's, yeah, that's what you should be doing 100% because the prompts aren't made to work that way, and it doesn't right. And yeah, so no, that's, that's excellent. Okay, okay, when you go, when you go click on, okay, we'll click on Test then go to the test page. Okay. When you are on the test page, you should be able to see all of your these are all the tests that you have access to. And since it's a combined thing, we're all we're admins here, so you can see all of Download the test scenarios when you go scroll down just a little bit farther that resume my session, that is, again, your chat. It'll basically just navigate you over to the chat page and pull that up so that behind"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "me in my new scenario for Leigh, Ann, right?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "No, no, it's it is your separate from all of those chat those tests, if you're"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "an old one."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download So test so when it says my, yeah, so what does this say? Yeah, my chat session. So that's yours. That's your chat session. So, but it puts it in test mode, right? You get the viewer, you have all of the normal stuff, right? But you'll notice is that a little key that you can tell it's not I didn't make it very obvious. I just wrote up there my my chat session for the test mode, and then the reset conversation button says reset conversation. If it's a test case, it will say reset test conversation, which is not really that's not that great, but that's if you click that button, it will erase your whole chat. That chat, your personal chat, will be gone, and it'll erase"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "it. And then I could create test scenario from current session."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Well, what you want to do is, yeah, you could, yeah, you could do that the I'll fix the form so that you just be able to click, you'll be able to click it, put in a little like a name and a description or whatever, and then it'll just be a fresh scenario so that that button actually works well. So that you can do"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "that, what do we need to do so that Jake can do this? Well,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Jake can do one of two things. He'll be able to He can either just start a new he could do a test scenario, right? He could do that. Or probably, he probably doesn't care that much. He could just go to his own personal session and reset it and do it that way."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Well, I don't know if he has anything in there, but he went in and he we got the chat open, and it said, Hi, nice to meet ili Ann, and he wrote something, and then nothing happened."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Let me try, because I don't know, I don't know"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "if you can see the logs for Leigh's sessions or anything like"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "that. I can, I can go in the database and look at the messaging the log, since it's hosted. Yeah, I could go look at them if I wanted to, but I don't think, I think I'll be able to figure it out without having to do that. Let me see something really quickly. Yeah, I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "ah, yeah, something happened."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "What happened?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "So, yeah, all right, let's see, yes, I did that. We'll go here. Start."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "What is this? All right, yeah, it's giving an error. It's weird. It shouldn't do that at all. That's okay, yeah, that's busted. It's like, busted, busted, good, but that's trying to think about what I did. I had the code base right here and just change it, push it right now, fix it, let me it's saying there's an not enough values to unpack. Actually, I know, yeah, here's the problem. It's weird, because what happens is, I test all this stuff locally, and then if it works locally, it should just work when you push It play."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Sorry, give me just one second. Okay, mm,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "or so, Oh, silly. I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "I have a million things running. Oh, don't worry."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Excuse me. Okay, that's all. I'm yay now that worked. Leigh's testing start, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "this is so silly because I tested it like today, I tested all this stuff, like Right now, already put, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "what I don't I'm okay, wait. The only thing I can think of is that maybe there's,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "oh, look at that. What happened here? That's why,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "seriously, that's what happened. Okay, sorry, that's a dummy thing that happened. It's dummy. It's a Oh, okay, yeah, at least it's easy. It's an easy fix. I'll fix it right now. What is it? I'll tell you. I'll tell you. What happened is when I set everything up, and then what I set everything up so that when I when I save it to get hub, it just automatically deploys everything. And I've been doing that for a while, and everything just works fine. And I'll usually go to the live website, test it, check and log in, and things work right? But I didn't test the actual chat feature. And what happened is I deployed everything today when I push those new changes for the consistent bulletin boards, and the front end had a bill there and didn't deploy. So the back end and everything all deployed correctly, but the front end didn't, and it's not sending the right data that they're not synced"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "up."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "So I just have to, basically, I have to comment something out in the thing. I'll start. I need to get, I need to get much better at this. This sucks. Real developers don't have these problems because they have all these tests and stuff that they build into their into their thing. And I haven't built any stuff ever."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "What do you mean real developers?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download Yeah, real, like, like, big daddy developers, like people who do this for real, for real, that you're supposed when you when you push to a thing, you're supposed to have all these tests and all these like things that run and make sure that your code isn't actually broken, so that stuff like this doesn't happen, right? Because it like, yeah, you shouldn't. It's embarrassing. It's like, well, on a for a developer, for me, is the site not working when you're trying to show it to Jake, is like, the worst possible,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "worst case scenario? No, I get it. I get it. I did not"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "happen. It's like, I'm mortified, right? And so,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "right, right, right. So the fact"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "that it was something done that I could have just seen if I had looked kind of pisses me off a little bit. Well,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "that's the kind of thing because I was, like, afraid to do it with the investor because I had never opened it. Oh, that sucks."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "See, I don't want you to be afraid. It should just work."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Yeah, well, I mean, look, we are a ragamuffin team right now, but that is all hopefully going to change. Awesome."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, I'll start doing this. I'll fix I need to, yeah, right there. There there they are three build errors, dangling, okay, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "that's one. What is this? Oh, yeah, these two, yeah, duh. It's stupid. I knew I was doing this."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Now let me try that doesn't explain why the it doesn't explain why the production one was broken. Though. This is just the this is just the staging version right now, because yesterday it should have worked. Oh, what is all of this? Oh, come on now. All right. This thing is getting out of control. Yeah. What happened here? What happened is, is I wrote a bunch of new code yesterday, not yesterday, over the weekend, to put in the components, and today, I pulled all that code out. I took it out so and but I took it out right? I'm just not using it anymore, but TypeScript doesn't like it. When you just don't use stuff. You're not allowed to have code dead code. Can't have variables that don't get used."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Interesting, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "oh, yeah, gotta save it. I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, it built All right, so I'm going to push this, and then in a few minutes, it should be up and working the staging one should work. Okay, I'm"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "going to just get that link, because I I'm also sending it to someone else, the my designer, who, who's who she is, one of the very first people that tested this, and she's one of the people who had just, like, completely, like, a year ago, she wrote all these things, and I was and then now I remember a year, a year later, I was Like, whoa, this. You're actually doing all these things now, like, This is who you are. And it was, it was really awesome. And she, and so she her whole life has changed because in the way that she wanted to, but now it's her time to, like, read, look at, look at all over. And she's the one helping me design the whole front end. So I was like, well, you check this out. So super"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "awesome. So I'm"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "going to just send her,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "excellent, yeah, the website, the dev coach, thing that we have built, one of the things Jake had me do was write your seed for the front end. And so there's a, yeah, website exists. And so the second that we get those designs and everything, it's all just basically copy and paste everything we've done from the other one get look like this new one. Well,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "the big question we have is, how do we design the homepage like I have the sub pages? Those were all designed, but we have to, like,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "open you could I made one. It's a dummy one, yeah, I"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "know. But, but for us, from a design standpoint, what is the home page look like? I mean, obviously the whole homepage is the coach with reference to the reference pages, which is the stuff that we create with the coach. But what does it look like? How do we"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "I do not envy that. I do not envy that decision. Don't"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "worry. We're"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "that's a hard thing to do, but,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "but it is going to be hard because we do have to kind of reconceive. I mean, we don't have to remake the wheel or whatever. Obviously, it's just like a chat, but we got to figure it out. Make it cool, especially gonna have videos. It's gonna have these componenty things, you know,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, yeah. And they like the user interface for how all that stuff is gonna work and flow together is, yeah, right now, things just, like, things are ugly, they just pop in and out, right? Like, Oh, yeah. Oh, put up. Here you go. Here's the thing. Oh, now it's gone. Yeah, I can do some stuff to, like, smooth the edges a little bit, but that's not, like, that's not doing UX. Like, I'm not a UX designer, right, right? Somebody. Like, who knows, who knows how to actually do that stuff"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "look, and we're just graph, she's a graphic designer, and I'm someone who likes pretty things. So we're going to just do our best with this. For the excellent Super Beta. We're not going to pay anyone, so we don't have to be too crazy with it, but we just, we do want it to be like, use user friendly."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, okay. I just tested it. It works. Now, should work. Now, reset test conversation so I'm on the"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "okay. Yeah, okay, that worked. That worked. So the you should, if you refresh your page, you might not even have to do that. Okay, but the staging, the staging one, should work. Oh, wait, I'm testing it so dumb. Hang on. I'm testing it on mine. I didn't test it on the regular one. I just tested it on my local one. And, yeah, I'm a big dummy. Okay, there's that start."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Great."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Oh yeah, we refresh because it's not doing what I wanted it to do. Yeah, there's some Yeah, I'm gonna have to stop. I need to fix. I ah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "there it goes. Okay, yeah, you'll have to, if you refresh the staging page, it should work now. Okay."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Oh, it says, because it says backslash test. So that's always, yeah, that's, that's one of the one I that's one of the things I'm gonna fix. I'm gonna fix it so that I won't do that anymore."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Well, but then what happens is, it goes, it says not available, or whatever, like it, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah. If you try to just refresh the page, it won't, yeah. That's a, it's an easy fix. I just need to do it. Chat, okay, I'll take care of"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "that. So, chat, so now here I am in chat. This is my so I just go reset conversation, because I think I already created a test scenario from this."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "But yeah, if you're not worried about"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "it's also outdated. It's also outdated, so I'm just going to reset."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah. Okay, nice to"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "meet you. My name is Leigh Ann, okay. Um, cool. Can I send it to Jake that it's ready?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "The staging one should work now, and if you want, here's what I'll do. I'll just, I will. I'll create a test scenario for Jake, just so that it's in there, and then later we can do the rest of it. But I have one here, actually, I have a start. Where's it at? Oh yeah, let me start this one. I'll reset this one. Reset."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "All right, and then I'll go here start it. I'm just going to make one for Jake. Great. I'll just call it Jake testing whatever he can go back and rename it whatever he wants. Um,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "take me around free session, yeah, when you, when you freeze a session, it has all of the data that it needs to make, the template to use to make the actual test scenario. But when you click the New button up there, it doesn't generate all that same info. Let me go back to test selection, yeah, so in the staging environment now, there is one, there is a, yeah, there's one in there called Jake testing. Actually, if you refresh your screen, you should see,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "it tests. Great, great, great. Okay, cool. I'm gonna"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "just so he can use that one. Just have him go in there and click, click start, and that'll be that's just the empty, a completely empty one. Fingers crossed. Yeah."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "All right, okay, so my, the next thing I'm going to be doing, the next big thing I'm going to be doing is working on the three phases after so, well actually the first, the two are going to be the big one, right? So it's going to be the affirmations, and then the which I call them affirmations. You want me to change the name to, I am statements, which is"    
+  },
+  {
+    "speaker": "Casey Schmid,Leigh Ann Orsi",   
+    "content": "yes, yes,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, I Yeah. I call them affirmations because that's what it's what I call them initially to right? For like a name, because I wanted it to follow the same pattern, just because I was being OCD. But that's that can be if it's that,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "but then the coach uses your information, right? So I think it's much more it's more powerful psychologically, to say it's an I am statement, yeah, I is a softer ad, like, is softer. Leigh, okay, you're affirming, not stating that you are"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "right, yeah, it should be a statement of fact, not some sort of re right, yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "that's it."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, yeah, I can, I can do that. So I wanted to, I wanted to talk with you about how, because I'm going to do refinement next, and then it's going to be the I am statements immediately after that. Because those two kind of go hand in hand. They work very similar. They're just doing different things, but they step through, they step through each one of the identities that you've created, right? But I wanted to, because I'm going to probably do this first thing in the morning when I wake up. Okay, great, so where's my Okay, I'll just write it down like this. It's probably better if I did like this anyway, Okay,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "there we go."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Ah, okay, there you go. That."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, that's fine. Whatever."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, great. So I can, I can take notes. I want to make sure. I want to make sure that I do these correctly. Because the and we can, we talked about this already a little bit, but I made some changes once, and I got the feeling that it wasn't exactly right. So I went through one time,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "I changed my conversation, and we'll kind of maybe we walk through it together a little"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "bit. That sounds great."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Okay, um, I'm going to share. So there's a bunch of stuff on my screen that just does not need to be here."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "I feel like it's very cluttered."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "I'm going gray. Leigh, Ann, oh,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "I am Gray. I was actually just looking at all these videos of these women going to their natural gray hair. I was like, wonder how long that's going to be for me. It's like, the the mold, the mold and my thyroid. Like, thyroid makes thyroid problems, make your hair great. Like, it made my hair so gray. And then I got out, it got better, like, a lot better. I still think there's more, but, yeah, it's crazy."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Oh, crazy. Minus, see, this is what I need to do,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download all right, so we love all of this, okay, minus my typing skills. Okay, who you are, okay."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Okay, so we loved all this, this, this was good. I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, okay."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download So, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "this is great happen anymore, yeah, now you'll have, now you'll have your it"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "will have this."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download Yeah, you won't have it won't. It won't do that. Oh, that. What? So, oh yes, it will do that. That's the thing, where it goes back at the end, right?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download Yeah, so this is at the very end. But here is where, like, here we need to say, okay, Representative nursing to each of these reflects a unique facet of who you are and who you're becoming. How does this collection feel? Any adjustments? Or just, I think that the direction here needs to be a little clearer, like, because, for example, what I realized is, like, I had health enthusiast and health seeker, oh, yeah, all in the same and I also have lifelong learner and explorer like these are both like, pretty similar, and I feel like, yeah, I feel like this is, there's always a time when, when I do this with People live that we kind of look and say, like Are any of these similar and like could be combined or eliminated? Because before you go through every single one, you want to kind of whittle, whittle it down, right? So it does kind of ask any adjustments or additions you'd like to make. I think that the that this is an opportunity, and, you know, again, maybe it's more componenty, right?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download because here we do need, because it's a brainstorming session, right? We've gone through this big brainstorming session. Here's the results of the brainstorming session, okay, are any of these super similar that we could remove or combine, right? Are any of these similar that we can find? Okay, now read it and then say, are any, is any of this? And again, I mean, I think a component might be even better than chat for that, because you could just so"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "this, this one. This is the end of the brainstorming phase, right?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Yes, this is the kind of cap at the end of the brainstorming. And that is exactly when you need to say, Okay, look at all these are any of them, like, super similar that we can combine. So, like, lifelong learner and explorer, you know, those are kind of the similar to me. Also, health seeker and health enthusiast are pretty much exactly the same. So combine, you know, okay, and decide later what you name them in their magnificence."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "So I, what I did is to the way that this works. Now, is it? It knows that you can see all of them, and so it's not going to list them all out like this anymore. So this list will be gone, because that would just be duplicating all of this stuff."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Should I this through the next version? Or it doesn't matter, let's just keep going."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, it's, it's basically, it's essentially the same. But this will now when you do, when you do this part. Now what I did is I made the way that the brainstorming worked. Is brainstorming is the most complicated phase that we've got, yeah, and so the way that it works is it's got a it has a second layer of prompting underneath it, so it has the regular phase prompt where it's stepping through the prompts, but once it gets to identity brainstorming, it like it has these other prompts that it cycles through, and it's like a little miniature chat bot inside. It's like a fractal, like, so, yeah, okay, so you can't see those prompts. I have them just hard coded in here, but what it is is it's the main prompt that you can see. If you go to prompts, you can see it, but at the bottom of the brainstorming phase prompt, there's a thing called Identity brainstorming context, and that context gets filled in with specific instructions for what category you're on. So depending on which identity category you're going through at the time, it has specific instructions for how it's supposed to talk to you, what it's supposed to do, and usually it goes quick, right? So it kind of does its thing, but it's got all the edge cases in there for how, how you're how you talk, how you respond, what you say, and all the different researchy type stuff. What I did is, at the end of all of that, and when you get to DOER of things, what I had it do was I had it transition from DOER of things out to the refinement phase. And so now what we do is I created a new category, just an internal category. It doesn't have anything to do with the coach. To do with the coach, of course. Yeah. So now, when you finish Doer things, you go to a review category, so it sets it to review, and then that has a special prompt that goes through all of this stuff. And so I was pulling this, the instructions for this up so that, oh, wow, just saw something. Oh, yeah, that's something else I needed up. Okay, yeah, I must have been sleepy. I have a version down here. Okay, yeah, it's fine. It's just a I have a copy of the prompt and then a copy of the prompt right below it. So it's like two the same"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "thing. It's double reinforced, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "what it's doing is what I told it to do as I said, basically that this right now, it's a celebration moment, right? So they've created all of their identities. Take a moment to acknowledge this accomplishment. Then that it asks a critical question. It says, I tell it to defer to whatever they say anyway. So it goes through step one, celebrate what they created, and then it tells you how to do it. To do it. Step two is ask the critical question, which is, before we move on, is there anything missing, right? So it asks that, is there anything missing thing? So that was the huge thing that you there. Was like, okay, that needs to get added in, for sure. That's where this will get added. And then basically forks off. And it says basically that they say, No, you just go right to the the refinement phase, no questions asked. And then there's stuff to do if they say something is missing. Basically, I list out all of the different categories again, because the context is gone now for each one of them. So there's a little line in there for each one of those. Yeah. And then, if it's not obvious which category it should go in. I tell it to put it in passions and talents, because that's where else would you put it. I thought about creating a new category for like the missing so you could keep track. But then I was I realized that those categories are just gone the second that you move out into"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "the matter. I think the important question is actually, instead of adding more, because brainstorming, if you think about brainstorming, is wide and then, and then, from there you go, reductionist. So I don't know if here the question is anything missing. I think really the question here is, like, is there anything that's like, super similar, that can be combined?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, yeah. So we, we did. So that was what I was going to ask. So I remember, I remember when you told me that is there anything missing thing? Because that was, like, the thing for me that was important, yeah, right. It was like, that was the question. That was like, Oh crap, okay, holy moly. And so I made sure to, I made sure to put that in. But like, I do think also too, that maybe, maybe there's"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "that question can be is later? Because I think we did that question after refinement for you,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "okay,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "because we did it like, okay, what are the names, what are the things? What are the whatever? Okay, are you? Are you good? How do you feel about all these right? And then I said, Is there anything missing? And I think that was, like, right at the end, and that's where we went, Yeah, but I don't think because we still haven't, like, combed out, like, this is all the massive stuff, that same question, and whatever you wrote to ask that, I think that actually comes at the end of of refinement. But in before refinement, what we want to do before we refine. It's like, for example, like I said, I have two that are duplicated in here, okay, so more that are kind of lifelong learner and explorer. Those are going to get combined in my world, okay? To an adventurer. And that's kind of all the same."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, great. No, no, no, it's not difficult at all. All I'm doing is I want to, I'm just making sure that I have the coach that I that I perfectly understand exactly what the coach is supposed to do, so that I can, I can then turn this into"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "and I understand. Look, I want to say to you that like, I'm like, vibe going. So I'm like, oh, some there's something more. And I'm like, No, actually, it's something Leigh's so each time I get a new result,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "in, dialing it in, yeah, right. So I apologize for that."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Don't apologize. All I want to do is I want to make sure that whenever we do make a correction that it's as close as possible to what right, what you say is correct. And then we can and"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "especially because now I can actually see them all. Because before I couldn't, now that I can actually see them all, I'm like, No, the question is, actually reduce. Because before you go, here are all the things I'm interested in. Before you're going to inspect each one individually, you want to say, well, actually, I don't need these two. And I don't these two are the same and these two are the same. So let's just pick one, or let's combine them even, even we don't even need to pick one, but we would say for the refinement, it would be health enthusiast slash seeker, right? Or health enthusiast health seeker. They're together on a line, so that when you refine it, you can choose the right word, same thing, kind of lifelong learner and explore like those are kind of the same to me. Explore lifelong learner. They can go together, you know."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, question, yeah, do Do you want to leave it up to the if it was you talking? You would look at my list. You would look at this list, and you would say, yeah, it looks like health enthusiast and health seeker can maybe go together,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "like my chat bot to do it."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Well, not not do it, but it would just suggest it. It would just be like, hey. It looks like maybe. But here's the thing where this is where it gets weird, yeah, where it gets weird is if you put instructions in there for to combine things, that's a gray line, and you're asking the LLM to make a decision, and you're do a thing, which is perfectly fine, but what you might end up with is it suggesting to combine identities don't need to get combined. Right, right? Well, we can write the we can write the prompt so that it won't be that won't be super weird, but like, what you want, what I would want to avoid is, is having a list of identities that can't get combined, and then having the thing suggest combine some right? So I don't know it does another."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "I think that that's actually why I think that a component might be the answer for this, and you tell me instead of a conversation, but it's kind of like, are any of these similar? I don't know if you can click. Like health seeker and health enthusiast are the same, because those are the only two that really need to be the same. Leigh's long because those are obvious. I mean, I don't know. But also, like I also see lifelong learner and explorer, also similar. But if I tease those all the way out at the very end, when you ask, is this integral to your life, something you want to focus on, nurture and pursue? That's another way to reduce right so, but right now I could see I could differentiate lifelong learner and explore. Those are pretty much the same. Health seeker and health enthusiast, those are the same. So we combine those two and come up with one name for them in the refinement process. But I don't know. I don't want the coach combined, because I know what it'll do. It'll combine everything."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Well, it wouldn't, I would not allow it to combine on its own, like, it wouldn't just be like, Hey, I'm gonna combine these two for you. Hope you like it, right? It's not gonna do I've seen it do that kind of stuff. No, I won't do that anymore. The only way that it can do anything like that is if I give it an action, like an actual thing that it can do, because otherwise it doesn't have the it doesn't have the, it won't have just the code won't exist for it to do it. Okay, we'll be able to touch the database in that way. So, but what I can give it is instructions to say, Hey, would you maybe want to combine these two? And then I can give it. I can give it. We can make it a component so that the user says, Hey, you want to combine these two, and when they click, yes, then it'll get combined right? And then we can say, we can make sure that the parameters are correct. So basically, what you would you wouldn't be combining them. I don't maybe, well, you're Oh, yeah. Do you want to come up with a new name for it? Or do you want to just delete one and stay with the other? Or, how does that work?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "That's the question. The thing is, you're coming up with a new name for the kind of theory of both. But here's an interesting thing. I also mentioned this in my thing. I don't want this embracing the dynamic and growth, growing nature of your romantic and internet self, taking charge and your own costs like we don't want any"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "of that. That list, that list, that list, will not be there. All you're going to have is the list of identities that you saw, the little with the little the little bullet points and all that stuff that's all that's going to be there. Okay? It's just going to know that you can see it. It's just going to know that it's there and it's going to reference it."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Well, maybe what the coach does is it just asks the questions, like, are any of these similar enough to be combined? And then you write health seeker and and spiritual seeker. And then you can also, and then, if you see it learner and explorer too. I mean that one again, I don't think it's the end of the world, but, but I think that you could write like, these ones are kind of, these ones are similar, you know. And so then it can take and then it just brings them up together in the refinement phase. Does that make sense? Oh, okay, like, yeah, the it would be health seeker, health enthusiast, which name do you prefer? And then it would be if I had pointed out lifelong learner and explorer, okay, it would say explore, lifelong learner, slash explorer, what? What name do you want for this? And again,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "all right, here's an adult"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "making decisions that I don't know if the coach can make."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "So, yeah, okay, and I'm trying to think about the practical way to do that. And I I think tell me how what you how you feel about this. I think that the right way to do what you want, because that's what you said. Is great to be able to take to like, kind of do them both right. I think the best way to do that is just to carry the names forward. And so what we would do when you combine two if we do that, what happens is you keep both names right. You delete one of them, but then the one that stays becomes right. In this case, it would be health enthusiast slash health seeker, right? Just stay with the two names combined. You don't come up with a new name. Now, you don't do any of that stuff, right, right, right. You now have the one identity with the two names to write it was. And then when you do it in refinement phase, we could tell the coach that, you know, if it has a slash in the name, or whatever, or I can put some parameter on it, we can have the coach update that it was, you know, this is a combined one, and it can handle it that way. I think that's probably the best."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Okay, yeah, no, that's exactly what I want, yeah. And then, and then, you know, someone else could also say, like, you know, also my athlete, health helps, health seeker or health enthusiast, and health whatever, those are all the same. Now for me, it's not because they're two different things in my mind that I pursue individually. But, you know, people can decide like, you know, actually my and I think, look, I think what's important is that. So here's what happens. Here's an interesting thought, and this might help you with the"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "coach. Okay, is the"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "what? Usually happens is that people have a passion and talent that overlaps with the later"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "thing. Oh, for sure, yeah."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "So that's what happened to me, the health enthusiast. Look, it's hard because this, these two are out of order. Like, honestly, it should be starting from creative, health enthusiast, lifelong learner, Explorer, entrepreneur."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "It's very easy to make sure that we here."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "We start with the real categories. Entrepreneur, power banker, spiritual seeker, epic presence. Athlete, health seeker, mother. So you don't want to combine athlete and health seeker, because that is two of the like individual categories. But what"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "happens? Oh, I see."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "What often happens is that there's easy stuff to combine in the passions and talents, or there's overlap from passions and talents into one of the future things. For example, say someone is like, super into their money investor might want to be one of their passions and talents. Yeah. And then wealth builder might be their their thing. So what you want to do is you want to take the passions and talents one and combine it with the wealth seeker. You want to take same thing in lifelong explorer and learner. Those who go together, they're both passions and talents, right? The the health seeker, the health enthusiast, would come out of passions and talents and go into health seeker as or maybe I created two, I think I created two in the physical expression. One so fine. But what you don't want to do is you don't want to say, like, Well, my power bank or my entrepreneur are kind of the same, because we want to separate those two ideologies of the like, working and keeping"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, okay, let me, let me see if I understand what you're saying. Yeah. If I, let me there the two identity categories that allow you to have multiple categories are familial relations and passions and talents and"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "well, for example, I made two personally. I made two in the reason I have a double gear is because I did athlete and health seeker in my personal appearance. So"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "okay, so it's"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "not those aren't the only ones. But here's, here's. The thing is that all of these you want to encourage someone to have one in the maker of money, keeper of money, spiritual, personal appearance, athlete or, you know, physical appearance, family relation, and then a romantic relation, and then DOER of things, right? So these two are in the wrong order. In my own mind, you want to make sure that they keep one if they've made one in each, that they keep one in each that you don't combine and lose any of those. The ones that you can combine out of is the passions and talents, because it's like the bigger button, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "okay, so in the as far as the coach is concerned, the way that I've written the prompts,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "yeah, the"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "family relations and the passions and talents have specific instructions to say people can put more than one identity in these right? And, in fact, you should have more than one. But for passions and talents, it says you should have more than one, right? It tries to digs until you get two or three, right? And the same with familiar relations. Nobody's just going to say they're one thing, right? I can't imagine that they will. I"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "mean, I did. I said I was one thing, but the"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "language in that one is softer, and it lets you do just one, yeah."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "And I also said, I said to it, well, I think I in the in the personal appearance, I said, Well, I think I have multiple athlete and health seeker. Now, it turns out that I had already had the health enthusiast above, but that's what came out of the brainstorming session."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, so let me ask you, this is I'm going to take it to the extreme. If we get done with this merging thing, is it okay for somebody to have no passions and talents identities because they've merged them with the other things?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Um, I've never seen that happen. I'll just tell you practically, I think that you want to have some but you just don't want to have redundancy so that you're over developing multiple identities in the same category."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, okay, that's"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "so it's really about eliminating redundancy, and not about like so reductionist that you don't have anything."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, all right,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "yeah, the idea is just that, like a lifelong learner and an explorer, both don't need to be developed. For me long term or focused on long term, I can just have that for me. That's one. And another great example is like I before, when I first wrote this, I had chef on there, and then I realized, like a chef, my chef is just an extension of my health enthusiast, yeah, and I don't like focus on nurture and pursue a chef identity. It's just not where I am in my life, you know. So I'm just going to include it in my health enthusiasts."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, all right. So what I'm trying to do is I'm trying to the chat box find some rules, yeah, if I can find some rules where I can say so it sounds like one rule is minimum one category. So by at the end of the identity brainstorming phase, you want to have at least one in every category, and the goal should be, that's what the goal should be. And remove redundancy by merging any superfluous identities you have in passions and talents that overlap too much with some of the ones that you have to keep right?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "I think that's it. And then the default is to keep it in the lower category and merge the passions and talents."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "One, okay, that's good."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "The athlete. One, I have two. So the health seeker, I mean, honestly it doesn't the health seeker could go up into the passions and talents, if that makes sense. Then I just have one in as athlete, in my physical appearance. Does that make sense? Because I did a double, which is how I ended up with the double. Then the other thing was, in the passions and talents, these are very easily overlapping, and so we don't want redundancy. We don't want to overdevelop, because we're going to ask them to we're going to ask them to remove it later if it's not something that's like, super important to them. Because what you have done yet is you use these identities as kind of like characters in your own personal film of life, and you're deploying them in the world. And so if you have, like, a lifelong learner and an explorer, for me, like my Explorer is my learner, we're out exploring. We're learning, you know, yeah, so you want to make sure that you don't have someone who's like, doesn't have that much to"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "do, okay, all right, cool. Okay, that way, though. The the coach does something right now that I don't know, I want to make sure that you're okay with this, because if not, I'm going to have to change the language, and it might make it a little more complicated. But currently, the way that the brainstorming phase works, if somebody wants to put more than one identity in one of the major categories, they're going to have to tell, like, I have to tell the coach. No, I did"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "tell the coach, and it did do it."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, great. No, it will. It can create them. There's no rules. I almost, I almost, I'm glad I didn't do it. I almost put in, like, coded rules to make sure that you don't have more than one in any of these other categories. And I was like, and I was like, that's I don't, I can do that later, if she wants me to. And I skipped it, and I'm glad I did. Yeah, so you can, you can force it and say, but you're gonna like, it's gonna just say, once you have one, it's gonna be like, Okay, next, right? And you have to be like, no, no, I want. I"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "actually, when it asked me the question, I said, You know what? I think I have more than one identity in this category. It's okay, okay, cool. But the truth is, had I had the block with the letter with the names of things above it being able to be referenced, I don't know, would have repeated it."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, maybe not. Well, that's it sounds like a self, like, it'll just solve, solve itself."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "It does. But the truth is, is that everybody comes up with with double things. Like, it's because you're, you're, you're thinking about yourself, right? And then, like, eventually you're like, No, you know, because for me, for a long time, when I was first doing it, I had, you know, warrior and athlete, and they were separate, or warrior and dancer, I think I had, because those were my two, like, major athletics pursuits. And then I decided, like, I don't need warrior and dancer, because even when I'm dancing, it's a little bit of warrior energy, so I'm going to just be warrior. That was my athletic identity, wow. Then I went down the road of that for a while, and I realized, Oh, my God, this is a trauma response. I don't need to be a warrior anymore. I could be something else here, you know. And I edited from there. So I think that there is a lot look, this is a journey, and we are taking them on the journey. Like, the first journey is like, expansive, like, think of everything you could be, right? Because you have the first list, then it's like, think of everything you are in these categories, right? Then it's like, think of, you know. And there should be a point later where you know, when we ask, is there anything missing. Like, you know, kind of can refer back to that very first list and be like, well, like you said, pianist on here, and it's nowhere on this. Like, is that okay? Now, I don't know if it's the most important question to ask in the beginning, because the truth is, we're going to refine these 100 times. And in the beginning we kind of want to get people like, through the process, but like, later we might come back when we do our first review, like quarterly review, of your identities. Like, be like, remember this just, just for, like, some inspiration, these were the first things you said you were, and these were the things you said you wanted to be. Are they represented here, just as, like, a brainstorming exercise, you know? Yeah. But for now, like, I'm just looking at this list that I came up with, and it's like, look, I've got a couple of redundancies here. We could slim it down so that when we go to refinement, we're not refining identities twice."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, no, that's that's great, okay?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "And also, sorry, there's one more thing, because we still categories, and we should honor skipped categories."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, that's in there too. It will, it will, it will ask you if you want to touch this skip. It'll be like, Hey, we skipped this one. Do you want to go back to it? And it'll just yes or no, and if you do, it'll go back to it. And if not, then, yeah, yeah, cool. I haven't figured out. So one thing for that, the skipped category thing, I haven't I haven't figured out a good way to to do it in the chat, but what it should do is it should set the focused category back to that one and then redo it. But the problem is, is that they work in a chain, and if you are on one, the instructions tell you to go to the next one, right? And so there's no way for me to say, Hey, we're back on this category, but because we skipped it, right? There's no because,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "honestly, if they skip it here, I don't think that they need to go back here. I think just Leigh's move on, because the idea is to create your constellation of identities, and we don't want anyone to confront any of their demons like this soon, like, it'll be much easier to revisit a skipped category after you've done shadow work, after you've done action work, after you've, like, gotten juicy in yourself and you're not so like, I mean, we don't want to make it hard. We don't want to drive people into their trauma, like on day one,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "this one doesn't it what it says the actual the actual instructions say, I noticed we skipped whatever categories you skipped. Before we ask you about anything else. Do you want to add an identity for any of these, basically, and then sure, if they say yes, then it just says, do it. And if not, then just keep going, right? Just, okay, awesome. Okay, so I have a bunch of action steps for the brainstorming phase. What would you like me to do to the refinement phase?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download Okay, so the refinement phase?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Okay, so again, it's doing the thing out of order, which is driving me nuts, because in my mind, there's an order, right? And it's also the reason. And I told you this before, the reason for the order is like, we want to start with the path of least resistance. It's easiest for people to think of what is fun for them, right? Right? The things they love, and then for most people to ask people to make of money. It's like, the most important question, right? And then the next one is the create, you know, the keeper of money, which is, like, a really important question. And then we kind of flow through, and we don't get to, like, the really hard stuff. I mean, we have spiritual which is challenging for people, but it's challenging in a kind of mind opening way, even if it's tragic. But then when you get into, like, family, romantic relation, you know, those things, there's a lot more trauma attached to those sort of questions, right? And then, and then the doer of things, we kind of just do it at the end, because it's like a bit of a head scratcher, and kind of it sums everything up. So, so anyways, so let's, let's dive into evolving lover."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "So the way that this prompt, when you did this thing, the way the product is designed to work is, I think it's just, I changed it so that the only thing that it did was names. That was it, right, right, right? The only thing that this thing can do is change the name, and that's it. But I feel like we when we mentioned it at some point, it was like, once you have the list, it was like, okay, it was like, Tell me about it, right? And you wanted to find out some more,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "yeah, but I think I'm gonna skip that, and I'm gonna ask that for the later stage. But you're right. I said that. But now that I'm here, I think that it's like, okay, let's dive into your evolving lover. Like, how do you feel about that name? Like, is it inspiring? Or would you be interested in some suggestions? Like, and then it makes these things, but it should all but it should also say, like, keep, keep the original name here is just trying to change it, right? Like, because, look, most people, you and I, I mean, we've been dealing with this for a while. Like, I'm really excited, once you get the next two scenarios going, I'm going to give this to my, my startup coach who's the one who's like, helped me with a lot of stuff, my startup mentor, and she hasn't done it at all, and so I'm really excited for her to get in there and try it. And same thing with my investor, like once, once it's all the way through ready the chat sections. I'm going to give it to them, and they've never done it. I might just do it on the phone with them so I can observe their process. You know?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, that's great, but that'll be some really good feedback too, yeah."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "But the thing is, is that they are not going to have come up with such a cool name in the beginning, like most of it, is going to be pretty standard. So we do want to upgrade the name, but we also don't want to assume that the name they came up with is bad. What if they're a very creative person and they immediately came up with something awesome?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah? No, that's true, right?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "So I think the thing is, is like, do you like this name, or do you want me to make more suggestions like passionate partner, intimate explorer, romantic innovator."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "But that's something I want to do. I want to for each one of these. I can actually, this would be good. I could actually keep a list of names, identity, like examples, so like, give it to prime it. I don't know if you have specific styles or words that you want to use or you want people to try to"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "concern. My only concern is that it's kind of shooting in the dark, right? Like, I chose evolving lover as, like, this new name, because, like, I'm growing. I'm in like, a big growth phase in my relationship. And, like,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "okay,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "you know, so that was what I did. Let's look at my other one, captain of my life. Okay, um, life navigator, you know, it should also say, if your name is cool, Leigh's pretty cool. You might want to keep it. Or I could make some suggestions. Do you know, whatever."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download So the thing is, is, how do you how like the coach has to have an opinion on what name is good and which ones aren't like it. Has to be able to say, right? It has to be you have to go to give it a name and then say this is good or bad, right? And if it's bad, then you"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "make an emotional determination, whether it's a creative name or not. Well,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "you just have to provide it directions on what is a good name and what isn't right, and it's completely subjective to the person who's doing the coaching. Okay, but it's up to you too, like you. It's the it's supposed to be mimicking you. So if you have opinions on what's a good name and what isn't, then we should definitely,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "for example, like evolving lover is amazing name. Captain of my life is an amazing name. Both of those badass, um, so let's move on to your creative identity. This is about your love for creativity and travel, which it's, by the way, it's wrong on this you know, given your passion for exploring new places, expressing your creativity like that, it's just wrong. So that's actually not true. So I don't like it. Trying to tell me, what about myself when it when I doesn't know, right?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "but yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "that's something, yeah. That's a general thing that it does that I don't like. It makes these. It's trying. It's doing what it's trained to do, which is fill it in and make all this stuff fluffy, right? But we need to make sure that it's not using information that's not"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "but here's the important part of this that really matters, is these all have to be I strong nouns. I am a captain, I am a lover, I am a and this one says a creative which is, it's fine, but what my real identity here look. And I said, How about creator is stronger? So like in this instead of artistic Voyager, imaginative traveler, I don't know where it got this idea. It earlier, tried to combine explore and creative. And I was like, no, they're not set, they're not the same, they're separate. But it got it in its mind that they were the same. So, you know, all good, yeah, it's and, I mean, no big deal. But what I said was, how about creator, right? And that is just like a much more powerful phrase. So I think what we want to do is we want to give them a strong noun, and that its job is to create a strong noun, because some people are going to come up with this as, like, it's going to all be adjectives, yeah, yeah. You know, like a we wrote I ams because we know what they should be, but for some reasonable it's going to be all adjectives. So like, they need to come up with a strong noun, not necessarily a descriptor, and then the descriptors need to be more personalized. So that's why, that's why I wonder if there is, if we do want to ask more questions. I Yeah. Or maybe, if it's like, do you, do you like this name? Or, if not, tell me a little bit more about this identity so I can help you come up with a good one. And then it says, Okay, well, I'm this, I'm that. What's important to me, whatever, it's tough, because it's also tough for you and I to do it, since we're so close to it, you know, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download yeah, all that is tough. That's a feedback will help with that."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Yeah, it will. And I also think other people doing it, maybe I need to go and do one where I do a bad job before I can answer this question. Yeah."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download So the, I'll tell you, the coach is gonna, the coach is going to go with whatever you say for the most part, right?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Yeah, okay."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Like, if you like the the user is in complete control over what the names are. So if you say, I like, you know, I like brown sludge for my identity name, it'll be like, Oh, what a fantastic name, right? So there should be some limit, yeah, something where we say, like,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download most important thing here is that it comes up with a strong noun, right? And that any Leigh Ann qualifier, you know, is Yeah, it's like not giving me a chance to keep it. And I keep saying, Keep it. You know what? I think I need to play with this more before I can answer how this should generally be done. So can we skip this for now and and let me do and I can literally tell you, like, in an hour, like, before you go to bed, or before you wake up tomorrow?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, no, yeah. Don't worry about that. Yeah, absolutely. If you come up with there are, there are things that I can do, and I have some stuff. So some of the stuff that you've said already, I can implement and fix some of the stuff that's"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "broken. I think I can play with this. I can play with this. Maybe I need to get my friend to do it. Maybe I can get her to do it. Let's see if, because doing it with her would be really helpful, because she's completely green, kind of familiar with the product, and she's like, a huge champion of it, but she's never actually done the work herself. I think because she's afraid to do the emotional work,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "she's got tractors in her Leigh, for sure, yeah, yeah, I want to pull them out. Yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "yeah, right, but I might, today might be the day, so we might have to go, if it's product testing, she'll do it. But not Leigh Orsi, you know, yeah, but, um, but anyways, so athlete, all right, so let me give you the feedback for the next layer, because I think it's definitely true, and I want to play with this, and I want to do some contrarian testing of it and see what happens, because I think that will help me decide,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download yeah, that'd be great. Oh, that will be great. Yeah. I think my plan, my plan is to wake up when I first wake up in the morning, I'll be, I'll be working with this, implementing this feedback, and try to get the look. It's"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "two one o'clock or it's almost two o'clock. So I will have time I will go over this again. And I also have my friend who has done this and has really incredible identity names. She's gonna do it, and so we'll see what her feedback is too so okay, but I get gather a little bit more great."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "That's awesome. Do you have any thing for I am statements,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download yeah, that's where we're going now. So my instinct right now is to not do"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "maybe maybe it's something okay, this would be like, if I had to decide right now, I would say, blah, blah, you chose creative. Is that name like deeply resonate you and like light you up inside. Or would you like me to help up with, help you come up with something more inspiring? And if they say, Yes, I'd like to come up with something more inspiring, then it says, like, what excites you about this idea? What feels you know? So that we're digging into the customer with some like, questions about, like, what excites you about this? Like, what makes you feel alive? Like, we're asking these leading questions that are very inspiring to them, for lack of a better word. And then once it has, like, the little details about it, it's like, what's exciting about this for you, what what fires you up about this? Then they can write those things. It again gets transferred to the knowledge base for future use. It helps come up with a more inspiring name that's accurate for them, right? But it's really based on, does this inspire you? Does this make you feel alive? Because we're also leading the consumer to realize that, like, that's the whole point of this, right, right? It's not about coming up with the right answer. It's about really, like, inspiring you to get excited to wake up in the morning and be this person that's that's what it is. And so we can ask that, and then we can make the suggestions based on that. But here's where I want to get into like, what the difference is for the I am statements, and I'm going to call them that instead of affirmations, so that we do,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, please do"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "get on that page. Okay, let's create an I am statement for your mother identity. This will be a statement that embodies, anyways, it's telling you instead of asking. So tell me what is important to you about being a mother and how you want to show up every day."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, yeah. This is Yeah. So this is what we Yeah, this is what I thought was going in the refinement phase. But yeah, that's great, right? Okay,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "important for you about being a mother and how you want to show up every day. And you say, Okay, well, I want this, and I want that this is that it's like anything else I should know and anything else I should know, you know so, or maybe it's one question, and then it's a follow up of, is there anything else I should know? Yes, no. Like, then it writes the I am statement, yeah."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download Hey, can you give me just one second? Yeah? No problem. One second. Yeah."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Hey, all right, sorry, sorry, kids are kids are going to bed. I had"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "to do, I know I was like, I feel like I'm always getting you right at that hour. No, it's"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "just, it's just how it is when I Yeah, living over here, that's just how it is, right? Everybody, everybody's on that side of the world, so it's kind of Yeah, no big deal. All"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "right? Well, once I get my schedule back kind of normal, I got it. I got to sleep at 3am the first day I got here because of travel. So once today, I woke up at like nine so I can shift to an earlier life and get on these"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "calls. You're good, you're not. You didn't bother me at all. It's fine."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Well, I think I'm gonna Leigh Ann do like, a crazy early morning drive. I mean, my like, Eric likes to wake up at like, 3am and drive. I think that's a little early for me, but I might"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "create, Yeah, crazy, yeah, me to wake up"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "at five. Or something. Yeah, to wake up at five and do something is nuts. But I might do something like that. I don't know. We'll see,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, getting up early in the morning and driving somewhere is, like, super fun."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "That is a dad thing. It's not a mom thing. No, moms want to do that. Dads think that's amazing. You know, I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "freaking love that. Yeah, it's great. I'm like, Yeah, well, if you leave at five, you can be there at like, one o'clock, right, right? Yeah, yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "no, but, but in general, No, thanks, but I might do it. We'll see. Um, okay, so we were getting right into the juice of it. So it's like, Yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "you were telling me, you know, it's like, digging into the identities, right?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "And that's when you were like, tell me how you want to show up. Yeah, you know, as a mother, like, what's important to you, what's meaningful? What are any like words that describe the mother you want to that you are and want to be, right? And so we want to ask them these questions so that you can craft the I am statement from the data that's received"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "excellent"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "and that's it. And, like, it's, so, it's, it's like, okay, it's Mother, tell me that, you know. And I said I'm going to find this part of the transcript, because I think that we're really in it right now, and I'm going to just be like, this dude, you know, so I think that we ask those questions and then have it, and it can say, How about something like this? And it creates the I am statement, and then it says, Is there anything you want to change? Because down here, I was like, No, you +2 Download +2 Download +2 Download know, I want to. I want to surrender the wisdom, something greater than myself, and not feel that I need to be the authority and everything. I want to turn everything over. But then it just didn't even change it. So then I said it, no, I already embraced flow. I want to embrace peace and faith and"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, I don't know Yeah, I just Yeah. It sucks. It sucks. It's yeah, it's"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "not, it's not great, but, but, you know what, what? But here's where we really want to dig, because we do not want to make a fucking random like, here is my biggest problem with the AI written stuff, is that it's so resume and like, performative, yeah, you know, because you really want it to be, like, deeply affecting. You want it to be something that, like, boom, like, hits you super hard in the heart, so that you're inspired by who you want to be every day, right? Or who you are inspired to wake up and be that. This is like, I nurture with love and wisdom, creating a safe and supportive environment for my family of five. My presence is a source of warm guidance, like, you know, like, it's just, it's kind of like a jerk off. It's not really anything meaningful. And so what? Yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "it's swap. That's what it"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "is, right, right. Don't want that look like I said. I was telling people, like, look, I went through the whole process, and it was if they went through this and even just had aI suggest the names and change the identities for you and write the I am statements. It's fucking better than nothing."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "you know, honestly, what we have here, if this is what we want to it's better than nothing, but we can make it even better. And the way we make it better is we ask them questions like, Okay, you're a mother. Tell me about this identity. How do you want to show up? What's meaningful to you? What are some important words that describe who you are, as a mother and like, help me understand, right? And then it writes the I am statement. And then once it writes the I am statement, it's like, do you want to accept this, or do you want to edit it or rewrite it? And then if the person makes the suggestion, they should change the statement to reflect the suggestion that was made until and then when it's at the end, they should say, Try saying that out loud. How does it feel? How does it feel? And it's like, we don't even need this. Does it resonate with the essence of who you are becoming as a mother? It's just like, say it out loud. How does it feel?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Right? Yeah."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "And then, if the answer is It feels amazing. If the answer is like, it's still not quite right, all right, let's work together to make it right. What part feels weird? Then we got to kind of like, tease out, yeah, okay, the issue, but that's basically the thing with the I am statements, and I think we can do most of the digging there. I think we have to do a little bit of digging in the refinement phase. So write this when you're finished with these notes, I'm let's go back to the refinement phase for Yeah."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "No, great. I'm done. Yeah."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Are you feel totally complete? Because I think the I am statements as before, it's pretty easy. We just need to get more information so that we know that we're writing a we're writing Yeah. And then I was like, I'm growing every day in order to love and be loved in a way that feels supportive, wholesome and free. And then it just like, didn't change it, yeah?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Download It will fix that stuff. Now it'll fix now that's, yeah, oh, cool."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Download So that's that, but let's go back here. I think the real questions are like, is like, Does this feel inspiring to you? Do you want to wake up every morning and be a health enthusiast, what's inspiring to you about this so, right? Like, instead of like, asking what's inspiring about it, asking what excites you about it, right? And how you want to show it like this part is, and then once it says, okay, wellness warrior, it's like, okay, how does that feel? There's just another answer of like, say, I am a wellness warrior. How does that make you feel? Like, this should light you up. This should inspire this should make you feel alive and excited to live your life. If you got to get up today and be a wellness warrior, you would be pumped type thing."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, right, yeah. And you know what? I i Yeah, it's you want to I'm trying. There's lots of things you have to say in the prompt. A lot of times, if you say things in a specific way, it will cause the it'll cause it to do. That's what prompt engineering is, right? The what you want it, you want the user to engage with it beyond a chat bot level, right? So like people are just like people, they have a fence up whenever they're talking to a chat bot. At least I do. I don't know. I'm sure everybody does. Everybody does. Where you're talking to this thing, you're like, I know this is fake. This is like, bullshit. I'm just gonna talk to it. Okay, yeah, fine. You have to break through that wall"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "if you don't do that. Have you ever talked to it about"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "your relationship, though? No. Like, what do you mean?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Like, Have you ever talked about it, something deeply talked to it? Talk to a chat about something deeply personal."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, yes."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Do you feel? Do you feel the same sort of wall?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "I guess not,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "because I think yes, in general, because remember, we both had that experience where all of a sudden we didn't have the wall, and we were answering the questions truthfully, and from our heart, happy to be asked them like I have one of my friends who's like, you know, trying to leave a alcoholic husband. She has the most unfettered conversations with AI about her relationship, because she's desperate,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "for solution and help, and no one's judging her. Like, that's the other thing is, like nobody is judging you. You don't have to reveal yourself to a person. You can be fucking honest about who you are and what you want, and you can say, I want to be a multi millionaire. I want this, or I want to be a, you know, I want to be the next Steve Jobs. And like, no one's going to going to tell you you're an idiot. Yeah, be like, you know. So, so I think that there is we have in the personal vulnerability state. There is a opportunity to go beyond what some people feel that they can do in normal conversation, but we it's our job to inspire them. So I think that the most important question about the refinement is like, this has to be a name that that like lights you up, that makes you excited to like, wake up and be this person. This is someone you want to be and you're proud to be every day. And so it's about like driving them towards the purpose of finding a cool name."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, yeah, up to this point, well, at least for me, using the coach, and because I'm doing it like development mode, and so I engage with it only on a superficial level."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Agreed, I have to say me too. I'm phoning it in a lot because I'm like, you know, yeah, whatever. However, I have had those moments where I'm not phoning it in like you. And I both had that in the very beginning when we created the GET TO KNOW YOU phase,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, yeah, exactly. I think, yeah. There's some, I captured a little bit of lightning in a bottle on that one. I need to get, I need to try to, like, see if I can sprinkle that around well and look,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "and it doesn't work anymore for us, because we've answered the question so many times now that it's just annoying. But I think that it's different. That's why I want to observe. I want to see if I can get my friend on the phone to do the first phase with me today, just while you're working on the second one, but just so that we can have some kind of feedback of what we should do in refinement, like what kind of answer she's going to come up with."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah. Okay. Yeah, that's great."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Also, I want to know that it took 30 minutes to do. When I did it with the with Eric, it took 30 minutes, which is fucking awesome, yeah, like to joke, yeah."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Well, the chat bots all business, right? It's just like, Yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "it's amazing. And, and I just think, from a user perspective, to be able to say, like, Okay, here's this process, and to complete the first module, you're going to need to set aside. I mean, look, I don't know how long it's going to take once we get through the art, but let's, like, say it's one hour, you know, like, set aside one hour to do the setup, to do your like, first phase, to do this all in an hour. Do you know how long it would take me to do it? Would take, yeah, I mean, think of how long it took us. Would take me a long time session, yeah, six hours, and we can do it in one I mean, it's art, and to make the art, I mean, just, it's, it's incredible the fact that we did all this, he went all the way through. I mean, he went to through the refinement, but then he was kind of like, I don't know it's doing this weird thing now, yeah, yeah, all the way through the whole thing in 30 minutes. And let's say we can do the back half in 30 minutes, like, game changer. Also, we can tell people it's an hour, if it takes them an hour and a half, like, who gives them? Sure, whatever, no one's gonna come kill us for it. You know what? I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "mean, right? Yeah, who's gonna come and audit us? Yeah, right."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "But I just think, I just think it's a really good sign"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "that's awesome. Great. Very, very good. Yay. Okay, so look,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "I think you have enough to to release. I'm going to highlight the content the this last because I think we really nailed it in this last little bracket. I'm going to highlight it and and send it over to you so that you just have those very specific words. But I think we do dig a little but in the identity refinement. It's about inspiration. And do you want to get up and be this person? How? How can I help you find the right words for that? What inspires you about, oh, that's"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "okay. I just thought of something great. So that's not really good. You can, you can maybe connect those two things. So when you Yeah, so, yeah, so you ask those questions in the refinement phase, and then when you do the I am statements, you can ask, okay, well, what? What was going on in your brain when you said, Yes, I like this. Like, why did you identify with this name? What is it about this name that you like those kind of maybe you can, well, you can connect"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "the data that you capture of what inspires them about it when you're writing the I am statement, but the I am statement is like, Okay, so first it's like, what like? Let's find something that inspires you. What's inspirational about this? What do you love? And then the next one is like, tell me about this, this identity. Tell me how you show up, this way. What is this person? Like? Give me some descriptive words, whatever. Because my experience when most people are writing the I ams is that it's very it's kind of like pulling teeth on most people, most non creatives. Like, it's funny, because, like, I do a lot of this work with, like, ex dancers and stuff like that. My previous industry, they're fucking great at it. When you get some like, suit or like corporate dude,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "they don't think their brain, that part of their brain is"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "completely dead. That's actually what this thing is great, because it can just take health and make it wellness warrior, and all of a sudden they're like, Yeah, I'm a wellness warrior, you know, right? Because, like, I actually think that that's one of its assets, is that it can be creative for a non creative person. But I think, I think that we do inspiration, we we are maximizing for inspiration in the name and connection like that, it like lights you up inside, and it makes you feel alive, like you want to get up and be this person in the morning. And then the next one is like, tell me about this identity. How do you want to show up? What do you want me to know about it? What's important? How do you describe it? And then, with the inspiration data and the descriptive data, it writes a relevant I am statement, not like a generic one."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, cool. Okay, no,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "you're figuring out how to do that, but I'm just going to leave you with what I want and let you untie the knots in your brain. Yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "hopefully, hopefully I can. I can give you I've Yeah, I'd like to be able to say, hey, go check it out, because I just pushed some changes, and it should work now. So I also want to"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "say that look for whatever things you're talking about with these tests and the kind of extraneous tech debt, you know what I mean? Like, I don't know if you're the guy to do that stuff, and I don't fucking care, because you can do this with me, and you can make this thing do what I wanted to do emotionally, which is, like, it's worth gold to me, Casey, like I am so, so lucky that I found you, like we have made this thing you and I"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "and it's incredible. And I am 100% sure that I can get this to work in the world. I'm just getting the chills because of what you've done for me. And I am so grateful, and I do not care that the little thing didn't work or whatever. Like I all right, we can get someone else to do that dumb stuff. If you and I, when we move forward, we just build this like mind, the mind of the AI together, everyone else can do the bullshit."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Okay, yeah, okay, great. That makes me feel a little better,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "don't you think,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, am I sure?"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Am I right to say that? Because,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, no, that's, it's"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "great, a hard part that no one else can do. You're doing the intricate part everyone else can build that other stuff, right? Yeah?"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Well, yeah, absolutely. And I and, and, well, the thing is, is I'm perfectly capable of doing all that other stuff too. I just it's less fun, yeah, well, and"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "less meaningful, yeah."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Well, that's really what it is right now, is it's not those things like, Yeah, okay. It sucks when you refresh the page and it doesn't, you know, load the test page or whatever, that sucks, and it's annoying. But the Yeah, I could, I could fix those things, but it doesn't. Every minute that's been doing that stuff isn't pushing you towards something that I know that you want, and so I don't want to, I would hate to be like, Hey, sorry, I don't have your, you know, refinement update, because I fixed a bunch of stuff you don't give a shit"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "about, right? And the truth is, if you get me to the update to where I can start sending this around and getting feedback, and like, also blooming in my mind, because I am a creative and so it's kind of hard for me to put the cart before the horse and start developing the marketing before I and even the design before I know what the meat of it is, right? And so like, once you get me this and I can go run with it, then you can build all that other stuff that, yeah, that's"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "exactly what I was about to say, too. It's like, what's this thought done? I can spend a weekend and, like, fiddle with it and make sure that everything is,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "everything is before we make but, yeah,"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "yeah, yeah, well, and yeah, that's another part of it, too. Leigh Ann, is that this is, it's the dev coach, right? So I'm not going to use any of this code really, right? It's just like the dev platform so that we can, like, get it to work. And once it, if, like, if you get funding, and this thing turns into, like, a real application, there's gonna, you're gonna, there's gonna be a team of people that show up, and they're gonna be like, Oh, they're gonna have their own ways of doing stuff, and all of my code is gonna get tossed in the trash, right? So spending a ton of time, but all"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "of your, prompt engineering and system and everything that"    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "will stick. Yeah, that's the part. That's the important part. Yeah, that won't go away. No, I'm talking about the technical part, like the website part, right,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "right? Yeah, all that, yeah, we don't want that anymore."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Yeah, the the login and how all that stuff works. Like, nobody cares. Like, a million, everybody can write one of those, right? So, yeah,"    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "and that, like the designer that I hired is going to be amazing, and I can't wait to see how he envisions all these things, which I think is going to be totally revolutionary. So anyway, all right, I'm going to let you go, and I'm going to see if I can get some people to do some super basic engagement with this with no, I'm trying to think who else has no experience with it that I could get to to do it with me. I think Mara is the best one. But anyways, all right, I will talk to you later. I will figure that out myself. Excellent."    
+  },
+  {
+    "speaker": "Casey",   
+    "content": "Oh, and for Jake, if you talk to him, he has his test scenario and is on staging not production, he was talking about production."    
+  },
+  {
+    "speaker": "Leigh Ann",   
+    "content": "Yesterday, I sent him. Okay, okay, okay, okay."    
+  }
+]
