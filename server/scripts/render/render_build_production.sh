@@ -31,26 +31,26 @@ main() {
     log "🏗️  Starting Dev Coach PRODUCTION build process..."
     
     # Step 1: Install dependencies
-    if ! run_command "Installing Python dependencies" "pip install -r server/requirements.txt"; then
+    if ! run_command "Installing Python dependencies" "pip install -r ../../requirements.txt"; then
         log "❌ Failed to install dependencies - stopping build"
         exit 1
     fi
     
     # Step 2: Run database migrations
-    if ! run_command "Running database migrations" "cd server && python manage.py migrate"; then
+    if ! run_command "Running database migrations" "cd ../.. && python manage.py migrate"; then
         log "❌ Failed to run migrations - stopping build"
         exit 1
     fi
     
     # Step 3: Collect static files
-    if ! run_command "Collecting static files" "cd server && python manage.py collectstatic --noinput"; then
+    if ! run_command "Collecting static files" "cd ../.. && python manage.py collectstatic --noinput"; then
         log "❌ Failed to collect static files - stopping build"
         exit 1
     fi
     
     # Step 4: Copy prompts from staging to production
     log "📋 Starting prompt synchronization for PRODUCTION..."
-    if run_command "Copy prompts from staging to production" "cd server && python manage.py copy_prompts_to_production --force"; then
+    if run_command "Copy prompts from staging to production" "cd ../.. && python manage.py copy_prompts_to_production --force"; then
         log "✅ Production prompts updated successfully from staging"
     else
         log "⚠️  Production prompt copy failed, but continuing deployment"
