@@ -59,7 +59,7 @@ const sidebars: SidebarsConfig = {
                 "core-systems/prompt-manager/context-keys/current-identity",
                 "core-systems/prompt-manager/context-keys/focused-identities",
                 "core-systems/prompt-manager/context-keys/refinement-identities",
-                "core-systems/prompt-manager/context-keys/i-am-identites",
+                "core-systems/prompt-manager/context-keys/i-am-identities",
                 "core-systems/prompt-manager/context-keys/visualization-identities",
                 "core-systems/prompt-manager/context-keys/current-phase",
                 "core-systems/prompt-manager/context-keys/who-you-are",
@@ -207,6 +207,7 @@ const sidebars: SidebarsConfig = {
       label: "Coach Development",
       items: [
         "development/overview",
+        "development/deployment-process",
         "development/docker-configuration",
         "development/common-commands",
       ],

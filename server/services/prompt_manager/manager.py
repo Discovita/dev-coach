@@ -57,7 +57,7 @@ class PromptManager:
         )
         if version_override is not None:
             prompt_queryset = prompt_queryset.filter(version=version_override)
-        prompt = prompt_queryset.order_by("-version").first()
+        prompt: Prompt = prompt_queryset.order_by("-version").first()
         if not prompt:
             raise ValueError(f"No prompt found for state {state_value}")
         # 3. Gather context for the prompt
@@ -87,7 +87,7 @@ class PromptManager:
             )
         else:
             log.warning(
-                f"Prompt {prompt.id} has no allowed actions. Using all action instructions."
+                f"Prompt {prompt.name} has no allowed actions. Using all action instructions."
             )
             coach_prompt = append_action_instructions(
                 coach_prompt, ActionType.get_all_actions()
