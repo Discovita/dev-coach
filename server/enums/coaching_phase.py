@@ -12,6 +12,7 @@ class CoachingPhase(models.TextChoices):
     GET_TO_KNOW_YOU = "get_to_know_you", "Get to Know You"
     IDENTITY_WARMUP = "identity_warm_up", "Identity Warm-Up"
     IDENTITY_BRAINSTORMING = "identity_brainstorming", "Identity Brainstorming"
+    BRAINSTORMING_REVIEW = "brainstorming_review", "Brainstorming Review"
     IDENTITY_REFINEMENT = "identity_refinement", "Identity Refinement"
     I_AM_STATEMENT = "i_am_statement", "I Am Statement"
     IDENTITY_VISUALIZATION = "identity_visualization", "Identity Visualization"

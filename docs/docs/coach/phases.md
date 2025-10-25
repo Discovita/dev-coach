@@ -154,6 +154,61 @@ This phase often reveals important patterns and preferences, such as which categ
 
 ---
 
+## Brainstorming Review
+
+This phase serves as a critical checkpoint between the creative brainstorming work and the refinement process. After clients have generated identities across all nine life categories, this phase provides a structured review to identify potential redundancies and ensure the identity constellation is clean and focused before moving into refinement.
+
+### The Purpose
+
+The Brainstorming Review phase operates on the principle that **clarity comes through consolidation**. After the expansive creative work of brainstorming, clients often discover they've created similar identities with different names across categories. This phase helps them recognize these overlaps and make conscious decisions about whether to combine or keep separate identities.
+
+### The Celebration Moment
+
+This phase begins with **celebration** - acknowledging the significant accomplishment of creating identities across all major life areas. The coach congratulates the client on their comprehensive identity work, creating a positive foundation for the review process.
+
+### The Review Process
+
+The coach systematically reviews the complete list of identities, looking for **actual redundancy** rather than related themes. The focus is on identifying identities that are essentially the same thing with different names - identities where developing one would automatically develop the other because they represent the same energy and require the same behaviors.
+
+**What constitutes redundancy:**
+- Two identities with nearly identical names describing the same thing (e.g., "Health Nut" and "Health Enthusiast")
+- Two identities about the same specific domain where one encompasses the other (e.g., "Runner" and "Marathon Trainer")
+- Two identities that would require identical daily actions and embody the same energy (e.g., "Wellness Advocate" and "Health Seeker")
+
+**What is NOT redundancy:**
+- Identities that share a theme but have different focuses (e.g., "Musician" and "Creative")
+- Identities that might complement each other but require different behaviors (e.g., "Reader" and "Writer")
+- Identities in different life categories even if they feel related (e.g., "Philosopher" and "Musician")
+
+### The Conversational Approach
+
+When potential overlaps are identified, the coach asks naturally about the relationship: "I'm noticing your [Identity Name] in [Category] and your [Identity Name] in [Category] feel like they might be related. Do these feel like two distinct identities to you, or are they really the same energy?"
+
+The coach then responds based on the client's answer:
+- **If they're distinct**: Honor their choice and continue reviewing
+- **If they're unsure**: Help them explore the differences naturally
+- **If they're the same**: Offer the option to combine them using the `show_combine_identities` component
+
+### The Combination Process
+
+When clients choose to combine identities, the process uses a specific component that allows them to merge similar identities. This decision is entirely client-driven - the coach presents the option but never forces consolidation.
+
+### Quality Control
+
+The phase ensures that:
+- **Minimum requirement**: At least one identity exists in each non-skipped category
+- **No forced consolidation**: Only obvious redundancies are flagged
+- **Client autonomy**: All decisions about combining or keeping separate identities rest with the client
+- **Natural flow**: The review feels like a thoughtful conversation, not a checklist
+
+### Transition to Refinement
+
+Once all potential overlaps have been addressed, the phase transitions naturally to Identity Refinement. The coach sets up what's next: "Now let's go back through each of these and really dial them in - make sure the names feel perfect for you."
+
+This phase creates a clean foundation for the refinement work ahead, ensuring that the identity constellation is streamlined and focused before the detailed work of perfecting language and creating "I Am" statements begins.
+
+---
+
 ## Identity Refinement
 
 This phase involves organizing the brainstormed identities into a coherent and functional framework. This is where the creative exploration meets practical application, as clients determine which identities deserve focus and development. The process uses specific categories that cover essential life domains while maintaining the internal, character-based orientation.
