@@ -111,8 +111,7 @@ export const CombineIdentitiesConfirmation: React.FC<{
       </div>
 
       <div className="mb-3 text-sm text-gray-700 dark:text-gray-300">
-        We’ll combine these two identities into a single one. You can review the
-        result before confirming.
+        We’ll combine these two identities into a single one.
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
