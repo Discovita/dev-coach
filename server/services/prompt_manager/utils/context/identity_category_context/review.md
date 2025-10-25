@@ -1,5 +1,3 @@
-15542-765-3n432=b=cx4tbvx
-
 # Completion Review Brainstorming Context
 
 **This is the final step of Identity Brainstorming.** All nine life categories have been completed. Now it's time to review everything, celebrate what they've created, and identify any overlapping identities before moving to the refinement phase.

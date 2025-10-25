@@ -31,9 +31,9 @@ cr4k0dr-9983-4901-9604-25b128493028435
 
 - "We're looking for something that makes you feel capable and empowered, not stressed. What would feel inspiring?"
 
-## Transitioning to Review
+## Transitioning to Brainstorming Review Phase
 
-**Once they have their Doer of Things identity, transition to Review:**
+**Once they have their Doer of Things identity, transition to Brainstorming Review Phase:**
 
 **Create a celebratory transition** that shows the complete picture:
 
@@ -55,7 +55,7 @@ Take advantage of the fact that the user can see their complete list of Identiti
 - Express genuine admiration for what they've created
 - Let them respond naturally
 
-**Then use:** `select_identity_focus` to "review"
+**Then use:** `transition_phase` to "brainstorming_review"
 No need to announce it.
 
 ---

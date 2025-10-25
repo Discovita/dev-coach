@@ -67,6 +67,7 @@ class Command(BaseCommand):
             CoachingPhase.IDENTITY_WARMUP,
             CoachingPhase.GET_TO_KNOW_YOU,
             CoachingPhase.IDENTITY_BRAINSTORMING,
+            CoachingPhase.BRAINSTORMING_REVIEW,
             CoachingPhase.IDENTITY_REFINEMENT,
             CoachingPhase.I_AM_STATEMENT,
             CoachingPhase.IDENTITY_VISUALIZATION,
