@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.AddField(
             model_name="chatmessage",
             name="component_config",
             field=models.JSONField(
