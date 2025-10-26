@@ -130,6 +130,14 @@ const sidebars: SidebarsConfig = {
             },
           ],
         },
+        {
+          type: "category",
+          label: "Component Renderer",
+          items: [
+            "core-systems/component-renderer/overview",
+            "core-systems/component-renderer/persistent-components",
+          ],
+        },
       ],
     },
     {

@@ -18,6 +18,7 @@ class CoreViewSet(viewsets.GenericViewSet):
     Used for populating dropdowns/selects in the frontend prompt management UI.
     """
 
+    # TODO: Remove certain ActionTypes enums that are not needed for the frontend.
     @decorators.action(detail=False, methods=["get"], url_path="enums")
     def enums(self, request, *args, **kwargs):
         """

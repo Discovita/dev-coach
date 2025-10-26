@@ -26,7 +26,6 @@ export enum IdentityCategory {
   FAMILIAL_RELATIONS = "familial_relations",
   ROMANTIC_RELATION = "romantic_relation",
   DOER_OF_THINGS = "doer_of_things",
-  REVIEW = "review",
 }
 
 /**
@@ -42,7 +41,6 @@ export const IDENTITY_CATEGORY_DISPLAY_NAMES: Record<IdentityCategory, string> =
   [IdentityCategory.FAMILIAL_RELATIONS]: "Familial Relations",
   [IdentityCategory.ROMANTIC_RELATION]: "Romantic Relation",
   [IdentityCategory.DOER_OF_THINGS]: "Doer of Things",
-  [IdentityCategory.REVIEW]: "Review",
 };
 
 /**
@@ -58,7 +56,6 @@ export const IDENTITY_CATEGORY_COLORS: Record<IdentityCategory, string> = {
   [IdentityCategory.FAMILIAL_RELATIONS]: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
   [IdentityCategory.ROMANTIC_RELATION]: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
   [IdentityCategory.DOER_OF_THINGS]: "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
-  [IdentityCategory.REVIEW]: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
   };
 
 /**
@@ -74,7 +71,6 @@ export const IDENTITY_CATEGORY_LIGHT_COLORS: Record<IdentityCategory, string> = 
   [IdentityCategory.FAMILIAL_RELATIONS]: "bg-indigo-50 dark:bg-indigo-950",
   [IdentityCategory.ROMANTIC_RELATION]: "bg-red-50 dark:bg-red-950",
   [IdentityCategory.DOER_OF_THINGS]: "bg-teal-50 dark:bg-teal-950",
-  [IdentityCategory.REVIEW]: "bg-gray-50 dark:bg-gray-950",
 };
 
 /**
@@ -90,7 +86,6 @@ export const IDENTITY_CATEGORY_DARK_COLORS: Record<IdentityCategory, string> = {
   [IdentityCategory.FAMILIAL_RELATIONS]: "border-indigo-300 text-indigo-800 dark:border-indigo-600 dark:text-indigo-200",
   [IdentityCategory.ROMANTIC_RELATION]: "border-red-300 text-red-800 dark:border-red-600 dark:text-red-200",
   [IdentityCategory.DOER_OF_THINGS]: "border-teal-300 text-teal-800 dark:border-teal-600 dark:text-teal-200",
-  [IdentityCategory.REVIEW]: "border-gray-300 text-gray-800 dark:border-gray-600 dark:text-gray-200",
 };
 
 /**

@@ -139,6 +139,11 @@ class TemplateChatMessageSerializer(ForbidExtraFieldsMixin, serializers.Serializ
     timestamp = serializers.DateTimeField(
         required=False, help_text="When the message was sent."
     )
+    component_config = serializers.JSONField(
+        required=False,
+        allow_null=True,
+        help_text="Optional component configuration for persistent component rendering (stored as JSON)."
+    )
 
 
 class TemplateUserNoteSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
@@ -181,8 +186,14 @@ class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     timestamp = serializers.DateTimeField(
         required=False, help_text="When the action was performed."
     )
+    original_coach_message_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="ID of the original coach message that triggered this action (for robust linking during instantiation)."
+    )
+    # Keep coach_message_content for backward compatibility with old templates
     coach_message_content = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Content of the coach message that triggered this action (for linking during instantiation)."
+        help_text="Content of the coach message that triggered this action (for linking during instantiation). DEPRECATED: Use original_coach_message_id instead."
     )

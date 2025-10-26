@@ -264,3 +264,12 @@ class CombineIdentitiesParams(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class PersistCombineIdentitiesParams(BaseModel):
+    identity_id_a: str = Field(..., description="ID of the first identity to combine")
+    identity_id_b: str = Field(..., description="ID of the second identity to combine")
+    coach_message_id: str = Field(..., description="ID of the coach message to persist the component to")
+
+    class Config:
+        extra = "forbid"

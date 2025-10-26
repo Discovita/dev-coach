@@ -8,20 +8,20 @@ import { CombineIdentitiesConfirmation } from "./CombineIdentitiesConfirmation";
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
   componentConfig: ComponentConfig;
-  onSelect: (request: CoachRequest) => void;
+  onSendUserMessageToCoach: (request: CoachRequest) => void;
   disabled: boolean;
 }
 
 export const CoachMessageWithComponent: React.FC<
   CoachMessageWithComponentProps
-> = ({ children, componentConfig, onSelect, disabled }) => {
+> = ({ children, componentConfig, onSendUserMessageToCoach, disabled }) => {
   switch (componentConfig.component_type) {
     case ComponentType.INTRO_CANNED_RESPONSE:
       return (
         <IntroCannedResponseComponent
           coachMessage={children}
           config={componentConfig}
-          onSelect={onSelect}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
           disabled={disabled}
         />
       );
@@ -30,7 +30,7 @@ export const CoachMessageWithComponent: React.FC<
         <CombineIdentitiesConfirmation
           coachMessage={children}
           config={componentConfig}
-          onSelect={onSelect}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
           disabled={disabled}
         />
       );

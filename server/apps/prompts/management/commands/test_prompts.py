@@ -23,6 +23,7 @@ class Command(BaseCommand):
     Management command to test prompt rendering.
     This bypasses Django's test database and tests against the live database.
     """
+
     help = "Test prompt rendering for all coaching phases"
 
     def add_arguments(self, parser):
@@ -66,6 +67,7 @@ class Command(BaseCommand):
             CoachingPhase.IDENTITY_WARMUP,
             CoachingPhase.GET_TO_KNOW_YOU,
             CoachingPhase.IDENTITY_BRAINSTORMING,
+            CoachingPhase.BRAINSTORMING_REVIEW,
             CoachingPhase.IDENTITY_REFINEMENT,
             CoachingPhase.I_AM_STATEMENT,
             CoachingPhase.IDENTITY_VISUALIZATION,
@@ -86,21 +88,24 @@ class Command(BaseCommand):
             if phase == CoachingPhase.IDENTITY_BRAINSTORMING:
                 # Test brainstorming for each category
                 for category in IdentityCategory:
-                    if category != IdentityCategory.REVIEW:  # Skip review category
-                        success, error, prompt_info = self._test_brainstorming_phase(
-                            user, coach_state, category
-                        )
-                        results.append(
-                            {
-                                "phase": f"{phase.label} ({category.label}){prompt_info}",
-                                "success": success,
-                                "error": error,
-                            }
-                        )
+                    success, error, prompt_info = self._test_brainstorming_phase(
+                        user, coach_state, category
+                    )
+                    results.append(
+                        {
+                            "phase": f"{phase.label} ({category.label}){prompt_info}",
+                            "success": success,
+                            "error": error,
+                        }
+                    )
             else:
                 success, error, prompt_info = self._test_phase(user, coach_state, phase)
                 results.append(
-                    {"phase": f"{phase.label}{prompt_info}", "success": success, "error": error}
+                    {
+                        "phase": f"{phase.label}{prompt_info}",
+                        "success": success,
+                        "error": error,
+                    }
                 )
 
         # Report results
@@ -133,7 +138,7 @@ class Command(BaseCommand):
             self.stdout.write("\n" + "=" * 60)
             self.stdout.write("DETAILED ERROR REPORT")
             self.stdout.write("=" * 60)
-            
+
             for result in results:
                 if not result["success"]:
                     self.stdout.write(f"\n🔍 {result['phase']}:")
@@ -189,12 +194,15 @@ class Command(BaseCommand):
             coach_state.save()
 
             # Get prompt info for reporting
-            prompt = Prompt.objects.filter(
-                coaching_phase=phase.value,
-                is_active=True
-            ).order_by("-version").first()
-            
-            prompt_info = f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            prompt = (
+                Prompt.objects.filter(coaching_phase=phase.value, is_active=True)
+                .order_by("-version")
+                .first()
+            )
+
+            prompt_info = (
+                f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            )
 
             # Create prompt manager and test
             prompt_manager = PromptManager()
@@ -206,11 +214,14 @@ class Command(BaseCommand):
 
         except Exception as e:
             # Get prompt info even for failed tests
-            prompt = Prompt.objects.filter(
-                coaching_phase=phase.value,
-                is_active=True
-            ).order_by("-version").first()
-            prompt_info = f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            prompt = (
+                Prompt.objects.filter(coaching_phase=phase.value, is_active=True)
+                .order_by("-version")
+                .first()
+            )
+            prompt_info = (
+                f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            )
             return False, str(e), prompt_info
 
     def _test_brainstorming_phase(self, user, coach_state, category):
@@ -222,12 +233,18 @@ class Command(BaseCommand):
             coach_state.save()
 
             # Get prompt info for reporting
-            prompt = Prompt.objects.filter(
-                coaching_phase=CoachingPhase.IDENTITY_BRAINSTORMING.value,
-                is_active=True
-            ).order_by("-version").first()
-            
-            prompt_info = f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            prompt = (
+                Prompt.objects.filter(
+                    coaching_phase=CoachingPhase.IDENTITY_BRAINSTORMING.value,
+                    is_active=True,
+                )
+                .order_by("-version")
+                .first()
+            )
+
+            prompt_info = (
+                f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            )
 
             # Create prompt manager and test
             prompt_manager = PromptManager()
@@ -239,9 +256,15 @@ class Command(BaseCommand):
 
         except Exception as e:
             # Get prompt info even for failed tests
-            prompt = Prompt.objects.filter(
-                coaching_phase=CoachingPhase.IDENTITY_BRAINSTORMING.value,
-                is_active=True
-            ).order_by("-version").first()
-            prompt_info = f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            prompt = (
+                Prompt.objects.filter(
+                    coaching_phase=CoachingPhase.IDENTITY_BRAINSTORMING.value,
+                    is_active=True,
+                )
+                .order_by("-version")
+                .first()
+            )
+            prompt_info = (
+                f" (Prompt v{prompt.version})" if prompt else " (No prompt found)"
+            )
             return False, str(e), prompt_info

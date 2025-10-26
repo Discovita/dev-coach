@@ -4,6 +4,8 @@ import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
 import { CoachRequest } from "@/types/coachRequest";
 import { Message } from "@/types/message";
+import { ComponentConfig } from "@/types/componentConfig";
+import { makeComponentDisplayOnly } from "@/utils/componentConfig";
 
 /**
  * useChatMessages hook
@@ -45,6 +47,56 @@ export function useChatMessages() {
     mutationFn: async (request: CoachRequest) => {
       return apiClient.sendMessage(request);
     },
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["user", "chatMessages"],
+      });
+
+      // Get the current component config from cache
+      const componentConfigFromCache = queryClient.getQueryData<ComponentConfig | null>([
+        "user",
+        "componentConfig",
+      ]);
+
+      // IMMEDIATELY attach display-only component to last coach message
+      if (componentConfigFromCache) {
+        queryClient.setQueryData<Message[] | undefined>(
+          ["user", "chatMessages"],
+          (old) => {
+            const current = old ?? [];
+            
+            // Find last coach message
+            let lastCoachIndex = -1;
+            for (let i = current.length - 1; i >= 0; i--) {
+              if (current[i].role === "coach") {
+                lastCoachIndex = i;
+                break;
+              }
+            }
+            
+            if (lastCoachIndex === -1) return current;
+            
+            // Attach display-only component
+            return current.map((msg, idx) => {
+              if (idx === lastCoachIndex) {
+                return {
+                  ...msg,
+                  component_config: makeComponentDisplayOnly(componentConfigFromCache) ?? undefined,
+                };
+              }
+              return msg;
+            });
+          }
+        );
+
+        // Clear the component config from cache immediately
+        queryClient.setQueryData(
+          ["user", "componentConfig"],
+          null
+        );
+      }
+    },
     // On success, update all relevant caches with the response
     onSuccess: (response: CoachResponse, variables) => {
       console.log("[useChatMessages] Response:", response);
@@ -81,6 +133,15 @@ export function useChatMessages() {
           const next: Message[] = hasUserAlready
             ? [...current]
             : [...current, userMsg];
+          
+          // If we have a component response, invalidate chat messages to get persistent components from database
+          if (response.component) {
+            console.log("[useChatMessages] Component response detected, invalidating chat messages to get persistent components");
+            queryClient.invalidateQueries({
+              queryKey: ["user", "chatMessages"],
+            });
+          }
+          
           return coachMsg ? [...next, coachMsg] : next;
         }
       );

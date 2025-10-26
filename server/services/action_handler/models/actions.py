@@ -26,6 +26,7 @@ from .params import (
     ShowAcceptIAMComponentParams,
     ShowCombineIdentitiesParams,
     CombineIdentitiesParams,
+    PersistCombineIdentitiesParams,
 )
 
 
@@ -258,6 +259,15 @@ class ShowCombineIdentitiesAction(BaseModel):
 class CombineIdentitiesAction(BaseModel):
     params: CombineIdentitiesParams = Field(
         ..., description="Parameters for combining two identities."
+    )
+
+    class Config:
+        extra = "forbid"
+
+
+class PersistCombineIdentitiesAction(BaseModel):
+    params: PersistCombineIdentitiesParams = Field(
+        ..., description="Parameters for persisting the combine identities component."
     )
 
     class Config:

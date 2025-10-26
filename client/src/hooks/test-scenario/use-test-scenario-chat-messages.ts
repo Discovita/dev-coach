@@ -4,6 +4,8 @@ import { apiClient } from "@/api/coach";
 import { CoachResponse } from "@/types/coachResponse";
 import { CoachRequest } from "@/types/coachRequest";
 import { Message } from "@/types/message";
+import { ComponentConfig } from "@/types/componentConfig";
+import { makeComponentDisplayOnly } from "@/utils/componentConfig";
 
 /**
  * useTestScenarioChatMessages
@@ -39,6 +41,57 @@ export function useTestScenarioChatMessages(userId: string) {
   const updateMutation = useMutation({
     mutationFn: async (request: CoachRequest) => {
       return apiClient.sendTestScenarioMessage(request);
+    },
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["testScenarioUser", userId, "chatMessages"],
+      });
+
+      // Get the current component config from cache
+      const componentConfigFromCache = queryClient.getQueryData<ComponentConfig | null>([
+        "testScenarioUser",
+        userId,
+        "componentConfig",
+      ]);
+
+      // IMMEDIATELY attach display-only component to last coach message
+      if (componentConfigFromCache) {
+        queryClient.setQueryData<Message[] | undefined>(
+          ["testScenarioUser", userId, "chatMessages"],
+          (old) => {
+            const current = old ?? [];
+            
+            // Find last coach message
+            let lastCoachIndex = -1;
+            for (let i = current.length - 1; i >= 0; i--) {
+              if (current[i].role === "coach") {
+                lastCoachIndex = i;
+                break;
+              }
+            }
+            
+            if (lastCoachIndex === -1) return current;
+            
+            // Attach display-only component
+            return current.map((msg, idx) => {
+              if (idx === lastCoachIndex) {
+                return {
+                  ...msg,
+                  component_config: makeComponentDisplayOnly(componentConfigFromCache) ?? undefined,
+                };
+              }
+              return msg;
+            });
+          }
+        );
+
+        // Clear the component config from cache immediately
+        queryClient.setQueryData(
+          ["testScenarioUser", userId, "componentConfig"],
+          null
+        );
+      }
     },
     onSuccess: (response: CoachResponse, variables) => {
       console.log("[useTestScenarioChatMessages] Response:", response);

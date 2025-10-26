@@ -39,7 +39,9 @@ def show_combine_identities(
     for identity_id in identity_ids:
         identity = id_to_identity.get(identity_id)
         if identity is None:
-            log.warning(f"Identity {identity_id} not found for user {coach_state.user.id}")
+            log.warning(
+                f"Identity {identity_id} not found for user {coach_state.user.id}"
+            )
             continue
         component_identities.append(
             ComponentIdentity(
@@ -52,21 +54,33 @@ def show_combine_identities(
     buttons = [
         ComponentButton(
             label="Yes",
+            # NOTE: It is imperitive that the PERSIST_COMBINE_IDENTITIES action is first in the list of actions.
+            # This is because the COMBINE_IDENTITIES action will actually delete one of the identities and change
+            # the name of the other identity. So we need to capture the data for the two identities before the
+            # COMBINE_IDENTITIES action is executed.
             actions=[
+                ComponentAction(
+                    action=ActionType.PERSIST_COMBINE_IDENTITIES.value,
+                    params={
+                        "identity_id_a": params.identity_id_a,
+                        "identity_id_b": params.identity_id_b,
+                        "coach_message_id": str(coach_message.id),
+                    },
+                ),
                 ComponentAction(
                     action=ActionType.COMBINE_IDENTITIES.value,
                     params={
                         "identity_id_a": params.identity_id_a,
                         "identity_id_b": params.identity_id_b,
                     },
-                )
+                ),
             ],
         ),
         ComponentButton(label="No"),
     ]
 
     component = ComponentConfig(
-        component_type=ComponentType.COMBINE_IDENTITIES,
+        component_type=ComponentType.COMBINE_IDENTITIES.value,
         identities=component_identities,
         buttons=buttons,
     )
@@ -90,5 +104,3 @@ def show_combine_identities(
     log.info("Successfully built combine identities component")
 
     return component
-
-

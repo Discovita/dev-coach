@@ -38,6 +38,7 @@ from services.action_handler.models.actions import (
     ShowAcceptIAMComponentAction,
     ShowCombineIdentitiesAction,
     CombineIdentitiesAction,
+    PersistCombineIdentitiesAction,
 )
 
 # Map ActionType to their parameter models and descriptions for prompt generation
@@ -146,6 +147,10 @@ ACTION_PARAMS = {
     ActionType.COMBINE_IDENTITIES: {
         "description": "Combine two identities. Exactly two identities are required. Category-specific rules apply.",
         "model": CombineIdentitiesAction,
+    },
+    ActionType.PERSIST_COMBINE_IDENTITIES: {
+        "description": "Persist the combine identities component configuration to the chat message for historical display.",
+        "model": PersistCombineIdentitiesAction,
     },
 }
 

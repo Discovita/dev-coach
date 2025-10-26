@@ -25,4 +25,5 @@ export enum ActionType {
   SHOW_BRAINSTORMING_IDENTITIES = "show_brainstorming_identities",
   SHOW_COMBINE_IDENTITIES = "show_combine_identities",
   COMBINE_IDENTITIES = "combine_identities",
+  PERSIST_COMBINE_IDENTITIES = "persist_combine_identities",
 }

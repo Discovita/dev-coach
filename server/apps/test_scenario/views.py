@@ -184,6 +184,8 @@ class TestScenarioViewSet(
         from apps.chat_messages.models import ChatMessage
         chat_messages_qs = ChatMessage.objects.filter(user=user).order_by("timestamp")
         chat_messages_section = []
+        # Create a mapping from original message IDs to their data for action linking
+        original_message_mapping = {}
         for msg in chat_messages_qs:
             msg_dict = {
                 "role": msg.role,
@@ -191,7 +193,16 @@ class TestScenarioViewSet(
             }
             if msg.timestamp:
                 msg_dict["timestamp"] = msg.timestamp.isoformat()
+            if msg.component_config:
+                msg_dict["component_config"] = msg.component_config
             chat_messages_section.append(msg_dict)
+            # Store original message ID for action linking
+            original_message_mapping[str(msg.id)] = {
+                "role": msg.role,
+                "content": msg.content,
+                "timestamp": msg.timestamp.isoformat() if msg.timestamp else None,
+                "component_config": msg.component_config
+            }
 
         # --- UserNotes section (only fields in TemplateUserNoteSerializer) ---
         from apps.user_notes.models import UserNote
@@ -221,9 +232,9 @@ class TestScenarioViewSet(
                 action_dict["result_summary"] = action.result_summary
             if action.timestamp:
                 action_dict["timestamp"] = action.timestamp.isoformat()
-            # Link to coach message content for instantiation
+            # Link to original coach message ID for robust instantiation
             if action.coach_message:
-                action_dict["coach_message_content"] = action.coach_message.content
+                action_dict["original_coach_message_id"] = str(action.coach_message.id)
             actions_section.append(action_dict)
 
         # 4. Build the template dict (only include sections if present)
@@ -238,6 +249,10 @@ class TestScenarioViewSet(
             template["user_notes"] = user_notes_section
         if actions_section:
             template["actions"] = actions_section
+        
+        # Store the original message mapping for robust action linking during instantiation
+        if original_message_mapping:
+            template["original_message_mapping"] = original_message_mapping
 
         # 5. Validate the template
         errors = validate_scenario_template(template)

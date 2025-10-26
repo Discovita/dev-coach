@@ -116,6 +116,8 @@ def instantiate_test_scenario(
 
     # Handle chat messages creation
     created_chat_messages = []
+    # Create a mapping from original message data to new message objects for action linking
+    original_to_new_message_mapping = {}
     if create_chat_messages and template.get("chat_messages") and created_user:
         # Delete existing chat messages for this user and scenario
         ChatMessage.objects.filter(user=created_user, test_scenario=scenario).delete()
@@ -129,8 +131,14 @@ def instantiate_test_scenario(
                 timestamp=(
                     msg_data.get("timestamp") if msg_data.get("timestamp") else None
                 ),
+                # component_config is optional
+                component_config=msg_data.get("component_config"),
             )
             created_chat_messages.append(chat_message)
+            
+            # Create mapping key from message data for action linking
+            message_key = f"{msg_data.get('role')}|{msg_data.get('content')}|{msg_data.get('timestamp', '')}"
+            original_to_new_message_mapping[message_key] = chat_message
 
     # Handle user notes creation
     if create_user_notes and template.get("user_notes") and created_user:
@@ -153,26 +161,70 @@ def instantiate_test_scenario(
         Action.objects.filter(user=created_user, test_scenario=scenario).delete()
         
         for action_data in template["actions"]:
-            # Find the corresponding coach message by content matching
+            # Find the corresponding coach message using ID-based mapping (preferred) or content matching (fallback)
             coach_message = None
-            if action_data.get("coach_message_content"):
-                # Try to find a coach message with matching content
-                try:
-                    coach_message = ChatMessage.objects.get(
-                        user=created_user,
-                        test_scenario=scenario,
-                        role="coach",
-                        content=action_data["coach_message_content"]
-                    )
-                except ChatMessage.DoesNotExist:
-                    # If no exact match, try to find the most recent coach message
-                    # This is a fallback for cases where content might have slight variations
-                    log.warning("Using fallback chat message for action relationship")
+            
+            # Try ID-based mapping first (new approach)
+            if action_data.get("original_coach_message_id") and template.get("original_message_mapping"):
+                # Get the original message data from the mapping
+                original_msg_id = action_data["original_coach_message_id"]
+                original_msg_data = template["original_message_mapping"].get(original_msg_id)
+                
+                if original_msg_data:
+                    # Create the same mapping key used when creating messages
+                    message_key = f"{original_msg_data.get('role')}|{original_msg_data.get('content')}|{original_msg_data.get('timestamp', '')}"
+                    coach_message = original_to_new_message_mapping.get(message_key)
+                    
+                    if not coach_message:
+                        log.warning(f"Could not find new message for original ID {original_msg_id}, using fallback")
+                        # Fallback to most recent coach message
+                        coach_message = ChatMessage.objects.filter(
+                            user=created_user,
+                            test_scenario=scenario,
+                            role="coach"
+                        ).order_by("-timestamp").first()
+                else:
+                    log.warning(f"Original message data not found for ID {original_msg_id}, using fallback")
+                    # Fallback to most recent coach message
                     coach_message = ChatMessage.objects.filter(
                         user=created_user,
                         test_scenario=scenario,
                         role="coach"
                     ).order_by("-timestamp").first()
+            
+            # Fallback to content-based matching for old templates
+            elif action_data.get("coach_message_content"):
+                log.warning("Using deprecated coach_message_content field, consider updating template")
+                # Use filter().first() instead of get() to handle multiple matches
+                coach_messages = ChatMessage.objects.filter(
+                    user=created_user,
+                    test_scenario=scenario,
+                    role="coach",
+                    content=action_data["coach_message_content"]
+                ).order_by("-timestamp")
+                
+                if coach_messages.exists():
+                    coach_message = coach_messages.first()
+                    # Log if we found multiple matches to help with debugging
+                    if coach_messages.count() > 1:
+                        log.warning(f"Found {coach_messages.count()} coach messages with same content, using most recent")
+                else:
+                    # If no exact match, try to find the most recent coach message
+                    log.warning("No exact coach message match found, using fallback chat message for action relationship")
+                    coach_message = ChatMessage.objects.filter(
+                        user=created_user,
+                        test_scenario=scenario,
+                        role="coach"
+                    ).order_by("-timestamp").first()
+            
+            # Final fallback
+            else:
+                log.warning("No coach message linking found, using fallback chat message for action relationship")
+                coach_message = ChatMessage.objects.filter(
+                    user=created_user,
+                    test_scenario=scenario,
+                    role="coach"
+                ).order_by("-timestamp").first()
             
             # Create the action
             action = Action(

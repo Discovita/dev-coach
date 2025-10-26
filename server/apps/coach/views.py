@@ -157,8 +157,8 @@ class CoachViewSet(
                 - 'final_prompt' (str)
                 - 'component' (object) optional
         """
+        log.info(f"Processing Request: {request.data}")
         try:
-            log.info(f"Processing Request: {request.data}")
             log.info(
                 f"Request user: {request.user} (is_staff: {request.user.is_staff}, is_superuser: {request.user.is_superuser})"
             )

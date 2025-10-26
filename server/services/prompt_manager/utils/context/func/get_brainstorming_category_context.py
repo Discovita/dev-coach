@@ -5,6 +5,7 @@ from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 
+# TODO: These need to just have their own prompt type in the database.
 # Map IdentityCategory values to markdown file paths
 CATEGORY_CONTEXT_FILES = {
     IdentityCategory.PASSIONS: "services/prompt_manager/utils/context/identity_category_context/passions_and_talents.md",
@@ -16,8 +17,8 @@ CATEGORY_CONTEXT_FILES = {
     IdentityCategory.FAMILY: "services/prompt_manager/utils/context/identity_category_context/familial_relations.md",
     IdentityCategory.ROMANTIC: "services/prompt_manager/utils/context/identity_category_context/romantic_relation.md",
     IdentityCategory.ACTION: "services/prompt_manager/utils/context/identity_category_context/doer_of_things.md",
-    IdentityCategory.REVIEW: "services/prompt_manager/utils/context/identity_category_context/review.md",
 }
+
 
 def get_brainstorming_category_context(coach_state: CoachState) -> str:
     """
@@ -33,4 +34,4 @@ def get_brainstorming_category_context(coach_state: CoachState) -> str:
         with open(abs_path, "r") as f:
             return f.read()
     except Exception as e:
-        return f"Could not load context for {category}: {str(e)}" 
+        return f"Could not load context for {category}: {str(e)}"

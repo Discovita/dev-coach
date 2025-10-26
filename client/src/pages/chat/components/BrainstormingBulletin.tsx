@@ -22,7 +22,8 @@ export const BrainstormingBulletin: React.FC<{
   identities: Identity[] | null | undefined;
 }> = ({ coachState, identities }) => {
   const isBrainstorming =
-    coachState?.current_phase === CoachingPhase.IDENTITY_BRAINSTORMING;
+    coachState?.current_phase === CoachingPhase.IDENTITY_BRAINSTORMING ||
+    coachState?.current_phase === CoachingPhase.BRAINSTORMING_REVIEW;
   if (!isBrainstorming) return null;
 
   const items = identities || [];

@@ -37,6 +37,11 @@ class ChatMessage(models.Model):
         help_text="When the message was sent.",
         db_index=True,
     )
+    component_config = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Optional component configuration for persistent component rendering (stored as JSON)."
+    )
     test_scenario = models.ForeignKey(
         'test_scenario.TestScenario',
         null=True,
