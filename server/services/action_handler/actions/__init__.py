@@ -29,6 +29,9 @@ from .components.show_introduction_canned_response_component import show_introdu
 from .components.show_accept_i_am_component import show_accept_i_am_component
 from .components.show_combine_identities import show_combine_identities
 
+# PERSISTENT COMPONENT ACTIONS
+from .persistent_components.persist_combine_identities import persist_combine_identities
+
 
 __all__ = [
     "create_identity",
@@ -57,4 +60,5 @@ __all__ = [
     "add_user_note",
     "update_user_note",
     "delete_user_note",
+    "persist_combine_identities",
 ]

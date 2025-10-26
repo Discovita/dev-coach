@@ -25,6 +25,7 @@ from .params import (
     ShowAcceptIAMComponentParams,
     ShowCombineIdentitiesParams,
     CombineIdentitiesParams,
+    PersistCombineIdentitiesParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -53,6 +54,7 @@ from .actions import (
     ShowAcceptIAMComponentAction,
     ShowCombineIdentitiesAction,
     CombineIdentitiesAction,
+    PersistCombineIdentitiesAction,
 )
 
 __all__ = [
@@ -82,6 +84,7 @@ __all__ = [
     "ShowAcceptIAMComponentParams",
     "ShowCombineIdentitiesParams",
     "CombineIdentitiesParams",
+    "PersistCombineIdentitiesParams",
     "SelectIdentityFocusAction",
     "SetCurrentIdentityAction",
     "CreateIdentityAction",
@@ -108,4 +111,5 @@ __all__ = [
     "ShowAcceptIAMComponentAction",
     "ShowCombineIdentitiesAction",
     "CombineIdentitiesAction",
+    "PersistCombineIdentitiesAction",
 ]

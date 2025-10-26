@@ -6,9 +6,9 @@ import MarkdownRenderer from "@/utils/MarkdownRenderer";
 export const IntroCannedResponseComponent: React.FC<{
   coachMessage: React.ReactNode;
   config: ComponentConfig;
-  onSelect: (request: CoachRequest) => void;
+  onSendUserMessageToCoach: (request: CoachRequest) => void;
   disabled: boolean;
-}> = ({ coachMessage, config, onSelect, disabled }) => {
+}> = ({ coachMessage, config, onSendUserMessageToCoach, disabled }) => {
   const hasButtons = config.buttons && config.buttons.length > 0;
 
   return (
@@ -31,7 +31,7 @@ export const IntroCannedResponseComponent: React.FC<{
             <button
               key={index}
               onClick={() =>
-                onSelect({ message: button.label, actions: button.actions })
+                onSendUserMessageToCoach({ message: button.label, actions: button.actions })
               }
               disabled={disabled}
               className="px-3 py-1.5 text-sm font-medium rounded-md bg-gold-500 text-black hover:bg-gold-600 hover:text-gold-50 transition-colors cursor-pointer"

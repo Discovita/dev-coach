@@ -30,6 +30,7 @@ ACTION_REGISTRY = {
     ActionType.UPDATE_WHO_YOU_ARE.value: update_who_you_are,
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value: update_who_you_want_to_be,
     ActionType.UPDATE_ASKED_QUESTIONS.value: update_asked_questions,
+    ActionType.COMBINE_IDENTITIES.value: combine_identities,
     # Sentinel actions (not logged in the Action Table)
     ActionType.ADD_USER_NOTE.value: add_user_note,
     ActionType.UPDATE_USER_NOTE.value: update_user_note,
@@ -38,7 +39,8 @@ ACTION_REGISTRY = {
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
     ActionType.SHOW_COMBINE_IDENTITIES.value: show_combine_identities,
-    ActionType.COMBINE_IDENTITIES.value: combine_identities,
+    # Persistent component actions (return ComponentConfig)
+    ActionType.PERSIST_COMBINE_IDENTITIES.value: persist_combine_identities,
 }
 
 
@@ -107,6 +109,8 @@ def apply_coach_actions(
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()
+    log.debug(f"Coach state after actions: {coach_state}")
+    log.debug(f"Component config after actions: {component_config}")
     return coach_state, component_config
 
 

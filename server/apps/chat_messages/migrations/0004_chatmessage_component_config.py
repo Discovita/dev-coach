@@ -9,12 +9,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
+        migrations.AlterField(
             model_name="chatmessage",
             name="component_config",
             field=models.JSONField(
                 blank=True,
-                help_text="Optional component configuration for persistent rendering (stored as JSON).",
+                help_text="Optional component configuration for persistent component rendering (stored as JSON).",
                 null=True,
             ),
         ),

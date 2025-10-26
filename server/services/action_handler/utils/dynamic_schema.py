@@ -28,6 +28,7 @@ from services.action_handler.models.actions import (
     ShowAcceptIAMComponentAction,
     ShowCombineIdentitiesAction,
     CombineIdentitiesAction,
+    PersistCombineIdentitiesAction,
 )
 
 from services.logger import configure_logging
@@ -61,6 +62,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT: ShowAcceptIAMComponentAction,
     ActionType.SHOW_COMBINE_IDENTITIES: ShowCombineIdentitiesAction,
     ActionType.COMBINE_IDENTITIES: CombineIdentitiesAction,
+    ActionType.PERSIST_COMBINE_IDENTITIES: PersistCombineIdentitiesAction,
 }
 
 

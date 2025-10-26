@@ -23,6 +23,7 @@ from services.action_handler.models.actions import (
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
     ShowCombineIdentitiesAction,
+    PersistCombineIdentitiesAction,
 )
 
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
@@ -103,4 +104,7 @@ class CoachChatResponse(BaseModel):
     )
     show_combine_identities: Optional[ShowCombineIdentitiesAction] = Field(
         default=None, description="Show the combine identities component."
+    )
+    persist_combine_identities: Optional[PersistCombineIdentitiesAction] = Field(
+        default=None, description="Persist the combine identities component for historical display."
     )

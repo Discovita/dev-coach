@@ -42,9 +42,9 @@ class ChatMessage(models.Model):
 1. **Component Display**: Coach performs `SHOW_XXX_COMPONENT` action
 2. **Component Config Returned**: Action handler returns `ComponentConfig` with buttons
 3. **User Interaction**: User clicks button with multiple actions
-4. **Action Execution**: Primary action (e.g., `COMBINE_IDENTITIES`) executes
-5. **Persistence Action**: Secondary action (e.g., `PERSIST_COMPONENT`) appends config to message
-6. **Database Update**: Message is updated with component configuration
+4. **Action Execution**: Actions execute in order (persistence action first, then business logic)
+5. **Database Update**: Persistence action updates the coach message with component configuration
+6. **Result**: Component graphic remains visible in chat history
 
 ### Frontend Flow
 
@@ -61,92 +61,35 @@ For persistent components to work correctly, **every button must have at least o
 
 ### Multi-Action Pattern
 
-Each button should have multiple actions:
+Each button should have multiple actions with **persistence action first**:
 
-1. **Primary Action**: The main business logic (e.g., `COMBINE_IDENTITIES`)
-2. **Persistence Action**: Appends component config to message (e.g., `PERSIST_COMPONENT`)
+1. **Persistence Action**: Must be first to capture data before business logic changes it
+2. **Business Action**: The main business logic (e.g., `COMBINE_IDENTITIES`)
+
+**Critical**: The persistence action must execute first because business actions may modify or delete data that the persistence action needs to capture.
 
 ### Example: Combine Identities Component
 
-```json
-{
-  "component_type": "COMBINE_IDENTITIES",
-  "identities": [...],
-  "buttons": [
-    {
-      "label": "Yes",
-      "actions": [
-        {
-          "action": "COMBINE_IDENTITIES",
-          "params": {
-            "identity_id_a": "uuid-1",
-            "identity_id_b": "uuid-2"
-          }
-        },
-        {
-          "action": "PERSIST_COMPONENT",
-          "params": {
-            "component_type": "COMBINE_IDENTITIES",
-            "identities": [...]
-          }
-        }
-      ]
-    },
-    {
-      "label": "No",
-      "actions": [
-        {
-          "action": "PERSIST_COMPONENT",
-          "params": {
-            "component_type": "COMBINE_IDENTITIES",
-            "identities": [...]
-          }
-        }
-      ]
-    }
-  ]
-}
-```
+The "Yes" button has two actions in this specific order:
+1. `PERSIST_COMBINE_IDENTITIES` - Captures the two identities before they're modified
+2. `COMBINE_IDENTITIES` - Performs the actual combination (deletes one, renames the other)
+
+The "No" button has only the persistence action since no business logic is needed.
 
 ## Action Handler Implementation
 
 ### Persist Component Action
 
-The `PERSIST_COMPONENT` action handler:
+The `PERSIST_COMBINE_IDENTITIES` action handler:
 
-1. **Receives Component Config**: Gets the component configuration to persist
-2. **Updates Message**: Appends component config to the current chat message
-3. **Removes Buttons**: Creates display-only version without interactive elements
-4. **Database Save**: Updates the message record with persistent component
+1. **Receives Parameters**: Gets identity IDs and coach message ID from the action parameters
+2. **Fetches Current Data**: Retrieves the current state of both identities before they're modified
+3. **Creates Display-Only Component**: Builds a component config with only visual elements (no buttons or actions)
+4. **Updates Message**: Saves the display-only component config to the specified coach message
 
-```python
-def persist_component(
-    coach_state: CoachState, 
-    params: PersistComponentParams, 
-    user_message: ChatMessage
-):
-    """
-    Persist a component configuration to a chat message for historical display.
-    Creates a display-only version without buttons.
-    """
-    # Get the coach message that triggered this component
-    coach_message = ChatMessage.objects.filter(
-        user=coach_state.user,
-        role=MessageRole.COACH
-    ).order_by('-timestamp').first()
-    
-    if coach_message:
-        # Create display-only component config
-        display_config = ComponentConfig(
-            component_type=params.component_type,
-            identities=params.identities,
-            # No buttons - display only
-        )
-        
-        # Update the coach message with persistent component
-        coach_message.component_config = display_config.model_dump()
-        coach_message.save(update_fields=['component_config'])
-```
+**Display-Only Components**: The persistent component is intentionally stripped of all interactive elements (buttons, actions) to create a pure visual representation that remains in chat history.
+
+The action is designed to capture the current state of identities before the business logic (combining) modifies them. This ensures the persistent component shows the original identities as they appeared when the user made their decision.
 
 ## Frontend Implementation
 
@@ -171,71 +114,66 @@ class ChatMessageSerializer(serializers.ModelSerializer):
 
 The frontend rendering logic has been updated to handle both active and persistent components:
 
-```typescript
-// In ChatMessages component
-const hasActiveComponent = componentConfig && !isProcessingMessage;
-const hasPersistentComponent = message.component_config && !isProcessingMessage;
-const isLastCoachMessage = index === messages.length - 1 && message.role === "coach";
+**Dual Rendering System**: The system supports both active (interactive) and persistent (display-only) components simultaneously.
 
-if (isLastCoachMessage && hasActiveComponent) {
-  // Render interactive component for latest message
-  return <CoachMessageWithComponent componentConfig={componentConfig} />;
-} else if (hasPersistentComponent) {
-  // Render persistent component for historical messages
-  return <CoachMessageWithComponent componentConfig={message.component_config} />;
-} else {
-  // Render standard message
-  return <CoachMessage>{message.content}</CoachMessage>;
+- **Active Components**: Latest coach messages with `componentConfig` prop render with full interactivity
+- **Persistent Components**: Historical messages with `component_config` field render as display-only graphics
+- **Automatic Detection**: The system automatically determines which type to render based on the presence of `message.component_config`
+
+**Component Priority**: When a message has both active and persistent components, the persistent component takes priority, ensuring historical accuracy.
+
+### Utility Functions
+
+The system includes utility functions to handle display-only components:
+
+```typescript
+// Create a display-only version of a component config
+export function createDisplayOnlyComponent(componentConfig: ComponentConfig): ComponentConfig {
+  return {
+    component_type: componentConfig.component_type,
+    texts: componentConfig.texts,
+    identities: componentConfig.identities,
+    // Explicitly exclude buttons and actions
+    buttons: undefined,
+  };
+}
+
+// Check if a component is display-only
+export function isDisplayOnlyComponent(componentConfig: ComponentConfig): boolean {
+  return !componentConfig.buttons || componentConfig.buttons.length === 0;
 }
 ```
+
+**Frontend Handling**: Display-only components automatically receive `onSelect={undefined}` to prevent any interaction, ensuring they remain purely visual.
 
 ## Development Workflow
 
 ### Adding Persistent Component Support
 
-1. **Create Persistence Action**: Add `PERSIST_COMPONENT` action to action registry
-2. **Update Component Actions**: Modify existing component actions to include persistence
+1. **Create Persistence Action**: Add `PERSIST_XXX_COMPONENT` action to action registry
+2. **Update Component Actions**: Modify existing component actions to include persistence as first action
 3. **Frontend Updates**: Update rendering logic to handle persistent components
 4. **Testing**: Verify components persist correctly in chat history
 
+**Key Implementation Steps**:
+- Add persistence action to `ActionType` enum
+- Create parameter model for persistence action
+- Implement persistence action handler
+- Update component action to include persistence action first
+- Ensure `coach_message_id` is passed to persistence action
+
 ### Example: Updating Combine Identities
 
-```python
-# In show_combine_identities action
-buttons = [
-    ComponentButton(
-        label="Yes",
-        actions=[
-            ComponentAction(
-                action=ActionType.COMBINE_IDENTITIES.value,
-                params={
-                    "identity_id_a": params.identity_id_a,
-                    "identity_id_b": params.identity_id_b,
-                }
-            ),
-            ComponentAction(
-                action=ActionType.PERSIST_COMPONENT.value,
-                params={
-                    "component_type": ComponentType.COMBINE_IDENTITIES.value,
-                    "identities": component_identities,
-                }
-            )
-        ],
-    ),
-    ComponentButton(
-        label="No",
-        actions=[
-            ComponentAction(
-                action=ActionType.PERSIST_COMPONENT.value,
-                params={
-                    "component_type": ComponentType.COMBINE_IDENTITIES.value,
-                    "identities": component_identities,
-                }
-            )
-        ],
-    ),
-]
-```
+**Action Order is Critical**: The persistence action must be first in the action list because the business action modifies the data that needs to be captured.
+
+**Yes Button Actions** (in this exact order):
+1. `PERSIST_COMBINE_IDENTITIES` - Captures current identity data
+2. `COMBINE_IDENTITIES` - Performs the combination (modifies/deletes identities)
+
+**No Button Actions**:
+1. `PERSIST_COMBINE_IDENTITIES` - Only persistence needed, no business logic
+
+**Parameter Requirements**: The persistence action requires the `coach_message_id` to know which message to update with the persistent component.
 
 ## Benefits
 
