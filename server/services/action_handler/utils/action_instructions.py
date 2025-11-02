@@ -11,35 +11,7 @@ from typing import Dict, List
 from enums.action_type import ActionType
 
 # Import the action models for each action type
-from services.action_handler.models.actions import (
-    SelectIdentityFocusAction,
-    SetCurrentIdentityAction,
-    CreateIdentityAction,
-    CreateMultipleIdentitiesAction,
-    UpdateIdentityNameAction,
-    UpdateIAmAction,
-    UpdateIdentityVisualizationAction,
-    UpdateIdentityAction,
-    AcceptIdentityAction,
-    AcceptIdentityRefinementAction,
-    AcceptIAmAction,
-    AcceptIdentityVisualizationAction,
-    TransitionPhaseAction,
-    AddIdentityNoteAction,
-    SkipIdentityCategoryAction,
-    UnskipIdentityCategoryAction,
-    UpdateWhoYouAreAction,
-    UpdateWhoYouWantToBeAction,
-    AddUserNoteAction,
-    UpdateUserNoteAction,
-    DeleteUserNoteAction,
-    UpdateAskedQuestionsAction,
-    ShowIntroductionCannedResponseComponentAction,
-    ShowAcceptIAMComponentAction,
-    ShowCombineIdentitiesAction,
-    CombineIdentitiesAction,
-    PersistCombineIdentitiesAction,
-)
+from services.action_handler.models.actions import *
 
 # Map ActionType to their parameter models and descriptions for prompt generation
 # Each entry should have a clear, concise description and the corresponding Pydantic model
@@ -83,6 +55,10 @@ ACTION_PARAMS = {
     ActionType.ACCEPT_IDENTITY_REFINEMENT: {
         "description": "Mark an Identity as refinement_complete.",
         "model": AcceptIdentityRefinementAction,
+    },
+    ActionType.ACCEPT_IDENTITY_COMMITMENT: {
+        "description": "Mark an Identity as commitment_complete.",
+        "model": AcceptIdentityCommitmentAction,
     },
     ActionType.ACCEPT_I_AM_STATEMENT: {
         "description": "Mark an Identity as i_am_complete.",

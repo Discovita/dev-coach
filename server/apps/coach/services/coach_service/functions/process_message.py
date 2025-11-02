@@ -7,7 +7,6 @@ from enums.message_role import MessageRole
 from services.logger import configure_logging
 from apps.coach.services.coach_service.utils import (
     ensure_initial_message_exists,
-    add_user_message_to_history,
     apply_user_component_actions,
     build_coach_prompt,
     get_recent_chat_messages_for_prompt,

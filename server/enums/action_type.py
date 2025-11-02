@@ -23,6 +23,10 @@ class ActionType(models.TextChoices):
         "accept_identity_refinement",
         "Accept Identity Refinement",
     )
+    ACCEPT_IDENTITY_COMMITMENT = (
+        "accept_identity_commitment",
+        "Accept Identity Commitment",
+    )
     ACCEPT_I_AM_STATEMENT = (
         "accept_i_am_statement",
         "Accept I Am Statement",

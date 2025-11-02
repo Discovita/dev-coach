@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { TestScenarioConversationResetterDialog } from "./TestScenarioConversationResetterDialog";
 import { useResetTestScenario } from "@/hooks/test-scenario/use-test-scenarios";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
+import { useProfile } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
 
 
@@ -11,7 +10,7 @@ import { Button } from "@/components/ui/button";
  * Allows the user to reset (delete) their entire test scenario data.
  *
  * Step-by-step:
- * 1. Get the current user profile from the query cache (if needed for UI logic).
+ * 1. Get the current user profile using hook.
  * 2. Show a button to open the reset confirmation dialog if the user is logged in.
  * 3. When the dialog is open, user can confirm or cancel the reset.
  * 4. If confirmed, call the resetTestScenario mutation.
@@ -21,8 +20,8 @@ import { Button } from "@/components/ui/button";
  * Used in: Any test or admin page where conversation reset is needed.
  */
 export const TestScenarioConversationResetter = ({ scenarioId, onResetSuccess }: { scenarioId: string; onResetSuccess?: () => void }) => {
-  // Get user profile from the query cache (optional, for UI logic)
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
+  // Get user profile using hook
+  const { profile } = useProfile();
   const userId = profile?.id;
 
   // Get the reset mutation and its status

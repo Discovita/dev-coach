@@ -4,14 +4,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { ConversationResetter } from "./ConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
 import { CoachRequest } from "@/types/coachRequest";
-import { CoachState } from "@/types/coachState";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
 import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
 import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
+import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
 import { useIdentities } from "@/hooks/use-identities";
+import { useCoachState } from "@/hooks/use-coach-state";
+import { useProfile } from "@/hooks/use-profile";
 
 interface ChatControlsProps {
   isProcessingMessage: boolean;
@@ -25,11 +25,12 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Get current user profile from TanStack Query cache
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
+  // Get current user profile using hook
+  const { profile } = useProfile();
 
-  // Read coach state from cache to determine whether to show bulletin
-  const coachState = useReactiveQueryData<CoachState>(["user", "coachState"]);
+  // Fetch coach state with active query subscription to ensure refetch on invalidation
+  // This ensures bulletins update when coachState is invalidated after sending messages
+  const { coachState } = useCoachState();
   const { identities } = useIdentities();
 
   /**
@@ -95,6 +96,7 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
       <WarmupBulletin coachState={coachState} />
       <BrainstormingBulletin coachState={coachState} identities={identities} />
       <RefinementBulletin coachState={coachState} />
+      <CommitmentBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}

@@ -11,6 +11,7 @@ export enum CoachingPhase {
   IDENTITY_BRAINSTORMING = "identity_brainstorming",
   BRAINSTORMING_REVIEW = "brainstorming_review",
   IDENTITY_REFINEMENT = "identity_refinement",
+  IDENTITY_COMMITMENT = "identity_commitment",
   I_AM_STATEMENT = "i_am_statement",
   IDENTITY_VISUALIZATION = "identity_visualization",
 }
@@ -26,6 +27,7 @@ export const COACHING_PHASE_DISPLAY_NAMES: Record<CoachingPhase, string> = {
   [CoachingPhase.IDENTITY_BRAINSTORMING]: "Identity Brainstorming",
   [CoachingPhase.BRAINSTORMING_REVIEW]: "Brainstorming Review",
   [CoachingPhase.IDENTITY_REFINEMENT]: "Identity Refinement",
+  [CoachingPhase.IDENTITY_COMMITMENT]: "Identity Commitment",
   [CoachingPhase.I_AM_STATEMENT]: "I Am Statement",
   [CoachingPhase.IDENTITY_VISUALIZATION]: "Identity Visualization",
 };
@@ -48,6 +50,8 @@ export const COACHING_PHASE_COLORS: Record<CoachingPhase, string> = {
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   [CoachingPhase.IDENTITY_REFINEMENT]:
     "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
+  [CoachingPhase.IDENTITY_COMMITMENT]:
+    "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
   [CoachingPhase.I_AM_STATEMENT]:
     "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
   [CoachingPhase.IDENTITY_VISUALIZATION]:

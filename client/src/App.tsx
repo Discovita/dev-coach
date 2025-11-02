@@ -9,8 +9,8 @@ import Signup from "@/pages/signup/Signup";
 import Test from "@/pages/test/Test";
 import Chat from "@/pages/chat/Chat";
 import Prompts from "@/pages/prompts/Prompts";
-import { User } from "@/types/user";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
+import { useProfile } from "@/hooks/use-profile";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { SessionRestorer } from "@/components/SessionRestorer";
 
 /**
@@ -19,9 +19,9 @@ import { SessionRestorer } from "@/components/SessionRestorer";
  * Each route is associated with a specific tool or feature
  */
 const App = () => {
-  // Get user profile and isAdmin flag from TanStack Query cache (populated after login/register)
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
-  const isAdmin = useReactiveQueryData<boolean>(["user", "isAdmin"]);
+  // Get user profile and isAdmin flag using hooks (profile is populated after login/register or by SessionRestorer)
+  const { profile } = useProfile();
+  const isAdmin = useIsAdmin();
 
   if (profile && isAdmin) {
     console.log("Showing admin routes", profile, isAdmin);

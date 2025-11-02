@@ -77,6 +77,12 @@ class AcceptIdentityRefinementAction(BaseActionModel):
     )
 
 
+class AcceptIdentityCommitmentAction(BaseActionModel):
+    params: AcceptIdentityCommitmentParams = Field(
+        ..., description="Parameters for marking an identity as commitment complete."
+    )
+
+
 class AcceptIAmAction(BaseActionModel):
     params: AcceptIAmParams = Field(
         ...,

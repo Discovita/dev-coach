@@ -11,6 +11,7 @@ from services.action_handler.models.actions import (
     UpdateIdentityVisualizationAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
+    AcceptIdentityCommitmentAction,
     AcceptIAmAction,
     AcceptIdentityVisualizationAction,
     TransitionPhaseAction,
@@ -61,6 +62,9 @@ class CoachChatResponse(BaseModel):
     )
     accept_identity_refinement: Optional[AcceptIdentityRefinementAction] = Field(
         default=None, description="Perform the accept_identity_refinement action."
+    )
+    accept_identity_commitment: Optional[AcceptIdentityCommitmentAction] = Field(
+        default=None, description="Perform the accept_identity_commitment action."
     )
     accept_i_am_statement: Optional[AcceptIAmAction] = Field(
         default=None, description="Perform the accept_i_am_statement action."

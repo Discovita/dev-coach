@@ -21,6 +21,7 @@ class ContextKey(models.TextChoices):
     CURRENT_IDENTITY = "current_identity", "Current Identity"
     ASKED_QUESTIONS = "asked_questions", "Asked Questions"
     REFINEMENT_IDENTITIES = "refinement_identities", "Refinement Identities"
+    COMMITMENT_IDENTITIES = "commitment_identities", "Commitment Identities"
     I_AM_IDENTITIES = "i_am_identities", "I Am Identities"
     VISUALIZATION_IDENTITIES = "visualization_identities", "Visualization Identities"
 

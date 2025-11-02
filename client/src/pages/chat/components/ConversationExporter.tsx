@@ -1,16 +1,15 @@
 import { convertToXml, downloadXml } from "@/utils/xmlExport";
 import { Button } from "@/components/ui/button";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
-import { Message } from "@/types/message";
-import { CoachState } from "@/types/coachState";
+import { useProfile } from "@/hooks/use-profile";
+import { useChatMessages } from "@/hooks/use-chat-messages";
+import { useCoachState } from "@/hooks/use-coach-state";
 
 export const ConversationExporter = () => {
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
+  const { profile } = useProfile();
   const userId = profile?.id;
-  const messages =
-    useReactiveQueryData<Message[]>(["user", "chatMessages"]) || [];
-  const coachState = useReactiveQueryData<CoachState>(["user", "coachState"]);
+  const { chatMessages } = useChatMessages();
+  const messages = chatMessages || [];
+  const { coachState } = useCoachState();
 
   // Handler for exporting conversation as XML
   const handleExport = () => {

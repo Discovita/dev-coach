@@ -11,6 +11,7 @@ import {
   CheckCircleIcon,
   AlertCircleIcon,
   StarIcon,
+  TargetIcon,
 } from "lucide-react";
 
 interface IdentityItemProps {
@@ -41,6 +42,12 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
           icon: StarIcon,
           color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
           label: "Refinement Complete",
+        };
+      case IdentityState.COMMITMENT_COMPLETE.toString():
+        return {
+          icon: TargetIcon,
+          color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+          label: "Commitment Complete",
         };
       default:
         return {

@@ -19,6 +19,7 @@ ACTION_REGISTRY = {
     ActionType.UPDATE_IDENTITY_VISUALIZATION.value: update_identity_visualization,
     ActionType.ACCEPT_IDENTITY.value: accept_identity,
     ActionType.ACCEPT_IDENTITY_REFINEMENT.value: accept_identity_refinement,
+    ActionType.ACCEPT_IDENTITY_COMMITMENT.value: accept_identity_commitment,
     ActionType.ACCEPT_I_AM_STATEMENT.value: accept_i_am_statement,
     ActionType.ACCEPT_IDENTITY_VISUALIZATION.value: accept_identity_visualization,
     ActionType.ADD_IDENTITY_NOTE.value: add_identity_note,
