@@ -159,6 +159,10 @@ class TestScenarioViewSet(
                 coach_state_section["current_identity"] = str(coach_state.current_identity.id)
             if hasattr(coach_state, "proposed_identity") and coach_state.proposed_identity:
                 coach_state_section["proposed_identity"] = str(coach_state.proposed_identity.id)
+            if hasattr(coach_state, "asked_questions") and coach_state.asked_questions:
+                coach_state_section["asked_questions"] = coach_state.asked_questions
+            if hasattr(coach_state, "metadata") and coach_state.metadata:
+                coach_state_section["metadata"] = coach_state.metadata
 
         # --- Identities section (only fields in TemplateIdentitySerializer) ---
         from apps.identities.models import Identity
