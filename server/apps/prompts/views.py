@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 from enums.coaching_phase import CoachingPhase
+from apps.prompts.serializers import PromptSerializer
 
 from services.logger import configure_logging
 
@@ -81,7 +82,7 @@ class PromptViewSet(
             data["version"] = (
                 1  # fallback, should not happen if coaching_phase is required
             )
-        serializer = self.get_serializer(data=data)
+        serializer = PromptSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -143,7 +144,7 @@ class PromptViewSet(
         instance = self.get_object()
         instance.is_active = False
         instance.save()
-        serializer = self.get_serializer(instance)
+        serializer = PromptSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="latest")
@@ -196,7 +197,7 @@ class PromptViewSet(
                     status=status.HTTP_404_NOT_FOUND
                 )
             
-            serializer = self.get_serializer(latest_prompt)
+            serializer = PromptSerializer(latest_prompt)
             return Response(serializer.data, status=status.HTTP_200_OK)
             
         except Exception as exc:
