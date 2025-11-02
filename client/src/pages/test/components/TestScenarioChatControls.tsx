@@ -5,13 +5,12 @@ import { ConversationExporter } from "@/pages/chat/components/ConversationExport
 import { TestScenarioConversationResetter } from "@/pages/test/components/TestScenarioConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
 import { CoachRequest } from "@/types/coachRequest";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { CoachState } from "@/types/coachState";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
 import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
 import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
 import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
+import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-scenario-user-coach-state";
 
 interface TestScenarioChatControlsProps {
   isProcessingMessage: boolean;
@@ -33,12 +32,9 @@ export const TestScenarioChatControls: React.FC<
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Read coach state from cache to determine whether to show bulletin
-  const coachState = useReactiveQueryData<CoachState>([
-    "testScenarioUser",
-    testUserId,
-    "coachState",
-  ]);
+  // Fetch coach state with active query subscription to ensure refetch on invalidation
+  // This ensures bulletins update when coachState is invalidated after sending messages
+  const { coachState } = useTestScenarioUserCoachState(testUserId);
   const { identities } = useTestScenarioUserIdentities(testUserId);
 
   /**

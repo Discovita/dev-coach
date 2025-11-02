@@ -19,16 +19,16 @@ import {
 } from "@/pages/signup/constants/constants";
 import { useAuth } from "@/hooks/use-auth";
 import { FormMessage, Message } from "@/components/FormMessage";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
+import { useProfile } from "@/hooks/use-profile";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const { register, registerStatus } = useAuth();
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
-  const isAdmin = useReactiveQueryData<boolean>(["user", "isAdmin"]);
+  const { profile } = useProfile();
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");

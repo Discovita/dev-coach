@@ -2,14 +2,13 @@ import AuthNavbar from "@/components/AuthNavbar";
 import Footer from "@/components/Footer";
 import { Outlet, useNavigate } from "react-router-dom";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
+import { useProfile } from "@/hooks/use-profile";
 import { useEffect } from "react";
 
 const AuthLayout = () => {
   const navigate = useNavigate();
-  // Use custom hook to reactively get profile from the cache
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
+  // Get profile using hook
+  const { profile } = useProfile();
 
   // Redirect to login if not authenticated
   useEffect(() => {
