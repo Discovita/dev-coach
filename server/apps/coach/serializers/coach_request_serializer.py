@@ -11,7 +11,6 @@ class CoachRequestSerializer(serializers.Serializer):
     Fields:
     - message: The user's message to the coach (required).
     - model_name: (Optional) The name of the AI model to use. If not provided, defaults to GPT-4o.
-    - user_id: (Optional) The user ID to act as (admin only). If not provided, uses request.user.
     """
 
     message = serializers.CharField(help_text="User's message to the coach.")
@@ -19,10 +18,6 @@ class CoachRequestSerializer(serializers.Serializer):
         required=False,
         allow_blank=True,
         help_text="Optional model name. If not provided, uses default.",
-    )
-    user_id = serializers.UUIDField(
-        required=False,
-        help_text="Optional user ID to act as (admin only). If not provided, uses request.user.",
     )
     actions = serializers.ListField(
         required=False,
@@ -34,13 +29,6 @@ class CoachRequestSerializer(serializers.Serializer):
             "with 'action' (str) and 'params' (object). Can be sent alongside message."
         ),
     )
-
-    def get_model(self) -> "AIModel":
-        """
-        Return the AIModel instance for this request.
-        Uses the model_name if provided, otherwise returns the default model (GPT-4o).
-        """
-        return AIModel.get_or_default(self.validated_data.get("model_name"))
 
     def validate(self, attrs):
         """
@@ -78,24 +66,9 @@ class CoachRequestSerializer(serializers.Serializer):
 
         return attrs
 
-
-class CoachResponseSerializer(serializers.Serializer):
-    """
-    Serializer for the response from the coach endpoint.
-    Fields:
-    - message: The coach's response message.
-    - coach_state: The updated state of the coaching session (as dict for now).
-    - final_prompt: The final prompt used to generate the coach's response.
-    - actions: List of actions performed (list of dicts, can be empty).
-    - chat_history: The latest chat history (list of messages, most recent last).
-    - identities: The user's current identities (list of identity dicts).
-    """
-
-    message = serializers.CharField(help_text="Coach's response message.")
-    final_prompt = serializers.CharField(
-        help_text="The final prompt used to generate the coach's response."
-    )
-    component = serializers.JSONField(
-        required=False,
-        help_text="Optional component configuration for frontend rendering.",
-    )
+    def get_model(self) -> AIModel:
+        """
+        Return the AIModel instance for this request.
+        Uses the model_name if provided, otherwise returns the default model (GPT-4o).
+        """
+        return AIModel.get_or_default(self.validated_data.get("model_name"))
