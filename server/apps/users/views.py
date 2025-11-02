@@ -127,8 +127,7 @@ class UserViewSet(viewsets.GenericViewSet):
                     user=request.user
                 ).order_by("-timestamp")
 
-        latest_messages_qs = chat_messages_qs[:20]
-        ordered_messages = list(reversed(latest_messages_qs))
+        ordered_messages = list(reversed(chat_messages_qs))
 
         return Response(ChatMessageSerializer(ordered_messages, many=True).data)
 
