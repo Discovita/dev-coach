@@ -20,6 +20,8 @@ from services.prompt_manager.utils import (
 )
 from services.logger import configure_logging
 from enums.prompt_type import PromptType
+from typing import Tuple, Union, Dict, Any
+from pydantic import BaseModel
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -35,7 +37,7 @@ class PromptManager:
     # TODO: Need to add identity_instructions to the prompt
     def create_chat_prompt(
         self, user: User, model: AIModel, version_override: int = None
-    ) -> str:
+    ) -> Tuple[str, Union[BaseModel, Dict[str, Any]]]:
         """
         Create a prompt for the chat endpoint using the user's context.
         Orchestrates context collection, prompt formatting, and action instructions.
@@ -43,7 +45,7 @@ class PromptManager:
             user: The Django User instance for whom to build the prompt.
             version_override: Optional version number to override the default prompt version.
         Returns:
-            str: prompt for the chat endpoint.
+            Tuple[str, Type[BaseModel]]: prompt for the chat endpoint and the response format.
         """
         # 1. Retrieve the user's CoachState
         coach_state = CoachState.objects.get(user=user)
