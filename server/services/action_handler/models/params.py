@@ -105,6 +105,10 @@ class AcceptIdentityRefinementParams(BaseParamsModel):
     id: str = Field(..., description="ID of identity to mark as refinement complete")
 
 
+class AcceptIdentityCommitmentParams(BaseParamsModel):
+    id: str = Field(..., description="ID of identity to mark as commitment complete")
+
+
 class AcceptIAmParams(BaseParamsModel):
     id: str = Field(
         ..., description="ID of identity to mark as i_am_statement complete"

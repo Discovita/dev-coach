@@ -6,6 +6,7 @@ from .update_i_am_statement import update_i_am_statement
 from .update_identity_visualization import update_identity_visualization
 from .accept_identity import accept_identity # Deprecated; auto update Identity state to ACCEPTED when moving to Identity Refinement
 from .accept_identity_refinement import accept_identity_refinement
+from .accept_identity_commitment import accept_identity_commitment
 from .accept_i_am_statement import accept_i_am_statement
 from .accept_identity_visualization import accept_identity_visualization
 from .add_identity_note import add_identity_note
@@ -42,6 +43,7 @@ __all__ = [
     "update_identity_visualization",
     "accept_identity",
     "accept_identity_refinement",
+    "accept_identity_commitment",
     "accept_i_am_statement",
     "accept_identity_visualization",
     "add_identity_note",
