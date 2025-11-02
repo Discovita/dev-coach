@@ -11,6 +11,7 @@ import { CoachState } from "@/types/coachState";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
 import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
 import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
+import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
 import { useIdentities } from "@/hooks/use-identities";
 
 interface ChatControlsProps {
@@ -95,6 +96,7 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
       <WarmupBulletin coachState={coachState} />
       <BrainstormingBulletin coachState={coachState} identities={identities} />
       <RefinementBulletin coachState={coachState} />
+      <CommitmentBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}

@@ -10,9 +10,8 @@ import { CoachState } from "@/types/coachState";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
 import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
 import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
+import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
-
-
 
 interface TestScenarioChatControlsProps {
   isProcessingMessage: boolean;
@@ -24,7 +23,13 @@ interface TestScenarioChatControlsProps {
 
 export const TestScenarioChatControls: React.FC<
   TestScenarioChatControlsProps
-> = ({ isProcessingMessage, onSendMessage, scenarioId, testUserId, onResetSuccess }) => {
+> = ({
+  isProcessingMessage,
+  onSendMessage,
+  scenarioId,
+  testUserId,
+  onResetSuccess,
+}) => {
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -35,8 +40,6 @@ export const TestScenarioChatControls: React.FC<
     "coachState",
   ]);
   const { identities } = useTestScenarioUserIdentities(testUserId);
-
-
 
   /**
    * Resizes the textarea to fit content, up to a max height.
@@ -76,9 +79,9 @@ export const TestScenarioChatControls: React.FC<
     (e: React.FormEvent) => {
       e.preventDefault();
       if (inputMessage.trim()) {
-        onSendMessage({ 
+        onSendMessage({
           message: inputMessage,
-          user_id: testUserId
+          user_id: testUserId,
         });
         setInputMessage("");
         setTimeout(resizeTextarea, 0);
@@ -104,6 +107,7 @@ export const TestScenarioChatControls: React.FC<
       <WarmupBulletin coachState={coachState} />
       <BrainstormingBulletin coachState={coachState} identities={identities} />
       <RefinementBulletin coachState={coachState} />
+      <CommitmentBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}
@@ -124,10 +128,7 @@ export const TestScenarioChatControls: React.FC<
           scenarioId={scenarioId}
           onResetSuccess={onResetSuccess}
         />
-        <TestScenarioSessionFreezer
-          userId={testUserId}
-          onSuccess={() => {}}
-        />
+        <TestScenarioSessionFreezer userId={testUserId} onSuccess={() => {}} />
         <ConversationExporter />
       </div>
     </div>
