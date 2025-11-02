@@ -1,36 +1,7 @@
 from typing import Optional, Dict, Type, List
 from pydantic import Field, create_model, BaseModel
 from enums.action_type import ActionType
-from services.action_handler.models.actions import (
-    SelectIdentityFocusAction,
-    SetCurrentIdentityAction,
-    CreateIdentityAction,
-    CreateMultipleIdentitiesAction,
-    UpdateIdentityNameAction,
-    UpdateIAmAction,
-    UpdateIdentityVisualizationAction,
-    UpdateIdentityAction,
-    AcceptIdentityAction,
-    AcceptIdentityRefinementAction,
-    AcceptIdentityCommitmentAction,
-    AcceptIAmAction,
-    AcceptIdentityVisualizationAction,
-    TransitionPhaseAction,
-    AddIdentityNoteAction,
-    SkipIdentityCategoryAction,
-    UpdateWhoYouAreAction,
-    UpdateWhoYouWantToBeAction,
-    UnskipIdentityCategoryAction,
-    AddUserNoteAction,
-    UpdateUserNoteAction,
-    DeleteUserNoteAction,
-    UpdateAskedQuestionsAction,
-    ShowIntroductionCannedResponseComponentAction,
-    ShowAcceptIAMComponentAction,
-    ShowCombineIdentitiesAction,
-    CombineIdentitiesAction,
-    PersistCombineIdentitiesAction,
-)
+from services.action_handler.models.actions import *
 
 from services.logger import configure_logging
 
