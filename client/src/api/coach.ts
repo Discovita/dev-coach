@@ -24,19 +24,19 @@ export class ApiClient {
     return response.json();
   }
   /**
-   * Send a message as a test scenario user (admin only).
-   * Calls /coach/process-message-for-user
+   * Send a message as a specific user (admin only).
+   * Calls admin/coach/process-message-for-user
    */
   async sendTestScenarioMessage(request: CoachRequest) {
     const response = await authFetch(
-      `${COACH_BASE_URL}/coach/process-message-for-user`,
+      `${COACH_BASE_URL}/admin/coach/process-message-for-user`,
       {
         method: "POST",
         body: JSON.stringify(request),
       }
     );
     if (!response.ok)
-      throw new Error("Failed to send message as test scenario user");
+      throw new Error("Failed to send message as specific user");
     return response.json();
   }
 }
