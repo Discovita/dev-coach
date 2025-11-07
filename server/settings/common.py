@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "drf_spectacular",
+    "storages",  # Required for S3 file storage (django-storages)
 ]
 
 MIDDLEWARE = [

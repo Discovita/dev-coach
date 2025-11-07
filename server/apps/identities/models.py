@@ -76,6 +76,12 @@ class Identity(models.Model):
         on_delete=models.SET_NULL,
         help_text="Test scenario this identity is associated with (for test data isolation).",
     )
+    image = models.ImageField(
+        upload_to="identities/%Y/%m/%d/",
+        null=True,
+        blank=True,
+        help_text="Image associated with this identity. Stored in S3 (production/staging) or local media directory (development).",
+    )
 
     def __str__(self):
         """
@@ -83,7 +89,6 @@ class Identity(models.Model):
         """
         return f"{self.name[:30]} ({self.get_category_display()}) - {self.get_state_display()}"
 
-
-class Meta:
-    verbose_name = "Identity"
-    verbose_name_plural = "Identities"
+    class Meta:
+        verbose_name = "Identity"
+        verbose_name_plural = "Identities"

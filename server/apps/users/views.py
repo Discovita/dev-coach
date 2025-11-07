@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from enums.identity_category import IdentityCategory
 from services.logger import configure_logging
 
-log = configure_logging(__name__, log_level="INFO")
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 class UserViewSet(viewsets.GenericViewSet):
@@ -79,9 +79,11 @@ class UserViewSet(viewsets.GenericViewSet):
         """
         from apps.identities.models import Identity
         from apps.identities.serializer import IdentitySerializer
-
+        log.debug(f"Identities Request: {request.user}")
         identities = Identity.objects.filter(user=request.user)
-        return Response(IdentitySerializer(identities, many=True).data)
+        response = IdentitySerializer(identities, many=True).data
+        log.debug(f"Identities Response: {response}")
+        return Response(response)
 
     @decorators.action(
         detail=False,

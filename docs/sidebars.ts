@@ -154,6 +154,7 @@ const sidebars: SidebarsConfig = {
             "api/endpoints/users",
             "api/endpoints/core",
             "api/endpoints/prompts",
+            "api/endpoints/identities",
             "api/endpoints/test-users",
             "api/endpoints/test-scenarios",
             "api/endpoints/actions",
