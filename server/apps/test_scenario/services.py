@@ -30,6 +30,7 @@ def instantiate_test_scenario(
     template = scenario.template
     created_user = None
     created_coach_state = None
+    unique_email = None
     if create_user:
         # Delete any existing user(s) for this scenario
         User.objects.filter(test_scenario=scenario).delete()
@@ -48,16 +49,40 @@ def instantiate_test_scenario(
             unique_email = base_email
         user_data["email"] = unique_email
         user_data["password"] = password
-        # Remove password from user_data to set it properly
+        # Remove fields that shouldn't be passed to User constructor
+        # Remove password - we'll set it with set_password()
         user_data.pop("password", None)
-        user = User(**user_data, test_scenario=scenario)
-        user.set_password(password)
-        user.save()
-        created_user = user
+        # Remove id/user_id - we want to create a new user, not reference an existing one
+        user_data.pop("id", None)
+        user_data.pop("user_id", None)
+        # Remove fields that are auto-generated or not part of User model
+        user_data.pop("created_at", None)
+        user_data.pop("updated_at", None)
+        user_data.pop("last_login", None)
+        user_data.pop("date_joined", None)
+        
+        try:
+            user = User(**user_data, test_scenario=scenario)
+            user.set_password(password)
+            user.save()
+            created_user = user
+            log.info(f"Created user {created_user.id} ({unique_email}) for test scenario {scenario.id}")
+        except Exception as e:
+            log.error(f"Failed to create user for test scenario {scenario.id}: {str(e)}", exc_info=True)
+            log.error(f"User data that was attempted: {user_data}")
+            raise ValueError(f"Failed to create user: {str(e)}") from e
 
     # Handle identities creation FIRST (before coach_state to ensure identities exist for linking)
+    # IMPORTANT: Only create identities if user was successfully created
     created_identities = {}
-    if create_identities and template.get("identities") and created_user:
+    if create_identities and template.get("identities"):
+        if not created_user:
+            log.error("Cannot create identities: user was not created. Skipping identity creation.")
+            raise ValueError("Cannot create identities: user creation failed or was skipped")
+        
+        if not created_user.id:
+            log.error("Cannot create identities: created user has no ID. Skipping identity creation.")
+            raise ValueError("Cannot create identities: created user has no ID")
         # Delete existing identities for this user and scenario
         Identity.objects.filter(user=created_user, test_scenario=scenario).delete()
         for identity_data in template["identities"]:
@@ -75,18 +100,16 @@ def instantiate_test_scenario(
             image_url = identity_data.get("image")
             if image_url:
                 from .utils import copy_image_from_url
-                from django.core.files.storage import default_storage
                 copied_key = copy_image_from_url(image_url)
                 if copied_key:
-                    # Open the copied file and assign to identity.image
-                    copied_file = default_storage.open(copied_key, 'rb')
-                    identity.image.save(
-                        os.path.basename(copied_key),
-                        copied_file,
-                        save=False  # Don't save yet, we'll save the identity below
-                    )
-                    copied_file.close()
-                    log.info(f"Copied image for identity {identity.name} from {image_url}")
+                    # Strip "media/" prefix if present - VersatileImageField adds it via location setting
+                    # The copied_key from boto3 operations includes "media/" but we need just the relative path
+                    if copied_key.startswith("media/"):
+                        image_path = copied_key[6:]  # Remove "media/" prefix
+                    else:
+                        image_path = copied_key
+                    identity.image.name = image_path
+                    log.info(f"Copied image for identity {identity.name} from {image_url} to {copied_key} (stored as {image_path})")
                 else:
                     log.warning(f"Failed to copy image for identity {identity.name} from {image_url}, continuing without image")
             identity.save()

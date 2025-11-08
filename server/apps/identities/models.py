@@ -5,15 +5,18 @@ from enums.identity_category import IdentityCategory
 from enums.identity_state import IdentityState
 from apps.users.models import User
 from django.contrib.postgres.fields import ArrayField
+from apps.core.models import ImageMixin
 
 
 # The Identity model stores a single identity for a user, including its state, notes, and category.
 # This model is used in the coaching system to track user identities and their progress.
 # Referenced in: CoachState, coaching logic, admin, and API serializers.
-class Identity(models.Model):
+class Identity(ImageMixin, models.Model):
     """
     Represents a single identity with its state for a user in the coaching system.
     """
+
+    # NOTE: Image field inherited from ImageMixin (VersatileImageField with UUID-based paths)
 
     id = models.UUIDField(
         primary_key=True,
@@ -75,12 +78,6 @@ class Identity(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         help_text="Test scenario this identity is associated with (for test data isolation).",
-    )
-    image = models.ImageField(
-        upload_to="identities/%Y/%m/%d/",
-        null=True,
-        blank=True,
-        help_text="Image associated with this identity. Stored in S3 (production/staging) or local media directory (development).",
     )
 
     def __str__(self):

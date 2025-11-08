@@ -190,12 +190,14 @@ You can make and apply migrations directly inside the running backend container.
 #### **Using Docker Compose Exec**
 
 Make migrations:
+
 ```sh
 COMPOSE_PROJECT_NAME=dev-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py makemigrations
 ```
 
 Apply migrations:
+
 ```sh
 COMPOSE_PROJECT_NAME=dev-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
@@ -220,6 +222,7 @@ To run your Django/pytest tests in the same environment as your backend (recomme
     ```
 
 **Tip:**
+
 - This approach ensures your tests use the same environment, database, and dependencies as your running backend service.
 - You can use this pattern for any Django management or test command.
 
@@ -263,18 +266,21 @@ You can make and apply migrations directly inside the running backend container.
 #### **Using Docker Compose Exec**
 
 Make migrations:
+
 ```sh
 COMPOSE_PROJECT_NAME=dev-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py makemigrations
 ```
 
 Apply migrations:
+
 ```sh
 COMPOSE_PROJECT_NAME=dev-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
 ```
 
 Create a super user:
+
 ```sh
 COMPOSE_PROJECT_NAME=dev-coach-local \
 docker compose \
@@ -320,4 +326,18 @@ docker compose \
 exec -T db pg_restore \
 -U postgres \
 -d dev_coach_core_local < server/backups/your_backup_file.dump
+```
+
+### AWS Commands
+
+See whats in the staging bucket
+
+```sh
+aws s3 ls s3://discovita-dev-coach-staging --profile discovita-jake --recursive
+```
+
+See whats in the production bucket
+
+```sh
+aws s3 ls s3://discovita-dev-coach-production --profile discovita-jake --recursive
 ```

@@ -89,8 +89,12 @@ export default function TestScenarioIdentitiesForm({
     }
     setError(null);
     if (editingIndex !== null) {
+      // Preserve existing image URL if no new file is selected
+      // If a new file is selected, the backend will replace it with the new URL
+      const updatedDraft = { ...draft };
+      // Don't clear the image URL - let the backend handle it when a new file is uploaded
       const updated = value.map((id, i) =>
-        i === editingIndex ? { ...draft } : id
+        i === editingIndex ? updatedDraft : id
       );
       console.log("Updated identities (edit):", updated);
       onChange(updated);
@@ -100,12 +104,22 @@ export default function TestScenarioIdentitiesForm({
         newImageFiles.set(editingIndex, selectedImageFile);
         setImageFiles(newImageFiles);
         onImageFilesChange?.(newImageFiles);
+      } else {
+        // If no new file selected but image was deleted, remove from map
+        if (!draft.image && imageFiles.has(editingIndex)) {
+          const newImageFiles = new Map(imageFiles);
+          newImageFiles.delete(editingIndex);
+          setImageFiles(newImageFiles);
+          onImageFilesChange?.(newImageFiles);
+        }
       }
       setEditingIndex(null);
       setDraft(emptyIdentity());
       setSelectedImageFile(null);
     } else {
-      const updated = [...value, { ...draft }];
+      // For new identities, preserve image URL if set
+      const updatedDraft = { ...draft };
+      const updated = [...value, updatedDraft];
       console.log("Updated identities (add):", updated);
       onChange(updated);
       // Update image files map if a file was selected
@@ -140,6 +154,8 @@ export default function TestScenarioIdentitiesForm({
     }
     setError(null);
     setSelectedImageFile(file);
+    // Don't clear draft.image here - it will be replaced by backend when file is uploaded
+    // The selected file preview will show, and the existing image URL will remain until backend updates it
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -337,11 +353,31 @@ export default function TestScenarioIdentitiesForm({
           </div>
           <div className="md:col-span-2">
             <Label>Image</Label>
-            {draft.image && (
-              <div className="mb-2">
-                <div className="text-xs text-neutral-500 mb-1">
-                  Current Image URL: <span className="font-mono text-xs break-all">{draft.image}</span>
+            <div className="mb-2">
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs text-neutral-500">
+                  Current Image URL:{" "}
+                  {draft.image ? (
+                    <span className="font-mono text-xs break-all">{draft.image}</span>
+                  ) : (
+                    <span className="text-neutral-400 italic">No image URL set</span>
+                  )}
                 </div>
+                {draft.image && (
+                  <Button
+                    type="button"
+                    size="xs"
+                    variant="destructive"
+                    onClick={() => {
+                      setDraft({ ...draft, image: undefined });
+                      setError(null);
+                    }}
+                  >
+                    Delete Image
+                  </Button>
+                )}
+              </div>
+              {draft.image ? (
                 <img
                   src={draft.image}
                   alt={draft.name || "Identity"}
@@ -350,8 +386,12 @@ export default function TestScenarioIdentitiesForm({
                     (e.target as HTMLImageElement).style.display = "none";
                   }}
                 />
-              </div>
-            )}
+              ) : (
+                <div className="max-w-[200px] max-h-[200px] border rounded mb-2 flex items-center justify-center bg-neutral-50 text-neutral-400 text-xs p-4">
+                  No image preview available
+                </div>
+              )}
+            </div>
             {selectedImageFile && (
               <div className="mb-2">
                 <div className="text-xs text-green-600 mb-1">
@@ -370,6 +410,13 @@ export default function TestScenarioIdentitiesForm({
                     setSelectedImageFile(null);
                     if (fileInputRef.current) {
                       fileInputRef.current.value = "";
+                    }
+                    // Clear the image file from the map if it was set
+                    if (editingIndex !== null && imageFiles.has(editingIndex)) {
+                      const newImageFiles = new Map(imageFiles);
+                      newImageFiles.delete(editingIndex);
+                      setImageFiles(newImageFiles);
+                      onImageFilesChange?.(newImageFiles);
                     }
                   }}
                 >

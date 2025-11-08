@@ -10,27 +10,71 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 import json
 import re
+import urllib.parse
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
 
 
-def process_identity_images(request, template):
+def process_identity_images(request, template, old_template=None):
     """
     Process image files from request.FILES and upload them to S3.
     Updates template.identities[index].image with S3 URLs.
+    Also handles deletion of images when they are removed.
     
     Args:
         request: Django request object with FILES
         template: Template dict (will be modified in place)
+        old_template: Optional old template dict to compare against for deletions
         
     Returns:
         Updated template dict with image URLs injected
     """
-    if not request.FILES:
+    if "identities" not in template or not template["identities"]:
         return template
     
-    if "identities" not in template or not template["identities"]:
+    # First, handle image deletions (when image field is removed)
+    if old_template and "identities" in old_template:
+        for index, new_identity in enumerate(template["identities"]):
+            if index < len(old_template["identities"]):
+                old_identity = old_template["identities"][index]
+                old_image_url = old_identity.get("image")
+                new_image_url = new_identity.get("image")
+                
+                # If old identity had an image but new one doesn't, delete it
+                if old_image_url and not new_image_url:
+                    try:
+                        # Extract key from old URL
+                        old_key = None
+                        # Get bucket name and custom domain from STORAGES if available
+                        bucket_name = None
+                        custom_domain = None
+                        if hasattr(settings, 'STORAGES') and 'default' in settings.STORAGES:
+                            bucket_name = settings.STORAGES['default']['OPTIONS'].get('bucket_name')
+                            custom_domain = settings.STORAGES['default']['OPTIONS'].get('custom_domain')
+                        
+                        if "/media/" in old_image_url:
+                            old_key = old_image_url.split("/media/")[-1].split("?")[0]
+                        elif bucket_name and f"{bucket_name}.s3.amazonaws.com" in old_image_url:
+                            parts = old_image_url.split(f"{bucket_name}.s3.amazonaws.com/")
+                            if len(parts) > 1:
+                                old_key = parts[1].split("?")[0]
+                        elif custom_domain and custom_domain in old_image_url:
+                            parts = old_image_url.split(f"{custom_domain}/")
+                            if len(parts) > 1:
+                                old_key = parts[1].split("?")[0]
+                        
+                        if old_key:
+                            # URL decode the key in case it has encoded characters
+                            old_key = urllib.parse.unquote(old_key)
+                            # Use default_storage which automatically uses STORAGES['default']
+                            default_storage.delete(old_key)
+                            log.info(f"Deleted removed image {old_key} for identity at index {index}")
+                    except Exception as e:
+                        log.warning(f"Failed to delete removed image for identity at index {index}: {str(e)}")
+    
+    # Now handle new image uploads
+    if not request.FILES:
         return template
     
     # Extract image files using naming convention: identity_{index}_image
@@ -51,25 +95,44 @@ def process_identity_images(request, template):
             continue
         
         try:
-            # Use Identity model's upload_to pattern to save image directly to S3
-            from datetime import datetime
-            from django.core.files.base import ContentFile
+            # Use UUID-based upload path (compatible with VersatileImageField)
+            import uuid
+            import os
             
-            # Generate path using Identity model's upload_to pattern: identities/%Y/%m/%d/
-            now = datetime.now()
-            upload_path = f"identities/{now.year}/{now.month:02d}/{now.day:02d}/"
+            # Use default_storage which automatically uses STORAGES['default']
+            # Verify storage backend is configured correctly
+            log.info(f"Storage backend: {type(default_storage).__name__}")
+            if hasattr(settings, 'STORAGES') and 'default' in settings.STORAGES:
+                log.info(f"Storage backend setting: {settings.STORAGES['default']['BACKEND']}")
+                log.info(f"AWS Bucket: {settings.STORAGES['default']['OPTIONS'].get('bucket_name', 'NOT SET')}")
+                log.info(f"Location: {settings.STORAGES['default']['OPTIONS'].get('location', 'NOT SET')}")
+            log.info(f"AWS Access Key ID set: {bool(getattr(settings, 'AWS_ACCESS_KEY_ID', None))}")
             
-            # Get filename from uploaded file
+            # Generate UUID-based path manually (same format as uuid_upload_path)
+            # Note: Don't include "media" prefix - storage backend adds it via location setting
             filename = image_file.name
+            uuid_dir = str(uuid.uuid4())
+            full_path = os.path.join(uuid_dir, filename).replace("\\", "/")
             
-            # Save file to S3 using default storage
+            log.info(f"Attempting to save image to S3 with path: {full_path}, file size: {image_file.size} bytes")
+            
+            # Save file to S3 using default_storage (automatically uses STORAGES['default'])
             saved_path = default_storage.save(
-                f"{upload_path}{filename}",
+                full_path,
                 image_file
             )
             
+            log.info(f"Storage save() returned path: {saved_path}")
+            
+            # Note: exists() check may fail due to S3 eventual consistency or key format
+            # If save() succeeded without error, the file is likely saved correctly
+            # The URL generation below will confirm the file is accessible
+            
             # Get the S3 URL
+            # Note: saved_path is the actual S3 key stored by django-storages
+            # default_storage.url() generates the full URL from this key
             image_url = default_storage.url(saved_path)
+            log.info(f"Generated image URL: {image_url}")
             
             # Delete old image if identity already has one
             existing_identity_data = template["identities"][index]
@@ -78,19 +141,31 @@ def process_identity_images(request, template):
                 try:
                     old_url = existing_identity_data["image"]
                     # Extract key from URL
+                    old_key = None
+                    # Get bucket name and custom domain from STORAGES if available
+                    bucket_name = None
+                    custom_domain = None
+                    if hasattr(settings, 'STORAGES') and 'default' in settings.STORAGES:
+                        bucket_name = settings.STORAGES['default']['OPTIONS'].get('bucket_name')
+                        custom_domain = settings.STORAGES['default']['OPTIONS'].get('custom_domain')
+                    
                     if "/media/" in old_url:
                         old_key = old_url.split("/media/")[-1].split("?")[0]  # Remove query params
-                    elif f"{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com" in old_url:
+                    elif bucket_name and f"{bucket_name}.s3.amazonaws.com" in old_url:
                         # Extract from full S3 URL
-                        parts = old_url.split(f"{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/")
+                        parts = old_url.split(f"{bucket_name}.s3.amazonaws.com/")
                         if len(parts) > 1:
                             old_key = parts[1].split("?")[0]
-                        else:
-                            old_key = None
-                    else:
-                        old_key = None
+                    elif custom_domain and custom_domain in old_url:
+                        # Extract from custom domain URL
+                        parts = old_url.split(f"{custom_domain}/")
+                        if len(parts) > 1:
+                            old_key = parts[1].split("?")[0]
                     
                     if old_key:
+                        # URL decode the key in case it has encoded characters
+                        old_key = urllib.parse.unquote(old_key)
+                        # Use default_storage which automatically uses STORAGES['default']
                         default_storage.delete(old_key)
                         log.info(f"Deleted old image {old_key} for identity at index {index}")
                 except Exception as e:
@@ -165,6 +240,10 @@ class TestScenarioViewSet(
         )
 
     def perform_update(self, serializer):
+        # Get the old template for comparison (to detect deleted images)
+        instance = self.get_object()
+        old_template = instance.template if hasattr(instance, 'template') else None
+        
         # Handle multipart/form-data: template comes as JSON string
         template_data = self.request.data.get("template")
         if not template_data:
@@ -178,8 +257,8 @@ class TestScenarioViewSet(
         else:
             template = template_data
         
-        # Process image uploads and inject URLs into template
-        template = process_identity_images(self.request, template)
+        # Process image uploads and deletions, inject URLs into template
+        template = process_identity_images(self.request, template, old_template=old_template)
         
         errors = validate_scenario_template(template)
         if errors:
@@ -319,10 +398,9 @@ class TestScenarioViewSet(
             # Handle image duplication
             if identity.image:
                 from .utils import duplicate_s3_image
-                from django.core.files.storage import default_storage
                 duplicated_key = duplicate_s3_image(identity.image)
                 if duplicated_key:
-                    # Get the URL of the duplicated image
+                    # Get the URL of the duplicated image using default_storage
                     identity_dict["image"] = default_storage.url(duplicated_key)
                     log.info(f"Duplicated image for identity {identity.name} to {identity_dict['image']}")
                 else:
