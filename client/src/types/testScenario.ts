@@ -41,6 +41,7 @@ export interface TestScenarioIdentity {
   i_am_statement?: string;
   visualization?: string;
   notes?: string[];
+  image?: string; // S3 URL for the image
 }
 
 export interface TestScenarioChatMessage {

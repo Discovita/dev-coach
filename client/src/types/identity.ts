@@ -14,6 +14,8 @@ export interface Identity {
   i_am_statement?: string;
   /** Visualization (optional) */
   visualization?: string;
+  /** Image (optional) */
+  image?: string;
   /** Notes about the identity (optional) */
   notes?: string[];
   /** Category this identity belongs to */

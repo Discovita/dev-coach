@@ -1,13 +1,110 @@
 from rest_framework import viewsets, status, decorators, mixins, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import TestScenario
 from .serializers import TestScenarioSerializer
 from .validation import validate_scenario_template
 from .services import instantiate_test_scenario
+from django.core.files.storage import default_storage
+from django.conf import settings
+import json
+import re
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
+
+
+def process_identity_images(request, template):
+    """
+    Process image files from request.FILES and upload them to S3.
+    Updates template.identities[index].image with S3 URLs.
+    
+    Args:
+        request: Django request object with FILES
+        template: Template dict (will be modified in place)
+        
+    Returns:
+        Updated template dict with image URLs injected
+    """
+    if not request.FILES:
+        return template
+    
+    if "identities" not in template or not template["identities"]:
+        return template
+    
+    # Extract image files using naming convention: identity_{index}_image
+    image_files = {}
+    for key in request.FILES.keys():
+        match = re.match(r'identity_(\d+)_image', key)
+        if match:
+            index = int(match.group(1))
+            image_files[index] = request.FILES[key]
+    
+    if not image_files:
+        return template
+    
+    # Process each image file
+    for index, image_file in image_files.items():
+        if index >= len(template["identities"]):
+            log.warning(f"Image file provided for identity index {index}, but only {len(template['identities'])} identities exist")
+            continue
+        
+        try:
+            # Use Identity model's upload_to pattern to save image directly to S3
+            from datetime import datetime
+            from django.core.files.base import ContentFile
+            
+            # Generate path using Identity model's upload_to pattern: identities/%Y/%m/%d/
+            now = datetime.now()
+            upload_path = f"identities/{now.year}/{now.month:02d}/{now.day:02d}/"
+            
+            # Get filename from uploaded file
+            filename = image_file.name
+            
+            # Save file to S3 using default storage
+            saved_path = default_storage.save(
+                f"{upload_path}{filename}",
+                image_file
+            )
+            
+            # Get the S3 URL
+            image_url = default_storage.url(saved_path)
+            
+            # Delete old image if identity already has one
+            existing_identity_data = template["identities"][index]
+            if existing_identity_data.get("image"):
+                # Try to delete the old image from S3
+                try:
+                    old_url = existing_identity_data["image"]
+                    # Extract key from URL
+                    if "/media/" in old_url:
+                        old_key = old_url.split("/media/")[-1].split("?")[0]  # Remove query params
+                    elif f"{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com" in old_url:
+                        # Extract from full S3 URL
+                        parts = old_url.split(f"{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/")
+                        if len(parts) > 1:
+                            old_key = parts[1].split("?")[0]
+                        else:
+                            old_key = None
+                    else:
+                        old_key = None
+                    
+                    if old_key:
+                        default_storage.delete(old_key)
+                        log.info(f"Deleted old image {old_key} for identity at index {index}")
+                except Exception as e:
+                    log.warning(f"Failed to delete old image for identity at index {index}: {str(e)}")
+            
+            # Inject URL into template
+            template["identities"][index]["image"] = image_url
+            log.info(f"Uploaded image for identity at index {index} to {image_url}")
+            
+        except Exception as e:
+            log.error(f"Error processing image for identity at index {index}: {str(e)}", exc_info=True)
+            # Continue without image for this identity
+    
+    return template
 
 
 class TestScenarioViewSet(
@@ -28,12 +125,31 @@ class TestScenarioViewSet(
     queryset = TestScenario.objects.all()
     serializer_class = TestScenarioSerializer
     permission_classes = [IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
-        template = self.request.data.get("template")
+        # Handle multipart/form-data: template comes as JSON string
+        template_data = self.request.data.get("template")
+        if not template_data:
+            raise serializers.ValidationError({"template": "Template is required"})
+        
+        if isinstance(template_data, str):
+            try:
+                template = json.loads(template_data)
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({"template": f"Invalid JSON in template: {str(e)}"})
+        else:
+            template = template_data
+        
+        # Process image uploads and inject URLs into template
+        template = process_identity_images(self.request, template)
+        
         errors = validate_scenario_template(template)
         if errors:
             raise serializers.ValidationError({"template": errors})
+        
+        # Update serializer with processed template
+        serializer.validated_data["template"] = template
         instance = serializer.save(
             created_by=self.request.user if self.request.user.is_authenticated else None
         )
@@ -49,10 +165,28 @@ class TestScenarioViewSet(
         )
 
     def perform_update(self, serializer):
-        template = self.request.data.get("template")
+        # Handle multipart/form-data: template comes as JSON string
+        template_data = self.request.data.get("template")
+        if not template_data:
+            raise serializers.ValidationError({"template": "Template is required"})
+        
+        if isinstance(template_data, str):
+            try:
+                template = json.loads(template_data)
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({"template": f"Invalid JSON in template: {str(e)}"})
+        else:
+            template = template_data
+        
+        # Process image uploads and inject URLs into template
+        template = process_identity_images(self.request, template)
+        
         errors = validate_scenario_template(template)
         if errors:
             raise serializers.ValidationError({"template": errors})
+        
+        # Update serializer with processed template
+        serializer.validated_data["template"] = template
         instance = serializer.save()
         # Re-instantiate scenario with all supported sections
         instantiate_test_scenario(
@@ -182,6 +316,17 @@ class TestScenarioViewSet(
                 identity_dict["visualization"] = identity.visualization
             if identity.notes:
                 identity_dict["notes"] = identity.notes
+            # Handle image duplication
+            if identity.image:
+                from .utils import duplicate_s3_image
+                from django.core.files.storage import default_storage
+                duplicated_key = duplicate_s3_image(identity.image)
+                if duplicated_key:
+                    # Get the URL of the duplicated image
+                    identity_dict["image"] = default_storage.url(duplicated_key)
+                    log.info(f"Duplicated image for identity {identity.name} to {identity_dict['image']}")
+                else:
+                    log.warning(f"Failed to duplicate image for identity {identity.name}, continuing without image")
             identities_section.append(identity_dict)
 
         # --- ChatMessages section (only fields in TemplateChatMessageSerializer) ---

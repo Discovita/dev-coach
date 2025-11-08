@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { TestScenarioIdentity } from "@/types/testScenario";
 import { IdentityCategory } from "@/enums/identityCategory";
 import { IdentityState } from "@/enums/identityState";
@@ -16,6 +16,7 @@ import {
 interface TestScenarioIdentitiesFormProps {
   value: TestScenarioIdentity[];
   onChange: (identities: TestScenarioIdentity[]) => void;
+  onImageFilesChange?: (files: Map<number, File>) => void;
 }
 
 const emptyIdentity = (): TestScenarioIdentity => ({
@@ -30,24 +31,50 @@ const emptyIdentity = (): TestScenarioIdentity => ({
 export default function TestScenarioIdentitiesForm({
   value,
   onChange,
+  onImageFilesChange,
 }: TestScenarioIdentitiesFormProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [draft, setDraft] = useState<TestScenarioIdentity>(emptyIdentity());
   const [error, setError] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
+  const [imageFiles, setImageFiles] = useState<Map<number, File>>(new Map());
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleEdit = (idx: number) => {
     setEditingIndex(idx);
     setDraft({ ...value[idx] });
     setError(null);
+    // Set selected image file if one exists for this identity
+    setSelectedImageFile(imageFiles.get(idx) || null);
   };
 
   const handleDelete = (idx: number) => {
     const updated = value.filter((_, i) => i !== idx);
     onChange(updated);
+    // Remove image file for deleted identity and reindex remaining files
+    if (imageFiles.has(idx)) {
+      const newImageFiles = new Map<number, File>();
+      imageFiles.forEach((file, index) => {
+        if (index < idx) {
+          // Keep files before deleted index
+          newImageFiles.set(index, file);
+        } else if (index > idx) {
+          // Shift files after deleted index down by 1
+          newImageFiles.set(index - 1, file);
+        }
+        // Skip the deleted index
+      });
+      setImageFiles(newImageFiles);
+      onImageFilesChange?.(newImageFiles);
+    }
     if (editingIndex === idx) {
       setEditingIndex(null);
       setDraft(emptyIdentity());
+      setSelectedImageFile(null);
+    } else if (editingIndex !== null && editingIndex > idx) {
+      // Adjust editing index if it's after the deleted one
+      setEditingIndex(editingIndex - 1);
     }
   };
 
@@ -67,13 +94,29 @@ export default function TestScenarioIdentitiesForm({
       );
       console.log("Updated identities (edit):", updated);
       onChange(updated);
+      // Update image files map if a file was selected
+      if (selectedImageFile) {
+        const newImageFiles = new Map(imageFiles);
+        newImageFiles.set(editingIndex, selectedImageFile);
+        setImageFiles(newImageFiles);
+        onImageFilesChange?.(newImageFiles);
+      }
       setEditingIndex(null);
       setDraft(emptyIdentity());
+      setSelectedImageFile(null);
     } else {
       const updated = [...value, { ...draft }];
       console.log("Updated identities (add):", updated);
       onChange(updated);
+      // Update image files map if a file was selected
+      if (selectedImageFile) {
+        const newImageFiles = new Map(imageFiles);
+        newImageFiles.set(updated.length - 1, selectedImageFile);
+        setImageFiles(newImageFiles);
+        onImageFilesChange?.(newImageFiles);
+      }
       setDraft(emptyIdentity());
+      setSelectedImageFile(null);
     }
   };
 
@@ -81,7 +124,44 @@ export default function TestScenarioIdentitiesForm({
     setEditingIndex(null);
     setDraft(emptyIdentity());
     setError(null);
+    setSelectedImageFile(null);
   };
+
+  const handleFileSelect = (file: File) => {
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file.");
+      return;
+    }
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Image file size must be less than 10MB.");
+      return;
+    }
+    setError(null);
+    setSelectedImageFile(file);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
   // Notes handling
   const handleAddNote = (note: string) => {
@@ -141,6 +221,21 @@ export default function TestScenarioIdentitiesForm({
                   <span className="ml-2 text-xs text-neutral-500">
                     Notes: {identity.notes.join(", ")}
                   </span>
+                )}
+                {identity.image && (
+                  <div className="mt-2">
+                    <div className="text-xs text-neutral-500 mb-1">
+                      Image URL: <span className="font-mono text-xs break-all">{identity.image}</span>
+                    </div>
+                    <img
+                      src={identity.image}
+                      alt={identity.name}
+                      className="max-w-[200px] max-h-[200px] object-contain border rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
                 )}
               </div>
               <div className="flex gap-2">
@@ -239,6 +334,71 @@ export default function TestScenarioIdentitiesForm({
               }
               placeholder="e.g. Standing on a mountain, seeing the horizon."
             />
+          </div>
+          <div className="md:col-span-2">
+            <Label>Image</Label>
+            {draft.image && (
+              <div className="mb-2">
+                <div className="text-xs text-neutral-500 mb-1">
+                  Current Image URL: <span className="font-mono text-xs break-all">{draft.image}</span>
+                </div>
+                <img
+                  src={draft.image}
+                  alt={draft.name || "Identity"}
+                  className="max-w-[200px] max-h-[200px] object-contain border rounded mb-2"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+            {selectedImageFile && (
+              <div className="mb-2">
+                <div className="text-xs text-green-600 mb-1">
+                  Selected file: {selectedImageFile.name} ({(selectedImageFile.size / 1024).toFixed(2)} KB)
+                </div>
+                <img
+                  src={URL.createObjectURL(selectedImageFile)}
+                  alt="Preview"
+                  className="max-w-[200px] max-h-[200px] object-contain border rounded mb-2"
+                />
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => {
+                    setSelectedImageFile(null);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  }}
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
+            <div
+              className="border-2 border-dashed border-neutral-300 rounded p-4 text-center cursor-pointer hover:border-gold-500 transition-colors"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+              <div className="text-sm text-neutral-600">
+                {selectedImageFile
+                  ? "Click to change image"
+                  : "Drag and drop an image here, or click to browse"}
+              </div>
+              <div className="text-xs text-neutral-400 mt-1">
+                Supports: JPEG, PNG, GIF, WebP (max 10MB)
+              </div>
+            </div>
           </div>
           <div className="md:col-span-2">
             <Label>Notes</Label>

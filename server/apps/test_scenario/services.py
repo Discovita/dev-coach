@@ -6,6 +6,7 @@ from apps.user_notes.models import UserNote
 from apps.actions.models import Action
 import hashlib
 import uuid
+import os
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -70,6 +71,24 @@ def instantiate_test_scenario(
                 visualization=identity_data.get("visualization", ""),
                 notes=identity_data.get("notes", []),
             )
+            # Handle image copying from template URL
+            image_url = identity_data.get("image")
+            if image_url:
+                from .utils import copy_image_from_url
+                from django.core.files.storage import default_storage
+                copied_key = copy_image_from_url(image_url)
+                if copied_key:
+                    # Open the copied file and assign to identity.image
+                    copied_file = default_storage.open(copied_key, 'rb')
+                    identity.image.save(
+                        os.path.basename(copied_key),
+                        copied_file,
+                        save=False  # Don't save yet, we'll save the identity below
+                    )
+                    copied_file.close()
+                    log.info(f"Copied image for identity {identity.name} from {image_url}")
+                else:
+                    log.warning(f"Failed to copy image for identity {identity.name} from {image_url}, continuing without image")
             identity.save()
             # Store reference by name for later linking
             created_identities[identity.name] = identity
