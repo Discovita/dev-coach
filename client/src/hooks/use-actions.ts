@@ -25,6 +25,8 @@ export function useActions() {
   } = useQuery({
     queryKey: ["user", "actions"],
     queryFn: fetchActions,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: false,
   });
 
   // Placeholder for update mutation (implement as needed)

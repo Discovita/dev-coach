@@ -19,7 +19,7 @@ When a user is brainstorming identities for a specific category, the context inc
 
 ## How It Works
 
-The context is injected into the Identity Brainstorming prompt based on the current `brainstorming_category` stored in the user's `CoachState`. This allows the AI to provide targeted, relevant guidance for each specific identity category without overwhelming the prompt with information for all categories.
+The context is injected into the Identity Brainstorming prompt based on the current `identity_focus` stored in the user's `CoachState`. This allows the AI to provide targeted, relevant guidance for each specific identity category without overwhelming the prompt with information for all categories.
 
 ## Implementation
 
@@ -42,7 +42,7 @@ Each category file contains:
 
 **Key Name**: `brainstorming_category_context`  
 **Enum Value**: `ContextKey.BRAINSTORMING_CATEGORY_CONTEXT`  
-**Data Source**: `CoachState.brainstorming_category_context`  
+**Data Source**: `CoachState.identity_focus` (reads from markdown files)  
 **Phase**: Identity Brainstorming (`IDENTITY_BRAINSTORMING`)
 
 ## Usage in Prompts

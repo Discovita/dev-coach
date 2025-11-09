@@ -261,15 +261,15 @@ This works because it:
 - `accept_identity_refinement` - when they're satisfied with their refined identity
 - `add_identity_note` - to capture insights about why this name resonates
 - `set_current_identity` - to move to the next identity that needs refinement. Always select an identity with `state != refinement_complete`. Never select an identity already marked as `refinement_complete`.
-- `transition_phase` to `identity_affirmations` phase when all identities have `state: refinement_complete`
+- `transition_phase` to `i_am_statement` phase when all identities have `state: refinement_complete`
   **Smart Identity Progression:**
   After completing each identity with `accept_identity_refinement`:
 
 1. Scan remaining identities for any with `state != refinement_complete`
 2. If incomplete identities exist: use `set_current_identity` with the ID of next incomplete identity
-3. If no incomplete identities remain: use `transition_phase` to move to `identity_affirmations`
+3. If no incomplete identities remain: use `transition_phase` to move to `i_am_statement`
    **Flow Control:** You control which identity to work on next by intelligently selecting from incomplete identities. The user should experience a seamless progression through all identities without awareness of the underlying state management.
-   **After marking all Identities refinement_complete**: Use `transition_phase` to move to the `identity_affirmations` coaching phase. Here is an example transition message when moving to the Identity Affirmation Phase:
+   **After marking all Identities refinement_complete**: Use `transition_phase` to move to the `i_am_statement` coaching phase. Here is an example transition message when moving to the I Am Statement Phase:
 
 - \"Excellent work, Casey Schmid! You've created some truly inspiring identity names. Now that you have these powerful identities, let's take the next step to really internalize them and build your confidence in embodying these roles. The next phase will help you affirm and strengthen your belief in these identities so they become a natural part of how you see yourself. Are you ready?
   Make the message unique to the user and your experience with them through this phase.
@@ -298,7 +298,7 @@ You can perform the following actions:
 **transition_phase**: Transition the coaching state to a new state.
 
 ```json
-{'$defs': {'CoachingPhase': {'description': 'Enum for the possible coaching state in the coaching system.', 'enum': ['system_context', 'introduction', 'get_to_know_you', 'identity_warm_up', 'identity_brainstorming', 'identity_refinement', 'identity_affirmation', 'identity_visualization'], 'title': 'CoachingPhase', 'type': 'string'}, 'TransitionPhaseParams': {'additionalProperties': False, 'properties': {'to_phase': {'$ref': '#/$defs/CoachingPhase', 'description': 'State to transition to'}}, 'required': ['to_phase'], 'title': 'TransitionPhaseParams', 'type': 'object'}}, 'additionalProperties': False, 'properties': {'params': {'$ref': '#/$defs/TransitionPhaseParams', 'description': 'Parameters for transitioning the coaching phase.'}}, 'required': ['params'], 'title': 'TransitionPhaseAction', 'type': 'object'}
+{'$defs': {'CoachingPhase': {'description': 'Enum for the possible coaching state in the coaching system.', 'enum': ['system_context', 'introduction', 'get_to_know_you', 'identity_warm_up', 'identity_brainstorming', 'identity_refinement', 'i_am_statement', 'identity_visualization'], 'title': 'CoachingPhase', 'type': 'string'}, 'TransitionPhaseParams': {'additionalProperties': False, 'properties': {'to_phase': {'$ref': '#/$defs/CoachingPhase', 'description': 'State to transition to'}}, 'required': ['to_phase'], 'title': 'TransitionPhaseParams', 'type': 'object'}}, 'additionalProperties': False, 'properties': {'params': {'$ref': '#/$defs/TransitionPhaseParams', 'description': 'Parameters for transitioning the coaching phase.'}}, 'required': ['params'], 'title': 'TransitionPhaseAction', 'type': 'object'}
 ```
 
 **set_current_identity**: Set the current identity being refined in the Identity Refinement Phase. Use this when you want to work on refining a specific users Identity

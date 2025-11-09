@@ -2,15 +2,15 @@ import AdminNavbar from "@/components/AdminNavbar";
 import Footer from "@/components/Footer";
 import { Outlet, useNavigate } from "react-router-dom";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
+import { useProfile } from "@/hooks/use-profile";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useEffect } from "react";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
-  // Use custom hook to reactively get profile and isAdmin from the cache
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
-  const isAdmin = useReactiveQueryData<boolean>(["user", "isAdmin"]);
+  // Get profile and isAdmin using hooks
+  const { profile } = useProfile();
+  const isAdmin = useIsAdmin();
 
   // Redirect if not admin or not logged in
   useEffect(() => {

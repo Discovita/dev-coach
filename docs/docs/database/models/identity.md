@@ -4,18 +4,18 @@ sidebar_position: 3
 
 # Identity
 
-The Identity model represents a single identity with its state for a user in the coaching system. It stores the core components of user identities including affirmations, visualizations, and progress tracking through different states.
+The Identity model represents a single identity with its state for a user in the coaching system. It stores the core components of user identities including "I Am" Statements, visualizations, and progress tracking through different states.
 
 ## Overview
 
-The Identity model stores user identities with their components (name, affirmation, visualization), tracks progression through different states, and categorizes identities by life areas for organized coaching.
+The Identity model stores user identities with their components (name, "I Am" Statement, visualization), tracks progression through different states, and categorizes identities by life areas for organized coaching.
 
 ## Fields
 
 - `id` (UUIDField): Primary key, auto-generated UUID
 - `user` (ForeignKey): Link to [User](./users.md) model
 - `name` (CharField): Concise identity label, max 255 characters, optional
-- `affirmation` (TextField): "I am" statement with description, optional
+- `i_am_statement` (TextField): "I am" statement with description, optional
 - `visualization` (TextField): Vivid mental image, optional
 - `state` (CharField): Current identity state, max 32 characters, defaults to ACCEPTED
 - `notes` (ArrayField): List of notes about the identity
@@ -62,7 +62,7 @@ The Identity model stores user identities with their components (name, affirmati
 
 - Core model for storing user identities in the coaching system
 - Tracks identity progression through different states
-- Stores identity components (affirmation, visualization, notes)
+- Stores identity components ("I Am" Statement, visualization, notes)
 - Categorized by life areas for organized coaching approach
 - Supports test scenario isolation for development
 - Referenced by CoachState for current and proposed identities

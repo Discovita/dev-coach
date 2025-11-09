@@ -15,7 +15,7 @@ The `current_identity` context key provides detailed information about the ident
 
 ## What Data It Provides
 
-Returns detailed markdown-formatted information about the current identity including name, ID, state, category, and notes, or `None` if no current identity is set.
+Returns detailed markdown-formatted information about the current identity including name, ID, state, category, and notes, or "No current identity set." if no current identity is set.
 
 ## How It Gets the Data
 
@@ -27,7 +27,7 @@ The function retrieves the `current_identity` from the coach state and formats i
 # Example return values
 "#### Creator\n**ID:** 123\n**State:** refinement_in_progress\n**Category:** passions_and_talents\n**Notes:**\n- Working on creative projects\n- Building confidence in artistic expression"
 
-None  # No current identity set
+"No current identity set."  # No current identity set
 ```
 
 ## Implementation
@@ -48,5 +48,6 @@ def get_current_identity_context(coach_state: CoachState) -> str:
             notes_str = "\n".join([f"- {note}" for note in identity.notes])
             current_identity_str += f"**Notes:**\n{notes_str}\n"
         return current_identity_str
-    return None
+    else:
+        return "No current identity set."
 ```

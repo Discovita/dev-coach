@@ -7,6 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
+from enums.coaching_phase import CoachingPhase
+from apps.prompts.serializers import PromptSerializer
 
 from services.logger import configure_logging
 
@@ -80,7 +82,7 @@ class PromptViewSet(
             data["version"] = (
                 1  # fallback, should not happen if coaching_phase is required
             )
-        serializer = self.get_serializer(data=data)
+        serializer = PromptSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -142,5 +144,69 @@ class PromptViewSet(
         instance = self.get_object()
         instance.is_active = False
         instance.save()
-        serializer = self.get_serializer(instance)
+        serializer = PromptSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="latest")
+    def latest(self, request):
+        """
+        Get the latest prompt for a specific coaching phase.
+        GET /api/prompts/latest?coaching_phase=introduction
+        Returns: 200 OK, the most recent active prompt for the specified phase.
+        """
+        coaching_phase = request.query_params.get('coaching_phase')
+        
+        if not coaching_phase:
+            return Response(
+                {
+                    "success": False,
+                    "error": "Missing required parameter",
+                    "detail": "coaching_phase query parameter is required"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate coaching_phase against enum
+        try:
+            CoachingPhase.from_string(coaching_phase)
+        except ValueError as e:
+            valid_phases = [phase.value for phase in CoachingPhase]
+            return Response(
+                {
+                    "success": False,
+                    "error": "Invalid coaching phase",
+                    "detail": f"Invalid coaching_phase: {coaching_phase}. Valid phases: {valid_phases}"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get the latest active prompt for the specified phase
+        try:
+            latest_prompt = Prompt.objects.filter(
+                coaching_phase=coaching_phase,
+                is_active=True
+            ).order_by('-version').first()
+            
+            if not latest_prompt:
+                return Response(
+                    {
+                        "success": False,
+                        "error": "No prompt found",
+                        "detail": f"No active prompt found for coaching phase: {coaching_phase}"
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            serializer = PromptSerializer(latest_prompt)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as exc:
+            log.error(f"Error retrieving latest prompt for phase {coaching_phase}: {str(exc)}")
+            return Response(
+                {
+                    "success": False,
+                    "error": "Server error",
+                    "detail": "An error occurred while retrieving the latest prompt"
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

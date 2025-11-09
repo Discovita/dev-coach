@@ -1,4 +1,7 @@
 from apps.coach_states.models import CoachState
+from services.logger import configure_logging
+
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 def get_current_identity_context(coach_state: CoachState) -> str:
@@ -8,6 +11,7 @@ def get_current_identity_context(coach_state: CoachState) -> str:
     """
     identity = coach_state.current_identity
     if identity:
+        log.debug(f"Current Identity: {identity.name}")
         current_identity_str = f"#### {identity.name}\n"
         current_identity_str += f"**ID:** {identity.id}\n"
         current_identity_str += (
@@ -20,4 +24,5 @@ def get_current_identity_context(coach_state: CoachState) -> str:
             notes_str = "\n".join([f"- {note}" for note in identity.notes])
             current_identity_str += f"**Notes:**\n{notes_str}\n"
         return current_identity_str
-    return None
+    else:
+        return "No current identity set."

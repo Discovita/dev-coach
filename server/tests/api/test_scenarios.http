@@ -37,7 +37,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
       {
         "name": "Curious Explorer",
         "category": "physical_expression",
-        "affirmation": "I am curious.",
+        "i_am_statement": "I am curious.",
         "visualization": "A vivid scene.",
         "notes": ["note1", "note2"]
       }
@@ -91,7 +91,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
       {
         "name": "Visionary Leader",
         "category": "physical_expression",
-        "affirmation": "I am a visionary.",
+        "i_am_statement": "I am a visionary.",
         "visualization": "A grand vision.",
         "notes": ["note3"]
       }

@@ -111,10 +111,10 @@ class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer)
         allow_blank=True,
         help_text="Current state of the identity (proposed, accepted, refinement complete).",
     )
-    affirmation = serializers.CharField(
+    i_am_statement = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Affirmation statement for the identity.",
+        help_text="I Am statement for the identity.",
     )
     visualization = serializers.CharField(
         required=False, allow_blank=True, help_text="Visualization for the identity."
@@ -123,6 +123,12 @@ class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer)
         child=serializers.CharField(),
         required=False,
         help_text="List of notes about the identity.",
+    )
+    image = serializers.URLField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        help_text="S3 URL for the identity image. Stored as URL in template, copied to new S3 location during instantiation.",
     )
 
 
@@ -138,6 +144,11 @@ class TemplateChatMessageSerializer(ForbidExtraFieldsMixin, serializers.Serializ
     content = serializers.CharField(help_text="Content of the message. Required.")
     timestamp = serializers.DateTimeField(
         required=False, help_text="When the message was sent."
+    )
+    component_config = serializers.JSONField(
+        required=False,
+        allow_null=True,
+        help_text="Optional component configuration for persistent component rendering (stored as JSON)."
     )
 
 
@@ -181,8 +192,14 @@ class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     timestamp = serializers.DateTimeField(
         required=False, help_text="When the action was performed."
     )
+    original_coach_message_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="ID of the original coach message that triggered this action (for robust linking during instantiation)."
+    )
+    # Keep coach_message_content for backward compatibility with old templates
     coach_message_content = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Content of the coach message that triggered this action (for linking during instantiation)."
+        help_text="Content of the coach message that triggered this action (for linking during instantiation). DEPRECATED: Use original_coach_message_id instead."
     )

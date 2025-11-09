@@ -1,15 +1,16 @@
 import React from "react";
 import { CoachMessage } from "@/pages/chat/components/CoachMessage";
-import { CoachMessageWithComponent } from "@/pages/chat/components/CoachMessageWithComponent";
+import { CoachMessageWithComponent } from "@/pages/chat/components/coach-message-with-component.tsx/CoachMessageWithComponent";
 import { UserMessage } from "@/pages/chat/components/UserMessage";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { LoadingBubbles } from "@/pages/chat/components/LoadingBubbles";
 import { Message } from "@/types/message";
 import { CoachRequest } from "@/types/coachRequest";
+import { ComponentConfig } from "@/types/componentConfig";
 
-/** 
- * ChatMessages component is used to render the chat messages in both the 
- * 
+/**
+ * ChatMessages component is used to render the chat messages in both the
+ *
  */
 
 /**
@@ -28,9 +29,9 @@ interface ChatMessagesProps {
   isProcessingMessage: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   /** Latest component config to render for the newest coach message (or null) */
-  componentConfig?: import("@/types/componentConfig").ComponentConfig | null;
+  componentConfig?: ComponentConfig | null;
   /** Handler for component button selection (sends a CoachRequest) */
-  onSelectComponentOption?: (request: CoachRequest) => void;
+  onSendUserMessageToCoach: (request: CoachRequest) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -38,30 +39,39 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   isProcessingMessage,
   messagesEndRef,
   componentConfig,
-  onSelectComponentOption,
+  onSendUserMessageToCoach,
 }) => {
   return (
     <div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto p-6 bg-gold-50  dark:bg-[#333333]">
       {messages.map((message: Message, index: number) => (
         <div key={index}>
           {message.role === "coach" ? (
-            index === messages.length - 1 &&
-            !!componentConfig &&
-            !isProcessingMessage ? (
-              <CoachMessageWithComponent
-                componentConfig={componentConfig}
-                onSelect={(request: CoachRequest) =>
-                  onSelectComponentOption && onSelectComponentOption({ message: request.message, actions: request.actions })
-                }
-                disabled={isProcessingMessage}
-              >
-                <MarkdownRenderer content={message.content} />
-              </CoachMessageWithComponent>
-            ) : (
-              <CoachMessage>
-                <MarkdownRenderer content={message.content} />
-              </CoachMessage>
-            )
+            (() => {
+              const isLastCoachMessage = index === messages.length - 1;
+              let componentToRender = null;
+
+              if (isLastCoachMessage) {
+                // For the last coach message, ONLY check the componentConfig prop (from cache)
+                componentToRender = !isProcessingMessage && componentConfig ? componentConfig : null;
+              } else {
+                // For all other coach messages, ONLY check message.component_config
+                componentToRender = message.component_config || null;
+              }
+
+              return componentToRender ? (
+                <CoachMessageWithComponent
+                  componentConfig={componentToRender}
+                  onSendUserMessageToCoach={onSendUserMessageToCoach}
+                  disabled={isProcessingMessage}
+                >
+                  <MarkdownRenderer content={message.content} />
+                </CoachMessageWithComponent>
+              ) : (
+                <CoachMessage>
+                  <MarkdownRenderer content={message.content} />
+                </CoachMessage>
+              );
+            })()
           ) : message.role === "user" ? (
             <UserMessage>{message.content}</UserMessage>
           ) : (

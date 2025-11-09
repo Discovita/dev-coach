@@ -1,5 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
+from enums.component_type import ComponentType
 
 
 class ComponentAction(BaseModel):
@@ -25,12 +26,49 @@ class ComponentButton(BaseModel):
     )
 
 
+class ComponentText(BaseModel):
+    """
+    Arbitrary markdown text to render with the coach message.
+    - text: markdown content to render
+    - location: whether to render before or after the coach message
+    - source: label indicating where this text came from (e.g., "warmup")
+    """
+
+    text: str = Field(..., description="Markdown text to inject")
+    location: Literal["before", "after"] = Field(
+        ..., description="Where to render relative to the coach message"
+    )
+    source: str = Field(..., description="Source label for this text block")
+
+
+class ComponentIdentity(BaseModel):
+    """
+    Represents a single identity for display in components.
+    Contains the essential information needed to display an identity.
+    """
+
+    id: str = Field(..., description="Unique identifier for the identity")
+    name: str = Field(..., description="Name of the identity")
+    category: Optional[str] = Field(..., description="Category of the identity")
+
+
 class ComponentConfig(BaseModel):
     """
     Configuration for frontend components. The frontend will determine
     how to render based on the structure of the data.
     """
 
-    buttons: List[ComponentButton] = Field(
-        ..., description="List of buttons to display"
+    component_type: str = Field(
+        ..., description="Type of component to display (ComponentType value)"
+    )
+    texts: Optional[List[ComponentText]] = Field(
+        default=None,
+        description="Optional list of text blocks to render before/after the coach message",
+    )
+    buttons: Optional[List[ComponentButton]] = Field(
+        default=None, description="Optional list of buttons to display"
+    )
+    identities: Optional[List[ComponentIdentity]] = Field(
+        default=None,
+        description="Optional list of identities to display in the component",
     )

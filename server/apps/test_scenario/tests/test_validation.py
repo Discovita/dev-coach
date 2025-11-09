@@ -106,7 +106,7 @@ def test_all_optional_fields_present():
                 "name": "Curious Explorer",
                 "category": "PASSIONS",
                 "state": "ACCEPTED",
-                "affirmation": "I am curious.",
+                "i_am_statement": "I am curious.",
                 "visualization": "A vivid scene.",
                 "notes": ["note1", "note2"]
             }

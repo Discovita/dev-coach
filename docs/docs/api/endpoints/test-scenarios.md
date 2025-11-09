@@ -87,7 +87,7 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
         "name": "Creative Visionary",
         "category": "PASSIONS",
         "state": "ACCEPTED",
-        "affirmation": "I am a bold creator, transforming ideas into reality.",
+        "i_am_statement": "I am a bold creator, transforming ideas into reality.",
         "visualization": "I see myself confidently presenting innovative solutions...",
         "notes": ["Note 1", "Note 2"]
       }
@@ -321,7 +321,7 @@ Same format as the retrieve endpoint.
       "name": "string (required)",
       "category": "string (required)",
       "state": "string (optional)",
-      "affirmation": "string (optional)",
+      "i_am_statement": "string (optional)",
       "visualization": "string (optional)",
       "notes": ["string array (optional)"]
     }

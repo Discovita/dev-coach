@@ -1,4 +1,6 @@
 import { IdentityCategory } from "@/enums/identityCategory";
+import { IdentityState } from "@/enums/identityState";
+import { ImageSizes } from "@/types/imageSizes";
 
 /**
  * Represents a single identity with its state for test scenario editing.
@@ -9,16 +11,18 @@ export interface Identity {
   id?: string;
   /** Name/label for the identity (required) */
   name: string;
-  /** Affirmation statement (optional) */
-  affirmation?: string;
+  /** I Am statement (optional) */
+  i_am_statement?: string;
   /** Visualization (optional) */
   visualization?: string;
+  /** Image URLs for different sizes (optional) */
+  image?: ImageSizes | null;
   /** Notes about the identity (optional) */
   notes?: string[];
   /** Category this identity belongs to */
   category: IdentityCategory;
   /** Current state of the identity (optional) */
-  state?: string;
+  state?: IdentityState;
   /** Created timestamp (optional) */
   created_at?: string;
   /** Updated timestamp (optional) */

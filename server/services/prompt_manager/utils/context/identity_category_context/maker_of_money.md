@@ -8,15 +8,12 @@
 
 ## Category-Specific Approach
 
-**Language Elevation**: Help transform job-focused language into identity-based language:
-- "Sales rep" → "Connector" or "Builder" 
-- "Manager" → "Leader" or "Organizer"
-- "Freelancer" → "Creator" or "Specialist"
+**The question**: "Who are you in relation to making money? Who wakes up and generates income in your life?"
 
-**Key Questions to Explore**:
-- "Who wakes up in the morning and makes money in your life?"
-- "Which identity feels most energizing for generating income?"
-- "Where do opportunities flow most naturally to you?"
+**If they're stuck, suggest simple options based on their work/career from User Notes**:
+- Builder, Seller, Creator, Leader, Connector, Organizer, Specialist
+
+**Keep names simple**: Single words work best for now
 
 ## Natural Resistance Responses
 

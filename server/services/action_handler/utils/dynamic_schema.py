@@ -1,31 +1,7 @@
 from typing import Optional, Dict, Type, List
 from pydantic import Field, create_model, BaseModel
 from enums.action_type import ActionType
-from services.action_handler.models.actions import (
-    SelectIdentityFocusAction,
-    SetCurrentIdentityAction,
-    CreateIdentityAction,
-    UpdateIdentityNameAction,
-    UpdateIdentityAffirmationAction,
-    UpdateIdentityVisualizationAction,
-    UpdateIdentityAction,
-    AcceptIdentityAction,
-    AcceptIdentityRefinementAction,
-    AcceptIdentityAffirmationAction,
-    AcceptIdentityVisualizationAction,
-    TransitionPhaseAction,
-    AddIdentityNoteAction,
-    SkipIdentityCategoryAction,
-    UpdateWhoYouAreAction,
-    UpdateWhoYouWantToBeAction,
-    UnskipIdentityCategoryAction,
-    AddUserNoteAction,
-    UpdateUserNoteAction,
-    DeleteUserNoteAction,
-    UpdateAskedQuestionsAction,
-    ShowIntroductionCannedResponseComponentAction,
-    ShowAcceptIAMComponentAction,
-)
+from services.action_handler.models.actions import *
 
 from services.logger import configure_logging
 
@@ -35,13 +11,15 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.SELECT_IDENTITY_FOCUS: SelectIdentityFocusAction,
     ActionType.SET_CURRENT_IDENTITY: SetCurrentIdentityAction,
     ActionType.CREATE_IDENTITY: CreateIdentityAction,
+    ActionType.CREATE_MULTIPLE_IDENTITIES: CreateMultipleIdentitiesAction,
     ActionType.UPDATE_IDENTITY_NAME: UpdateIdentityNameAction,
-    ActionType.UPDATE_IDENTITY_AFFIRMATION: UpdateIdentityAffirmationAction,
+    ActionType.UPDATE_I_AM_STATEMENT: UpdateIAmAction,
     ActionType.UPDATE_IDENTITY_VISUALIZATION: UpdateIdentityVisualizationAction,
     ActionType.UPDATE_IDENTITY: UpdateIdentityAction,
     ActionType.ACCEPT_IDENTITY: AcceptIdentityAction,
     ActionType.ACCEPT_IDENTITY_REFINEMENT: AcceptIdentityRefinementAction,
-    ActionType.ACCEPT_IDENTITY_AFFIRMATION: AcceptIdentityAffirmationAction,
+    ActionType.ACCEPT_IDENTITY_COMMITMENT: AcceptIdentityCommitmentAction,
+    ActionType.ACCEPT_I_AM_STATEMENT: AcceptIAmAction,
     ActionType.ACCEPT_IDENTITY_VISUALIZATION: AcceptIdentityVisualizationAction,
     ActionType.TRANSITION_PHASE: TransitionPhaseAction,
     ActionType.ADD_IDENTITY_NOTE: AddIdentityNoteAction,
@@ -55,6 +33,9 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.UPDATE_ASKED_QUESTIONS: UpdateAskedQuestionsAction,
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT: ShowIntroductionCannedResponseComponentAction,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT: ShowAcceptIAMComponentAction,
+    ActionType.SHOW_COMBINE_IDENTITIES: ShowCombineIdentitiesAction,
+    ActionType.COMBINE_IDENTITIES: CombineIdentitiesAction,
+    ActionType.PERSIST_COMBINE_IDENTITIES: PersistCombineIdentitiesAction,
 }
 
 

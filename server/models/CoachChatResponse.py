@@ -4,13 +4,15 @@ from services.action_handler.models.actions import (
     SelectIdentityFocusAction,
     SetCurrentIdentityAction,
     CreateIdentityAction,
+    CreateMultipleIdentitiesAction,
     UpdateIdentityAction,
     UpdateIdentityNameAction,
-    UpdateIdentityAffirmationAction,
+    UpdateIAmAction,
     UpdateIdentityVisualizationAction,
     AcceptIdentityAction,
     AcceptIdentityRefinementAction,
-    AcceptIdentityAffirmationAction,
+    AcceptIdentityCommitmentAction,
+    AcceptIAmAction,
     AcceptIdentityVisualizationAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
@@ -21,6 +23,8 @@ from services.action_handler.models.actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
+    ShowCombineIdentitiesAction,
+    PersistCombineIdentitiesAction,
 )
 
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
@@ -38,14 +42,17 @@ class CoachChatResponse(BaseModel):
     create_identity: Optional[CreateIdentityAction] = Field(
         default=None, description="Perform the create_identity action."
     )
+    create_multiple_identities: Optional[CreateMultipleIdentitiesAction] = Field(
+        default=None, description="Perform the create_multiple_identities action."
+    )
     update_identity: Optional[UpdateIdentityAction] = Field(
         default=None, description="Perform the update_identity action."
     )
     update_identity_name: Optional[UpdateIdentityNameAction] = Field(
         default=None, description="Perform the update_identity_name action."
     )
-    update_identity_affirmation: Optional[UpdateIdentityAffirmationAction] = Field(
-        default=None, description="Perform the update_identity_affirmation action."
+    update_i_am_statement: Optional[UpdateIAmAction] = Field(
+        default=None, description="Perform the update_i_am_statement action."
     )
     update_identity_visualization: Optional[UpdateIdentityVisualizationAction] = Field(
         default=None, description="Perform the update_identity_visualization action."
@@ -56,8 +63,11 @@ class CoachChatResponse(BaseModel):
     accept_identity_refinement: Optional[AcceptIdentityRefinementAction] = Field(
         default=None, description="Perform the accept_identity_refinement action."
     )
-    accept_identity_affirmation: Optional[AcceptIdentityAffirmationAction] = Field(
-        default=None, description="Perform the accept_identity_affirmation action."
+    accept_identity_commitment: Optional[AcceptIdentityCommitmentAction] = Field(
+        default=None, description="Perform the accept_identity_commitment action."
+    )
+    accept_i_am_statement: Optional[AcceptIAmAction] = Field(
+        default=None, description="Perform the accept_i_am_statement action."
     )
     accept_identity_visualization: Optional[AcceptIdentityVisualizationAction] = Field(
         default=None, description="Perform the accept_identity_visualization action."
@@ -89,9 +99,16 @@ class CoachChatResponse(BaseModel):
     set_current_identity: Optional[SetCurrentIdentityAction] = Field(
         default=None, description="Perform the set_current_identity action."
     )
+    # Components
     show_introduction_canned_response_component: Optional[ShowIntroductionCannedResponseComponentAction] = Field(
         default=None, description="Show the introduction canned response component."
     )
     show_accept_i_am_component: Optional[ShowAcceptIAMComponentAction] = Field(
         default=None, description="Show the Accept I Am component."
+    )
+    show_combine_identities: Optional[ShowCombineIdentitiesAction] = Field(
+        default=None, description="Show the combine identities component."
+    )
+    persist_combine_identities: Optional[PersistCombineIdentitiesAction] = Field(
+        default=None, description="Persist the combine identities component for historical display."
     )

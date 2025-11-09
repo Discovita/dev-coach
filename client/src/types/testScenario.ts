@@ -1,5 +1,6 @@
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { IdentityCategory } from "@/enums/identityCategory";
+import { IdentityState } from "@/enums/identityState";
 import { GetToKnowYouQuestions } from "@/enums/getToKnowYouQuestions";
 import { ActionType } from "@/enums/actionType";
 
@@ -36,9 +37,16 @@ export interface TestScenarioCoachState {
 export interface TestScenarioIdentity {
   name: string;
   category: IdentityCategory;
-  affirmation?: string;
+  state?: IdentityState;
+  i_am_statement?: string;
   visualization?: string;
   notes?: string[];
+  /**
+   * S3 URL for the image (stored as string in test scenario template).
+   * Note: When identities are fetched directly from the API (not from template),
+   * use the Identity type which has image as ImageSizes object with multiple sizes.
+   */
+  image?: string;
 }
 
 export interface TestScenarioChatMessage {

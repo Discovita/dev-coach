@@ -12,6 +12,8 @@ import {
   TestScenarioUserNote,
   TestScenarioAction,
 } from "@/types/testScenario";
+import { CoachingPhase } from "@/enums/coachingPhase";
+import { IdentityCategory } from "@/enums/identityCategory";
 import TestScenarioGeneralForm from "@/pages/test/components/TestScenarioGeneralForm";
 import TestScenarioUserForm from "@/pages/test/components/TestScenarioUserForm";
 import TestScenarioCoachStateForm from "@/pages/test/components/TestScenarioCoachStateForm";
@@ -26,6 +28,7 @@ interface TestScenarioEditorProps {
     name: string;
     description: string;
     template: TestScenarioTemplate;
+    imageFiles?: Map<number, File>;
   }) => void;
   onCancel: () => void;
   onDelete?: () => void;
@@ -146,6 +149,7 @@ const TestScenarioEditor = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
+  const [identityImageFiles, setIdentityImageFiles] = useState<Map<number, File>>(new Map());
 
   // Update state when scenario prop changes
   useEffect(() => {
@@ -258,17 +262,37 @@ const TestScenarioEditor = ({
     }
     try {
       console.log("Identities being sent:", identities);
+      // Build template with required sections and defaults
+      const template: TestScenarioTemplate = {
+        user: { first_name: firstName, last_name: lastName },
+        coach_state: {
+          current_phase: coachState.current_phase || CoachingPhase.INTRODUCTION,
+          identity_focus: coachState.identity_focus || IdentityCategory.PASSIONS_AND_TALENTS,
+          who_you_are: coachState.who_you_are || [],
+          who_you_want_to_be: coachState.who_you_want_to_be || [],
+          ...coachState, // Include any other coach state fields
+        },
+      };
+
+      // Only include optional sections if they have meaningful data
+      if (identities && identities.length > 0) {
+        template.identities = identities;
+      }
+      if (chatMessages && chatMessages.length > 0) {
+        template.chat_messages = chatMessages;
+      }
+      if (userNotes && userNotes.length > 0) {
+        template.user_notes = userNotes;
+      }
+      if (actions && actions.length > 0) {
+        template.actions = actions;
+      }
+
       onSave({
         name,
         description,
-        template: {
-          user: { first_name: firstName, last_name: lastName },
-          coach_state: coachState,
-          identities: identities,
-          chat_messages: chatMessages,
-          user_notes: userNotes,
-          actions: actions,
-        },
+        template,
+        imageFiles: identityImageFiles.size > 0 ? identityImageFiles : undefined,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -330,6 +354,7 @@ const TestScenarioEditor = ({
           <TestScenarioIdentitiesForm
             value={identities}
             onChange={setIdentities}
+            onImageFilesChange={setIdentityImageFiles}
           />
         </TabsContent>
         <TabsContent value="chat_messages">

@@ -3,13 +3,15 @@
  */
 export enum ActionType {
   CREATE_IDENTITY = "create_identity",
+  CREATE_MULTIPLE_IDENTITIES = "create_multiple_identities",
   UPDATE_IDENTITY = "update_identity",
   UPDATE_IDENTITY_NAME = "update_identity_name",
-  UPDATE_IDENTITY_AFFIRMATION = "update_identity_affirmation",
+  UPDATE_I_AM_STATEMENT = "update_i_am_statement",
   UPDATE_IDENTITY_VISUALIZATION = "update_identity_visualization",
   ACCEPT_IDENTITY = "accept_identity",
   ACCEPT_IDENTITY_REFINEMENT = "accept_identity_refinement",
-  ACCEPT_IDENTITY_AFFIRMATION = "accept_identity_affirmation",
+  ACCEPT_IDENTITY_COMMITMENT = "accept_identity_commitment",
+  ACCEPT_I_AM_STATEMENT = "accept_i_am_statement",
   ACCEPT_IDENTITY_VISUALIZATION = "accept_identity_visualization",
   ADD_IDENTITY_NOTE = "add_identity_note",
   TRANSITION_PHASE = "transition_phase",
@@ -21,4 +23,8 @@ export enum ActionType {
   UNSKIP_IDENTITY_CATEGORY = "unskip_identity_category",
   UPDATE_ASKED_QUESTIONS = "update_asked_questions",
   SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component",
+  SHOW_BRAINSTORMING_IDENTITIES = "show_brainstorming_identities",
+  SHOW_COMBINE_IDENTITIES = "show_combine_identities",
+  COMBINE_IDENTITIES = "combine_identities",
+  PERSIST_COMBINE_IDENTITIES = "persist_combine_identities",
 }

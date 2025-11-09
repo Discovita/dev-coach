@@ -11,31 +11,7 @@ from typing import Dict, List
 from enums.action_type import ActionType
 
 # Import the action models for each action type
-from services.action_handler.models.actions import (
-    SelectIdentityFocusAction,
-    SetCurrentIdentityAction,
-    CreateIdentityAction,
-    UpdateIdentityNameAction,
-    UpdateIdentityAffirmationAction,
-    UpdateIdentityVisualizationAction,
-    UpdateIdentityAction,
-    AcceptIdentityAction,
-    AcceptIdentityRefinementAction,
-    AcceptIdentityAffirmationAction,
-    AcceptIdentityVisualizationAction,
-    TransitionPhaseAction,
-    AddIdentityNoteAction,
-    SkipIdentityCategoryAction,
-    UnskipIdentityCategoryAction,
-    UpdateWhoYouAreAction,
-    UpdateWhoYouWantToBeAction,
-    AddUserNoteAction,
-    UpdateUserNoteAction,
-    DeleteUserNoteAction,
-    UpdateAskedQuestionsAction,
-    ShowIntroductionCannedResponseComponentAction,
-    ShowAcceptIAMComponentAction,
-)
+from services.action_handler.models.actions import *
 
 # Map ActionType to their parameter models and descriptions for prompt generation
 # Each entry should have a clear, concise description and the corresponding Pydantic model
@@ -52,13 +28,17 @@ ACTION_PARAMS = {
         "description": "Creates a new Identity for the user. DO NOT create duplicate Identities. Ask yourself - Has the user expressed consent to create this Identity? If the answer is no, don't create a new one. DO NOT preemptively create Identities for the user.",
         "model": CreateIdentityAction,
     },
+    ActionType.CREATE_MULTIPLE_IDENTITIES: {
+        "description": "Creates multiple new Identities for the user at once. Use this when the user has provided multiple identity concepts that should all be created together. DO NOT create duplicate Identities. Ask yourself - Has the user expressed consent to create these Identities? If the answer is no, don't create them. DO NOT preemptively create Identities for the user.",
+        "model": CreateMultipleIdentitiesAction,
+    },
     ActionType.UPDATE_IDENTITY_NAME: {
         "description": "Update the name of an existing Identity.",
         "model": UpdateIdentityNameAction,
     },
-    ActionType.UPDATE_IDENTITY_AFFIRMATION: {
-        "description": "Update the affirmation of an existing Identity.",
-        "model": UpdateIdentityAffirmationAction,
+    ActionType.UPDATE_I_AM_STATEMENT: {
+        "description": "Update the 'I Am' statement of an existing Identity.",
+        "model": UpdateIAmAction,
     },
     ActionType.UPDATE_IDENTITY_VISUALIZATION: {
         "description": "Update the visualization of an existing Identity.",
@@ -76,9 +56,13 @@ ACTION_PARAMS = {
         "description": "Mark an Identity as refinement_complete.",
         "model": AcceptIdentityRefinementAction,
     },
-    ActionType.ACCEPT_IDENTITY_AFFIRMATION: {
-        "description": "Mark an Identity as affirmation_complete.",
-        "model": AcceptIdentityAffirmationAction,
+    ActionType.ACCEPT_IDENTITY_COMMITMENT: {
+        "description": "Mark an Identity as commitment_complete.",
+        "model": AcceptIdentityCommitmentAction,
+    },
+    ActionType.ACCEPT_I_AM_STATEMENT: {
+        "description": "Mark an Identity as i_am_complete.",
+        "model": AcceptIAmAction,
     },
     ActionType.ACCEPT_IDENTITY_VISUALIZATION: {
         "description": "Mark an Identity as visualization_complete.",
@@ -129,8 +113,20 @@ ACTION_PARAMS = {
         "model": ShowIntroductionCannedResponseComponentAction,
     },
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT: {
-        "description": "Show an 'Accept I Am' component asking the user to accept the proposed affirmation or keep working on it. Pass the identity id and the proposed affirmation.",
+        "description": "Show an 'Accept I Am' component asking the user to accept the proposed 'I Am' statement or keep working on it. Pass the identity id and the proposed 'I Am' statement.",
         "model": ShowAcceptIAMComponentAction,
+    },
+    ActionType.SHOW_COMBINE_IDENTITIES: {
+        "description": "Show a component that displays two identities side-by-side with Yes/No buttons to confirm combining them.",
+        "model": ShowCombineIdentitiesAction,
+    },
+    ActionType.COMBINE_IDENTITIES: {
+        "description": "Combine two identities. Exactly two identities are required. Category-specific rules apply.",
+        "model": CombineIdentitiesAction,
+    },
+    ActionType.PERSIST_COMBINE_IDENTITIES: {
+        "description": "Persist the combine identities component configuration to the chat message for historical display.",
+        "model": PersistCombineIdentitiesAction,
     },
 }
 

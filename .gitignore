@@ -51,3 +51,5 @@ backend/public/*
 
 
 .cursor
+.claude
+.mcp.json

@@ -10,7 +10,7 @@ from apps.prompts.models import Prompt
 from apps.users.models import User
 from enums.action_type import ActionType
 from services.prompt_manager import gather_prompt_context, format_for_provider
-from services.action_handler.utils.dynamic_schema import build_dynamic_response_format
+from services.action_handler.utils import build_dynamic_response_format
 from services.prompt_manager.utils import (
     prepend_system_context,
     prepend_user_notes,
@@ -20,6 +20,8 @@ from services.prompt_manager.utils import (
 )
 from services.logger import configure_logging
 from enums.prompt_type import PromptType
+from typing import Tuple, Union, Dict, Any
+from pydantic import BaseModel
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -35,7 +37,7 @@ class PromptManager:
     # TODO: Need to add identity_instructions to the prompt
     def create_chat_prompt(
         self, user: User, model: AIModel, version_override: int = None
-    ) -> str:
+    ) -> Tuple[str, Union[BaseModel, Dict[str, Any]]]:
         """
         Create a prompt for the chat endpoint using the user's context.
         Orchestrates context collection, prompt formatting, and action instructions.
@@ -43,7 +45,7 @@ class PromptManager:
             user: The Django User instance for whom to build the prompt.
             version_override: Optional version number to override the default prompt version.
         Returns:
-            str: prompt for the chat endpoint.
+            Tuple[str, Type[BaseModel]]: prompt for the chat endpoint and the response format.
         """
         # 1. Retrieve the user's CoachState
         coach_state = CoachState.objects.get(user=user)
@@ -57,7 +59,7 @@ class PromptManager:
         )
         if version_override is not None:
             prompt_queryset = prompt_queryset.filter(version=version_override)
-        prompt = prompt_queryset.order_by("-version").first()
+        prompt: Prompt = prompt_queryset.order_by("-version").first()
         if not prompt:
             raise ValueError(f"No prompt found for state {state_value}")
         # 3. Gather context for the prompt
@@ -87,7 +89,7 @@ class PromptManager:
             )
         else:
             log.warning(
-                f"Prompt {prompt.id} has no allowed actions. Using all action instructions."
+                f"Prompt {prompt.name} has no allowed actions. Using all action instructions."
             )
             coach_prompt = append_action_instructions(
                 coach_prompt, ActionType.get_all_actions()

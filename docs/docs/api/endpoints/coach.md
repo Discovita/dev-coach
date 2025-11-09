@@ -80,7 +80,7 @@
       "id": "uuid-string",
       "user": "user-uuid",
       "name": "Creative Visionary",
-      "affirmation": "I am a bold creator, transforming ideas into reality.",
+      "i_am_statement": "I am a bold creator, transforming ideas into reality.",
       "visualization": "I see myself confidently presenting innovative solutions...",
       "state": "ACCEPTED",
       "notes": ["Note 1", "Note 2"],

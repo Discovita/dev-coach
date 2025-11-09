@@ -8,17 +8,12 @@
 
 ## Category-Specific Approach
 
-**Body as Vehicle**: Frame the body as their "suit for while you're here" or "vehicle" that needs tending, rather than focusing on appearance or performance standards.
+**The question**: "How do you care for your vessel that you live inside? What's your brand of caring for your physical self?"
 
-**Key Questions to Explore**:
-- "How do you care for your vessel that you live inside?"
-- "What's your brand of caring for your physical self?"
-- "Everyone manifests differently in this area—what's your particular way?"
+**If they're stuck, suggest simple options**:
+- Mover, Builder, Optimizer, Nourisher, Athlete, Warrior, Healer, Tender
 
-**Language Elevation**: Transform obligation-based language into empowering identity language:
-- "Should exercise" → "Mover" or "Builder"
-- "Health focused" → "Optimizer" or "Tender"
-- "Diet conscious" → "Nourisher" or "Fueler"
+**Keep names simple**: Single words work best.
 
 ## Natural Resistance Responses
 

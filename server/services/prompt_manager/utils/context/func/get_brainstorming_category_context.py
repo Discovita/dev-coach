@@ -3,8 +3,9 @@ from apps.coach_states.models import CoachState
 from enums.identity_category import IdentityCategory
 from services.logger import configure_logging
 
-log = configure_logging(__name__, log_level="DEBUG")
+log = configure_logging(__name__, log_level="INFO")
 
+# TODO: These need to just have their own prompt type in the database.
 # Map IdentityCategory values to markdown file paths
 CATEGORY_CONTEXT_FILES = {
     IdentityCategory.PASSIONS: "services/prompt_manager/utils/context/identity_category_context/passions_and_talents.md",
@@ -17,6 +18,7 @@ CATEGORY_CONTEXT_FILES = {
     IdentityCategory.ROMANTIC: "services/prompt_manager/utils/context/identity_category_context/romantic_relation.md",
     IdentityCategory.ACTION: "services/prompt_manager/utils/context/identity_category_context/doer_of_things.md",
 }
+
 
 def get_brainstorming_category_context(coach_state: CoachState) -> str:
     """
@@ -32,4 +34,4 @@ def get_brainstorming_category_context(coach_state: CoachState) -> str:
         with open(abs_path, "r") as f:
             return f.read()
     except Exception as e:
-        return f"Could not load context for {category}: {str(e)}" 
+        return f"Could not load context for {category}: {str(e)}"

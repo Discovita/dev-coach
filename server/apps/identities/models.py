@@ -5,15 +5,18 @@ from enums.identity_category import IdentityCategory
 from enums.identity_state import IdentityState
 from apps.users.models import User
 from django.contrib.postgres.fields import ArrayField
+from apps.core.models import ImageMixin
 
 
 # The Identity model stores a single identity for a user, including its state, notes, and category.
 # This model is used in the coaching system to track user identities and their progress.
 # Referenced in: CoachState, coaching logic, admin, and API serializers.
-class Identity(models.Model):
+class Identity(ImageMixin, models.Model):
     """
     Represents a single identity with its state for a user in the coaching system.
     """
+
+    # NOTE: Image field inherited from ImageMixin (VersatileImageField with UUID-based paths)
 
     id = models.UUIDField(
         primary_key=True,
@@ -34,7 +37,7 @@ class Identity(models.Model):
         blank=True,
         help_text="A concise label for the identity (e.g., 'Creative Visionary')",
     )
-    affirmation = models.TextField(
+    i_am_statement = models.TextField(
         help_text="An 'I am' statement with a brief description",
         null=True,
         blank=True,
@@ -47,7 +50,7 @@ class Identity(models.Model):
     state = models.CharField(
         max_length=32,
         choices=IdentityState.choices,
-        default=IdentityState.ACCEPTED,
+        default=IdentityState.PROPOSED,
         help_text="Current state of the identity (proposed, accepted, refinement complete).",
         null=True,
         blank=True,
@@ -83,7 +86,6 @@ class Identity(models.Model):
         """
         return f"{self.name[:30]} ({self.get_category_display()}) - {self.get_state_display()}"
 
-
-class Meta:
-    verbose_name = "Identity"
-    verbose_name_plural = "Identities"
+    class Meta:
+        verbose_name = "Identity"
+        verbose_name_plural = "Identities"

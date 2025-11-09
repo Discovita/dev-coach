@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useChatMessages } from "@/hooks/use-chat-messages";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
-import { Message } from "@/types/message";
+import { useProfile } from "@/hooks/use-profile";
 import { useState } from "react";
 import { ConversationResetterDialog } from "./ConversationResetterDialog";
 
@@ -11,7 +9,7 @@ import { ConversationResetterDialog } from "./ConversationResetterDialog";
  * Allows the user to reset (delete) their entire conversation history.
  *
  * Step-by-step:
- * 1. Get the current user profile and chat messages from the query cache.
+ * 1. Get the current user profile and chat messages using hooks.
  * 2. Show a button to open the reset confirmation dialog if the user is logged in.
  * 3. When the dialog is open, user can confirm or cancel the reset.
  * 4. If confirmed, call the resetChatMessages mutation from useChatMessages.
@@ -21,11 +19,11 @@ import { ConversationResetterDialog } from "./ConversationResetterDialog";
  * Used in: Any test or admin page where conversation reset is needed.
  */
 export const ConversationResetter = () => {
-  // Get user profile and chat messages from the query cache
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
+  // Get user profile and chat messages using hooks
+  const { profile } = useProfile();
   const userId = profile?.id;
-  const messages =
-    useReactiveQueryData<Message[]>(["user", "chatMessages"]) || [];
+  const { chatMessages } = useChatMessages();
+  const messages = chatMessages || [];
 
   // Get the reset mutation and its status
   const { resetChatMessages, resetStatus } = useChatMessages();

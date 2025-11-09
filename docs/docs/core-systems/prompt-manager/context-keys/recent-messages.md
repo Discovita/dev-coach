@@ -38,6 +38,14 @@ def get_recent_messages_context(coach_state: CoachState, num_messages: int = 5) 
     Retrieves the most recent chat messages for the user associated with the given coach_state.
     Also includes all actions taken by the coach that occurred between messages to provide timeline context.
     Formats these messages into a markdown-friendly string, with a heading.
+
+    Output format:
+    ## Recent conversation
+    **Role:**
+    Content
+    **Action:**
+    [Action description with details]
+    ...
     """
     user = coach_state.user
     recent_messages: List[ChatMessage] = user.chat_messages.all().order_by("-timestamp")[:num_messages]
@@ -57,16 +65,18 @@ def get_recent_messages_context(coach_state: CoachState, num_messages: int = 5) 
     for msg in recent_messages:
         timeline_events.append({"type": "message", "timestamp": msg.timestamp, "data": msg})
 
-    # Add actions to timeline
+    # Add actions to timeline - place them right after their triggering message
     for action in recent_actions:
+        # Use action timestamp, but if it's very close to the message timestamp,
+        # we'll place it after the message in the timeline
         timeline_events.append({
             "type": "action",
             "timestamp": action.timestamp,
             "data": action,
-            "message_id": action.coach_message.id,
+            "message_id": action.coach_message.id,  # For sorting purposes
         })
 
-    # Sort timeline by timestamp (oldest first)
+    # Sort timeline by timestamp (oldest first), and for actions, place them after their message
     timeline_events.sort(key=lambda x: (x["timestamp"], x.get("type") == "action"))
 
     # Format the timeline events
@@ -82,4 +92,16 @@ def get_recent_messages_context(coach_state: CoachState, num_messages: int = 5) 
 
     messages_block = "\n".join(formatted_messages)
     return f"## Recent conversation\n\n{messages_block}\n"
+
+
+def _format_action_description(action: Action) -> str:
+    """
+    Format an action into a human-readable description.
+    Provides a fallback if the result_summary isn't available for whatever reason
+    """
+    if action.result_summary:
+        return action.result_summary
+
+    action_type = action.action_type
+    return f"Performed {action_type.replace('_', ' ')} action"
 ```

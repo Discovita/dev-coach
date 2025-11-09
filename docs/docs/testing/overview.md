@@ -55,7 +55,7 @@ Each scenario template contains sections for different aspects of a user's state
   "user": { "first_name": "John", "last_name": "Doe", "email": "john@example.com" },
   "coach_state": { "current_phase": "IDENTITY_BRAINSTORMING", "identity_focus": "CAREER" },
   "identities": [
-    { "name": "Career Professional", "category": "CAREER", "affirmation": "I am..." }
+    { "name": "Career Professional", "category": "CAREER", "i_am_statement": "I am..." }
   ],
   "chat_messages": [
     { "role": "user", "content": "I want to improve my career" },

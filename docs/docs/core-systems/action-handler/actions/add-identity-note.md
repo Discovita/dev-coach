@@ -27,9 +27,10 @@ Adds a note to an existing identity. Notes are appended to the existing notes li
 ## Implementation Steps
 
 1. **Identity Retrieval**: Gets the identity by ID and user
-2. **Note Addition**: Appends the new note to the existing notes list
-3. **Save**: Saves the updated identity
-4. **Action Logging**: Records the action with details
+2. **Duplicate Check**: Checks if the note already exists to prevent duplicates
+3. **Note Addition**: Appends the new note to the existing notes list if not duplicate
+4. **Save**: Saves the updated identity
+5. **Action Logging**: Records the action with details
 
 ## Example Usage
 
@@ -46,7 +47,8 @@ Adds a note to an existing identity. Notes are appended to the existing notes li
 ## Result
 
 - **Success**: Adds the note to the identity and returns the updated identity object
-- **Logging**: Records the action with result summary: "Added note to identity 'Visionary Entrepreneur'"
+- **Duplicate**: Returns without adding if the note already exists
+- **Logging**: Records the action with result summary: "Added note to identity 'Visionary Entrepreneur': [note text]"
 
 ## Related Actions
 

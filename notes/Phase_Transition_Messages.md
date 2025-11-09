@@ -58,7 +58,7 @@ What we've just done can be a lot for some. Here's what I'd like you to do - I'd
 
 - "Excellent work, {user_name}! You've created some truly inspiring identity names. Now that you have these powerful identities, let's take the next step to really internalize them and build your confidence in embodying these roles. The next phase will help you affirm and strengthen your belief in these identities so they become a natural part of how you see yourself. Are you ready? 
 
-## Identity Affirmation
+## I Am Statements
 
 ### First Message
 

@@ -58,8 +58,11 @@ export const authFetch = async (
 
   // Set default headers if not provided
   options.headers = options.headers || {};
-  options.headers["Content-Type"] =
-    options.headers["Content-Type"] || "application/json";
+  // Don't set Content-Type for FormData - browser will set it with boundary
+  if (!(options.body instanceof FormData)) {
+    options.headers["Content-Type"] =
+      options.headers["Content-Type"] || "application/json";
+  }
 
   // Include the access token in the Authorization header
   if (accessToken) {

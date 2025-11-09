@@ -1,24 +1,7 @@
 from enums.context_keys import ContextKey
 from apps.coach_states.models import CoachState
-from services.prompt_manager.utils.context.func import (
-    get_user_name_context,
-    get_identities_context,
-    get_number_of_identites_context,
-    get_identity_focus_context,
-    get_who_you_are,
-    get_who_you_want_to_be,
-    get_focused_identities_context,
-    get_user_notes_context,
-    get_current_message_context,
-    get_previous_message_context,
-    get_current_phase_context,
-    get_brainstorming_category_context,
-    get_current_identity_context,
-    get_asked_questions,
-    get_refinement_identities_context,
-    get_affirmation_identities_context,
-    get_visualization_identities_context,
-)
+from services.prompt_manager.utils.context.func import *
+
 
 def get_context_value(key: ContextKey, coach_state: CoachState):
     """
@@ -55,8 +38,10 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_asked_questions(coach_state)
     elif key == ContextKey.REFINEMENT_IDENTITIES:
         return get_refinement_identities_context(coach_state)
-    elif key == ContextKey.AFFIRMATION_IDENTITIES:
-        return get_affirmation_identities_context(coach_state)
+    elif key == ContextKey.COMMITMENT_IDENTITIES:
+        return get_commitment_identities_context(coach_state)
+    elif key == ContextKey.I_AM_IDENTITIES:
+        return get_i_am_identities_context(coach_state)
     elif key == ContextKey.VISUALIZATION_IDENTITIES:
         return get_visualization_identities_context(coach_state)
     # Add more context key handlers as needed

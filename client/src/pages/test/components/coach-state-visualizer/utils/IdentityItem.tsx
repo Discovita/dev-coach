@@ -11,6 +11,7 @@ import {
   CheckCircleIcon,
   AlertCircleIcon,
   StarIcon,
+  TargetIcon,
 } from "lucide-react";
 
 interface IdentityItemProps {
@@ -22,24 +23,31 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
 
   // Get state display info
   const getStateInfo = (state?: string) => {
+    console.log("state", state);
     switch (state) {
-      case IdentityState.PROPOSED:
+      case IdentityState.PROPOSED.toString():
         return {
           icon: AlertCircleIcon,
           color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
           label: "Proposed",
         };
-      case IdentityState.ACCEPTED:
+      case IdentityState.ACCEPTED.toString():
         return {
           icon: CheckCircleIcon,
           color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
           label: "Accepted",
         };
-      case IdentityState.REFINEMENT_COMPLETE:
+      case IdentityState.REFINEMENT_COMPLETE.toString():
         return {
           icon: StarIcon,
           color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
           label: "Refinement Complete",
+        };
+      case IdentityState.COMMITMENT_COMPLETE.toString():
+        return {
+          icon: TargetIcon,
+          color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+          label: "Commitment Complete",
         };
       default:
         return {
@@ -55,12 +63,12 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
 
   // Check if there are expandable details
   const hasExpandableDetails = 
-    identity.affirmation || 
+    identity.i_am_statement || 
     identity.visualization || 
     (identity.notes && identity.notes.length > 0);
 
   return (
-    <div className="border rounded-md overflow-hidden bg-white dark:bg-neutral-800 shadow">
+    <div className="_IdentityItem border rounded-md overflow-hidden bg-white dark:bg-neutral-800 shadow">
       <div
         className="flex justify-between items-center px-4 py-2 bg-gold-100 dark:bg-gold-900/20 cursor-pointer transition-colors"
         onClick={() => hasExpandableDetails && setIsExpanded(!isExpanded)}
@@ -94,14 +102,14 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
             </Badge>
           </div>
 
-          {/* Affirmation */}
-          {identity.affirmation && (
+          {/* I Am Statement */}
+          {identity.i_am_statement && (
             <div className="mb-3">
               <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                <strong>Affirmation:</strong>
+                <strong>I Am Statement:</strong>
               </div>
               <div className="text-xs text-[#333] dark:text-gold-50 italic">
-                "{identity.affirmation}"
+                "{identity.i_am_statement}"
               </div>
             </div>
           )}

@@ -3,19 +3,22 @@ Utility to format a generation prompt for a specific AI provider.
 Used by prompt_manager and generation prompt logic.
 """
 
+import os
+import time
 from pydantic import BaseModel
 from enums.ai import AIProvider
 from services.prompt_manager.models import PromptContext
 from services.prompt_manager.utils import log_context_stats
 from apps.prompts.models import Prompt
+from typing import Dict, Any, Tuple, Union
 
 
 def format_for_provider(
     prompt: Prompt,
     prompt_context: PromptContext,
     provider: AIProvider,
-    response_format: BaseModel,
-):
+    response_format: BaseModel | Dict[str, Any],
+) -> Tuple[str, Union[BaseModel, Dict[str, Any]]]:
     """Internal helper to apply provider-specific formatting to the prompt body."""
     log_context_stats(prompt_context)
     prompt_body = prompt.body
@@ -33,7 +36,12 @@ def format_for_provider(
     if provider == AIProvider.OPENAI:
         pass  # No additional formatting needed for OpenAI
     elif provider == AIProvider.ANTHROPIC:
-        response_format_schema = response_format.model_json_schema()
-        prompt_body += f"\n\nYour response must be in the form of a JSON object.\n{response_format_schema}"
+        response_format = response_format.model_json_schema()
+        prompt_body += f"\n\nYour response must be in the form of a JSON object.\n{response_format}"
+
+    # Add cache busting to the main prompt section itself
+    if "local" in os.getenv("DJANGO_SETTINGS_MODULE", ""):
+        timestamp = int(time.time())
+        prompt_body = f"# Main Prompt Cache bust: {timestamp}\n{prompt_body}"
 
     return prompt_body, response_format

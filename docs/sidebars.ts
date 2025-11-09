@@ -59,7 +59,7 @@ const sidebars: SidebarsConfig = {
                 "core-systems/prompt-manager/context-keys/current-identity",
                 "core-systems/prompt-manager/context-keys/focused-identities",
                 "core-systems/prompt-manager/context-keys/refinement-identities",
-                "core-systems/prompt-manager/context-keys/affirmation-identities",
+                "core-systems/prompt-manager/context-keys/i-am-identities",
                 "core-systems/prompt-manager/context-keys/visualization-identities",
                 "core-systems/prompt-manager/context-keys/current-phase",
                 "core-systems/prompt-manager/context-keys/who-you-are",
@@ -108,11 +108,11 @@ const sidebars: SidebarsConfig = {
                 "core-systems/action-handler/actions/create-identity",
                 "core-systems/action-handler/actions/update-identity",
                 "core-systems/action-handler/actions/update-identity-name",
-                "core-systems/action-handler/actions/update-identity-affirmation",
+                "core-systems/action-handler/actions/update-i-am-statement",
                 "core-systems/action-handler/actions/update-identity-visualization",
                 "core-systems/action-handler/actions/accept-identity",
                 "core-systems/action-handler/actions/accept-identity-refinement",
-                "core-systems/action-handler/actions/accept-identity-affirmation",
+                "core-systems/action-handler/actions/accept-i-am-statement",
                 "core-systems/action-handler/actions/accept-identity-visualization",
                 "core-systems/action-handler/actions/add-identity-note",
                 "core-systems/action-handler/actions/transition-phase",
@@ -128,6 +128,14 @@ const sidebars: SidebarsConfig = {
                 "core-systems/action-handler/actions/delete-user-note",
               ],
             },
+          ],
+        },
+        {
+          type: "category",
+          label: "Component Renderer",
+          items: [
+            "core-systems/component-renderer/overview",
+            "core-systems/component-renderer/persistent-components",
           ],
         },
       ],
@@ -146,6 +154,7 @@ const sidebars: SidebarsConfig = {
             "api/endpoints/users",
             "api/endpoints/core",
             "api/endpoints/prompts",
+            "api/endpoints/identities",
             "api/endpoints/test-users",
             "api/endpoints/test-scenarios",
             "api/endpoints/actions",
@@ -185,6 +194,14 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Frontend",
+      items: [
+        "frontend/react_query_implementation",
+        "frontend/image-handling",
+      ],
+    },
+    {
+      type: "category",
       label: "Testing",
       items: [
         "testing/overview",
@@ -207,6 +224,7 @@ const sidebars: SidebarsConfig = {
       label: "Coach Development",
       items: [
         "development/overview",
+        "development/deployment-process",
         "development/docker-configuration",
         "development/common-commands",
       ],

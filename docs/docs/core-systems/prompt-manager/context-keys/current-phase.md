@@ -27,7 +27,7 @@ The function directly returns the `current_phase` field from the coach state.
 # Example return values
 "identity_brainstorming"  # Current phase
 "identity_refinement"     # Current phase
-"identity_affirmation"    # Current phase
+"i_am_statement"    # Current phase
 "identity_visualization"  # Current phase
 "get_to_know_you"        # Current phase
 ```

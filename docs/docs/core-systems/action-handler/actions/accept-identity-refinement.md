@@ -27,7 +27,8 @@ Sets the state of the specified identity to 'refinement_complete', indicating th
 
 1. **State Update**: Updates the identity's state to `IdentityState.REFINEMENT_COMPLETE`
 2. **Identity Retrieval**: Gets the updated identity for logging
-3. **Action Logging**: Records the action with details
+3. **Current Identity Update**: Sets the current identity to the next pending refinement
+4. **Action Logging**: Records the action with details
 
 ## Example Usage
 
@@ -48,5 +49,5 @@ Sets the state of the specified identity to 'refinement_complete', indicating th
 ## Related Actions
 
 - [Accept Identity](accept-identity) - Mark identity as accepted
-- [Accept Identity Affirmation](accept-identity-affirmation) - Mark affirmation as complete
+- [Accept "I Am" Statement](accept-i-am-statement) - Mark "I Am" Statement as complete
 - [Accept Identity Visualization](accept-identity-visualization) - Mark visualization as complete

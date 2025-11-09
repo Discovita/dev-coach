@@ -104,19 +104,28 @@ function Test() {
     name: string;
     description: string;
     template: TestScenario["template"];
+    imageFiles?: Map<number, File>;
   }) => {
     if (editingScenario) {
       // Update
       const toastId = toast.loading("Updating scenario...");
       try {
+        // Always use FormData (backend only accepts multipart/form-data)
+        const formData = new FormData();
+        formData.append("name", fields.name);
+        formData.append("description", fields.description);
+        formData.append("template", JSON.stringify(fields.template));
+        
+        // Add image files if any
+        if (fields.imageFiles && fields.imageFiles.size > 0) {
+          fields.imageFiles.forEach((file, index) => {
+            formData.append(`identity_${index}_image`, file);
+          });
+        }
+        
         await updateMutation.mutateAsync({
           id: editingScenario.id,
-          data: {
-            ...editingScenario,
-            name: fields.name,
-            description: fields.description,
-            template: fields.template,
-          },
+          data: formData as unknown as Partial<TestScenario>,
         });
         toast.success("Scenario updated. Resetting data...", { id: toastId });
         await resetTestScenario(editingScenario.id);
@@ -134,16 +143,20 @@ function Test() {
       // Create
       const toastId = toast.loading("Creating scenario...");
       try {
-        await createMutation.mutateAsync({
-          name: fields.name,
-          description: fields.description,
-          template: {
-            user: fields.template.user,
-            ...(fields.template.coach_state
-              ? { coach_state: fields.template.coach_state }
-              : {}),
-          },
-        });
+        // Always use FormData (backend only accepts multipart/form-data)
+        const formData = new FormData();
+        formData.append("name", fields.name);
+        formData.append("description", fields.description);
+        formData.append("template", JSON.stringify(fields.template));
+        
+        // Add image files if any
+        if (fields.imageFiles && fields.imageFiles.size > 0) {
+          fields.imageFiles.forEach((file, index) => {
+            formData.append(`identity_${index}_image`, file);
+          });
+        }
+        
+        await createMutation.mutateAsync(formData as unknown as Partial<TestScenario>);
         toast.success("Test scenario created successfully!", { id: toastId });
         refetch();
         setShowEditor(false);

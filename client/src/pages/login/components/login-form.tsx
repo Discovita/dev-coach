@@ -14,8 +14,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle, FaApple } from "react-icons/fa";
 
 import { useAuth } from "@/hooks/use-auth";
-import { useReactiveQueryData } from "@/hooks/useReactiveQueryData";
-import { User } from "@/types/user";
+import { useProfile } from "@/hooks/use-profile";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { FormMessage, Message } from "@/components/FormMessage";
 
 export function LoginForm({
@@ -28,9 +28,9 @@ export function LoginForm({
   const [message, setMessage] = useState<Message | null>(null);
   const navigate = useNavigate();
 
-  // Use custom hook to reactively get profile and isAdmin from the cache
-  const profile = useReactiveQueryData<User>(["user", "profile"]);
-  const isAdmin = useReactiveQueryData<boolean>(["user", "isAdmin"]);
+  // Get profile and isAdmin using hooks
+  const { profile } = useProfile();
+  const isAdmin = useIsAdmin();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

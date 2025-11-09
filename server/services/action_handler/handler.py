@@ -12,13 +12,15 @@ log = configure_logging(__name__, log_level="DEBUG")
 # Registry mapping ActionType values to their handler functions
 ACTION_REGISTRY = {
     ActionType.CREATE_IDENTITY.value: create_identity,
+    ActionType.CREATE_MULTIPLE_IDENTITIES.value: create_multiple_identities,
     ActionType.UPDATE_IDENTITY.value: update_identity,
     ActionType.UPDATE_IDENTITY_NAME.value: update_identity_name,
-    ActionType.UPDATE_IDENTITY_AFFIRMATION.value: update_identity_affirmation,
+    ActionType.UPDATE_I_AM_STATEMENT.value: update_i_am_statement,
     ActionType.UPDATE_IDENTITY_VISUALIZATION.value: update_identity_visualization,
     ActionType.ACCEPT_IDENTITY.value: accept_identity,
     ActionType.ACCEPT_IDENTITY_REFINEMENT.value: accept_identity_refinement,
-    ActionType.ACCEPT_IDENTITY_AFFIRMATION.value: accept_identity_affirmation,
+    ActionType.ACCEPT_IDENTITY_COMMITMENT.value: accept_identity_commitment,
+    ActionType.ACCEPT_I_AM_STATEMENT.value: accept_i_am_statement,
     ActionType.ACCEPT_IDENTITY_VISUALIZATION.value: accept_identity_visualization,
     ActionType.ADD_IDENTITY_NOTE.value: add_identity_note,
     ActionType.TRANSITION_PHASE.value: transition_phase,
@@ -29,6 +31,7 @@ ACTION_REGISTRY = {
     ActionType.UPDATE_WHO_YOU_ARE.value: update_who_you_are,
     ActionType.UPDATE_WHO_YOU_WANT_TO_BE.value: update_who_you_want_to_be,
     ActionType.UPDATE_ASKED_QUESTIONS.value: update_asked_questions,
+    ActionType.COMBINE_IDENTITIES.value: combine_identities,
     # Sentinel actions (not logged in the Action Table)
     ActionType.ADD_USER_NOTE.value: add_user_note,
     ActionType.UPDATE_USER_NOTE.value: update_user_note,
@@ -36,6 +39,9 @@ ACTION_REGISTRY = {
     # Component actions (return ComponentConfig)
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
+    ActionType.SHOW_COMBINE_IDENTITIES.value: show_combine_identities,
+    # Persistent component actions (return ComponentConfig)
+    ActionType.PERSIST_COMBINE_IDENTITIES.value: persist_combine_identities,
 }
 
 
@@ -104,6 +110,8 @@ def apply_coach_actions(
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()
+    log.debug(f"Coach state after actions: {coach_state}")
+    log.debug(f"Component config after actions: {component_config}")
     return coach_state, component_config
 
 
@@ -151,6 +159,21 @@ def apply_component_actions(
         except ValueError:
             # Fallback if we can't find the enum
             log.action(f"Executing component action: {action_type}")
+
+        # Convert dictionary params to appropriate Pydantic model
+        # Get the parameter model class from the action handler's signature
+        import inspect
+        sig = inspect.signature(handler_func)
+        param_annotations = list(sig.parameters.values())
+        if len(param_annotations) >= 2:  # coach_state, params, [user_message]
+            params_param = param_annotations[1]  # Second parameter is params
+            if params_param.annotation != inspect.Parameter.empty:
+                # It's a Pydantic model, convert the dict to the model
+                try:
+                    action_params = params_param.annotation(**action_params)
+                except Exception as e:
+                    log.error(f"Failed to convert params to {params_param.annotation}: {e}")
+                    continue
 
         # Execute the action handler
         if action_type in [

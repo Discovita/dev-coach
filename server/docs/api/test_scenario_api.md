@@ -111,7 +111,7 @@ These serializers define the strict schema for each section of a test scenario t
 ### TemplateIdentitySerializer
 - **Fields:**
   - `name`, `category` (required)
-  - `state`, `affirmation`, `visualization`, `notes` (optional)
+  - `state`, `i_am_statement`, `visualization`, `notes` (optional)
 
 ### TemplateChatMessageSerializer
 - **Fields:**

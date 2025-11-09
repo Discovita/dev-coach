@@ -5,8 +5,12 @@ import { ConversationExporter } from "@/pages/chat/components/ConversationExport
 import { TestScenarioConversationResetter } from "@/pages/test/components/TestScenarioConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
 import { CoachRequest } from "@/types/coachRequest";
-
-
+import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
+import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
+import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
+import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
+import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
+import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-scenario-user-coach-state";
 
 interface TestScenarioChatControlsProps {
   isProcessingMessage: boolean;
@@ -18,11 +22,20 @@ interface TestScenarioChatControlsProps {
 
 export const TestScenarioChatControls: React.FC<
   TestScenarioChatControlsProps
-> = ({ isProcessingMessage, onSendMessage, scenarioId, testUserId, onResetSuccess }) => {
+> = ({
+  isProcessingMessage,
+  onSendMessage,
+  scenarioId,
+  testUserId,
+  onResetSuccess,
+}) => {
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-
+  // Fetch coach state with active query subscription to ensure refetch on invalidation
+  // This ensures bulletins update when coachState is invalidated after sending messages
+  const { coachState } = useTestScenarioUserCoachState(testUserId);
+  const { identities } = useTestScenarioUserIdentities(testUserId);
 
   /**
    * Resizes the textarea to fit content, up to a max height.
@@ -62,9 +75,9 @@ export const TestScenarioChatControls: React.FC<
     (e: React.FormEvent) => {
       e.preventDefault();
       if (inputMessage.trim()) {
-        onSendMessage({ 
+        onSendMessage({
           message: inputMessage,
-          user_id: testUserId
+          user_id: testUserId,
         });
         setInputMessage("");
         setTimeout(resizeTextarea, 0);
@@ -87,6 +100,10 @@ export const TestScenarioChatControls: React.FC<
 
   return (
     <div className="_TestScenarioChatControls bg-gold-200 dark:bg-[#333333] p-4">
+      <WarmupBulletin coachState={coachState} />
+      <BrainstormingBulletin coachState={coachState} identities={identities} />
+      <RefinementBulletin coachState={coachState} />
+      <CommitmentBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}
@@ -107,10 +124,7 @@ export const TestScenarioChatControls: React.FC<
           scenarioId={scenarioId}
           onResetSuccess={onResetSuccess}
         />
-        <TestScenarioSessionFreezer
-          userId={testUserId}
-          onSuccess={() => {}}
-        />
+        <TestScenarioSessionFreezer userId={testUserId} onSuccess={() => {}} />
         <ConversationExporter />
       </div>
     </div>

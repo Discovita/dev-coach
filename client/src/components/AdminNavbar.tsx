@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 // import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import {
   DropdownMenu,
@@ -11,8 +12,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { User2 } from "lucide-react";
 
 export default function AdminNavbar() {
+  const location = useLocation();
+  
   const centerLinks = [
-    { label: "Home", to: "/", ariaCurrent: true },
+    { label: "Home", to: "/" },
     { label: "Chat", to: "/chat" },
     { label: "Test", to: "/test" },
     { label: "Prompts", to: "/prompts" },
@@ -41,14 +44,31 @@ export default function AdminNavbar() {
         <div className="flex items-center">
           <div className="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
             {centerLinks.map((link) => (
-              <Link
+              <motion.div
                 key={link.to}
-                to={link.to}
-                className="text-gold-50 dark:text-white hover:underline"
-                aria-current={link.ariaCurrent ? "page" : undefined}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                {link.label}
-              </Link>
+                <Link
+                  to={link.to}
+                  className={`relative text-gold-50 dark:text-white hover:underline px-3 py-2 rounded-lg transition-colors ${
+                    location.pathname === link.to 
+                      ? "text-gold-800 dark:text-gold-900 font-semibold" 
+                      : "hover:bg-gold-500/20"
+                  }`}
+                  aria-current={location.pathname === link.to ? "page" : undefined}
+                >
+                  {location.pathname === link.to && (
+                    <motion.div
+                      className="absolute inset-0 bg-gold-200 dark:bg-gold-300 rounded-lg"
+                      layoutId="activeTab"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10">{link.label}</span>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>

@@ -8,17 +8,12 @@
 
 ## Category-Specific Approach
 
-**Explore Encompassing First**: "Is there one energy that captures how you want to show up with all family members? Could 'Sister' energy work with parents, siblings, and extended family?"
+**The question**: "How do you show up in your family relationships? Is there one identity that captures how you relate to your family?"
 
-**Key Questions to Explore**:
-- "How do you naturally show up in family relationships?"
-- "Is there one identity that embodies how you relate to everyone in your family?"
-- "What energy do you want to bring to your family dynamics?"
+**If they're stuck, suggest simple options based on their family situation from User Notes**:
+- Mother, Father, Sister, Brother, Daughter, Son, Anchor, Guardian, Connector, Healer
 
-**Language Elevation**: Keep identities simple and clear - can be family roles or other simple names:
-- "Good family member" → "Sister," "Mother," "Connector," or "Anchor"
-- "The responsible one" → "Father," "Brother," "Guardian," or "Rock"
-- "Family supporter" → "Daughter," "Son," "Helper," or "Healer"
+**Keep names simple**: Family roles or single words work best.
 
 ## Natural Resistance Responses
 
@@ -31,11 +26,21 @@
 **"I don't know which role to pick"**:
 - "Is there one energy that captures how you want to show up with everyone, or do you need multiple identities here?"
 
-## Managing Multiple Identities
+## Continuing in This Category
 
-**Honor Multiple When Needed**: If they have distinct roles that feel important separately, continue creating identities until they feel complete.
+**After first identity**: Ask if there are more, using natural variation:
+- "Any other family roles that feel important?"
+- "Anyone else you show up as in your family?"
+- "Does that cover it?"
+- "Anything else here?"
 
-**Build on Warm-up Identities**: Reference family roles they mentioned in their "Who You Are" or "Who You Want to Be" lists.
+**Continue exploring for more**: Keep asking if there are more, using natural variation:
+- "Any other family roles that feel important?"
+- "Anyone else you show up as in your family?"
+- "Does that cover it?"
+- "Anything else here?"
+
+**Move on ONLY when**: The user indicates they're done.
 
 ## Transitioning to Romantic/Sexual Expression
 

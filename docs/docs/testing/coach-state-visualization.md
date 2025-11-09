@@ -144,7 +144,7 @@ Shows identity information in two sections:
 
 - **Identity List**: All accepted identities with full details
 - **Identity Cards**: Styled display of each identity
-- **Details**: Name, category, affirmation, visualization, and notes
+- **Details**: Name, category, "I Am" Statement, visualization, and notes
 
 ![Coach State Viewer - Identities Tab](/img/coach-state-viewer-identities.png)
 

@@ -1,5 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { fetchCoachState } from "@/api/user";
+import type { CoachState } from "@/types/coachState";
+
+type UseCoachStateResult = {
+  coachState: CoachState | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetchCoachState: UseQueryResult<CoachState, Error>["refetch"];
+};
 
 /**
  * useCoachState hook
@@ -13,30 +21,12 @@ import { fetchCoachState } from "@/api/user";
  *
  * Used in: Any component that needs to read or update the user's coach state.
  */
-export function useCoachState() {
-  const queryClient = useQueryClient();
-
-  // Fetch the user's coach state
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+export function useCoachState(): UseCoachStateResult {
+  const { data, isLoading, isError, refetch } = useQuery<CoachState, Error>({
     queryKey: ["user", "coachState"],
     queryFn: fetchCoachState,
-  });
-
-  // Placeholder for update mutation (implement as needed)
-  // The argument will be added when the update API is implemented
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      // Implement update API call here
-      throw new Error("Update coach state not implemented");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "coachState"] });
-    },
+    staleTime: 0, // Reduced to 0 for more responsive updates
+    retry: false,
   });
 
   return {
@@ -44,7 +34,5 @@ export function useCoachState() {
     isLoading,
     isError,
     refetchCoachState: refetch,
-    updateCoachState: updateMutation.mutateAsync,
-    updateStatus: updateMutation.status,
   };
-} 
+}
