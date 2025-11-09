@@ -194,6 +194,14 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Frontend",
+      items: [
+        "frontend/react_query_implementation",
+        "frontend/image-handling",
+      ],
+    },
+    {
+      type: "category",
       label: "Testing",
       items: [
         "testing/overview",

@@ -124,6 +124,12 @@ class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer)
         required=False,
         help_text="List of notes about the identity.",
     )
+    image = serializers.URLField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        help_text="S3 URL for the identity image. Stored as URL in template, copied to new S3 location during instantiation.",
+    )
 
 
 class TemplateChatMessageSerializer(ForbidExtraFieldsMixin, serializers.Serializer):

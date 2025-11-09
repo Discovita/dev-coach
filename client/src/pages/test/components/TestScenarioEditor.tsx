@@ -28,6 +28,7 @@ interface TestScenarioEditorProps {
     name: string;
     description: string;
     template: TestScenarioTemplate;
+    imageFiles?: Map<number, File>;
   }) => void;
   onCancel: () => void;
   onDelete?: () => void;
@@ -148,6 +149,7 @@ const TestScenarioEditor = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
+  const [identityImageFiles, setIdentityImageFiles] = useState<Map<number, File>>(new Map());
 
   // Update state when scenario prop changes
   useEffect(() => {
@@ -290,6 +292,7 @@ const TestScenarioEditor = ({
         name,
         description,
         template,
+        imageFiles: identityImageFiles.size > 0 ? identityImageFiles : undefined,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -351,6 +354,7 @@ const TestScenarioEditor = ({
           <TestScenarioIdentitiesForm
             value={identities}
             onChange={setIdentities}
+            onImageFilesChange={setIdentityImageFiles}
           />
         </TabsContent>
         <TabsContent value="chat_messages">

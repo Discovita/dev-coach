@@ -1,19 +1,18 @@
 from apps.identities.models import Identity
 from rest_framework import serializers
+from apps.core.serializers import VersatileImageFieldWithSizes
 
 
 class IdentitySerializer(serializers.ModelSerializer):
     """
     Serializer for Identity model.
-    Used to serialize user identities when included in UserSerializer.
-    Handles image uploads via ImageField, which automatically uses S3 in production/staging
-    and local storage in development.
+    Returns image URLs for multiple sizes (original, thumbnail, medium, large).
     """
 
     # Force UUID to be serialized as a string (read-only, set by viewset)
     user = serializers.CharField(source="user_id", read_only=True)
-    # Image field will automatically return full URL (S3 URL in prod/staging, local URL in dev)
-    image = serializers.ImageField(required=False, allow_null=True)
+    # Image field returns URLs for all sizes
+    image = VersatileImageFieldWithSizes(required=False, allow_null=True, read_only=True)
 
     class Meta:
         model = Identity

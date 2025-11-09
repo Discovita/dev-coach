@@ -10,8 +10,21 @@ export async function fetchTestScenarios(): Promise<TestScenario[]> {
 }
 
 export async function createTestScenario(
-  data: Partial<TestScenario>
+  data: Partial<TestScenario> | FormData
 ): Promise<TestScenario> {
+  // Check if data is FormData
+  if (data instanceof FormData) {
+    // Send FormData directly (don't stringify, don't set Content-Type header)
+    const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}`, {
+      method: "POST",
+      body: data,
+      // Don't set Content-Type - browser will set it with boundary
+    });
+    if (!res.ok) throw new Error("Failed to create test scenario");
+    return res.json();
+  }
+  
+  // Handle regular JSON payload
   const template: any =
     typeof data.template === "object" && data.template !== null
       ? data.template
@@ -37,8 +50,21 @@ export async function createTestScenario(
 
 export async function updateTestScenario(
   id: string,
-  data: Partial<TestScenario>
+  data: Partial<TestScenario> | FormData
 ): Promise<TestScenario> {
+  // Check if data is FormData
+  if (data instanceof FormData) {
+    // Send FormData directly (don't stringify, don't set Content-Type header)
+    const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}`, {
+      method: "PUT",
+      body: data,
+      // Don't set Content-Type - browser will set it with boundary
+    });
+    if (!res.ok) throw new Error("Failed to update test scenario");
+    return res.json();
+  }
+  
+  // Handle regular JSON payload
   const template =
     typeof data.template === "object" && data.template !== null
       ? data.template

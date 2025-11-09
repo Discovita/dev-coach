@@ -29,20 +29,33 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TIMEZONE = "UTC"
 
 # S3 Configuration - Local development uses staging bucket
-AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default="")
-AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default="")
-AWS_STORAGE_BUCKET_NAME = env("STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging")
-AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-AWS_S3_OBJECT_PARAMETERS = {
-    "CacheControl": "max-age=86400",
-}
-AWS_DEFAULT_ACL = "public-read"
-AWS_QUERYSTRING_AUTH = False
+# Note: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set in common.py
+bucket_name = env("STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging")
+custom_domain = f"{bucket_name}.s3.amazonaws.com"
 
 # Media files configuration - Use S3 for local development (staging bucket)
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+# Django 4.2+ STORAGES format per django-storages documentation
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "bucket_name": bucket_name,
+            "region_name": env("AWS_REGION", default="us-east-1"),
+            "location": "media",  # Prefix for all files stored in S3
+            "custom_domain": custom_domain,
+            # Note: ACLs are disabled on this bucket. Public access is handled via bucket policy.
+            "object_parameters": {
+                "CacheControl": "max-age=86400",
+            },
+            "querystring_auth": False,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+MEDIA_URL = f"https://{custom_domain}/media/"
 
 # Optional: Add debug logging for static files
 if DEBUG:
