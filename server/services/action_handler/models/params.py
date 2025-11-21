@@ -123,6 +123,11 @@ class ArchiveIdentityParams(BaseParamsModel):
     id: str = Field(..., description="ID of identity to archive")
 
 
+class NestIdentityParams(BaseParamsModel):
+    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
+    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+
+
 class TransitionPhaseParams(BaseParamsModel):
     to_phase: CoachingPhase = Field(..., description="State to transition to")
 

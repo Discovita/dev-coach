@@ -115,6 +115,7 @@ const sidebars: SidebarsConfig = {
                 "core-systems/action-handler/actions/accept-i-am-statement",
                 "core-systems/action-handler/actions/accept-identity-visualization",
                 "core-systems/action-handler/actions/archive-identity",
+                "core-systems/action-handler/actions/nest-identity",
                 "core-systems/action-handler/actions/add-identity-note",
                 "core-systems/action-handler/actions/transition-phase",
                 "core-systems/action-handler/actions/select-identity-focus",

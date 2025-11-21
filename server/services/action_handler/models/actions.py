@@ -102,6 +102,12 @@ class ArchiveIdentityAction(BaseActionModel):
     )
 
 
+class NestIdentityAction(BaseActionModel):
+    params: NestIdentityParams = Field(
+        ..., description="Parameters for nesting an identity under a parent identity."
+    )
+
+
 class TransitionPhaseAction(BaseActionModel):
     params: TransitionPhaseParams = Field(
         ..., description="Parameters for transitioning the coaching phase."

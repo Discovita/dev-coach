@@ -22,6 +22,7 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.ACCEPT_I_AM_STATEMENT: AcceptIAmAction,
     ActionType.ACCEPT_IDENTITY_VISUALIZATION: AcceptIdentityVisualizationAction,
     ActionType.ARCHIVE_IDENTITY: ArchiveIdentityAction,
+    ActionType.NEST_IDENTITY: NestIdentityAction,
     ActionType.TRANSITION_PHASE: TransitionPhaseAction,
     ActionType.ADD_IDENTITY_NOTE: AddIdentityNoteAction,
     ActionType.SKIP_IDENTITY_CATEGORY: SkipIdentityCategoryAction,

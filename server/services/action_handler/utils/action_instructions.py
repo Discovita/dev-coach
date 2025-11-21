@@ -72,6 +72,10 @@ ACTION_PARAMS = {
         "description": "Archive an Identity. This marks the identity as archived, removing it from active coaching workflows while preserving it in the database.",
         "model": ArchiveIdentityAction,
     },
+    ActionType.NEST_IDENTITY: {
+        "description": "Nest an identity under a parent identity. Copies all notes from the nested identity to the parent, then archives the nested identity. No name changes are made.",
+        "model": NestIdentityAction,
+    },
     ActionType.TRANSITION_PHASE: {
         "description": "Move to the next Coaching Phase.",
         "model": TransitionPhaseAction,
