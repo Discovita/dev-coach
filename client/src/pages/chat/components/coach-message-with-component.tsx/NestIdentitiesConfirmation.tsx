@@ -7,64 +7,25 @@ import {
   getIdentityCategoryLightColor,
   getIdentityCategoryDarkColor,
 } from "@/enums/identityCategory";
-import {
-  FaDollarSign,
-  FaPiggyBank,
-  FaUser,
-  FaDumbbell,
-  FaHeart,
-  FaRegCheckSquare,
-} from "react-icons/fa";
-import { MdFamilyRestroom } from "react-icons/md";
-import { BsStars } from "react-icons/bs";
-import { AiOutlineSun } from "react-icons/ai";
 import { createLogger, LogLevel } from "@/lib/logger";
+import { getIdentityCategoryIcon } from "@/utils/getIdentityCategoryIcon";
 const log = createLogger("NestIdentitiesConfirmation", LogLevel.DEBUG);
-
-const CATEGORY_ICON_MAP: Record<
-  string,
-  React.ComponentType<{ className?: string }>
-> = {
-  passions_and_talents: BsStars,
-  maker_of_money: FaDollarSign,
-  keeper_of_money: FaPiggyBank,
-  spiritual: AiOutlineSun,
-  personal_appearance: FaUser,
-  physical_expression: FaDumbbell,
-  familial_relations: MdFamilyRestroom,
-  romantic_relation: FaHeart,
-  doer_of_things: FaRegCheckSquare,
-};
-
-const getCategoryIcon = (category: string) => {
-  const normalizedCategory = category.toLowerCase();
-  if (CATEGORY_ICON_MAP[normalizedCategory]) {
-    return CATEGORY_ICON_MAP[normalizedCategory];
-  }
-  for (const [key, icon] of Object.entries(CATEGORY_ICON_MAP)) {
-    if (
-      normalizedCategory.includes(key.split("_")[0]) ||
-      key.split("_").some((part) => normalizedCategory.includes(part))
-    ) {
-      return icon;
-    }
-  }
-  return FaUser;
-};
 
 const IdentityCard: React.FC<{ identity: ComponentIdentity | null }> = ({
   identity,
 }) => {
   if (!identity) {
     return (
-      <div className="w-fit min-w-[120px] max-w-[200px] p-4 rounded-lg border border-gray-300/50 dark:border-gray-700 bg-white/70 dark:bg-gray-900/30">
+      <div className="w-fit p-3 rounded-lg border border-gray-300/50 dark:border-gray-700 bg-white/70 dark:bg-gray-900/30">
         <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
         <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
       </div>
     );
   }
 
-  const IconComponent = getCategoryIcon(String(identity.category || ""));
+  const IconComponent = getIdentityCategoryIcon(
+    String(identity.category || "")
+  );
   const badgeColorClasses = getIdentityCategoryColor(
     String(identity.category || "")
   );
@@ -77,15 +38,9 @@ const IdentityCard: React.FC<{ identity: ComponentIdentity | null }> = ({
 
   return (
     <div
-      className={`_IdentityCard w-fit min-w-[120px] max-w-[250px] p-4 rounded-lg border shadow-sm ${lightColorClasses} ${darkColorClasses}`}
+      className={`_IdentityCard w-fit p-3 rounded-lg border shadow-sm ${lightColorClasses} ${darkColorClasses}`}
     >
       <div className="flex items-center gap-2 mb-2">
-        <IconComponent
-          className={`w-4 h-4 ${darkColorClasses
-            .split(" ")
-            .filter((cls) => cls.startsWith("text-"))
-            .join(" ")}`}
-        />
         <div
           className={`text-lg font-semibold ${darkColorClasses
             .split(" ")
@@ -109,6 +64,64 @@ const IdentityCard: React.FC<{ identity: ComponentIdentity | null }> = ({
   );
 };
 
+const NestedIdentityCard: React.FC<{
+  parentIdentity: ComponentIdentity | null;
+  nestedIdentity: ComponentIdentity | null;
+}> = ({ parentIdentity, nestedIdentity }) => {
+  if (!parentIdentity) {
+    return (
+      <div className="w-fit p-3 rounded-lg border border-gray-300/50 dark:border-gray-700 bg-white/70 dark:bg-gray-900/30">
+        <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+        <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      </div>
+    );
+  }
+
+  const ParentIcon = getIdentityCategoryIcon(
+    String(parentIdentity.category || "")
+  );
+  const parentBadgeColorClasses = getIdentityCategoryColor(
+    String(parentIdentity.category || "")
+  );
+  const parentLightColorClasses = getIdentityCategoryLightColor(
+    String(parentIdentity.category || "")
+  );
+  const parentDarkColorClasses = getIdentityCategoryDarkColor(
+    String(parentIdentity.category || "")
+  );
+
+  return (
+    <div
+      className={`_NestedIdentityCard w-fit p-3 rounded-lg border shadow-sm relative ${parentLightColorClasses} ${parentDarkColorClasses} flex items-center justify-center gap-3`}
+    >
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2 mb-2">
+          <div
+            className={`text-lg font-semibold ${parentDarkColorClasses
+              .split(" ")
+              .filter((cls) => cls.startsWith("text-"))
+              .join(" ")}`}
+          >
+            {parentIdentity.name}
+          </div>
+        </div>
+        {parentIdentity.category && (
+          <div
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${parentBadgeColorClasses} mb-2`}
+          >
+            <ParentIcon className="w-3 h-3" />
+            <span className="font-medium">
+              {parentIdentity.category.replace(/_/g, " ")}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <IdentityCard identity={nestedIdentity} />
+    </div>
+  );
+};
+
 export const NestIdentitiesConfirmation: React.FC<{
   coachMessage: React.ReactNode;
   config: ComponentConfig;
@@ -124,7 +137,7 @@ export const NestIdentitiesConfirmation: React.FC<{
 
   return (
     <div
-      className={`_NestIdentitiesConfirmation mb-4 p-4 rounded-xl ${
+      className={`_NestIdentitiesConfirmation mb-4 p-3 rounded-xl ${
         hasButtons ? "w-fit max-w-[100%]" : "w-fit max-w-[75%]"
       } leading-[1.5] shadow-sm animate-fadeIn break-words mr-auto bg-gold-200`}
     >
@@ -137,24 +150,31 @@ export const NestIdentitiesConfirmation: React.FC<{
       </div>
 
       <div className="mb-3 text-sm text-gray-700 dark:text-gray-300">
-        We'll nest the first identity under the second one. The nested identity's notes will be copied to the parent.
+        We'll nest the first identity under the second one.
       </div>
 
-      <div className="flex flex-col items-start gap-3">
-        {/* Parent Identity */}
-        <div className="flex items-center gap-3">
-          <IdentityCard identity={parentIdentity} />
-        </div>
-
-        {/* Arrow pointing down */}
-        <div className="flex items-center justify-center px-2 text-gray-700 dark:text-gray-300 select-none ml-4">
-          <span className="text-xl">↓</span>
-        </div>
-
+      <div className="flex flex-wrap items-center gap-3 justify-start">
         {/* Nested Identity */}
-        <div className="flex items-center gap-3 ml-4">
-          <IdentityCard identity={nestedIdentity} />
+        <IdentityCard identity={nestedIdentity} />
+
+        {/* Arrow pointing right */}
+        <div className="flex items-center justify-center px-2 text-gray-700 dark:text-gray-300 select-none">
+          <span className="text-xl">→</span>
         </div>
+
+        {/* Parent Identity */}
+        <IdentityCard identity={parentIdentity} />
+
+        {/* Equals sign */}
+        <div className="flex items-center justify-center px-2 text-gray-700 dark:text-gray-300 select-none">
+          <span className="text-xl font-bold">=</span>
+        </div>
+
+        {/* Combined visual: Parent with nested inside */}
+        <NestedIdentityCard
+          parentIdentity={parentIdentity}
+          nestedIdentity={nestedIdentity}
+        />
       </div>
 
       {config.buttons && config.buttons.length > 0 && (
@@ -184,4 +204,3 @@ export const NestIdentitiesConfirmation: React.FC<{
     </div>
   );
 };
-
