@@ -219,6 +219,7 @@ const sidebars: SidebarsConfig = {
         "how-to/how-to-add-a-new-context-key",
         "how-to/how-to-add-a-new-coach-phase",
         "how-to/how-to-add-a-new-coach-action",
+        "how-to/how-to-add-a-new-persistent-component",
       ],
     },
     {
