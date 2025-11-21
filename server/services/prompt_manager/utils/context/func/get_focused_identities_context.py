@@ -2,6 +2,7 @@ from typing import List
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.identity_category import IdentityCategory
+from enums.identity_state import IdentityState
 from services.prompt_manager.utils.format_identities import format_identities
 
 def get_focused_identities_context(coach_state: CoachState) -> str:
@@ -10,7 +11,8 @@ def get_focused_identities_context(coach_state: CoachState) -> str:
     If the category is in skipped categories and there are no identities, return a skipped message.
     """
     user = coach_state.user
-    identities: List[Identity] = user.identities.all()
+    # Exclude archived identities from focused identities
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.ARCHIVED)
     focus = coach_state.identity_focus
     if not focus:
         return "No identity focus set."

@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from .models import Identity
 from .serializer import IdentitySerializer
+from enums.identity_state import IdentityState
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -44,18 +45,38 @@ class IdentityViewSet(
 
     def get_queryset(self):
         """
-        Return only identities belonging to the authenticated user.
+        Return identities belonging to the authenticated user.
+        By default, excludes archived identities unless include_archived=true.
+        Supports query parameters:
+        - include_archived=true: Include archived identities in results
+        - archived_only=true: Return only archived identities
         """
-        return Identity.objects.filter(user=self.request.user)
+        queryset = Identity.objects.filter(user=self.request.user)
+        
+        # Check query parameters
+        include_archived = self.request.query_params.get('include_archived', 'false').lower() == 'true'
+        archived_only = self.request.query_params.get('archived_only', 'false').lower() == 'true'
+        
+        if archived_only:
+            return queryset.filter(state=IdentityState.ARCHIVED)
+        elif not include_archived:
+            # Default: exclude archived
+            return queryset.exclude(state=IdentityState.ARCHIVED)
+        else:
+            # Include all
+            return queryset
 
     def list(self, request, *args, **kwargs):
         """
         List all identities for the authenticated user.
         GET /api/v1/identities/
-        Returns: 200 OK, list of user's identities.
+        Query parameters:
+        - include_archived=true: Include archived identities
+        - archived_only=true: Return only archived identities
+        Returns: 200 OK, list of user's identities (excluding archived by default).
         """
         try:
-            identities = Identity.objects.filter(user=request.user)
+            identities = self.get_queryset()
             serializer = IdentitySerializer(identities, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:

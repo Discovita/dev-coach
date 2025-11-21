@@ -7,10 +7,10 @@ def set_current_identity_to_next_pending_refinement(coach_state: CoachState) -> 
     """
     Set the current_identity to the next (oldest) identity that needs refinement.
     """
-    # Find the next (oldest) identity that is NOT refinement_complete
+    # Find the next (oldest) identity that is NOT refinement_complete and NOT archived
     next_identity: Identity = coach_state.user.identities.exclude(
         state=IdentityState.REFINEMENT_COMPLETE
-    ).order_by('created_at').first()
+    ).exclude(state=IdentityState.ARCHIVED).order_by('created_at').first()
     
     if next_identity:
         coach_state.current_identity = next_identity

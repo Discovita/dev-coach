@@ -10,9 +10,10 @@ def set_current_identity_to_next_pending_commitment(coach_state: CoachState) -> 
     """
     Set the current_identity to the next (oldest) identity that needs commitment.
     """
-    # Find the next (oldest) identity that is NOT commitment_complete
+    # Find the next (oldest) identity that is NOT commitment_complete and NOT archived
     next_identity: Identity = (
         coach_state.user.identities.exclude(state=IdentityState.COMMITMENT_COMPLETE)
+        .exclude(state=IdentityState.ARCHIVED)
         .order_by("created_at")
         .first()
     )

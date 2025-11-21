@@ -1,6 +1,7 @@
 from typing import List
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
+from enums.identity_state import IdentityState
 from services.prompt_manager.utils.format_identities import format_identities
 from services.prompt_manager.utils.format_skipped_categories import (
     format_skipped_categories,
@@ -14,7 +15,8 @@ def get_identities_context(coach_state: CoachState) -> str:
     Also includes a section listing skipped identity categories (if any).
     """
     user = coach_state.user
-    identities: List[Identity] = user.identities.all()
+    # Exclude archived identities from general identity context
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.ARCHIVED)
     skipped = coach_state.skipped_identity_categories or []
 
     identities_section = format_identities(identities)
