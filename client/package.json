@@ -37,6 +37,7 @@
     "lucide-react": "^0.483.0",
     "motion": "^12.7.4",
     "msw": "^2.12.2",
+    "msw-storybook-addon": "^2.0.6",
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.0.0",
@@ -78,5 +79,10 @@
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0",
     "vitest": "^4.0.12"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
