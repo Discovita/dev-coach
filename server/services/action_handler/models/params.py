@@ -119,6 +119,10 @@ class AcceptIdentityVisualizationParams(BaseParamsModel):
     id: str = Field(..., description="ID of identity to mark as visualization complete")
 
 
+class ArchiveIdentityParams(BaseParamsModel):
+    id: str = Field(..., description="ID of identity to archive")
+
+
 class TransitionPhaseParams(BaseParamsModel):
     to_phase: CoachingPhase = Field(..., description="State to transition to")
 

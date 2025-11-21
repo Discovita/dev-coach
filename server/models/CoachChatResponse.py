@@ -14,6 +14,7 @@ from services.action_handler.models.actions import (
     AcceptIdentityCommitmentAction,
     AcceptIAmAction,
     AcceptIdentityVisualizationAction,
+    ArchiveIdentityAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
@@ -71,6 +72,9 @@ class CoachChatResponse(BaseModel):
     )
     accept_identity_visualization: Optional[AcceptIdentityVisualizationAction] = Field(
         default=None, description="Perform the accept_identity_visualization action."
+    )
+    archive_identity: Optional[ArchiveIdentityAction] = Field(
+        default=None, description="Perform the archive_identity action."
     )
     add_identity_note: Optional[AddIdentityNoteAction] = Field(
         default=None, description="Perform the add_identity_note action."

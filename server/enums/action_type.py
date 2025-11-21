@@ -35,6 +35,7 @@ class ActionType(models.TextChoices):
         "accept_identity_visualization",
         "Accept Identity Visualization",
     )
+    ARCHIVE_IDENTITY = "archive_identity", "Archive Identity"
     ADD_IDENTITY_NOTE = "add_identity_note", "Add Identity Note"
     TRANSITION_PHASE = "transition_phase", "Transition Phase"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"

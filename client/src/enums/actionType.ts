@@ -13,6 +13,7 @@ export enum ActionType {
   ACCEPT_IDENTITY_COMMITMENT = "accept_identity_commitment",
   ACCEPT_I_AM_STATEMENT = "accept_i_am_statement",
   ACCEPT_IDENTITY_VISUALIZATION = "accept_identity_visualization",
+  ARCHIVE_IDENTITY = "archive_identity",
   ADD_IDENTITY_NOTE = "add_identity_note",
   TRANSITION_PHASE = "transition_phase",
   SELECT_IDENTITY_FOCUS = "select_identity_focus",

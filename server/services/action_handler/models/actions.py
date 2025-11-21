@@ -96,6 +96,12 @@ class AcceptIdentityVisualizationAction(BaseActionModel):
     )
 
 
+class ArchiveIdentityAction(BaseActionModel):
+    params: ArchiveIdentityParams = Field(
+        ..., description="Parameters for archiving an identity."
+    )
+
+
 class TransitionPhaseAction(BaseActionModel):
     params: TransitionPhaseParams = Field(
         ..., description="Parameters for transitioning the coaching phase."

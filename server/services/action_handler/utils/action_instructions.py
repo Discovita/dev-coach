@@ -68,6 +68,10 @@ ACTION_PARAMS = {
         "description": "Mark an Identity as visualization_complete.",
         "model": AcceptIdentityVisualizationAction,
     },
+    ActionType.ARCHIVE_IDENTITY: {
+        "description": "Archive an Identity. This marks the identity as archived, removing it from active coaching workflows while preserving it in the database.",
+        "model": ArchiveIdentityAction,
+    },
     ActionType.TRANSITION_PHASE: {
         "description": "Move to the next Coaching Phase.",
         "model": TransitionPhaseAction,

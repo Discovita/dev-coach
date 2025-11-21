@@ -9,6 +9,7 @@ from .accept_identity_refinement import accept_identity_refinement
 from .accept_identity_commitment import accept_identity_commitment
 from .accept_i_am_statement import accept_i_am_statement
 from .accept_identity_visualization import accept_identity_visualization
+from .archive_identity import archive_identity
 from .add_identity_note import add_identity_note
 from .combine_identities import combine_identities
 from .transition_phase import transition_phase
@@ -46,6 +47,7 @@ __all__ = [
     "accept_identity_commitment",
     "accept_i_am_statement",
     "accept_identity_visualization",
+    "archive_identity",
     "add_identity_note",
     "transition_phase",
     "select_identity_focus",
