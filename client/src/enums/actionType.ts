@@ -27,6 +27,8 @@ export enum ActionType {
   SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component",
   SHOW_BRAINSTORMING_IDENTITIES = "show_brainstorming_identities",
   SHOW_COMBINE_IDENTITIES = "show_combine_identities",
+  SHOW_NEST_IDENTITIES = "show_nest_identities",
   COMBINE_IDENTITIES = "combine_identities",
   PERSIST_COMBINE_IDENTITIES = "persist_combine_identities",
+  PERSIST_NEST_IDENTITIES = "persist_nest_identities",
 }

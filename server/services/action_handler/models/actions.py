@@ -196,3 +196,15 @@ class PersistCombineIdentitiesAction(BaseActionModel):
     params: PersistCombineIdentitiesParams = Field(
         ..., description="Parameters for persisting the combine identities component."
     )
+
+
+class ShowNestIdentitiesAction(BaseActionModel):
+    params: ShowNestIdentitiesParams = Field(
+        ..., description="Parameters for showing the nest identities component."
+    )
+
+
+class PersistNestIdentitiesAction(BaseActionModel):
+    params: PersistNestIdentitiesParams = Field(
+        ..., description="Parameters for persisting the nest identities component."
+    )

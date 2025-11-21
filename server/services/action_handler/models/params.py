@@ -223,3 +223,16 @@ class PersistCombineIdentitiesParams(BaseParamsModel):
     coach_message_id: str = Field(
         ..., description="ID of the coach message to persist the component to"
     )
+
+
+class ShowNestIdentitiesParams(BaseParamsModel):
+    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
+    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+
+
+class PersistNestIdentitiesParams(BaseParamsModel):
+    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
+    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+    coach_message_id: str = Field(
+        ..., description="ID of the coach message to persist the component to"
+    )

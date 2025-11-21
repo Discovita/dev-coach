@@ -31,9 +31,11 @@ from .sentinel.delete_user_note import delete_user_note
 from .components.show_introduction_canned_response_component import show_introduction_canned_response_component
 from .components.show_accept_i_am_component import show_accept_i_am_component
 from .components.show_combine_identities import show_combine_identities
+from .components.show_nest_identities import show_nest_identities
 
 # PERSISTENT COMPONENT ACTIONS
 from .persistent_components.persist_combine_identities import persist_combine_identities
+from .persistent_components.persist_nest_identities import persist_nest_identities
 
 
 __all__ = [
@@ -62,9 +64,11 @@ __all__ = [
     "show_introduction_canned_response_component",
     "show_accept_i_am_component",
     "show_combine_identities",
+    "show_nest_identities",
     "combine_identities",
     "add_user_note",
     "update_user_note",
     "delete_user_note",
     "persist_combine_identities",
+    "persist_nest_identities",
 ]
