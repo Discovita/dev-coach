@@ -69,7 +69,7 @@ ACTION_PARAMS = {
         "model": AcceptIdentityVisualizationAction,
     },
     ActionType.ARCHIVE_IDENTITY: {
-        "description": "Archive an Identity. This marks the identity as archived, removing it from active coaching workflows while preserving it in the database.",
+        "description": "Archive an Identity (internally). When communicating with the user, refer to this as 'deleting' the identity. This marks the identity as archived, removing it from active coaching workflows while preserving it in the database.",
         "model": ArchiveIdentityAction,
     },
     ActionType.NEST_IDENTITY: {
@@ -133,7 +133,7 @@ ACTION_PARAMS = {
         "model": ShowNestIdentitiesAction,
     },
     ActionType.SHOW_ARCHIVE_IDENTITY: {
-        "description": "Show a component that displays an identity with Yes/No buttons to confirm archiving it.",
+        "description": "Show a component that displays an identity with Yes/No buttons to confirm deleting it. (Note: Internally this archives the identity, but to the user it should be referred to as 'deleting').",
         "model": ShowArchiveIdentityAction,
     },
     ActionType.COMBINE_IDENTITIES: {

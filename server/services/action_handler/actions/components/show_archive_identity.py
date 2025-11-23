@@ -26,6 +26,7 @@ def show_archive_identity(
     """
     Show a component that displays an identity and offers Yes/No buttons to archive it.
     The Yes button will trigger the ARCHIVE_IDENTITY action with the identity ID.
+    The No button will accept the identity commitment, marking it as commitment_complete.
     """
 
     # Fetch the identity and construct display object
@@ -69,7 +70,17 @@ def show_archive_identity(
                 ),
             ],
         ),
-        ComponentButton(label="No"),
+        ComponentButton(
+            label="No",
+            actions=[
+                ComponentAction(
+                    action=ActionType.ACCEPT_IDENTITY_COMMITMENT.value,
+                    params={
+                        "id": params.identity_id,
+                    },
+                ),
+            ],
+        ),
     ]
 
     component = ComponentConfig(
