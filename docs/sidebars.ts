@@ -114,6 +114,8 @@ const sidebars: SidebarsConfig = {
                 "core-systems/action-handler/actions/accept-identity-refinement",
                 "core-systems/action-handler/actions/accept-i-am-statement",
                 "core-systems/action-handler/actions/accept-identity-visualization",
+                "core-systems/action-handler/actions/archive-identity",
+                "core-systems/action-handler/actions/nest-identity",
                 "core-systems/action-handler/actions/add-identity-note",
                 "core-systems/action-handler/actions/transition-phase",
                 "core-systems/action-handler/actions/select-identity-focus",
@@ -217,6 +219,7 @@ const sidebars: SidebarsConfig = {
         "how-to/how-to-add-a-new-context-key",
         "how-to/how-to-add-a-new-coach-phase",
         "how-to/how-to-add-a-new-coach-action",
+        "how-to/how-to-add-a-new-persistent-component",
       ],
     },
     {

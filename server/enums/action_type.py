@@ -35,6 +35,8 @@ class ActionType(models.TextChoices):
         "accept_identity_visualization",
         "Accept Identity Visualization",
     )
+    ARCHIVE_IDENTITY = "archive_identity", "Archive Identity"
+    NEST_IDENTITY = "nest_identity", "Nest Identity"
     ADD_IDENTITY_NOTE = "add_identity_note", "Add Identity Note"
     TRANSITION_PHASE = "transition_phase", "Transition Phase"
     SELECT_IDENTITY_FOCUS = "select_identity_focus", "Select Identity Focus"
@@ -53,8 +55,12 @@ class ActionType(models.TextChoices):
     SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT = "show_introduction_canned_response_component", "Show Introduction Canned Response Component"
     SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component", "Show Accept I Am Component"
     SHOW_COMBINE_IDENTITIES = "show_combine_identities", "Show Combine Identities"
+    SHOW_NEST_IDENTITIES = "show_nest_identities", "Show Nest Identities"
+    SHOW_ARCHIVE_IDENTITY = "show_archive_identity", "Show Archive Identity"
     # Persistent component actions
     PERSIST_COMBINE_IDENTITIES = "persist_combine_identities", "Persist Combine Identities"
+    PERSIST_NEST_IDENTITIES = "persist_nest_identities", "Persist Nest Identities"
+    PERSIST_ARCHIVE_IDENTITY = "persist_archive_identity", "Persist Archive Identity"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""

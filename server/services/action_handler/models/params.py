@@ -119,6 +119,15 @@ class AcceptIdentityVisualizationParams(BaseParamsModel):
     id: str = Field(..., description="ID of identity to mark as visualization complete")
 
 
+class ArchiveIdentityParams(BaseParamsModel):
+    id: str = Field(..., description="ID of identity to archive")
+
+
+class NestIdentityParams(BaseParamsModel):
+    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
+    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+
+
 class TransitionPhaseParams(BaseParamsModel):
     to_phase: CoachingPhase = Field(..., description="State to transition to")
 
@@ -211,6 +220,30 @@ class CombineIdentitiesParams(BaseParamsModel):
 class PersistCombineIdentitiesParams(BaseParamsModel):
     identity_id_a: str = Field(..., description="ID of the first identity to combine")
     identity_id_b: str = Field(..., description="ID of the second identity to combine")
+    coach_message_id: str = Field(
+        ..., description="ID of the coach message to persist the component to"
+    )
+
+
+class ShowNestIdentitiesParams(BaseParamsModel):
+    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
+    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+
+
+class PersistNestIdentitiesParams(BaseParamsModel):
+    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
+    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+    coach_message_id: str = Field(
+        ..., description="ID of the coach message to persist the component to"
+    )
+
+
+class ShowArchiveIdentityParams(BaseParamsModel):
+    identity_id: str = Field(..., description="ID of the identity to archive")
+
+
+class PersistArchiveIdentityParams(BaseParamsModel):
+    identity_id: str = Field(..., description="ID of the identity to archive")
     coach_message_id: str = Field(
         ..., description="ID of the coach message to persist the component to"
     )

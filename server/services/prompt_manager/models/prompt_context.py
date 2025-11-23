@@ -27,3 +27,4 @@ class PromptContext(BaseModel):
     commitment_identities: Optional[str]
     i_am_identities: Optional[str]
     visualization_identities: Optional[str]
+    identity_ids: Optional[str]

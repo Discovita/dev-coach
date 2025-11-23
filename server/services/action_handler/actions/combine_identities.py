@@ -4,6 +4,7 @@ from apps.actions.models import Action
 from apps.identities.models import Identity
 from enums.action_type import ActionType
 from enums.identity_category import IdentityCategory
+from enums.identity_state import IdentityState
 from services.action_handler.models.params import (
     CombineIdentitiesParams,
 )
@@ -15,9 +16,9 @@ def combine_identities(
     coach_state: CoachState, params: CombineIdentitiesParams, coach_message: ChatMessage
 ):
     """
-    Placeholder for combining two identities.
-    Validates exactly two IDs, loads identities, and logs the action. Category
-    combination rules to be implemented later.
+    Combines two identities into one by merging their names and notes.
+    The identity that gets archived (based on category rules) is marked as archived
+    instead of being deleted, preserving it in the database for historical reference.
     """
 
     identity_id_a = params.identity_id_a
@@ -48,20 +49,20 @@ def combine_identities(
         f"Preparing to combine identities {identity_id_a} ({category_a}) and {identity_id_b} ({category_b})"
     )
 
-    # Determine which identity to delete vs keep per rules
+    # Determine which identity to archive vs keep per rules
     passions_value = IdentityCategory.PASSIONS.value
     if (category_a == passions_value) ^ (category_b == passions_value):
-        # Exactly one is Passions and Talents → delete that one, edit the other
+        # Exactly one is Passions and Talents → archive that one, edit the other
         if category_a == passions_value:
-            delete_identity = identity_a
+            archive_identity = identity_a
             save_identity = identity_b
         else:
-            delete_identity = identity_b
+            archive_identity = identity_b
             save_identity = identity_a
     else:
-        # Neither or both are Passions and Talents → edit A, delete B
+        # Neither or both are Passions and Talents → edit A, archive B
         save_identity = identity_a
-        delete_identity = identity_b
+        archive_identity = identity_b
 
     # Build resulting name "A/B" using original names, handle None
     name_a = identity_a.name or ""
@@ -70,20 +71,29 @@ def combine_identities(
 
     # Merge notes: prepend source marker and append to save_identity notes
     save_notes = list(save_identity.notes or [])
-    source_name = delete_identity.name or "Unnamed Identity"
-    merged_notes = [f"[Merged from {source_name}]: {note}" for note in (delete_identity.notes or [])]
+    source_name = archive_identity.name or "Unnamed Identity"
+    merged_notes = [f"[Merged from {source_name}]: {note}" for note in (archive_identity.notes or [])]
     save_identity.notes = save_notes + merged_notes
 
     # Apply name change and save
     save_identity.name = combined_name
     save_identity.save(update_fields=["name", "notes", "updated_at"])
 
-    # Delete the other identity
-    deleted_identity_id = str(delete_identity.id)
-    deleted_identity_name = delete_identity.name or ""
-    delete_identity.delete()
+    # Archive the other identity instead of deleting it
+    archived_identity_id = str(archive_identity.id)
+    archived_identity_name = archive_identity.name or ""
+    save_identity_name = save_identity.name or "Unnamed Identity"
+    
+    # Add note to archived identity indicating it was combined/nested
+    archive_notes = list(archive_identity.notes or [])
+    archive_notes.append(f"[Combined/Nested with {save_identity_name}]: This identity was combined or nested with '{save_identity_name}'.")
+    archive_identity.notes = archive_notes
+    archive_identity.state = IdentityState.ARCHIVED
+    archive_identity.save(update_fields=["state", "notes", "updated_at"])
+    
     log.debug(f"Merged Identity Name: {save_identity.name}")
     log.debug(f"Merged Identity Notes: {save_identity.notes}")
+    log.debug(f"Archived Identity: {archived_identity_name} ({archived_identity_id})")
 
     # Log the action
     Action.objects.create(
@@ -91,7 +101,7 @@ def combine_identities(
         action_type=ActionType.COMBINE_IDENTITIES.value,
         parameters=params.model_dump(),
         result_summary=(
-            f"Combined identities into '{save_identity.name}'. Deleted '{deleted_identity_name}' ({deleted_identity_id})."
+            f"Combined identities into '{save_identity.name}'. Archived '{archived_identity_name}' ({archived_identity_id})."
         ),
         coach_message=coach_message,
         test_scenario=(

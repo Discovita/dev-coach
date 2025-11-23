@@ -13,8 +13,8 @@ def get_refinement_identities_context(coach_state: CoachState) -> str:
     If no identities remain to be refined, returns instructions to move to the next phase.
     """
     user = coach_state.user
-    # Filter to only show identities that are NOT refinement_complete, sorted by oldest first
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.REFINEMENT_COMPLETE).order_by('created_at')
+    # Filter to only show identities that are NOT refinement_complete and NOT archived, sorted by oldest first
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.REFINEMENT_COMPLETE).exclude(state=IdentityState.ARCHIVED).order_by('created_at')
 
     # Check if there are any identities left to refine
     if identities.count() == 0:

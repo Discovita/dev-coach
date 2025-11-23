@@ -9,6 +9,8 @@ from .accept_identity_refinement import accept_identity_refinement
 from .accept_identity_commitment import accept_identity_commitment
 from .accept_i_am_statement import accept_i_am_statement
 from .accept_identity_visualization import accept_identity_visualization
+from .archive_identity import archive_identity
+from .nest_identity import nest_identity
 from .add_identity_note import add_identity_note
 from .combine_identities import combine_identities
 from .transition_phase import transition_phase
@@ -29,9 +31,13 @@ from .sentinel.delete_user_note import delete_user_note
 from .components.show_introduction_canned_response_component import show_introduction_canned_response_component
 from .components.show_accept_i_am_component import show_accept_i_am_component
 from .components.show_combine_identities import show_combine_identities
+from .components.show_nest_identities import show_nest_identities
+from .components.show_archive_identity import show_archive_identity
 
 # PERSISTENT COMPONENT ACTIONS
 from .persistent_components.persist_combine_identities import persist_combine_identities
+from .persistent_components.persist_nest_identities import persist_nest_identities
+from .persistent_components.persist_archive_identity import persist_archive_identity
 
 
 __all__ = [
@@ -46,6 +52,8 @@ __all__ = [
     "accept_identity_commitment",
     "accept_i_am_statement",
     "accept_identity_visualization",
+    "archive_identity",
+    "nest_identity",
     "add_identity_note",
     "transition_phase",
     "select_identity_focus",
@@ -58,9 +66,13 @@ __all__ = [
     "show_introduction_canned_response_component",
     "show_accept_i_am_component",
     "show_combine_identities",
+    "show_nest_identities",
+    "show_archive_identity",
     "combine_identities",
     "add_user_note",
     "update_user_note",
     "delete_user_note",
     "persist_combine_identities",
+    "persist_nest_identities",
+    "persist_archive_identity",
 ]

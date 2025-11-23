@@ -2,8 +2,10 @@ import React from "react";
 import { ComponentConfig } from "@/types/componentConfig";
 import { CoachRequest } from "@/types/coachRequest";
 import { ComponentType } from "@/enums/componentType";
-import { IntroCannedResponseComponent } from "./IntroCannedResponseComponent";
-import { CombineIdentitiesConfirmation } from "./CombineIdentitiesConfirmation";
+import { IntroCannedResponseComponent } from "@/pages/chat/components/coach-message-with-component/IntroCannedResponseComponent";
+import { CombineIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/CombineIdentitiesConfirmation";
+import { NestIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/NestIdentitiesConfirmation";
+import { ArchiveIdentityConfirmation } from "@/pages/chat/components/coach-message-with-component/ArchiveIdentityConfirmation";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -28,6 +30,24 @@ export const CoachMessageWithComponent: React.FC<
     case ComponentType.COMBINE_IDENTITIES:
       return (
         <CombineIdentitiesConfirmation
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+          disabled={disabled}
+        />
+      );
+    case ComponentType.NEST_IDENTITIES:
+      return (
+        <NestIdentitiesConfirmation
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+          disabled={disabled}
+        />
+      );
+    case ComponentType.ARCHIVE_IDENTITY:
+      return (
+        <ArchiveIdentityConfirmation
           coachMessage={children}
           config={componentConfig}
           onSendUserMessageToCoach={onSendUserMessageToCoach}

@@ -12,11 +12,22 @@
 
 - **URL:** `/identities/`
 - **Method:** `GET`
-- **Description:** List all identities for the authenticated user.
+- **Description:** List all identities for the authenticated user. By default, archived identities are excluded from the results.
 - **Authentication:** Required
+- **Query Parameters:**
+  - `include_archived` (optional): Set to `true` to include archived identities in the results. Default: `false`
+  - `archived_only` (optional): Set to `true` to return only archived identities. Default: `false`
 - **Response:**
-  - `200 OK`: Array of identity objects belonging to the authenticated user.
+  - `200 OK`: Array of identity objects belonging to the authenticated user (excluding archived by default).
   - `500 Internal Server Error`: Server error.
+
+#### Example Request
+
+```
+GET /identities/
+GET /identities/?include_archived=true
+GET /identities/?archived_only=true
+```
 
 #### Example Response
 
@@ -57,10 +68,10 @@
 
 - **URL:** `/identities/{id}/`
 - **Method:** `GET`
-- **Description:** Retrieve a single identity by ID. Only returns identities belonging to the authenticated user.
+- **Description:** Retrieve a single identity by ID. Only returns identities belonging to the authenticated user. Archived identities can be retrieved by ID even though they are excluded from list endpoints by default.
 - **Authentication:** Required
 - **Response:**
-  - `200 OK`: Identity object.
+  - `200 OK`: Identity object (including archived identities if accessed by ID).
   - `404 Not Found`: If identity doesn't exist or doesn't belong to the user.
   - `500 Internal Server Error`: Server error.
 
@@ -333,6 +344,10 @@ The `state` field accepts the following values:
 - `PROPOSED`: Identity has been proposed but not yet accepted
 - `ACCEPTED`: Identity has been accepted by the user
 - `REFINEMENT_COMPLETE`: Identity refinement process is complete
+- `COMMITMENT_COMPLETE`: User has committed to the identity and wants to advance to the I Am Statement Phase
+- `I_AM_COMPLETE`: User has created an I Am statement for the identity
+- `VISUALIZATION_COMPLETE`: User has created a visualization for the identity
+- `ARCHIVED`: Identity has been archived and is excluded from active coaching workflows by default
 
 ### Identity Category Choices
 
@@ -356,6 +371,10 @@ The `category` field accepts the following values (see `enums/identity_category.
 - All endpoints require authentication. See the authentication documentation for details.
 - All operations are scoped to the authenticated user's identities only. Users cannot access or modify identities belonging to other users.
 - The `user` field is read-only and automatically set to the authenticated user when creating identities.
+- **Archived Identities**: Archived identities are excluded from list endpoints by default but can be accessed:
+  - Via query parameters: `?include_archived=true` to include them, or `?archived_only=true` to see only archived identities
+  - By direct ID retrieval: Archived identities can be retrieved using the `GET /identities/{id}/` endpoint
+  - Archived identities are excluded from all active coaching workflows (context functions, action handlers, etc.)
 - Image uploads use `multipart/form-data` content type. The image field name in the form data must be `image`.
 - Images are automatically stored in:
   - **Production/Staging**: S3 bucket (`discovita-dev-coach-production` or `discovita-dev-coach-staging`)

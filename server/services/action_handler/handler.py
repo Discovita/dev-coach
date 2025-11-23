@@ -22,6 +22,8 @@ ACTION_REGISTRY = {
     ActionType.ACCEPT_IDENTITY_COMMITMENT.value: accept_identity_commitment,
     ActionType.ACCEPT_I_AM_STATEMENT.value: accept_i_am_statement,
     ActionType.ACCEPT_IDENTITY_VISUALIZATION.value: accept_identity_visualization,
+    ActionType.ARCHIVE_IDENTITY.value: archive_identity,
+    ActionType.NEST_IDENTITY.value: nest_identity,
     ActionType.ADD_IDENTITY_NOTE.value: add_identity_note,
     ActionType.TRANSITION_PHASE.value: transition_phase,
     ActionType.SELECT_IDENTITY_FOCUS.value: select_identity_focus,
@@ -40,8 +42,12 @@ ACTION_REGISTRY = {
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
     ActionType.SHOW_COMBINE_IDENTITIES.value: show_combine_identities,
+    ActionType.SHOW_NEST_IDENTITIES.value: show_nest_identities,
+    ActionType.SHOW_ARCHIVE_IDENTITY.value: show_archive_identity,
     # Persistent component actions (return ComponentConfig)
     ActionType.PERSIST_COMBINE_IDENTITIES.value: persist_combine_identities,
+    ActionType.PERSIST_NEST_IDENTITIES.value: persist_nest_identities,
+    ActionType.PERSIST_ARCHIVE_IDENTITY.value: persist_archive_identity,
 }
 
 

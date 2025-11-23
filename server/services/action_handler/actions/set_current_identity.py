@@ -4,6 +4,7 @@ from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
 from services.action_handler.models import SetCurrentIdentityParams
 from enums.action_type import ActionType
+from enums.identity_state import IdentityState
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -17,6 +18,11 @@ def set_current_identity(coach_state: CoachState, params: SetCurrentIdentityPara
     
     try:
         identity = Identity.objects.get(id=identity_id)
+        
+        # Prevent setting archived identity as current
+        if identity.state == IdentityState.ARCHIVED:
+            raise ValueError(f"Cannot set archived identity as current: {identity_id}")
+        
         coach_state.current_identity = identity
         coach_state.save()
         

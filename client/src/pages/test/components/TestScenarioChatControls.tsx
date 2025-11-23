@@ -6,7 +6,7 @@ import { TestScenarioConversationResetter } from "@/pages/test/components/TestSc
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
 import { CoachRequest } from "@/types/coachRequest";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
-import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
+import { IdentitiesBulletin } from "@/pages/chat/components/IdentitiesBulletin";
 import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
 import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
@@ -101,7 +101,7 @@ export const TestScenarioChatControls: React.FC<
   return (
     <div className="_TestScenarioChatControls bg-gold-200 dark:bg-[#333333] p-4">
       <WarmupBulletin coachState={coachState} />
-      <BrainstormingBulletin coachState={coachState} identities={identities} />
+      <IdentitiesBulletin coachState={coachState} identities={identities} />
       <RefinementBulletin coachState={coachState} />
       <CommitmentBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>

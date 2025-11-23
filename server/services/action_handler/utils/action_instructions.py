@@ -68,6 +68,14 @@ ACTION_PARAMS = {
         "description": "Mark an Identity as visualization_complete.",
         "model": AcceptIdentityVisualizationAction,
     },
+    ActionType.ARCHIVE_IDENTITY: {
+        "description": "Archive an Identity (internally). When communicating with the user, refer to this as 'deleting' the identity. This marks the identity as archived, removing it from active coaching workflows while preserving it in the database.",
+        "model": ArchiveIdentityAction,
+    },
+    ActionType.NEST_IDENTITY: {
+        "description": "Nest an identity under a parent identity. Copies all notes from the nested identity to the parent, then archives the nested identity. No name changes are made.",
+        "model": NestIdentityAction,
+    },
     ActionType.TRANSITION_PHASE: {
         "description": "Move to the next Coaching Phase.",
         "model": TransitionPhaseAction,
@@ -120,6 +128,14 @@ ACTION_PARAMS = {
         "description": "Show a component that displays two identities side-by-side with Yes/No buttons to confirm combining them.",
         "model": ShowCombineIdentitiesAction,
     },
+    ActionType.SHOW_NEST_IDENTITIES: {
+        "description": "Show a component that displays two identities side-by-side with Yes/No buttons to confirm nesting one under the other.",
+        "model": ShowNestIdentitiesAction,
+    },
+    ActionType.SHOW_ARCHIVE_IDENTITY: {
+        "description": "Show a component that displays an identity with Yes/No buttons to confirm deleting it. (Note: Internally this archives the identity, but to the user it should be referred to as 'deleting').",
+        "model": ShowArchiveIdentityAction,
+    },
     ActionType.COMBINE_IDENTITIES: {
         "description": "Combine two identities. Exactly two identities are required. Category-specific rules apply.",
         "model": CombineIdentitiesAction,
@@ -127,6 +143,14 @@ ACTION_PARAMS = {
     ActionType.PERSIST_COMBINE_IDENTITIES: {
         "description": "Persist the combine identities component configuration to the chat message for historical display.",
         "model": PersistCombineIdentitiesAction,
+    },
+    ActionType.PERSIST_NEST_IDENTITIES: {
+        "description": "Persist the nest identities component configuration to the chat message for historical display.",
+        "model": PersistNestIdentitiesAction,
+    },
+    ActionType.PERSIST_ARCHIVE_IDENTITY: {
+        "description": "Persist the archive identity component configuration to the chat message for historical display.",
+        "model": PersistArchiveIdentityAction,
     },
 }
 

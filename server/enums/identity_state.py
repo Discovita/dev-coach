@@ -23,6 +23,7 @@ class IdentityState(models.TextChoices):
     COMMITMENT_COMPLETE = "commitment_complete", "Commitment Complete"
     I_AM_COMPLETE = "i_am_complete", "I Am Complete"
     VISUALIZATION_COMPLETE = "visualization_complete", "Visualization Complete"
+    ARCHIVED = "archived", "Archived"
 
     @classmethod
     def from_string(cls, value: str) -> "IdentityState":
