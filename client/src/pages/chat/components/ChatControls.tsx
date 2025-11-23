@@ -56,6 +56,22 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
     resizeTextarea();
   }, [inputMessage, resizeTextarea]);
 
+  // Auto-focus textarea when coach finishes responding
+  // This allows users to immediately type their next message without clicking
+  const prevIsProcessingRef = useRef(isProcessingMessage);
+  useEffect(() => {
+    // Only focus when transitioning from processing (true) to not processing (false)
+    // This avoids focusing on initial mount or when already not processing
+    if (prevIsProcessingRef.current === true && !isProcessingMessage && textareaRef.current) {
+      // Use setTimeout to ensure the DOM has updated after the response
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 0);
+    }
+    // Update the ref to track the previous value
+    prevIsProcessingRef.current = isProcessingMessage;
+  }, [isProcessingMessage]);
+
   /**
    * Handles input change and resizes textarea.
    */
