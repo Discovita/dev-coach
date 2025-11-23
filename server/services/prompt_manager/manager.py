@@ -48,6 +48,7 @@ class PromptManager:
             Tuple[str, Type[BaseModel]]: prompt for the chat endpoint and the response format.
         """
         # 1. Retrieve the user's CoachState
+        log.info(f"Creating chat prompt")
         coach_state = CoachState.objects.get(user=user)
         log.debug(f"coach_state: {coach_state}")
         state_value = coach_state.current_phase

@@ -132,6 +132,10 @@ ACTION_PARAMS = {
         "description": "Show a component that displays two identities side-by-side with Yes/No buttons to confirm nesting one under the other.",
         "model": ShowNestIdentitiesAction,
     },
+    ActionType.SHOW_ARCHIVE_IDENTITY: {
+        "description": "Show a component that displays an identity with Yes/No buttons to confirm archiving it.",
+        "model": ShowArchiveIdentityAction,
+    },
     ActionType.COMBINE_IDENTITIES: {
         "description": "Combine two identities. Exactly two identities are required. Category-specific rules apply.",
         "model": CombineIdentitiesAction,
@@ -143,6 +147,10 @@ ACTION_PARAMS = {
     ActionType.PERSIST_NEST_IDENTITIES: {
         "description": "Persist the nest identities component configuration to the chat message for historical display.",
         "model": PersistNestIdentitiesAction,
+    },
+    ActionType.PERSIST_ARCHIVE_IDENTITY: {
+        "description": "Persist the archive identity component configuration to the chat message for historical display.",
+        "model": PersistArchiveIdentityAction,
     },
 }
 

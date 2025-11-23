@@ -12,7 +12,7 @@ def format_identity_ids(identities: List[Identity]) -> str:
     
     formatted = []
     for identity in identities:
-        formatted.append(f"- **{identity.name}**: {identity.id}")
+        formatted.append(f"- **{identity.name}**: {identity.id} ({identity.state})")
     
     return "\n".join(formatted)
 

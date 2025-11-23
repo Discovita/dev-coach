@@ -28,7 +28,9 @@ export enum ActionType {
   SHOW_BRAINSTORMING_IDENTITIES = "show_brainstorming_identities",
   SHOW_COMBINE_IDENTITIES = "show_combine_identities",
   SHOW_NEST_IDENTITIES = "show_nest_identities",
+  SHOW_ARCHIVE_IDENTITY = "show_archive_identity",
   COMBINE_IDENTITIES = "combine_identities",
   PERSIST_COMBINE_IDENTITIES = "persist_combine_identities",
   PERSIST_NEST_IDENTITIES = "persist_nest_identities",
+  PERSIST_ARCHIVE_IDENTITY = "persist_archive_identity",
 }

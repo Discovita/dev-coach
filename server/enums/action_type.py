@@ -56,9 +56,11 @@ class ActionType(models.TextChoices):
     SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component", "Show Accept I Am Component"
     SHOW_COMBINE_IDENTITIES = "show_combine_identities", "Show Combine Identities"
     SHOW_NEST_IDENTITIES = "show_nest_identities", "Show Nest Identities"
+    SHOW_ARCHIVE_IDENTITY = "show_archive_identity", "Show Archive Identity"
     # Persistent component actions
     PERSIST_COMBINE_IDENTITIES = "persist_combine_identities", "Persist Combine Identities"
     PERSIST_NEST_IDENTITIES = "persist_nest_identities", "Persist Nest Identities"
+    PERSIST_ARCHIVE_IDENTITY = "persist_archive_identity", "Persist Archive Identity"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""

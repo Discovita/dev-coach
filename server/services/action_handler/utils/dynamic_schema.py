@@ -38,6 +38,10 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.SHOW_COMBINE_IDENTITIES: ShowCombineIdentitiesAction,
     ActionType.COMBINE_IDENTITIES: CombineIdentitiesAction,
     ActionType.PERSIST_COMBINE_IDENTITIES: PersistCombineIdentitiesAction,
+    ActionType.SHOW_NEST_IDENTITIES: ShowNestIdentitiesAction,
+    ActionType.PERSIST_NEST_IDENTITIES: PersistNestIdentitiesAction,
+    ActionType.SHOW_ARCHIVE_IDENTITY: ShowArchiveIdentityAction,
+    ActionType.PERSIST_ARCHIVE_IDENTITY: PersistArchiveIdentityAction,
 }
 
 

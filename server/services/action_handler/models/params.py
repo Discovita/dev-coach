@@ -236,3 +236,14 @@ class PersistNestIdentitiesParams(BaseParamsModel):
     coach_message_id: str = Field(
         ..., description="ID of the coach message to persist the component to"
     )
+
+
+class ShowArchiveIdentityParams(BaseParamsModel):
+    identity_id: str = Field(..., description="ID of the identity to archive")
+
+
+class PersistArchiveIdentityParams(BaseParamsModel):
+    identity_id: str = Field(..., description="ID of the identity to archive")
+    coach_message_id: str = Field(
+        ..., description="ID of the coach message to persist the component to"
+    )

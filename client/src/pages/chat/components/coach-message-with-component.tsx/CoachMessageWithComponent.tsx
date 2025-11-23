@@ -5,6 +5,7 @@ import { ComponentType } from "@/enums/componentType";
 import { IntroCannedResponseComponent } from "./IntroCannedResponseComponent";
 import { CombineIdentitiesConfirmation } from "./CombineIdentitiesConfirmation";
 import { NestIdentitiesConfirmation } from "./NestIdentitiesConfirmation";
+import { ArchiveIdentityConfirmation } from "./ArchiveIdentityConfirmation";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -38,6 +39,15 @@ export const CoachMessageWithComponent: React.FC<
     case ComponentType.NEST_IDENTITIES:
       return (
         <NestIdentitiesConfirmation
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+          disabled={disabled}
+        />
+      );
+    case ComponentType.ARCHIVE_IDENTITY:
+      return (
+        <ArchiveIdentityConfirmation
           coachMessage={children}
           config={componentConfig}
           onSendUserMessageToCoach={onSendUserMessageToCoach}

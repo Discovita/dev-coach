@@ -43,9 +43,11 @@ ACTION_REGISTRY = {
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
     ActionType.SHOW_COMBINE_IDENTITIES.value: show_combine_identities,
     ActionType.SHOW_NEST_IDENTITIES.value: show_nest_identities,
+    ActionType.SHOW_ARCHIVE_IDENTITY.value: show_archive_identity,
     # Persistent component actions (return ComponentConfig)
     ActionType.PERSIST_COMBINE_IDENTITIES.value: persist_combine_identities,
     ActionType.PERSIST_NEST_IDENTITIES.value: persist_nest_identities,
+    ActionType.PERSIST_ARCHIVE_IDENTITY.value: persist_archive_identity,
 }
 
 

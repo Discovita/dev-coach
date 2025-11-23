@@ -31,6 +31,8 @@ from .params import (
     PersistCombineIdentitiesParams,
     ShowNestIdentitiesParams,
     PersistNestIdentitiesParams,
+    ShowArchiveIdentityParams,
+    PersistArchiveIdentityParams,
 )
 from .actions import (
     SelectIdentityFocusAction,
@@ -65,6 +67,8 @@ from .actions import (
     PersistCombineIdentitiesAction,
     ShowNestIdentitiesAction,
     PersistNestIdentitiesAction,
+    ShowArchiveIdentityAction,
+    PersistArchiveIdentityAction,
 )
 
 __all__ = [
@@ -100,6 +104,8 @@ __all__ = [
     "PersistCombineIdentitiesParams",
     "ShowNestIdentitiesParams",
     "PersistNestIdentitiesParams",
+    "ShowArchiveIdentityParams",
+    "PersistArchiveIdentityParams",
     "SelectIdentityFocusAction",
     "SetCurrentIdentityAction",
     "CreateIdentityAction",
@@ -132,4 +138,6 @@ __all__ = [
     "PersistCombineIdentitiesAction",
     "ShowNestIdentitiesAction",
     "PersistNestIdentitiesAction",
+    "ShowArchiveIdentityAction",
+    "PersistArchiveIdentityAction",
 ]

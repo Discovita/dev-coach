@@ -208,3 +208,15 @@ class PersistNestIdentitiesAction(BaseActionModel):
     params: PersistNestIdentitiesParams = Field(
         ..., description="Parameters for persisting the nest identities component."
     )
+
+
+class ShowArchiveIdentityAction(BaseActionModel):
+    params: ShowArchiveIdentityParams = Field(
+        ..., description="Parameters for showing the archive identity component."
+    )
+
+
+class PersistArchiveIdentityAction(BaseActionModel):
+    params: PersistArchiveIdentityParams = Field(
+        ..., description="Parameters for persisting the archive identity component."
+    )

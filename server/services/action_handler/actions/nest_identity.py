@@ -4,7 +4,11 @@ from apps.actions.models import Action
 from apps.identities.models import Identity
 from enums.action_type import ActionType
 from enums.identity_state import IdentityState
+from enums.coaching_phase import CoachingPhase
 from services.action_handler.models import NestIdentityParams
+from services.action_handler.utils import (
+    set_current_identity_to_next_pending_commitment,
+)
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -95,6 +99,10 @@ def nest_identity(
             else None
         ),
     )
+
+    # Set current_identity to the next pending identity based on current phase
+    if coach_state.current_phase == CoachingPhase.IDENTITY_COMMITMENT.value:
+        set_current_identity_to_next_pending_commitment(coach_state)
 
     return None
 
