@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { NestIdentitiesConfirmation } from './NestIdentitiesConfirmation';
+import { NestIdentitiesConfirmation } from '@/pages/chat/components/coach-message-with-component/NestIdentitiesConfirmation';
 import { ComponentType } from '@/enums/componentType';
 import { IdentityCategory } from '@/enums/identityCategory';
 

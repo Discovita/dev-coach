@@ -2,7 +2,10 @@ import React from "react";
 import { CoachState } from "@/types/coachState";
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { Identity } from "@/types/identity";
-import { getIdentityCategoryColor, getIdentityCategoryIcon } from "@/enums/identityCategory";
+import {
+  getIdentityCategoryColor,
+  getIdentityCategoryIcon,
+} from "@/enums/identityCategory";
 
 const IdentityBadge: React.FC<{ identity: Identity }> = ({ identity }) => {
   const IconComponent = getIdentityCategoryIcon(String(identity.category));
@@ -17,14 +20,15 @@ const IdentityBadge: React.FC<{ identity: Identity }> = ({ identity }) => {
   );
 };
 
-export const BrainstormingBulletin: React.FC<{
+export const IdentitiesBulletin: React.FC<{
   coachState: CoachState | null | undefined;
   identities: Identity[] | null | undefined;
 }> = ({ coachState, identities }) => {
-  const isBrainstorming =
+  const shouldShowIdentities =
     coachState?.current_phase === CoachingPhase.IDENTITY_BRAINSTORMING ||
-    coachState?.current_phase === CoachingPhase.BRAINSTORMING_REVIEW;
-  if (!isBrainstorming) return null;
+    coachState?.current_phase === CoachingPhase.BRAINSTORMING_REVIEW ||
+    coachState?.current_phase === CoachingPhase.IDENTITY_COMMITMENT;
+  if (!shouldShowIdentities) return null;
 
   const items = identities || [];
 
@@ -45,12 +49,13 @@ export const BrainstormingBulletin: React.FC<{
       ) : (
         <div className="flex flex-wrap gap-2">
           {items.map((identity) => (
-            <IdentityBadge key={identity.id || identity.name} identity={identity} />
+            <IdentityBadge
+              key={identity.id || identity.name}
+              identity={identity}
+            />
           ))}
         </div>
       )}
     </div>
   );
 };
-
-

@@ -2,10 +2,10 @@ import React from "react";
 import { ComponentConfig } from "@/types/componentConfig";
 import { CoachRequest } from "@/types/coachRequest";
 import { ComponentType } from "@/enums/componentType";
-import { IntroCannedResponseComponent } from "./IntroCannedResponseComponent";
-import { CombineIdentitiesConfirmation } from "./CombineIdentitiesConfirmation";
-import { NestIdentitiesConfirmation } from "./NestIdentitiesConfirmation";
-import { ArchiveIdentityConfirmation } from "./ArchiveIdentityConfirmation";
+import { IntroCannedResponseComponent } from "@/pages/chat/components/coach-message-with-component/IntroCannedResponseComponent";
+import { CombineIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/CombineIdentitiesConfirmation";
+import { NestIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/NestIdentitiesConfirmation";
+import { ArchiveIdentityConfirmation } from "@/pages/chat/components/coach-message-with-component/ArchiveIdentityConfirmation";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
