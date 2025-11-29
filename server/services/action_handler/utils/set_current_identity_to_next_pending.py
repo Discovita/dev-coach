@@ -32,6 +32,7 @@ def set_current_identity_to_next_pending(
         # For I Am Statement phase
         set_current_identity_to_next_pending(coach_state, IdentityState.I_AM_COMPLETE)
     """
+    log.debug(f"Setting current_identity to the next pending identity for {complete_state.label}")
     # Find the next (oldest) identity that is NOT in the complete state and NOT archived
     next_identity: Identity = (
         coach_state.user.identities.exclude(state=complete_state)

@@ -261,7 +261,7 @@ def instantiate_test_scenario(
             
             # Final fallback
             else:
-                log.warning("No coach message linking found, using fallback chat message for action relationship")
+                log.debug("No coach message linking found, using fallback chat message for action relationship")
                 coach_message = ChatMessage.objects.filter(
                     user=created_user,
                     test_scenario=scenario,

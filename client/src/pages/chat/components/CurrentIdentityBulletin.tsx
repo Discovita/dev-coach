@@ -18,7 +18,7 @@ const IdentityCard: React.FC<{ identity: Identity }> = ({ identity }) => {
   );
 
   return (
-    <div className="relative p-6">
+    <div className="relative px-6 py-2">
       {/* Large Icon positioned to the right */}
       <div className="absolute top-1/2 right-6 transform -translate-y-1/2">
         <div className={`p-4 rounded-full ${colorClasses}`}>
