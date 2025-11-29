@@ -6,8 +6,10 @@ from enums.identity_state import IdentityState
 from services.action_handler.models import AcceptIAmParams
 from enums.action_type import ActionType
 from services.logger import configure_logging
+from services.action_handler.utils import set_current_identity_to_next_pending
 
 log = configure_logging(__name__, log_level="INFO")
+
 
 def accept_i_am_statement(
     coach_state: CoachState, params: AcceptIAmParams, coach_message: ChatMessage
@@ -18,10 +20,12 @@ def accept_i_am_statement(
     Identity.objects.filter(id=params.id, user=coach_state.user).update(
         state=IdentityState.I_AM_COMPLETE
     )
-    
+
     # Get the identity for logging
     identity = Identity.objects.get(id=params.id, user=coach_state.user)
-    
+
+    set_current_identity_to_next_pending(coach_state, IdentityState.I_AM_COMPLETE)
+
     # Log the action with rich context
     Action.objects.create(
         user=coach_state.user,
@@ -29,5 +33,9 @@ def accept_i_am_statement(
         parameters=params.model_dump(),
         result_summary=f"Accepted 'I Am' statement for identity '{identity.name}'",
         coach_message=coach_message,
-        test_scenario=coach_state.user.test_scenario if hasattr(coach_state.user, 'test_scenario') else None
+        test_scenario=(
+            coach_state.user.test_scenario
+            if hasattr(coach_state.user, "test_scenario")
+            else None
+        ),
     )

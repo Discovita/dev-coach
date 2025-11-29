@@ -31,10 +31,17 @@ def transition_phase(
     # If moving into Identity Refinement, accept all current identities for this user and set the current identity to the next (should be first) pending refinement
     if CoachingPhase.IDENTITY_REFINEMENT.value == params.to_phase:
         update_all_user_identities_to_accepted_state(coach_state)
-        set_current_identity_to_next_pending(coach_state, IdentityState.REFINEMENT_COMPLETE)
+        set_current_identity_to_next_pending(
+            coach_state, IdentityState.REFINEMENT_COMPLETE
+        )
 
     if CoachingPhase.IDENTITY_COMMITMENT.value == params.to_phase:
-        set_current_identity_to_next_pending(coach_state, IdentityState.COMMITMENT_COMPLETE)
+        set_current_identity_to_next_pending(
+            coach_state, IdentityState.COMMITMENT_COMPLETE
+        )
+
+    if CoachingPhase.I_AM_STATEMENT.value == params.to_phase:
+        set_current_identity_to_next_pending(coach_state, IdentityState.I_AM_COMPLETE)
 
     # Log the action with rich context
     Action.objects.create(
