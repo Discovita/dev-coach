@@ -9,9 +9,10 @@ def get_identity_ids_context(coach_state: CoachState) -> str:
     """
     Get all of the user's identities formatted as a simple name-ID mapping.
     Excludes archived identities to only show active identities.
+    Ordered by created_at (oldest first) to match the order used by set_current_identity_to_next_pending.
     """
     user = coach_state.user
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.ARCHIVED)
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.ARCHIVED).order_by('created_at')
     
     return format_identity_ids(identities)
 
