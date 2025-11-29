@@ -7,8 +7,7 @@ import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenario
 import { CoachRequest } from "@/types/coachRequest";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
 import { IdentitiesBulletin } from "@/pages/chat/components/IdentitiesBulletin";
-import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
-import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
+import { CurrentIdentityBulletin } from "@/pages/chat/components/CurrentIdentityBulletin";
 import { useIdentities } from "@/hooks/use-identities";
 import { useCoachState } from "@/hooks/use-coach-state";
 import { useProfile } from "@/hooks/use-profile";
@@ -111,8 +110,7 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
     <div className="_ChatControls bg-gold-200 dark:bg-[#333333] p-4">
       <WarmupBulletin coachState={coachState} />
       <IdentitiesBulletin coachState={coachState} identities={identities} />
-      <RefinementBulletin coachState={coachState} />
-      <CommitmentBulletin coachState={coachState} />
+      <CurrentIdentityBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}

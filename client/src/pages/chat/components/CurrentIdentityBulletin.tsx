@@ -58,13 +58,16 @@ const IdentityCard: React.FC<{ identity: Identity }> = ({ identity }) => {
   );
 };
 
-export const CommitmentBulletin: React.FC<{
+export const CurrentIdentityBulletin: React.FC<{
   coachState: CoachState | null | undefined;
 }> = ({ coachState }) => {
-  const isCommitment =
-    coachState?.current_phase === CoachingPhase.IDENTITY_COMMITMENT;
+  const shouldShowCurrentIdentity =
+    coachState?.current_phase === CoachingPhase.IDENTITY_REFINEMENT ||
+    coachState?.current_phase === CoachingPhase.IDENTITY_COMMITMENT ||
+    coachState?.current_phase === CoachingPhase.I_AM_STATEMENT ||
+    coachState?.current_phase === CoachingPhase.IDENTITY_VISUALIZATION;
 
-  if (!isCommitment) return null;
+  if (!shouldShowCurrentIdentity) return null;
 
   const currentIdentity = coachState?.current_identity;
 
@@ -79,3 +82,4 @@ export const CommitmentBulletin: React.FC<{
     </div>
   );
 };
+
