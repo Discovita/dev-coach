@@ -22,16 +22,14 @@ def set_current_identity_to_next_pending(
         complete_state: The IdentityState that represents "complete" for this phase
                        (e.g., IdentityState.REFINEMENT_COMPLETE, IdentityState.COMMITMENT_COMPLETE)
     
-    Examples:
-        # For refinement phase
-        set_current_identity_to_next_pending(coach_state, IdentityState.REFINEMENT_COMPLETE)
-        
+    Examples:        
         # For commitment phase
         set_current_identity_to_next_pending(coach_state, IdentityState.COMMITMENT_COMPLETE)
         
         # For I Am Statement phase
         set_current_identity_to_next_pending(coach_state, IdentityState.I_AM_COMPLETE)
     """
+    log.debug(f"Setting current_identity to the next pending identity for {complete_state.label}")
     # Find the next (oldest) identity that is NOT in the complete state and NOT archived
     next_identity: Identity = (
         coach_state.user.identities.exclude(state=complete_state)
