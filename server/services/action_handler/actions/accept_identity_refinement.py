@@ -6,7 +6,7 @@ from enums.identity_state import IdentityState
 from services.action_handler.models import AcceptIdentityRefinementParams
 from enums.action_type import ActionType
 from services.logger import configure_logging
-from services.action_handler.utils import set_current_identity_to_next_pending_refinement
+from services.action_handler.utils import set_current_identity_to_next_pending
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -23,7 +23,7 @@ def accept_identity_refinement(
     # Get the identity for logging
     identity = Identity.objects.get(id=params.id, user=coach_state.user)
     
-    set_current_identity_to_next_pending_refinement(coach_state)
+    set_current_identity_to_next_pending(coach_state, IdentityState.REFINEMENT_COMPLETE)
     
     # Log the action with rich context
     Action.objects.create(
