@@ -47,6 +47,10 @@ const meta = {
       control: 'text',
       description: 'The coach message content (markdown supported)',
     },
+    testUserId: {
+      control: 'text',
+      description: 'Optional user ID for test scenarios (uses admin endpoint)',
+    },
   },
   args: {
     onSendUserMessageToCoach: fn(),
