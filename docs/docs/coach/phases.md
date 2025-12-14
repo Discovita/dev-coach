@@ -223,13 +223,45 @@ The coach systematically reviews each identity, asking whether it feels "excitin
 - "fitness enthusiast" might evolve into "Warrior"
 - "good with money" might transform into "Wealth Architect"
 
-This phase also involves consolidating similar identities and ensuring the constellation feels complete without being overwhelming. The coach helps clients identify which identities might nest under others and whether any essential aspects of their lives remain unaddressed.
+This phase also involves consolidating similar identities and ensuring the constellation feels complete without being overwhelming. The coach helps clients identify which identities might nest under others.
+
+### Transition to Anything Missing
+
+After completing the refinement of all identities, the coach transitions to the Anything Missing phase by asking: "Sometimes, as we go through this process, we might realize there's an important aspect of our lives that hasn't been captured in the identities we've created. This could be a role or a part of yourself that you feel is significant but hasn't been named yet. Is there any part of your life or any role you play that you think might be missing from the identities we've already refined?"
+
+---
+
+## Anything Missing
+
+This phase provides a final opportunity for users to identify any important aspects of their lives that haven't been captured in their identities before moving to the commitment phase. This checkpoint ensures the identity constellation is truly complete and comprehensive.
+
+### The Purpose
+
+After refining all identities, clients sometimes realize there's an important domain or role that wasn't represented in earlier phases. This phase catches these missing elements before the commitment evaluation begins, ensuring nothing important is overlooked.
+
+### The Process
+
+If a client identifies something missing, the coach helps them:
+- Create the new identity with an appropriate name
+- Add notes about why this identity matters
+- Bring it to the same `refinement_complete` state as all other identities
+
+The phase supports creating multiple identities if needed. After completing one identity, the coach asks "Is there anything else that you feel is missing?" and continues until the client says there's nothing else.
+
+### Default Category
+
+New identities created in this phase default to the "Passions and Talents" category unless it's clearly obvious which category they belong to.
+
+### Transition to Commitment
+
+- If no new identities were created: The coach transitions directly to Identity Commitment
+- If one or more new identities were created: The coach acknowledges the new identity(ies) and transitions to Identity Commitment, where all identities (including the newly created ones) will be evaluated for commitment
 
 ---
 
 ## Identity Commitment
 
-This phase serves as a critical checkpoint between refinement and "I Am" Statements. After elevating names and organizing the constellation, the client evaluates each identity for genuine commitment and focus. Only identities that pass this checkpoint advance to "I Am" Statements work.
+This phase serves as a critical checkpoint between Anything Missing and "I Am" Statements. After elevating names and organizing the constellation, the client evaluates each identity for genuine commitment and focus. Only identities that pass this checkpoint advance to "I Am" Statements work.
 
 ### The Critical Question
 
@@ -249,12 +281,6 @@ Ask and answer this for every identity in the constellation. The aim is to ensur
   - **Eliminate it entirely**
     - Remove identities that do not belong in the client’s current life focus.
 
-### Missing Identity Check
-
-- After evaluating all identities, ask: **“Is anything missing?”**
-- Clients sometimes discover an important domain or role wasn’t represented in earlier phases.
-  - Examples: **Investor** (clear part of life not previously named); noticing a new essential identity like **Helper** and determining whether it belongs as a focus, nests under another, or is better addressed later (e.g., in shadow work).
-
 ### Common Pitfalls and Guidance
 
 - **People-pleasing/helper patterns** often arise at this stage. If an identity feels driven by external approval rather than genuine desire, consider eliminating it or nesting appropriately rather than promoting it to active focus.
@@ -272,7 +298,6 @@ Ask and answer this for every identity in the constellation. The aim is to ensur
 >
 > “When you nest, it’s for clarity—so you know it’s the Magical Healer that’s cooking dinner, not a Chef.”
 >
-> “Before moving on, ask what’s missing—you might have an identity like Investor that didn’t surface earlier.”
 
 ---
 
