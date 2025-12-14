@@ -15,10 +15,12 @@ import {
   FaHeart,
   FaRegCheckSquare,
 } from "react-icons/fa";
+import { FiDownload } from "react-icons/fi";
 import { MdFamilyRestroom } from "react-icons/md";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineSun } from "react-icons/ai";
 import { createLogger, LogLevel } from "@/lib/logger";
+import { useDownloadIAmPdf } from "@/hooks/use-download-i-am-pdf";
 
 const log = createLogger("IAmStatementsSummaryComponent", LogLevel.DEBUG);
 
@@ -110,6 +112,7 @@ export const IAmStatementsSummaryComponent: React.FC<{
 }> = ({ coachMessage, config, onSendUserMessageToCoach, disabled }) => {
   const identities = (config.identities || []) as ComponentIdentity[];
   const hasButtons = config.buttons && config.buttons.length > 0;
+  const { downloadPdf, isDownloading } = useDownloadIAmPdf();
 
   return (
     <div
@@ -135,9 +138,23 @@ export const IAmStatementsSummaryComponent: React.FC<{
         </div>
       )}
 
-      {config.buttons && config.buttons.length > 0 && (
-        <div className="_IAmStatementsSummaryButtons mt-4 flex flex-wrap gap-2 justify-end">
-          {config.buttons.map((button, index) => (
+      <div className="_IAmStatementsSummaryButtons mt-4 flex flex-wrap gap-2 justify-end">
+        {/* Download PDF button */}
+        <button
+          onClick={() => {
+            log.debug("Download PDF button clicked");
+            downloadPdf();
+          }}
+          disabled={disabled || isDownloading}
+          className="px-4 py-2 text-sm font-medium rounded-md bg-white/50 hover:bg-white/70 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 transition-colors cursor-pointer flex items-center gap-2"
+        >
+          <FiDownload className="w-4 h-4" />
+          {isDownloading ? "Downloading..." : "Download PDF"}
+        </button>
+
+        {/* Dynamic buttons from config */}
+        {config.buttons &&
+          config.buttons.map((button, index) => (
             <button
               key={index}
               onClick={() => {
@@ -153,8 +170,7 @@ export const IAmStatementsSummaryComponent: React.FC<{
               {button.label}
             </button>
           ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 };
