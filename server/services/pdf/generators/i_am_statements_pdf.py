@@ -38,6 +38,9 @@ def generate_i_am_statements_pdf(user: User) -> BytesIO:
     - Two-column layout of identity cards
     - Each card shows: identity name, category, and I Am statement
     
+    Includes all identities that have an I Am statement populated,
+    regardless of their state (excluding archived identities).
+    
     Args:
         user: The User instance to generate the PDF for.
         
@@ -45,19 +48,22 @@ def generate_i_am_statements_pdf(user: User) -> BytesIO:
         BytesIO buffer containing the generated PDF.
         
     Raises:
-        ValueError: If the user has no completed identities.
+        ValueError: If the user has no identities with I Am statements.
     """
-    # Fetch completed identities
+    # Fetch identities that have I Am statements (regardless of state)
+    # This includes all identities with i_am_statement populated, excluding archived ones
     identities = Identity.objects.filter(
         user=user,
-        state=IdentityState.I_AM_COMPLETE,
+        i_am_statement__isnull=False,
+    ).exclude(
+        i_am_statement=""
     ).exclude(
         state=IdentityState.ARCHIVED
     ).order_by("created_at")
     
     if not identities.exists():
-        log.warning(f"No completed identities found for user {user.id}")
-        raise ValueError("No completed identities found for this user.")
+        log.warning(f"No identities with I Am statements found for user {user.id}")
+        raise ValueError("No identities with I Am statements found for this user.")
     
     # Create PDF buffer
     buffer = BytesIO()
