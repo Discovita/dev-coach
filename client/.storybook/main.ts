@@ -11,7 +11,6 @@ const config: StorybookConfig = {
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
-    // "@chromatic-com/storybook", // Temporarily removed - not compatible with Storybook 10 ESM architecture
     "@storybook/addon-docs",
     "@storybook/addon-onboarding",
     "@storybook/addon-a11y",
