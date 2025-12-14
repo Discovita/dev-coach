@@ -36,8 +36,15 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 
 ## 3. Prompt Creation
 
-- [ ] Create initial prompt for the new phase in the database
-  - Phase name: "Anything Missing"
+- [ ] Create initial prompt for the new phase in the database using Dev Coach MCP server
+  - **IMPORTANT**: Prompts are NOT file-based - they must be created directly in the database using the `create_new_coach_prompt` MCP tool
+  - Use the Dev Coach MCP server to create the prompt with:
+    - `coaching_phase`: "anything_missing"
+    - `name`: "Anything Missing"
+    - `description`: Brief description of the phase purpose
+    - `body`: Full prompt content (see below)
+    - `required_context_keys`: Array of context keys needed
+    - `allowed_actions`: Array of action types allowed
   - Required context keys:
     - `user_name`
     - `identities` (to show what they already have)
@@ -53,11 +60,12 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
     - `transition_phase` (to move to Identity Commitment)
 
 - [ ] Prompt content should include:
-  - Instructions to ask "Is anything missing?" with full context upfront
+  - Instructions to ask "Is anything missing?" - **NOTE**: If context explanation is in transition message, prompt may just ask the question directly (coordinate with step 6)
   - Process for creating new identity (name it, refine it, add notes)
   - Default to "passions_and_talents" category unless obvious
   - Instructions to get the new identity to `refinement_complete` state
   - Transition logic (if no, move to commitment; if yes, handle creation then move to commitment)
+  - **Consideration**: If transition message includes full context explanation, the prompt's first message may be simpler since context was already provided
 
 ---
 
@@ -87,10 +95,18 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 
 ## 6. Phase Transition Messages
 
+- [ ] Get latest Identity Commitment prompt to review context explanation
+  - Use Dev Coach MCP server `get_latest_prompt` with `coaching_phase: "identity_commitment"`
+  - Review the explanation that provides context about what "Is anything missing?" means
+  - The explanation includes: "Sometimes, as we go through this process, we might realize there's an important aspect of our lives that hasn't been captured in the identities we've created. This could be a role or a part of yourself that you feel is significant but hasn't been named yet."
+
 - [ ] Update transition message FROM Brainstorming Review
   - Current message transitions directly to Identity Commitment
   - New message should transition to Anything Missing phase
-  - Message should ask if they're ready to check if anything is missing
+  - **IMPORTANT**: Incorporate the context explanation into the transition message itself
+  - The transition message should explain what we mean by "anything missing" before asking the question
+  - Example structure: Explain the concept, then ask if they're ready to check if anything is missing
+  - This ensures smooth experience - user understands the question before the phase begins
 
 - [ ] Create transition message FROM Anything Missing TO Identity Commitment
   - If user said "no" to missing anything: brief transition acknowledging they're complete
@@ -100,29 +116,39 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 - [ ] Update `notes/Phase_Transition_Messages.md`
   - Add new section for Anything Missing phase
   - Document both transition messages (from and to)
+  - Include the context explanation in the transition FROM Brainstorming Review
 
 ---
 
 ## 7. Update Identity Commitment Prompt
 
-- [ ] Remove "Is anything missing?" section from Identity Commitment prompt
-  - Remove the "MANDATORY: Missing Identity Check (AT THE BEGINNING)" section
-  - Remove related instructions about asking at the beginning
-  - Update transition message handling to remove references to asking "Is anything missing?" first
+- [ ] Get latest Identity Commitment prompt using Dev Coach MCP server
+  - Use `get_latest_prompt` MCP tool with `coaching_phase: "identity_commitment"`
 
-- [ ] Update Identity Commitment prompt to assume identities are already complete
-  - Prompt should start directly with evaluating identities for commitment
-  - Remove all logic about handling missing identities
-
-- [ ] Create new version of Identity Commitment prompt in database
+- [ ] Create new version of Identity Commitment prompt in database using Dev Coach MCP server
+  - Use `create_new_coach_prompt` MCP tool to create a new version
+  - Remove "Is anything missing?" section from the prompt
+    - Remove the "MANDATORY: Missing Identity Check (AT THE BEGINNING)" section
+    - Remove related instructions about asking at the beginning
+    - Update transition message handling to remove references to asking "Is anything missing?" first
+  - Update prompt to assume identities are already complete
+    - Prompt should start directly with evaluating identities for commitment
+    - Remove all logic about handling missing identities
+  - Keep all existing context keys and allowed actions the same
 
 ---
 
 ## 8. Update Brainstorming Review Prompt
 
-- [ ] Update transition message in Brainstorming Review prompt
-  - Change transition target from `identity_commitment` to `anything_missing`
-  - Update transition message text to reflect new phase
+- [ ] Get latest Brainstorming Review prompt using Dev Coach MCP server
+  - Use `get_latest_prompt` MCP tool with `coaching_phase: "brainstorming_review"`
+
+- [ ] Create new version of Brainstorming Review prompt in database using Dev Coach MCP server
+  - Use `create_new_coach_prompt` MCP tool to create a new version
+  - Update transition message in the prompt
+    - Change transition target from `identity_commitment` to `anything_missing`
+    - Update transition message text to reflect new phase
+  - Keep all existing context keys and allowed actions the same
 
 ---
 
