@@ -319,6 +319,68 @@ image: [binary file data]
 
 ---
 
+### 9. Download I Am Statements PDF
+
+- **URL:** `/identities/download-i-am-statements-pdf/`
+- **Method:** `GET`
+- **Description:** Download a PDF document containing all of the authenticated user's completed I Am statements. The PDF includes identity names, categories, and I Am statements in a two-column layout.
+- **Authentication:** Required
+- **Response:**
+  - `200 OK`: PDF file download.
+  - `400 Bad Request`: No completed identities found for the user.
+  - `500 Internal Server Error`: Server error.
+
+#### Example Request
+
+```
+GET /identities/download-i-am-statements-pdf/
+```
+
+#### Response Headers
+
+```
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
+```
+
+**Note:** 
+- Only identities with `state = I_AM_COMPLETE` are included in the PDF.
+- Archived identities are excluded.
+- If the user has no completed identities, a 400 error is returned.
+
+---
+
+### 10. Download I Am Statements PDF for User (Admin Only)
+
+- **URL:** `/admin/identities/download-i-am-statements-pdf-for-user/`
+- **Method:** `GET`
+- **Description:** Admin endpoint to download a PDF of I Am statements for any user by ID.
+- **Authentication:** Required (Admin only)
+- **Query Parameters:**
+  - `user_id` (required): The ID of the user to generate the PDF for.
+- **Response:**
+  - `200 OK`: PDF file download.
+  - `400 Bad Request`: Missing `user_id` parameter or no completed identities found.
+  - `404 Not Found`: User not found.
+  - `500 Internal Server Error`: Server error.
+
+#### Example Request
+
+```
+GET /admin/identities/download-i-am-statements-pdf-for-user/?user_id=abc123
+```
+
+#### Response Headers
+
+```
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
+```
+
+**Note:** This endpoint is only accessible to admin users.
+
+---
+
 ## Field Reference
 
 ### Identity Fields
