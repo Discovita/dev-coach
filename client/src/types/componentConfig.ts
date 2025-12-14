@@ -20,6 +20,7 @@ export interface ComponentIdentity {
   id: string;
   name: string;
   category: string;
+  i_am_statement?: string;
 }
 
 export interface ComponentConfig {

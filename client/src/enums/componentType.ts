@@ -11,6 +11,7 @@ export enum ComponentType {
   ARCHIVE_IDENTITY = "archive_identity",
   ACCEPT_I_AM = "accept_i_am",
   SUGGEST_I_AM_STATEMENT = "suggest_i_am_statement",
+  I_AM_STATEMENTS_SUMMARY = "i_am_statements_summary",
 }
 
 

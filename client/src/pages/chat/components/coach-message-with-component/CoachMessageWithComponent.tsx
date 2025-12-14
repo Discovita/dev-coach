@@ -7,6 +7,7 @@ import { CombineIdentitiesConfirmation } from "@/pages/chat/components/coach-mes
 import { NestIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/NestIdentitiesConfirmation";
 import { ArchiveIdentityConfirmation } from "@/pages/chat/components/coach-message-with-component/ArchiveIdentityConfirmation";
 import { SuggestIAmStatementComponent } from "@/pages/chat/components/coach-message-with-component/SuggestIAmStatementComponent";
+import { IAmStatementsSummaryComponent } from "@/pages/chat/components/coach-message-with-component/IAmStatementsSummaryComponent";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -58,6 +59,15 @@ export const CoachMessageWithComponent: React.FC<
     case ComponentType.SUGGEST_I_AM_STATEMENT:
       return (
         <SuggestIAmStatementComponent
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+          disabled={disabled}
+        />
+      );
+    case ComponentType.I_AM_STATEMENTS_SUMMARY:
+      return (
+        <IAmStatementsSummaryComponent
           coachMessage={children}
           config={componentConfig}
           onSendUserMessageToCoach={onSendUserMessageToCoach}
