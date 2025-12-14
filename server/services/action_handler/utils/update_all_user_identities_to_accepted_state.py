@@ -12,8 +12,9 @@ def update_all_user_identities_to_accepted_state(coach_state: CoachState) -> int
 
     This utility is intended to be used during a phase transition when the
     application needs to mark all current identities as accepted.
+    Excludes archived identities from being updated.
     """
     user = coach_state.user
-    return Identity.objects.filter(user=user).update(state=IdentityState.ACCEPTED)
+    return Identity.objects.filter(user=user).exclude(state=IdentityState.ARCHIVED).update(state=IdentityState.ACCEPTED)
 
 

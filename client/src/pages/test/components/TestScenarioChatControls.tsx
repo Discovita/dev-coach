@@ -6,9 +6,8 @@ import { TestScenarioConversationResetter } from "@/pages/test/components/TestSc
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
 import { CoachRequest } from "@/types/coachRequest";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
-import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
-import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
-import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
+import { IdentitiesBulletin } from "@/pages/chat/components/IdentitiesBulletin";
+import { CurrentIdentityBulletin } from "@/pages/chat/components/CurrentIdentityBulletin";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
 import { useTestScenarioUserCoachState } from "@/hooks/test-scenario/use-test-scenario-user-coach-state";
 
@@ -60,6 +59,22 @@ export const TestScenarioChatControls: React.FC<
     resizeTextarea();
   }, [inputMessage, resizeTextarea]);
 
+  // Auto-focus textarea when coach finishes responding
+  // This allows users to immediately type their next message without clicking
+  const prevIsProcessingRef = useRef(isProcessingMessage);
+  useEffect(() => {
+    // Only focus when transitioning from processing (true) to not processing (false)
+    // This avoids focusing on initial mount or when already not processing
+    if (prevIsProcessingRef.current === true && !isProcessingMessage && textareaRef.current) {
+      // Use setTimeout to ensure the DOM has updated after the response
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 0);
+    }
+    // Update the ref to track the previous value
+    prevIsProcessingRef.current = isProcessingMessage;
+  }, [isProcessingMessage]);
+
   /**
    * Handles input change and resizes textarea.
    */
@@ -101,9 +116,8 @@ export const TestScenarioChatControls: React.FC<
   return (
     <div className="_TestScenarioChatControls bg-gold-200 dark:bg-[#333333] p-4">
       <WarmupBulletin coachState={coachState} />
-      <BrainstormingBulletin coachState={coachState} identities={identities} />
-      <RefinementBulletin coachState={coachState} />
-      <CommitmentBulletin coachState={coachState} />
+      <IdentitiesBulletin coachState={coachState} identities={identities} />
+      <CurrentIdentityBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}

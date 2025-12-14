@@ -10,6 +10,8 @@ class ComponentType(models.TextChoices):
     WARMUP_IDENTITIES = "warmup_identities", "Warmup Identities"
     BRAINSTORMING_IDENTITIES = "brainstorming_identities", "Brainstorming Identities"
     COMBINE_IDENTITIES = "combine_identities", "Combine Identities"
+    NEST_IDENTITIES = "nest_identities", "Nest Identities"
+    ARCHIVE_IDENTITY = "archive_identity", "Archive Identity"
     ACCEPT_I_AM = "accept_i_am", "Accept I Am"
 
     @classmethod

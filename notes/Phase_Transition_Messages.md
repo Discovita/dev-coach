@@ -56,7 +56,21 @@ What we've just done can be a lot for some. Here's what I'd like you to do - I'd
 
 ### Transition
 
-- "Excellent work, {user_name}! You've created some truly inspiring identity names. Now that you have these powerful identities, let's take the next step to really internalize them and build your confidence in embodying these roles. The next phase will help you affirm and strengthen your belief in these identities so they become a natural part of how you see yourself. Are you ready? 
+- "Excellent work, {user_name}! You've created some truly inspiring identity names. Before we move forward, let me ask you something: Sometimes, as we go through this process, we might realize there's an important aspect of our lives that hasn't been captured in the identities we've created. This could be a role or a part of yourself that you feel is significant but hasn't been named yet. Is there any part of your life or any role you play that you think might be missing from the identities we've already refined?"
+
+## Anything Missing
+
+### First Message
+
+- If user said "no" to missing anything in the transition: Brief acknowledgment and transition to Identity Commitment
+- If user said "yes" or identified something missing: Help them create the new identity(ies), name it/them, add notes, and mark it/them as refinement_complete
+- **Note**: This phase supports creating multiple identities. After completing one identity, ask "Is there anything else missing?" and continue until they say "no"
+
+### Transition
+
+- If user said "no" to missing anything (no new identities created): "Perfect! You've got a complete set of identities. Now let's make sure each one is truly something you want to commit to and focus on. The next phase will help you evaluate which identities are truly central to your being. Are you ready?"
+- If user created one new identity: "Wonderful! I'm glad we caught that. Now that we've added **[New Identity Name]**, let's make sure each of your identities - including this new one - is truly something you want to commit to and focus on. The next phase will help you evaluate which identities are truly central to your being. Are you ready?"
+- If user created multiple new identities: "Wonderful! I'm glad we caught those. Now that we've added **[list the new identity names, e.g., "Helper, Mentor, and Creator"]**, let's make sure each of your identities - including these new ones - is truly something you want to commit to and focus on. The next phase will help you evaluate which identities are truly central to your being. Are you ready?"
 
 ## I Am Statements
 

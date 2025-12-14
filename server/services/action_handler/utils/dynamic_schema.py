@@ -21,6 +21,8 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.ACCEPT_IDENTITY_COMMITMENT: AcceptIdentityCommitmentAction,
     ActionType.ACCEPT_I_AM_STATEMENT: AcceptIAmAction,
     ActionType.ACCEPT_IDENTITY_VISUALIZATION: AcceptIdentityVisualizationAction,
+    ActionType.ARCHIVE_IDENTITY: ArchiveIdentityAction,
+    ActionType.NEST_IDENTITY: NestIdentityAction,
     ActionType.TRANSITION_PHASE: TransitionPhaseAction,
     ActionType.ADD_IDENTITY_NOTE: AddIdentityNoteAction,
     ActionType.SKIP_IDENTITY_CATEGORY: SkipIdentityCategoryAction,
@@ -36,6 +38,10 @@ ACTION_TYPE_TO_MODEL: Dict[ActionType, Type[BaseModel]] = {
     ActionType.SHOW_COMBINE_IDENTITIES: ShowCombineIdentitiesAction,
     ActionType.COMBINE_IDENTITIES: CombineIdentitiesAction,
     ActionType.PERSIST_COMBINE_IDENTITIES: PersistCombineIdentitiesAction,
+    ActionType.SHOW_NEST_IDENTITIES: ShowNestIdentitiesAction,
+    ActionType.PERSIST_NEST_IDENTITIES: PersistNestIdentitiesAction,
+    ActionType.SHOW_ARCHIVE_IDENTITY: ShowArchiveIdentityAction,
+    ActionType.PERSIST_ARCHIVE_IDENTITY: PersistArchiveIdentityAction,
 }
 
 

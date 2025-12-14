@@ -5,6 +5,7 @@ from apps.users.serializer import UserSerializer, UserProfileSerializer
 from rest_framework.response import Response
 
 from enums.identity_category import IdentityCategory
+from enums.identity_state import IdentityState
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -76,11 +77,30 @@ class UserViewSet(viewsets.GenericViewSet):
     def identities(self, request: Request):
         """
         Get the authenticated user's identities.
+        Query parameters:
+        - include_archived=true: Include archived identities
+        - archived_only=true: Return only archived identities
+        By default, excludes archived identities.
         """
         from apps.identities.models import Identity
         from apps.identities.serializer import IdentitySerializer
         log.debug(f"Identities Request: {request.user}")
-        identities = Identity.objects.filter(user=request.user)
+        
+        queryset = Identity.objects.filter(user=request.user)
+        
+        # Check query parameters
+        include_archived = request.query_params.get('include_archived', 'false').lower() == 'true'
+        archived_only = request.query_params.get('archived_only', 'false').lower() == 'true'
+        
+        if archived_only:
+            identities = queryset.filter(state=IdentityState.ARCHIVED)
+        elif not include_archived:
+            # Default: exclude archived
+            identities = queryset.exclude(state=IdentityState.ARCHIVED)
+        else:
+            # Include all
+            identities = queryset
+        
         response = IdentitySerializer(identities, many=True).data
         log.debug(f"Identities Response: {response}")
         return Response(response)
@@ -290,6 +310,10 @@ class TestUserViewSet(viewsets.GenericViewSet):
     def identities(self, request, pk=None):
         """
         Get the identities for a test scenario user.
+        Query parameters:
+        - include_archived=true: Include archived identities
+        - archived_only=true: Return only archived identities
+        By default, excludes archived identities.
         """
         if not self.admin_required(request):
             return Response({"detail": "Not authorized."}, status=403)
@@ -299,7 +323,21 @@ class TestUserViewSet(viewsets.GenericViewSet):
         from apps.identities.models import Identity
         from apps.identities.serializer import IdentitySerializer
 
-        identities = Identity.objects.filter(user=user)
+        queryset = Identity.objects.filter(user=user)
+        
+        # Check query parameters
+        include_archived = request.query_params.get('include_archived', 'false').lower() == 'true'
+        archived_only = request.query_params.get('archived_only', 'false').lower() == 'true'
+        
+        if archived_only:
+            identities = queryset.filter(state=IdentityState.ARCHIVED)
+        elif not include_archived:
+            # Default: exclude archived
+            identities = queryset.exclude(state=IdentityState.ARCHIVED)
+        else:
+            # Include all
+            identities = queryset
+        
         return Response(IdentitySerializer(identities, many=True).data)
 
     @decorators.action(

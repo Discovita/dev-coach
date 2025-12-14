@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, decorators, mixins, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .models import TestScenario
 from .serializers import TestScenarioSerializer
 from .validation import validate_scenario_template
@@ -200,7 +200,8 @@ class TestScenarioViewSet(
     queryset = TestScenario.objects.all()
     serializer_class = TestScenarioSerializer
     permission_classes = [IsAdminUser]
-    parser_classes = [MultiPartParser, FormParser]
+    # Support both JSON and multipart/form-data (for file uploads)
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
         # Handle multipart/form-data: template comes as JSON string

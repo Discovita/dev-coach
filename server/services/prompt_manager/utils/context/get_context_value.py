@@ -44,4 +44,6 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_i_am_identities_context(coach_state)
     elif key == ContextKey.VISUALIZATION_IDENTITIES:
         return get_visualization_identities_context(coach_state)
+    elif key == ContextKey.IDENTITY_IDS:
+        return get_identity_ids_context(coach_state)
     # Add more context key handlers as needed

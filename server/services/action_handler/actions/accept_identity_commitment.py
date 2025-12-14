@@ -6,9 +6,10 @@ from enums.identity_state import IdentityState
 from services.action_handler.models import AcceptIdentityCommitmentParams
 from enums.action_type import ActionType
 from services.logger import configure_logging
-from services.action_handler.utils import set_current_identity_to_next_pending_commitment
+from services.action_handler.utils import set_current_identity_to_next_pending
 
 log = configure_logging(__name__, log_level="INFO")
+
 
 def accept_identity_commitment(
     coach_state: CoachState, params: AcceptIdentityCommitmentParams, coach_message: ChatMessage
@@ -23,7 +24,7 @@ def accept_identity_commitment(
     # Get the identity for logging
     identity = Identity.objects.get(id=params.id, user=coach_state.user)
     
-    set_current_identity_to_next_pending_commitment(coach_state)
+    set_current_identity_to_next_pending(coach_state, IdentityState.COMMITMENT_COMPLETE)
     
     # Log the action with rich context
     Action.objects.create(

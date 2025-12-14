@@ -53,3 +53,6 @@ backend/public/*
 .cursor
 .claude
 .mcp.json
+
+*storybook.log
+storybook-static

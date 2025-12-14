@@ -7,6 +7,8 @@ export enum ComponentType {
   WARMUP_IDENTITIES = "warmup_identities",
   BRAINSTORMING_IDENTITIES = "brainstorming_identities",
   COMBINE_IDENTITIES = "combine_identities",
+  NEST_IDENTITIES = "nest_identities",
+  ARCHIVE_IDENTITY = "archive_identity",
   ACCEPT_I_AM = "accept_i_am",
 }
 

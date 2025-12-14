@@ -14,6 +14,8 @@ from services.action_handler.models.actions import (
     AcceptIdentityCommitmentAction,
     AcceptIAmAction,
     AcceptIdentityVisualizationAction,
+    ArchiveIdentityAction,
+    NestIdentityAction,
     TransitionPhaseAction,
     AddIdentityNoteAction,
     SkipIdentityCategoryAction,
@@ -24,7 +26,11 @@ from services.action_handler.models.actions import (
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
     ShowCombineIdentitiesAction,
+    ShowNestIdentitiesAction,
     PersistCombineIdentitiesAction,
+    PersistNestIdentitiesAction,
+    ShowArchiveIdentityAction,
+    PersistArchiveIdentityAction,
 )
 
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
@@ -72,6 +78,12 @@ class CoachChatResponse(BaseModel):
     accept_identity_visualization: Optional[AcceptIdentityVisualizationAction] = Field(
         default=None, description="Perform the accept_identity_visualization action."
     )
+    archive_identity: Optional[ArchiveIdentityAction] = Field(
+        default=None, description="Perform the archive_identity action."
+    )
+    nest_identity: Optional[NestIdentityAction] = Field(
+        default=None, description="Perform the nest_identity action."
+    )
     add_identity_note: Optional[AddIdentityNoteAction] = Field(
         default=None, description="Perform the add_identity_note action."
     )
@@ -109,6 +121,18 @@ class CoachChatResponse(BaseModel):
     show_combine_identities: Optional[ShowCombineIdentitiesAction] = Field(
         default=None, description="Show the combine identities component."
     )
+    show_nest_identities: Optional[ShowNestIdentitiesAction] = Field(
+        default=None, description="Show the nest identities component."
+    )
+    show_archive_identity: Optional[ShowArchiveIdentityAction] = Field(
+        default=None, description="Show the archive identity component."
+    )
     persist_combine_identities: Optional[PersistCombineIdentitiesAction] = Field(
         default=None, description="Persist the combine identities component for historical display."
+    )
+    persist_nest_identities: Optional[PersistNestIdentitiesAction] = Field(
+        default=None, description="Persist the nest identities component for historical display."
+    )
+    persist_archive_identity: Optional[PersistArchiveIdentityAction] = Field(
+        default=None, description="Persist the archive identity component for historical display."
     )
