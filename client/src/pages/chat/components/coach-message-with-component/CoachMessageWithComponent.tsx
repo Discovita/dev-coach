@@ -6,6 +6,7 @@ import { IntroCannedResponseComponent } from "@/pages/chat/components/coach-mess
 import { CombineIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/CombineIdentitiesConfirmation";
 import { NestIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/NestIdentitiesConfirmation";
 import { ArchiveIdentityConfirmation } from "@/pages/chat/components/coach-message-with-component/ArchiveIdentityConfirmation";
+import { SuggestIAmStatementComponent } from "@/pages/chat/components/coach-message-with-component/SuggestIAmStatementComponent";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -48,6 +49,15 @@ export const CoachMessageWithComponent: React.FC<
     case ComponentType.ARCHIVE_IDENTITY:
       return (
         <ArchiveIdentityConfirmation
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+          disabled={disabled}
+        />
+      );
+    case ComponentType.SUGGEST_I_AM_STATEMENT:
+      return (
+        <SuggestIAmStatementComponent
           coachMessage={children}
           config={componentConfig}
           onSendUserMessageToCoach={onSendUserMessageToCoach}

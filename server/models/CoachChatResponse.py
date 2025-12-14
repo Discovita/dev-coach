@@ -25,9 +25,11 @@ from services.action_handler.models.actions import (
     UpdateAskedQuestionsAction,
     ShowIntroductionCannedResponseComponentAction,
     ShowAcceptIAMComponentAction,
+    ShowSuggestIAMStatementComponentAction,
     ShowCombineIdentitiesAction,
     ShowNestIdentitiesAction,
     PersistCombineIdentitiesAction,
+    PersistSuggestIAMStatementComponentAction,
     PersistNestIdentitiesAction,
     ShowArchiveIdentityAction,
     PersistArchiveIdentityAction,
@@ -118,6 +120,9 @@ class CoachChatResponse(BaseModel):
     show_accept_i_am_component: Optional[ShowAcceptIAMComponentAction] = Field(
         default=None, description="Show the Accept I Am component."
     )
+    show_suggest_i_am_statement_component: Optional[ShowSuggestIAMStatementComponentAction] = Field(
+        default=None, description="Show the Suggest I Am Statement component."
+    )
     show_combine_identities: Optional[ShowCombineIdentitiesAction] = Field(
         default=None, description="Show the combine identities component."
     )
@@ -129,6 +134,9 @@ class CoachChatResponse(BaseModel):
     )
     persist_combine_identities: Optional[PersistCombineIdentitiesAction] = Field(
         default=None, description="Persist the combine identities component for historical display."
+    )
+    persist_suggest_i_am_statement_component: Optional[PersistSuggestIAMStatementComponentAction] = Field(
+        default=None, description="Persist the Suggest I Am Statement component for historical display."
     )
     persist_nest_identities: Optional[PersistNestIdentitiesAction] = Field(
         default=None, description="Persist the nest identities component for historical display."

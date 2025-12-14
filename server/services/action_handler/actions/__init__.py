@@ -30,12 +30,14 @@ from .sentinel.delete_user_note import delete_user_note
 # COMPONENT ACTIONS
 from .components.show_introduction_canned_response_component import show_introduction_canned_response_component
 from .components.show_accept_i_am_component import show_accept_i_am_component
+from .components.show_suggest_i_am_statement_component import show_suggest_i_am_statement_component
 from .components.show_combine_identities import show_combine_identities
 from .components.show_nest_identities import show_nest_identities
 from .components.show_archive_identity import show_archive_identity
 
 # PERSISTENT COMPONENT ACTIONS
 from .persistent_components.persist_combine_identities import persist_combine_identities
+from .persistent_components.persist_suggest_i_am_statement_component import persist_suggest_i_am_statement_component
 from .persistent_components.persist_nest_identities import persist_nest_identities
 from .persistent_components.persist_archive_identity import persist_archive_identity
 
@@ -65,6 +67,7 @@ __all__ = [
     "update_asked_questions",
     "show_introduction_canned_response_component",
     "show_accept_i_am_component",
+    "show_suggest_i_am_statement_component",
     "show_combine_identities",
     "show_nest_identities",
     "show_archive_identity",
@@ -73,6 +76,7 @@ __all__ = [
     "update_user_note",
     "delete_user_note",
     "persist_combine_identities",
+    "persist_suggest_i_am_statement_component",
     "persist_nest_identities",
     "persist_archive_identity",
 ]

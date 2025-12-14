@@ -41,11 +41,13 @@ ACTION_REGISTRY = {
     # Component actions (return ComponentConfig)
     ActionType.SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT.value: show_introduction_canned_response_component,
     ActionType.SHOW_ACCEPT_I_AM_COMPONENT.value: show_accept_i_am_component,
+    ActionType.SHOW_SUGGEST_I_AM_STATEMENT_COMPONENT.value: show_suggest_i_am_statement_component,
     ActionType.SHOW_COMBINE_IDENTITIES.value: show_combine_identities,
     ActionType.SHOW_NEST_IDENTITIES.value: show_nest_identities,
     ActionType.SHOW_ARCHIVE_IDENTITY.value: show_archive_identity,
     # Persistent component actions (return ComponentConfig)
     ActionType.PERSIST_COMBINE_IDENTITIES.value: persist_combine_identities,
+    ActionType.PERSIST_SUGGEST_I_AM_STATEMENT_COMPONENT.value: persist_suggest_i_am_statement_component,
     ActionType.PERSIST_NEST_IDENTITIES.value: persist_nest_identities,
     ActionType.PERSIST_ARCHIVE_IDENTITY.value: persist_archive_identity,
 }
