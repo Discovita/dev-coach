@@ -10,6 +10,7 @@ from services.action_handler.utils import set_current_identity_to_next_pending
 
 log = configure_logging(__name__, log_level="INFO")
 
+
 def accept_identity_commitment(
     coach_state: CoachState, params: AcceptIdentityCommitmentParams, coach_message: ChatMessage
 ):
