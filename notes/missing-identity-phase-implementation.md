@@ -10,12 +10,12 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 ## Progress Summary
 - ✅ Backend enum added
 - ✅ Frontend enum added (with display name and color)
-- ✅ Prompt created in database
+- ✅ Prompt created in database (version 5 - refined for natural conversation)
 - ✅ Transition messages documented in Phase_Transition_Messages.md
 - ✅ Coach phases documentation updated
 - ✅ Django migrations created and applied
-- ⏳ Identity Refinement prompt needs update (change transition target to anything_missing)
-- ⏳ Identity Commitment prompt needs update (remove "Is anything missing?" section)
+- ✅ Identity Refinement prompt updated (transition target changed to anything_missing)
+- ✅ Identity Commitment prompt updated (removed all missing identity logic - version 13)
 - ⏳ Additional documentation updates
 - ⏳ Testing
 
@@ -72,20 +72,23 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
     - `accept_identity_refinement` (to mark as refinement_complete - REQUIRED before transition)
     - `transition_phase` (to move to Identity Commitment phase)
 
-- [ ] Prompt content should include:
-  - Instructions to ask "Is anything missing?" - **NOTE**: If context explanation is in transition message, prompt may just ask the question directly (coordinate with step 6)
+- [x] Prompt content should include:
+  - Instructions to ask "Is anything missing?" - **NOTE**: Context explanation is in transition message, prompt handles response directly
   - Process for creating new identity:
     1. Create identity with `create_identity` (category: "passions_and_talents" as default)
     2. Help user name it (may need `update_identity_name` if they want to refine)
-    3. Add notes with `add_identity_note` about why this identity matters
+    3. Add notes with `add_identity_note` about why this identity matters (captured silently from conversation)
     4. Mark as `refinement_complete` with `accept_identity_refinement` (REQUIRED - identity must be at same state as others before transition)
-    5. Transition to Identity Commitment phase
+    5. Ask "Is there anything else that you feel is missing?" and continue loop until they say "no"
+    6. Transition to Identity Commitment phase
   - **CRITICAL**: New identity MUST be marked as `refinement_complete` before transitioning - this ensures it's ready for commitment phase along with all other identities
   - Default to "passions_and_talents" category unless it's clearly obvious which category it belongs to
+  - Support for multiple identities - continues asking until user says "no"
+  - Natural conversation only - no previewing of technical actions, no vague phrases
   - Transition logic:
     - If user says "no" to missing anything: transition immediately to Identity Commitment
-    - If user creates new identity: complete the process above, then transition to Identity Commitment
-  - **Consideration**: If transition message includes full context explanation, the prompt's first message may be simpler since context was already provided
+    - If user creates new identity(ies): complete the process above, then transition to Identity Commitment with appropriate message for single or multiple identities
+  - **Completed**: Prompt created and refined through version 5 - now behaves naturally and conversationally
 
 ---
 
@@ -131,14 +134,14 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
   - Review the explanation that provides context about what "Is anything missing?" means
   - The explanation includes: "Sometimes, as we go through this process, we might realize there's an important aspect of our lives that hasn't been captured in the identities we've created. This could be a role or a part of yourself that you feel is significant but hasn't been named yet."
 
-- [ ] Update transition message FROM Identity Refinement
+- [x] Update transition message FROM Identity Refinement
   - Current message transitions directly to Identity Commitment
   - New message should transition to Anything Missing phase
   - **IMPORTANT**: Incorporate the context explanation into the transition message itself
   - The transition message should explain what we mean by "anything missing" before asking the question
   - Example structure: Explain the concept, then ask if they're ready to check if anything is missing
   - This ensures smooth experience - user understands the question before the phase begins
-  - **Note**: Transition message documented in `notes/Phase_Transition_Messages.md`, but Identity Refinement prompt not yet updated
+  - **Completed**: Transition message updated in Identity Refinement prompt to transition to anything_missing phase
 
 - [x] Create transition message FROM Anything Missing TO Identity Commitment
   - If user said "no" to missing anything: brief transition acknowledging they're complete
@@ -155,23 +158,24 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 
 ## 7. Update Identity Refinement Prompt
 
-- [ ] Get latest Identity Refinement prompt using Dev Coach MCP server
+- [x] Get latest Identity Refinement prompt using Dev Coach MCP server
   - Use `get_latest_prompt` MCP tool with `coaching_phase: "identity_refinement"`
 
-- [ ] Create new version of Identity Refinement prompt in database using Dev Coach MCP server
+- [x] Create new version of Identity Refinement prompt in database using Dev Coach MCP server
   - Use `create_new_coach_prompt` MCP tool to create a new version
   - Update transition target from `identity_commitment` to `anything_missing`
   - Update transition message to match what's documented in `notes/Phase_Transition_Messages.md`
   - Keep all existing context keys and allowed actions the same
+  - **Completed**: Identity Refinement prompt updated to transition to anything_missing phase
 
 ---
 
 ## 8. Update Identity Commitment Prompt
 
-- [ ] Get latest Identity Commitment prompt using Dev Coach MCP server
+- [x] Get latest Identity Commitment prompt using Dev Coach MCP server
   - Use `get_latest_prompt` MCP tool with `coaching_phase: "identity_commitment"`
 
-- [ ] Create new version of Identity Commitment prompt in database using Dev Coach MCP server
+- [x] Create new version of Identity Commitment prompt in database using Dev Coach MCP server
   - Use `create_new_coach_prompt` MCP tool to create a new version
   - Remove "Is anything missing?" section from the prompt
     - Remove the "MANDATORY: Missing Identity Check (AT THE BEGINNING)" section
@@ -180,7 +184,9 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
   - Update prompt to assume identities are already complete
     - Prompt should start directly with evaluating identities for commitment
     - Remove all logic about handling missing identities
-  - Keep all existing context keys and allowed actions the same
+  - Remove `create_identity` from allowed actions (no longer needed)
+  - Keep all existing context keys the same
+  - **Completed**: Prompt updated to version 13 - all missing identity logic removed, prompt now focuses solely on commitment evaluation
 
 ---
 
@@ -266,4 +272,6 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 5. **Quick Path**: Most users will say "no" - the phase should handle this efficiently and transition immediately to Identity Commitment.
 
 6. **Integration**: New identities created here must integrate seamlessly with the rest of the coaching flow - they should appear in commitment phase and flow through all subsequent phases (I Am Statements, Visualization) normally, just like identities created in brainstorming.
+
+7. **Natural Conversation**: The prompt has been refined to ensure natural, conversational interactions. The coach should never preview technical actions (like "marking as complete" or "integrating into your set") or use vague phrases (like "Let's make sure this identity reflects..."). All technical work should be done silently while having a natural conversation with the user.
 
