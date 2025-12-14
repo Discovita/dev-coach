@@ -1,11 +1,11 @@
 # Anything Missing Phase Implementation To-Do List
 
 ## Overview
-Extract the "Is there anything missing?" functionality from the Identity Commitment phase into its own dedicated phase. This phase will be inserted between Brainstorming Review and Identity Commitment.
+Extract the "Is there anything missing?" functionality from the Identity Commitment phase into its own dedicated phase. This phase will be inserted between Identity Refinement and Identity Commitment.
 
 ## Phase Flow
-**Current:** Brainstorming Review → Identity Commitment  
-**New:** Brainstorming Review → Anything Missing → Identity Commitment
+**Current:** Identity Refinement → Identity Commitment  
+**New:** Identity Refinement → Anything Missing → Identity Commitment
 
 ---
 
@@ -13,7 +13,7 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 
 - [ ] Add new phase to `server/enums/coaching_phase.py`
   - Add `ANYTHING_MISSING = "anything_missing", "Anything Missing"` to `CoachingPhase` enum
-  - Place it between `BRAINSTORMING_REVIEW` and `IDENTITY_COMMITMENT`
+  - Place it between `IDENTITY_REFINEMENT` and `IDENTITY_COMMITMENT`
 
 - [ ] Create and run Django migration for the new phase
   - Migration will update `CoachState.current_phase` choices
@@ -50,46 +50,59 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
     - `identities` (to show what they already have)
     - `who_you_are` (for naming inspiration)
     - `who_you_want_to_be` (for naming inspiration)
-    - `identity_ids` (for nesting operations)
   - Allowed actions:
-    - `create_identity`
-    - `update_identity_name` (for refining the name)
-    - `add_identity_note` (for capturing notes about the identity)
-    - `accept_identity_refinement` (to mark as refinement_complete after naming/refining)
-    - `show_nest_identities` (if they want to nest under existing)
-    - `transition_phase` (to move to Identity Commitment)
+    - `create_identity` (with category: "passions_and_talents" as default)
+    - `update_identity_name` (for refining/updating the name if needed)
+    - `add_identity_note` (for capturing notes about why this identity matters)
+    - `accept_identity_refinement` (to mark as refinement_complete - REQUIRED before transition)
+    - `transition_phase` (to move to Identity Commitment phase)
 
 - [ ] Prompt content should include:
   - Instructions to ask "Is anything missing?" - **NOTE**: If context explanation is in transition message, prompt may just ask the question directly (coordinate with step 6)
-  - Process for creating new identity (name it, refine it, add notes)
-  - Default to "passions_and_talents" category unless obvious
-  - Instructions to get the new identity to `refinement_complete` state
-  - Transition logic (if no, move to commitment; if yes, handle creation then move to commitment)
+  - Process for creating new identity:
+    1. Create identity with `create_identity` (category: "passions_and_talents" as default)
+    2. Help user name it (may need `update_identity_name` if they want to refine)
+    3. Add notes with `add_identity_note` about why this identity matters
+    4. Mark as `refinement_complete` with `accept_identity_refinement` (REQUIRED - identity must be at same state as others before transition)
+    5. Transition to Identity Commitment phase
+  - **CRITICAL**: New identity MUST be marked as `refinement_complete` before transitioning - this ensures it's ready for commitment phase along with all other identities
+  - Default to "passions_and_talents" category unless it's clearly obvious which category it belongs to
+  - Transition logic:
+    - If user says "no" to missing anything: transition immediately to Identity Commitment
+    - If user creates new identity: complete the process above, then transition to Identity Commitment
   - **Consideration**: If transition message includes full context explanation, the prompt's first message may be simpler since context was already provided
 
 ---
 
 ## 4. Context Keys
 
-- [ ] Verify existing context keys are sufficient
-  - `identities` - shows all existing identities
-  - `who_you_are` - for naming inspiration
-  - `who_you_want_to_be` - for naming inspiration
-  - `identity_ids` - for nesting operations
-  - No new context keys needed (existing ones should cover it)
+- [ ] Required context keys for Anything Missing phase:
+  - `user_name` - user's name for personalization
+  - `identities` - shows all existing identities (so user can see what they already have)
+  - `who_you_are` - for naming inspiration when creating new identity
+  - `who_you_want_to_be` - for naming inspiration when creating new identity
+  - No new context keys needed (existing ones are sufficient)
 
 ---
 
 ## 5. Actions
 
-- [ ] Verify all needed actions exist
-  - `create_identity` - exists
-  - `update_identity_name` - exists
-  - `add_identity_note` - exists
-  - `accept_identity_refinement` - exists
-  - `show_nest_identities` - exists
-  - `transition_phase` - exists
-  - No new actions needed
+- [ ] Required actions for Anything Missing phase:
+  - `create_identity` - to create the new identity (with category: "passions_and_talents" as default)
+  - `update_identity_name` - to refine/update the name if needed (similar to refinement phase)
+  - `add_identity_note` - to capture notes about why this identity matters and what it represents
+  - `accept_identity_refinement` - to mark the identity as `refinement_complete` (required before transitioning to commitment)
+  - `transition_phase` - to move to Identity Commitment phase when done
+
+- [ ] Process flow for new identity:
+  1. User says something is missing
+  2. Use `create_identity` with category: "passions_and_talents" (unless clearly obvious it belongs elsewhere)
+  3. Help user name it (may need `update_identity_name` if they want to refine the name)
+  4. Use `add_identity_note` to capture why this identity matters
+  5. Use `accept_identity_refinement` to mark as `refinement_complete` (critical - must be done before transition)
+  6. Use `transition_phase` to move to Identity Commitment phase
+
+- [ ] All required actions exist - no new actions needed
 
 ---
 
@@ -100,7 +113,7 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
   - Review the explanation that provides context about what "Is anything missing?" means
   - The explanation includes: "Sometimes, as we go through this process, we might realize there's an important aspect of our lives that hasn't been captured in the identities we've created. This could be a role or a part of yourself that you feel is significant but hasn't been named yet."
 
-- [ ] Update transition message FROM Brainstorming Review
+- [ ] Update transition message FROM Identity Refinement
   - Current message transitions directly to Identity Commitment
   - New message should transition to Anything Missing phase
   - **IMPORTANT**: Incorporate the context explanation into the transition message itself
@@ -116,7 +129,7 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 - [ ] Update `notes/Phase_Transition_Messages.md`
   - Add new section for Anything Missing phase
   - Document both transition messages (from and to)
-  - Include the context explanation in the transition FROM Brainstorming Review
+  - Include the context explanation in the transition FROM Identity Refinement
 
 ---
 
@@ -134,20 +147,6 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
   - Update prompt to assume identities are already complete
     - Prompt should start directly with evaluating identities for commitment
     - Remove all logic about handling missing identities
-  - Keep all existing context keys and allowed actions the same
-
----
-
-## 8. Update Brainstorming Review Prompt
-
-- [ ] Get latest Brainstorming Review prompt using Dev Coach MCP server
-  - Use `get_latest_prompt` MCP tool with `coaching_phase: "brainstorming_review"`
-
-- [ ] Create new version of Brainstorming Review prompt in database using Dev Coach MCP server
-  - Use `create_new_coach_prompt` MCP tool to create a new version
-  - Update transition message in the prompt
-    - Change transition target from `identity_commitment` to `anything_missing`
-    - Update transition message text to reflect new phase
   - Keep all existing context keys and allowed actions the same
 
 ---
@@ -177,16 +176,13 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
   - New identity should not appear in commitment list
 
 - [ ] Test flow when user says "yes" and creates new identity
-  - New identity should be created with default category
-  - New identity should be named and refined
-  - New identity should be marked as `refinement_complete`
-  - New identity should appear in Identity Commitment phase list
-  - New identity should be evaluated like any other identity
-
-- [ ] Test flow when user wants to nest new identity
-  - Should use `show_nest_identities` action
-  - Should not create standalone identity
-  - Should transition to commitment after nesting
+  - New identity should be created with category: "passions_and_talents" (default)
+  - New identity should be named (may be refined with `update_identity_name` if needed)
+  - Notes should be added with `add_identity_note` about why it matters
+  - New identity MUST be marked as `refinement_complete` with `accept_identity_refinement`
+  - New identity should appear in Identity Commitment phase list (via `commitment_identities` context)
+  - New identity should be evaluated like any other identity in commitment phase
+  - New identity should flow through I Am Statements and Visualization phases normally
 
 - [ ] Verify new identities created in this phase integrate properly
   - Should appear in commitment identities context
@@ -221,12 +217,20 @@ Extract the "Is there anything missing?" functionality from the Identity Commitm
 
 ## Key Implementation Notes
 
-1. **New Identity State**: New identities created in this phase must be brought to `refinement_complete` state before transitioning to Identity Commitment, so they're ready for commitment evaluation.
+1. **New Identity State**: New identities created in this phase MUST be brought to `refinement_complete` state before transitioning to Identity Commitment. This is critical - use `accept_identity_refinement` action to mark the identity as complete so it's ready for commitment evaluation along with all other identities.
 
-2. **Default Category**: New identities default to "passions_and_talents" unless it's clearly obvious which category they belong to.
+2. **Default Category**: New identities automatically default to "passions_and_talents" category. Only use a different category if it's clearly obvious which category the identity belongs to.
 
-3. **Naming Process**: The phase needs clear instructions on how to help users name and refine new identities (similar to Identity Refinement phase process).
+3. **No Nesting or Combining**: This phase does NOT support nesting or combining operations. All new identities created here are standalone identities. Do not offer `show_nest_identities` or `show_combine_identities` actions.
 
-4. **Quick Path**: Most users will say "no" - the phase should handle this efficiently and transition quickly.
+4. **Simplified Process**: This phase is a streamlined combination of brainstorming, naming, and refinement:
+   - Create identity (with default category)
+   - Name it (may refine name if needed)
+   - Add notes about why it matters
+   - Mark as `refinement_complete`
+   - Transition to commitment
 
-5. **Integration**: New identities created here must integrate seamlessly with the rest of the coaching flow - they should appear in commitment phase and flow through all subsequent phases normally.
+5. **Quick Path**: Most users will say "no" - the phase should handle this efficiently and transition immediately to Identity Commitment.
+
+6. **Integration**: New identities created here must integrate seamlessly with the rest of the coaching flow - they should appear in commitment phase and flow through all subsequent phases (I Am Statements, Visualization) normally, just like identities created in brainstorming.
+
