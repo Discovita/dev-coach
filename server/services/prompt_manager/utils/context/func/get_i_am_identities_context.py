@@ -13,8 +13,8 @@ def get_i_am_identities_context(coach_state: CoachState) -> str:
     If no identities remain to be affirmed, returns instructions to move to the next phase.
     """
     user = coach_state.user
-    # Filter to only show identities that are NOT i_am_complete and NOT archived
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.I_AM_COMPLETE).exclude(state=IdentityState.ARCHIVED)
+    # Filter to only show identities that are NOT i_am_complete and NOT archived, sorted by oldest first
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.I_AM_COMPLETE).exclude(state=IdentityState.ARCHIVED).order_by('created_at')
 
     # Check if there are any identities left to affirm
     if identities.count() == 0:
