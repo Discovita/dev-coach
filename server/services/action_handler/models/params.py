@@ -216,6 +216,14 @@ class ShowSuggestIAMStatementComponentParams(BaseParamsModel):
     )
 
 
+class ShowIAmStatementsSummaryComponentParams(BaseParamsModel):
+    """
+    Parameters for showing the I Am Statements Summary component.
+    No parameters needed - fetches all i_am_complete identities automatically.
+    """
+    pass
+
+
 class ShowCombineIdentitiesParams(BaseParamsModel):
     identity_id_a: str = Field(..., description="ID of the first identity to combine")
     identity_id_b: str = Field(..., description="ID of the second identity to combine")
@@ -241,6 +249,12 @@ class PersistSuggestIAMStatementComponentParams(BaseParamsModel):
     i_am_statement: str = Field(
         ..., description="The I Am statement text to persist with the component"
     )
+    coach_message_id: str = Field(
+        ..., description="ID of the coach message to persist the component to"
+    )
+
+
+class PersistIAmStatementsSummaryComponentParams(BaseParamsModel):
     coach_message_id: str = Field(
         ..., description="ID of the coach message to persist the component to"
     )

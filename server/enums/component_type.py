@@ -14,6 +14,7 @@ class ComponentType(models.TextChoices):
     ARCHIVE_IDENTITY = "archive_identity", "Archive Identity"
     ACCEPT_I_AM = "accept_i_am", "Accept I Am"
     SUGGEST_I_AM_STATEMENT = "suggest_i_am_statement", "Suggest I Am Statement"
+    I_AM_STATEMENTS_SUMMARY = "i_am_statements_summary", "I Am Statements Summary"
 
     @classmethod
     def from_string(cls, value: str) -> "ComponentType":

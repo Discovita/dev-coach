@@ -125,6 +125,7 @@ export const TestScenarioChatInterface: React.FC<{
         messagesEndRef={messagesEndRef}
         componentConfig={componentConfig}
         onSendUserMessageToCoach={handleSendMessage}
+        testUserId={userId}
       />
       <TestScenarioChatControls
         isProcessingMessage={isPending}

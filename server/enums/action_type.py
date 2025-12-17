@@ -58,6 +58,10 @@ class ActionType(models.TextChoices):
         "show_suggest_i_am_statement_component",
         "Show Suggest I Am Statement Component",
     )
+    SHOW_I_AM_STATEMENTS_SUMMARY_COMPONENT = (
+        "show_i_am_statements_summary_component",
+        "Show I Am Statements Summary Component",
+    )
     SHOW_COMBINE_IDENTITIES = "show_combine_identities", "Show Combine Identities"
     SHOW_NEST_IDENTITIES = "show_nest_identities", "Show Nest Identities"
     SHOW_ARCHIVE_IDENTITY = "show_archive_identity", "Show Archive Identity"
@@ -68,6 +72,10 @@ class ActionType(models.TextChoices):
     PERSIST_SUGGEST_I_AM_STATEMENT_COMPONENT = (
         "persist_suggest_i_am_statement_component",
         "Persist Suggest I Am Statement Component",
+    )
+    PERSIST_I_AM_STATEMENTS_SUMMARY_COMPONENT = (
+        "persist_i_am_statements_summary_component",
+        "Persist I Am Statements Summary Component",
     )
 
     def get_all_actions() -> list:
