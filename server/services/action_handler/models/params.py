@@ -207,6 +207,15 @@ class ShowAcceptIAMComponentParams(BaseParamsModel):
     )
 
 
+class ShowSuggestIAMStatementComponentParams(BaseParamsModel):
+    identity_id: str = Field(
+        ..., description="ID of identity for the suggested i_am_statement component"
+    )
+    i_am_statement: str = Field(
+        ..., description="Suggested I Am statement to present for editing"
+    )
+
+
 class ShowCombineIdentitiesParams(BaseParamsModel):
     identity_id_a: str = Field(..., description="ID of the first identity to combine")
     identity_id_b: str = Field(..., description="ID of the second identity to combine")
@@ -220,6 +229,18 @@ class CombineIdentitiesParams(BaseParamsModel):
 class PersistCombineIdentitiesParams(BaseParamsModel):
     identity_id_a: str = Field(..., description="ID of the first identity to combine")
     identity_id_b: str = Field(..., description="ID of the second identity to combine")
+    coach_message_id: str = Field(
+        ..., description="ID of the coach message to persist the component to"
+    )
+
+
+class PersistSuggestIAMStatementComponentParams(BaseParamsModel):
+    identity_id: str = Field(
+        ..., description="ID of identity for the suggested i_am_statement component"
+    )
+    i_am_statement: str = Field(
+        ..., description="The I Am statement text to persist with the component"
+    )
     coach_message_id: str = Field(
         ..., description="ID of the coach message to persist the component to"
     )

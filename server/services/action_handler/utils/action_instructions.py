@@ -124,6 +124,10 @@ ACTION_PARAMS = {
         "description": "Show an 'Accept I Am' component asking the user to accept the proposed 'I Am' statement or keep working on it. Pass the identity id and the proposed 'I Am' statement.",
         "model": ShowAcceptIAMComponentAction,
     },
+    ActionType.SHOW_SUGGEST_I_AM_STATEMENT_COMPONENT: {
+        "description": "Show a component that suggests an editable 'I Am' statement with canned responses and capture the user's edits. Do not accept the statement here.",
+        "model": ShowSuggestIAMStatementComponentAction,
+    },
     ActionType.SHOW_COMBINE_IDENTITIES: {
         "description": "Show a component that displays two identities side-by-side with Yes/No buttons to confirm combining them.",
         "model": ShowCombineIdentitiesAction,
@@ -143,6 +147,10 @@ ACTION_PARAMS = {
     ActionType.PERSIST_COMBINE_IDENTITIES: {
         "description": "Persist the combine identities component configuration to the chat message for historical display.",
         "model": PersistCombineIdentitiesAction,
+    },
+    ActionType.PERSIST_SUGGEST_I_AM_STATEMENT_COMPONENT: {
+        "description": "Persist the suggested 'I Am' statement component configuration (display-only) to the chat message for historical display.",
+        "model": PersistSuggestIAMStatementComponentAction,
     },
     ActionType.PERSIST_NEST_IDENTITIES: {
         "description": "Persist the nest identities component configuration to the chat message for historical display.",
