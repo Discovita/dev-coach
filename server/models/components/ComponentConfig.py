@@ -50,6 +50,9 @@ class ComponentIdentity(BaseModel):
     id: str = Field(..., description="Unique identifier for the identity")
     name: str = Field(..., description="Name of the identity")
     category: Optional[str] = Field(..., description="Category of the identity")
+    i_am_statement: Optional[str] = Field(
+        default=None, description="I Am statement for the identity"
+    )
 
 
 class ComponentConfig(BaseModel):

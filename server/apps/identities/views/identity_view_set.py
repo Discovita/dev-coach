@@ -1,15 +1,22 @@
+"""
+Identity ViewSet
+
+Provides CRUD operations for user identities and PDF download for authenticated users.
+"""
+
 from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
-from django.http import Http404
-from .models import Identity
-from .serializer import IdentitySerializer
+from django.http import Http404, FileResponse
+from apps.identities.models import Identity
+from apps.identities.serializer import IdentitySerializer
 from enums.identity_state import IdentityState
 from services.logger import configure_logging
+from services.pdf import PDFService
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -34,6 +41,7 @@ class IdentityViewSet(
     - destroy: DELETE /api/v1/identities/{id}/    Delete an identity
     - upload_image: PATCH/PUT /api/v1/identities/{id}/upload-image/ Upload or update image
     - delete_image: DELETE /api/v1/identities/{id}/delete-image/ Delete image
+    - download_i_am_statements_pdf: GET /api/v1/identities/download-i-am-statements-pdf/ Download PDF
 
     All operations are scoped to the authenticated user's identities only.
     """
@@ -329,6 +337,49 @@ class IdentityViewSet(
             )
         except Exception as e:
             log.error(f"Error deleting image: {str(e)}", exc_info=True)
+            return Response(
+                {"success": False, "error": "Server error", "detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="download-i-am-statements-pdf",
+    )
+    def download_i_am_statements_pdf(self, request):
+        """
+        Download a PDF containing the user's I Am Statements.
+        GET /api/v1/identities/download-i-am-statements-pdf/
+        Returns: PDF file download.
+        """
+        try:
+            pdf_buffer = PDFService.generate_i_am_statements_pdf(request.user)
+            
+            # Create filename with user identifier
+            user_name = getattr(request.user, 'name', None) or 'user'
+            safe_name = "".join(c for c in user_name if c.isalnum() or c in (' ', '-', '_')).strip()
+            safe_name = safe_name.replace(' ', '-')[:30]  # Limit length
+            filename = f"i-am-statements-{safe_name}.pdf"
+            
+            response = FileResponse(
+                pdf_buffer,
+                content_type='application/pdf',
+                as_attachment=True,
+                filename=filename,
+            )
+            
+            log.info(f"Downloaded I Am Statements PDF for user {request.user.id}")
+            return response
+            
+        except ValueError as e:
+            log.warning(f"Cannot generate PDF for user {request.user.id}: {str(e)}")
+            return Response(
+                {"success": False, "error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            log.error(f"Error generating PDF: {str(e)}", exc_info=True)
             return Response(
                 {"success": False, "error": "Server error", "detail": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

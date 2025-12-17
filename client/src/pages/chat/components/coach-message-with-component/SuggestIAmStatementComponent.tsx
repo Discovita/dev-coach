@@ -49,7 +49,7 @@ export const SuggestIAmStatementComponent: React.FC<{
     const updatedActions = buildActionsWithStatement(actions);
     const message =
       label === "I came up with my own" && statement.trim().length > 0
-        ? statement
+        ? `I came up with my own:\n"${statement}"`
         : label;
 
     onSendUserMessageToCoach({

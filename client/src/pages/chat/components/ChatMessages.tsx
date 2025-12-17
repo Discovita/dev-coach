@@ -21,8 +21,9 @@ import { ComponentConfig } from "@/types/componentConfig";
  * - coachState: The current coach state (for proposed identity)
  * - handleIdentityChoice: Handler for when a user selects an identity
  * - messagesEndRef: Ref to scroll to the bottom of the messages
+ * - testUserId: Optional user ID for test scenarios (admin impersonation)
  *
- * Used by: ChatInterface.tsx
+ * Used by: ChatInterface.tsx, TestScenarioChatInterface.tsx
  */
 interface ChatMessagesProps {
   messages: Message[];
@@ -32,6 +33,8 @@ interface ChatMessagesProps {
   componentConfig?: ComponentConfig | null;
   /** Handler for component button selection (sends a CoachRequest) */
   onSendUserMessageToCoach: (request: CoachRequest) => void;
+  /** Optional user ID for test scenarios (enables admin endpoints) */
+  testUserId?: string;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -40,6 +43,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   messagesEndRef,
   componentConfig,
   onSendUserMessageToCoach,
+  testUserId,
 }) => {
   return (
     <div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto p-6 bg-gold-50  dark:bg-[#333333]">
@@ -63,6 +67,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                   componentConfig={componentToRender}
                   onSendUserMessageToCoach={onSendUserMessageToCoach}
                   disabled={isProcessingMessage}
+                  testUserId={testUserId}
                 >
                   <MarkdownRenderer content={message.content} />
                 </CoachMessageWithComponent>

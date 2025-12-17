@@ -7,17 +7,20 @@ import { CombineIdentitiesConfirmation } from "@/pages/chat/components/coach-mes
 import { NestIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/NestIdentitiesConfirmation";
 import { ArchiveIdentityConfirmation } from "@/pages/chat/components/coach-message-with-component/ArchiveIdentityConfirmation";
 import { SuggestIAmStatementComponent } from "@/pages/chat/components/coach-message-with-component/SuggestIAmStatementComponent";
+import { IAmStatementsSummaryComponent } from "@/pages/chat/components/coach-message-with-component/IAmStatementsSummaryComponent";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
   componentConfig: ComponentConfig;
   onSendUserMessageToCoach: (request: CoachRequest) => void;
   disabled: boolean;
+  /** Optional user ID for test scenarios (enables admin endpoints) */
+  testUserId?: string;
 }
 
 export const CoachMessageWithComponent: React.FC<
   CoachMessageWithComponentProps
-> = ({ children, componentConfig, onSendUserMessageToCoach, disabled }) => {
+> = ({ children, componentConfig, onSendUserMessageToCoach, disabled, testUserId }) => {
   switch (componentConfig.component_type) {
     case ComponentType.INTRO_CANNED_RESPONSE:
       return (
@@ -62,6 +65,16 @@ export const CoachMessageWithComponent: React.FC<
           config={componentConfig}
           onSendUserMessageToCoach={onSendUserMessageToCoach}
           disabled={disabled}
+        />
+      );
+    case ComponentType.I_AM_STATEMENTS_SUMMARY:
+      return (
+        <IAmStatementsSummaryComponent
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+          disabled={disabled}
+          testUserId={testUserId}
         />
       );
     default:

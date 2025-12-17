@@ -19,6 +19,7 @@ from apps.identities.views import IdentityViewSet
 
 # Local Modules - Admin Viewsets
 from apps.coach.views import AdminCoachViewSet
+from apps.identities.views import AdminIdentityViewSet
 
 # Initialize routers
 default_router = DefaultRouter(trailing_slash=False)
@@ -40,6 +41,7 @@ default_router.register(r"identities", IdentityViewSet, basename="identities")
 # Register admin viewsets
 # These will be available at /api/v1/admin/{resource}/
 admin_router.register(r"coach", AdminCoachViewSet, basename="admin-coach")
+admin_router.register(r"identities", AdminIdentityViewSet, basename="admin-identities")
 
 # JWT token URLs
 jwt_patterns = [
