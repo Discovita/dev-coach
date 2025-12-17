@@ -10,6 +10,7 @@ export enum ComponentType {
   NEST_IDENTITIES = "nest_identities",
   ARCHIVE_IDENTITY = "archive_identity",
   ACCEPT_I_AM = "accept_i_am",
+  SUGGEST_I_AM_STATEMENT = "suggest_i_am_statement",
 }
 
 

@@ -180,6 +180,12 @@ class ShowAcceptIAMComponentAction(BaseActionModel):
     )
 
 
+class ShowSuggestIAMStatementComponentAction(BaseActionModel):
+    params: ShowSuggestIAMStatementComponentParams = Field(
+        ..., description="Parameters for showing the suggest 'I am' statement component."
+    )
+
+
 class ShowCombineIdentitiesAction(BaseActionModel):
     params: ShowCombineIdentitiesParams = Field(
         ..., description="Parameters for showing the combine identities component."
@@ -195,6 +201,13 @@ class CombineIdentitiesAction(BaseActionModel):
 class PersistCombineIdentitiesAction(BaseActionModel):
     params: PersistCombineIdentitiesParams = Field(
         ..., description="Parameters for persisting the combine identities component."
+    )
+
+
+class PersistSuggestIAMStatementComponentAction(BaseActionModel):
+    params: PersistSuggestIAMStatementComponentParams = Field(
+        ...,
+        description="Parameters for persisting the suggest 'I am' statement component.",
     )
 
 
