@@ -134,3 +134,53 @@ class PromptManager:
         # with open("services/sentinel/most_recent_sentinel_prompt.md", "w", encoding="utf-8") as f:
         #     f.write(sentinel_prompt)
         return sentinel_prompt, response_format
+
+    def create_image_generation_prompt(
+        self,
+        identity: "Identity",
+        additional_prompt: str = "",
+    ) -> str:
+        """
+        Create a prompt for identity image generation.
+
+        Unlike chat prompts, this:
+        - Takes an Identity directly (not from CoachState)
+        - Returns just a string (no response_format model)
+        - Uses a simpler context gathering flow (no actions, no message history)
+
+        Args:
+            identity: The Identity to generate an image for
+            additional_prompt: Optional extra instructions from admin
+
+        Returns:
+            Formatted prompt string for Gemini image generation
+        """
+        from apps.identities.models import Identity
+        from services.prompt_manager.utils.context.func import get_identity_context_for_image
+
+        # Fetch the latest active image generation prompt
+        prompt = (
+            Prompt.objects.filter(
+                prompt_type=PromptType.IMAGE_GENERATION,
+                is_active=True,
+            )
+            .order_by("-version")
+            .first()
+        )
+
+        if not prompt:
+            raise ValueError("No active image generation prompt found in the database.")
+
+        log.info(f"Using Image Generation Prompt version: {prompt.version}")
+
+        # Gather identity context using our dedicated function
+        identity_context = get_identity_context_for_image(identity)
+
+        # Format the prompt template with context
+        # The prompt body should have placeholders: {identity_context} and {additional_prompt}
+        formatted_prompt = prompt.body.format(
+            identity_context=identity_context,
+            additional_prompt=additional_prompt or "None provided",
+        )
+
+        return formatted_prompt
