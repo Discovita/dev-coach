@@ -1227,11 +1227,13 @@ GEMINI_API_KEY=your_key_here
    - Ported logic from `server/services/gemini/text_and_image_to_image.py`
    - `GEMINI_API_KEY` already in .env (reads via `os.getenv()`)
 
-7. **Image Generation Orchestration** (30 min)
-   - Create `services/image_generation/orchestration.py` with `generate_identity_image()` function
-   - Create `services/image_generation/utils/load_pil_images.py` utility
+7. ✅ **Image Generation Orchestration** (30 min) - COMPLETED
+   - Created `services/image_generation/orchestration.py` with `generate_identity_image()` function
+   - Created `services/image_generation/utils/load_pil_images.py` utility
+   - Created `services/image_generation/utils/__init__.py` with exports
+   - Updated `services/image_generation/__init__.py` to export `generate_identity_image`
    - This orchestration function will be used by BOTH admin endpoints AND future Coach action
-   - Flow: PromptManager → GeminiService → return PIL Image
+   - Flow: PromptManager → load PIL images → GeminiService → return PIL Image
 
 8. **Admin Identity Endpoints** (30 min)
    - Add `generate-image` action to existing `AdminIdentityViewSet`
@@ -1271,7 +1273,7 @@ GEMINI_API_KEY=your_key_here
 | Reference Images App | ✅ COMPLETE | 45 tests passing, docs added |
 | PromptManager Integration | ✅ COMPLETE | Enums, context function, manager method, seed command, frontend tabs |
 | Image Generation Service | ✅ COMPLETE | GeminiImageService with generate_image() and generate_image_bytes() |
-| Image Generation Orchestration | ⏳ Pending | Orchestration function + utils in services/ |
+| Image Generation Orchestration | ✅ COMPLETE | Orchestration function + utils in services/ |
 | Admin Identity Endpoints | ⏳ Pending | Add generate-image action to AdminIdentityViewSet |
 | Frontend: API Layer | ⏳ Pending | |
 | Frontend: Page Structure | ⏳ Pending | |
@@ -1356,20 +1358,20 @@ client/src/pages/prompts/Prompts.tsx           # Added Image Generation & Sentin
 client/src/pages/prompts/components/NewPromptForm.tsx  # Added prompt_type selector
 ```
 
-### Backend - Image Generation Orchestration (NO NEW APP)
+### Backend - Image Generation Orchestration ✅ COMPLETED
 ```
 # Orchestration function and utils in existing service
 server/services/image_generation/
-├── __init__.py                    # Update exports
+├── __init__.py                    # ✅ Updated exports (GeminiImageService, generate_identity_image)
 ├── gemini_service.py              # ✅ Already done
-├── orchestration.py               # NEW: generate_identity_image() function
+├── orchestration.py               # ✅ COMPLETE: generate_identity_image() function
 └── utils/
-    ├── __init__.py
-    └── load_pil_images.py         # NEW: Load PIL images from ReferenceImage models
+    ├── __init__.py                # ✅ COMPLETE: Exports load_pil_images_from_references
+    └── load_pil_images.py         # ✅ COMPLETE: Load PIL images from ReferenceImage models
 
 # Admin endpoints added to existing ViewSet (already exists at this path)
 server/apps/identities/views/
-└── admin_identity_view_set.py     # UPDATE: Add generate-image and save-generated-image actions
+└── admin_identity_view_set.py     # ⏳ Pending: Add generate-image and save-generated-image actions
                                    # ViewSet calls orchestration service directly
 ```
 
