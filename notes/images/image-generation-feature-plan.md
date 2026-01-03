@@ -1235,11 +1235,12 @@ GEMINI_API_KEY=your_key_here
    - This orchestration function will be used by BOTH admin endpoints AND future Coach action
    - Flow: PromptManager → load PIL images → GeminiService → return PIL Image
 
-8. **Admin Identity Endpoints** (30 min)
-   - Add `generate-image` action to existing `AdminIdentityViewSet`
-   - Add `save-generated-image` action to save image bytes to Identity
+8. ✅ **Admin Identity Endpoints** (30 min) - COMPLETED
+   - Added `generate-image` action to existing `AdminIdentityViewSet`
+   - Added `save-generated-image` action to save image bytes to Identity
    - ViewSet calls orchestration service directly (no intermediate functions layer)
    - These are admin-only endpoints for the MVP UI
+   - Endpoints handle validation, error cases, and optional saving to identity
 
 ### Frontend Implementation
 
@@ -1249,8 +1250,8 @@ GEMINI_API_KEY=your_key_here
     - Create TanStack Query hooks
 
 10. **Frontend: Basic Page Structure** (30 min)
-    - Add route and navbar link
-    - Create `Images.tsx` with basic layout
+   - Add route and navbar link
+   - Create `Images.tsx` with basic layout
     - Create `UserSelector` component
 
 11. **Frontend: Reference Image Manager** (1 hr)
@@ -1274,7 +1275,7 @@ GEMINI_API_KEY=your_key_here
 | PromptManager Integration | ✅ COMPLETE | Enums, context function, manager method, seed command, frontend tabs |
 | Image Generation Service | ✅ COMPLETE | GeminiImageService with generate_image() and generate_image_bytes() |
 | Image Generation Orchestration | ✅ COMPLETE | Orchestration function + utils in services/ |
-| Admin Identity Endpoints | ⏳ Pending | Add generate-image action to AdminIdentityViewSet |
+| Admin Identity Endpoints | ✅ COMPLETE | Added generate-image and save-generated-image actions |
 | Frontend: API Layer | ⏳ Pending | |
 | Frontend: Page Structure | ⏳ Pending | |
 | Frontend: Reference Image Manager | ⏳ Pending | |
@@ -1371,7 +1372,7 @@ server/services/image_generation/
 
 # Admin endpoints added to existing ViewSet (already exists at this path)
 server/apps/identities/views/
-└── admin_identity_view_set.py     # ⏳ Pending: Add generate-image and save-generated-image actions
+└── admin_identity_view_set.py     # ✅ COMPLETE: Added generate-image and save-generated-image actions
                                    # ViewSet calls orchestration service directly
 ```
 
