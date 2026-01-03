@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from apps.users.models import User
 from apps.authentication.email_service import EmailVerificationService
 from apps.authentication.serializer import RegisterSerializer, LoginSerializer
-from apps.users.serializer import UserSerializer
+from apps.users.serializers import UserSerializer
 from .utils import (
     AuthErrorMessages,
     error_response,

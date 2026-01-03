@@ -13,7 +13,7 @@ This module provides a rich admin interface for managing User models with:
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User
+from apps.users.models import User
 
 
 @admin.register(User)
