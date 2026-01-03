@@ -1376,11 +1376,11 @@ GEMINI_API_KEY=your_key_here
    - **BONUS**: Updated frontend Prompts page to show Image Generation & Sentinel tabs
    - **BONUS**: Added `prompt_types` to `/api/v1/core/enums` endpoint
 
-6. **Image Generation Service** (30 min)
-   - Create `server/services/image_generation/__init__.py`
-   - Create `server/services/image_generation/gemini_service.py`
-   - Port from `server/services/gemini/text_and_image_to_image.py`
-   - Add GEMINI_API_KEY to settings
+6. ✅ **Image Generation Service** (30 min) - COMPLETED
+   - Created `server/services/image_generation/__init__.py`
+   - Created `server/services/image_generation/gemini_service.py` with `GeminiImageService` class
+   - Ported logic from `server/services/gemini/text_and_image_to_image.py`
+   - `GEMINI_API_KEY` already in .env (reads via `os.getenv()`)
 
 7. **Image Generation App - Setup** (15 min)
    - Create app: `cd server/apps && python ../manage.py startapp image_generation`
@@ -1432,7 +1432,7 @@ GEMINI_API_KEY=your_key_here
 |-------|--------|-------|
 | Reference Images App | ✅ COMPLETE | 45 tests passing, docs added |
 | PromptManager Integration | ✅ COMPLETE | Enums, context function, manager method, seed command, frontend tabs |
-| Image Generation Service | ⏳ Pending | GeminiImageService wrapper |
+| Image Generation Service | ✅ COMPLETE | GeminiImageService with generate_image() and generate_image_bytes() |
 | Image Generation App | ⏳ Pending | ViewSet, functions, utils |
 | Frontend: API Layer | ⏳ Pending | |
 | Frontend: Page Structure | ⏳ Pending | |
@@ -1541,11 +1541,15 @@ server/apps/image_generation/
     └── test_list_available_users.py
 ```
 
-### Backend - Gemini Service
+### Backend - Gemini Service ✅ COMPLETED
 ```
 server/services/image_generation/
-├── __init__.py
-└── gemini_service.py
+├── __init__.py              # Exports GeminiImageService
+└── gemini_service.py        # GeminiImageService class with:
+                             #   - generate_image(prompt, reference_images) -> PIL Image
+                             #   - generate_image_bytes(prompt, reference_images) -> bytes
+                             #   - Configurable aspect_ratio ("16:9" default)
+                             #   - Configurable resolution ("4K" default)
 ```
 
 ### Frontend
