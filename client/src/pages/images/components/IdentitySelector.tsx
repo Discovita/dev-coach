@@ -105,18 +105,48 @@ export function IdentitySelector({
       </Select>
 
       {selectedIdentity && (
-        <div className="mt-2 p-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-          <h3 className="font-semibold text-sm mb-2">{selectedIdentity.name}</h3>
-          {selectedIdentity.i_am_statement && (
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
-              <span className="font-medium">I Am:</span> {selectedIdentity.i_am_statement}
-            </p>
-          )}
-          {selectedIdentity.visualization && (
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
-              <span className="font-medium">Visualization:</span> {selectedIdentity.visualization}
-            </p>
-          )}
+        <div className="mt-4 p-6 bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
+          {/* Two-column layout: image on left, details on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left side: Image */}
+            <div className="flex flex-col items-center w-full">
+              {(selectedIdentity.image?.original || selectedIdentity.image?.large || selectedIdentity.image?.medium || selectedIdentity.image?.thumbnail) ? (
+                <>
+                  <img
+                    src={selectedIdentity.image.original || selectedIdentity.image.large || selectedIdentity.image.medium || selectedIdentity.image.thumbnail}
+                    alt={`${selectedIdentity.name} identity image`}
+                    className="w-full h-auto rounded-lg border border-neutral-300 dark:border-neutral-700"
+                    style={{ minHeight: '300px', objectFit: 'contain', backgroundColor: '#f5f5f5' }}
+                  />
+                  <p className="text-sm text-neutral-500 mt-2">Current Image</p>
+                </>
+              ) : (
+                <div className="w-full aspect-video bg-neutral-200 dark:bg-neutral-800 rounded-lg flex items-center justify-center min-h-[300px]">
+                  <p className="text-neutral-500 text-lg">No image generated yet</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right side: Identity details */}
+            <div className="flex flex-col justify-center">
+              <h3 className="font-bold text-2xl mb-4">{selectedIdentity.name}</h3>
+              {selectedIdentity.category && (
+                <p className="text-base text-neutral-600 dark:text-neutral-400 mb-4">
+                  <span className="font-semibold">Category:</span> {selectedIdentity.category}
+                </p>
+              )}
+              {selectedIdentity.i_am_statement && (
+                <p className="text-base text-neutral-600 dark:text-neutral-400 mb-4">
+                  <span className="font-semibold">I Am:</span> {selectedIdentity.i_am_statement}
+                </p>
+              )}
+              {selectedIdentity.visualization && (
+                <p className="text-base text-neutral-600 dark:text-neutral-400">
+                  <span className="font-semibold">Visualization:</span> {selectedIdentity.visualization}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
