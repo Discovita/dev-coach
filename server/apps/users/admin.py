@@ -14,6 +14,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from apps.users.models import User
+from apps.reference_images.admin import ReferenceImageInline
 
 
 @admin.register(User)
@@ -21,6 +22,9 @@ class UserAdmin(BaseUserAdmin):
     """
     Admin configuration for the custom User model.
     """
+    # Inline models
+    inlines = [ReferenceImageInline]
+    
     # Fields to display in the admin list view
     list_display = ("email", "first_name", "last_name", "is_staff", "is_active", "is_superuser", "created_at", "test_scenario_display")
     # Fields to filter by in the admin list view
