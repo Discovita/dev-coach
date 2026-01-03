@@ -6,7 +6,6 @@ where admin users can access and manage test user data.
 """
 
 from rest_framework import viewsets, decorators
-from rest_framework.request import Request
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
