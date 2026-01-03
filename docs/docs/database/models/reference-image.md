@@ -57,6 +57,54 @@ Reference images use the `ImageMixin` which provides:
   - Medium (300x300)
   - Large (600x600)
 
+## Admin Panel
+
+Reference images are integrated into the Django Admin panel:
+
+- **Inline Display**: Reference images appear inline when viewing/editing a User
+- **Thumbnail Previews**: Image thumbnails are displayed for quick visual reference
+- **Direct Management**: Standalone admin interface for managing reference images directly
+- **Read-Only Fields**: `id`, `created_at`, `updated_at` are read-only
+- **Image Upload**: Images can be uploaded directly through the admin panel
+
+## Logging
+
+All reference image operations include comprehensive logging:
+
+- **Model Operations**: Logs when images are created, updated, or deleted
+- **Image Processing**: Logs S3 upload operations and image size generation
+- **Error Tracking**: All errors are logged with full context for debugging
+
+Logs help identify:
+- Slow S3 operations
+- Image processing bottlenecks
+- Database constraint violations
+- Serialization issues
+
+## Admin Panel
+
+Reference images are integrated into the Django Admin panel:
+
+- **Inline Display**: Reference images appear inline when viewing/editing a User
+- **Thumbnail Previews**: Image thumbnails are displayed for quick visual reference
+- **Direct Management**: Standalone admin interface for managing reference images directly
+- **Read-Only Fields**: `id`, `created_at`, `updated_at` are read-only
+- **Image Upload**: Images can be uploaded directly through the admin panel
+
+## Logging
+
+All reference image operations include comprehensive logging:
+
+- **Model Operations**: Logs when images are created, updated, or deleted
+- **Image Processing**: Logs S3 upload operations and image size generation
+- **Error Tracking**: All errors are logged with full context for debugging
+
+Logs help identify:
+- Slow S3 operations
+- Image processing bottlenecks
+- Database constraint violations
+- Serialization issues
+
 ## Usage Context
 
 - Stores user's reference photos for AI image generation
@@ -64,4 +112,8 @@ Reference images use the `ImageMixin` which provides:
 - Admin users can manage reference images for test users
 - Part of the admin-only Images tab workflow
 - Referenced when generating identity images via the Gemini API
+- Accessible through Django Admin panel with inline display
+- Frontend components provide user-friendly management interface
+- Accessible through Django Admin panel with inline display
+- Frontend components provide user-friendly management interface
 

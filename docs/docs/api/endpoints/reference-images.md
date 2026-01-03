@@ -292,6 +292,51 @@ If no image has been uploaded, the `image` field will be `null`.
 
 ---
 
+## Logging and Debugging
+
+All reference image operations include comprehensive logging to help debug issues:
+
+- **ViewSet Operations**: Logs queryset retrieval, serialization steps, and CRUD operations
+- **Function Operations**: Logs image creation, upload, and deletion steps
+- **Serialization**: Logs image URL generation for each size variant (original, thumbnail, medium, large)
+- **Error Handling**: All errors are logged with full stack traces
+
+Logs are available in the Django application logs and can help identify:
+- Slow S3 operations (image URL generation)
+- Serialization bottlenecks
+- Database query issues
+- Image processing problems
+
+## Admin Panel Integration
+
+Reference images can be managed through the Django Admin panel:
+
+- **Inline Admin**: When viewing/editing a User in the admin panel, reference images are displayed inline with thumbnail previews
+- **Standalone Admin**: Direct management of reference images is available through the ReferenceImage admin interface
+- **Image Previews**: Thumbnail previews are shown for all images in the admin panel
+- **Maximum Limit**: The admin enforces the 5-image limit per user
+
+To access:
+1. Navigate to Django Admin (`/admin/`)
+2. Click on "Users" to view all users
+3. Click on a specific user to see their reference images inline
+4. Or navigate to "Reference Images" for direct management
+
+## Frontend Components
+
+The frontend includes dedicated components for managing reference images:
+
+- **ReferenceImageManager**: Main component that displays all 5 slots in a responsive grid
+- **ReferenceImageSlot**: Individual slot component with upload/replace/delete functionality
+- **Integration**: Integrated into the admin-only Images page (`/images`)
+
+Features:
+- Visual grid layout (responsive: 1-5 columns based on screen size)
+- Upload button for empty slots
+- Replace and Delete buttons on hover for filled slots
+- Loading states during operations
+- Toast notifications for success/error feedback
+
 ## Notes
 
 - All endpoints require authentication. See the authentication documentation for details.
@@ -301,5 +346,6 @@ If no image has been uploaded, the `image` field will be `null`.
 - The `VersatileImageField` automatically generates multiple size variants when an image is uploaded.
 - When uploading a new image, any existing image is automatically deleted before the new one is saved.
 - Supported image formats depend on Django's ImageField and Pillow configuration.
+- All operations include comprehensive logging for debugging purposes.
 - Update this document whenever the API changes.
 
