@@ -1259,10 +1259,12 @@ GEMINI_API_KEY=your_key_here
    - Created `Images.tsx` with basic layout
    - Created `UserSelector` component for selecting current user or test accounts
 
-11. **Frontend: Reference Image Manager** (1 hr)
-    - Create `ReferenceImageManager` component
-    - Create `ReferenceImageSlot` component
-    - Wire up upload, delete, display
+11. ✅ **Frontend: Reference Image Manager** (1 hr) - COMPLETED
+    - Created `ReferenceImageManager` component with responsive grid layout
+    - Created `ReferenceImageSlot` component with upload/replace/delete functionality
+    - Wired up upload, delete, and display operations
+    - Added hover states and loading indicators
+    - Integrated into Images page
 
 12. **Frontend: Identity Selection & Generation** (1 hr)
     - Create `IdentitySelector` component
@@ -1283,7 +1285,9 @@ GEMINI_API_KEY=your_key_here
 | Admin Identity Endpoints | ✅ COMPLETE | Added generate-image and save-generated-image actions |
 | Frontend: API Layer | ✅ COMPLETE | API functions and TanStack Query hooks created |
 | Frontend: Page Structure | ✅ COMPLETE | Route, navbar link, Images page, UserSelector component |
-| Frontend: Reference Image Manager | ⏳ Pending | |
+| Frontend: Reference Image Manager | ✅ COMPLETE | ReferenceImageManager and ReferenceImageSlot components with full CRUD |
+| Backend: Logging & Error Handling | ✅ COMPLETE | Comprehensive logging added throughout viewset, functions, and serializer |
+| Backend: Admin Panel Integration | ✅ COMPLETE | Inline admin for reference images, standalone admin, image previews |
 | Frontend: Identity Selection & Generation | ⏳ Pending | |
 
 ## Files to Create
@@ -1420,14 +1424,41 @@ client/src/pages/images/
 ├── Images.tsx                    # ✅ COMPLETE: Main page with basic layout
 └── components/
     ├── UserSelector.tsx          # ✅ COMPLETE: User selection dropdown
+    ├── ReferenceImageManager.tsx # ✅ COMPLETE: Manages all 5 slots, handles CRUD operations
+    ├── ReferenceImageSlot.tsx   # ✅ COMPLETE: Individual slot with upload/replace/delete
     ├── IdentitySelector.tsx      # ⏳ Pending
-    ├── ReferenceImageManager.tsx # ⏳ Pending
-    ├── ReferenceImageSlot.tsx   # ⏳ Pending
     └── GeneratedImageDisplay.tsx # ⏳ Pending
 
 # Route and Navbar
 client/src/App.tsx                 # ✅ Updated: Added /images route
 client/src/components/AdminNavbar.tsx  # ✅ Updated: Added Images link
+```
+
+### Backend - Logging & Error Handling ✅ COMPLETED
+```
+# Comprehensive logging added throughout
+server/apps/reference_images/
+├── views/reference_image_viewset.py    # ✅ Added logging to all operations
+├── functions/public/
+│   ├── create_reference_image.py       # ✅ Added detailed logging
+│   └── upload_reference_image.py       # ✅ Added detailed logging
+└── admin.py                            # ✅ Created admin panel integration
+
+server/apps/core/serializers/
+└── versatile_image_field_with_sizes.py # ✅ Added logging for URL generation debugging
+
+server/apps/users/
+└── admin.py                            # ✅ Added ReferenceImageInline to UserAdmin
+```
+
+### Backend - Admin Panel Integration ✅ COMPLETED
+```
+server/apps/reference_images/
+└── admin.py                            # ✅ Created ReferenceImageInline and ReferenceImageAdmin
+                                        #    - Inline display when viewing users
+                                        #    - Standalone admin for direct management
+                                        #    - Image preview thumbnails
+                                        #    - Enforces 5-image limit
 ```
 
 ## Notes
@@ -1438,3 +1469,13 @@ client/src/components/AdminNavbar.tsx  # ✅ Updated: Added Images link
 - **Gemini API model**: `gemini-3-pro-image-preview` is used for text-and-image-to-image generation
 - **S3 Storage**: All images (reference and generated) are stored in S3 via `default_storage`
 - **Generated images can be saved to Identity**: After generation, you can save directly to the identity's `image` field using the existing endpoint
+- **Comprehensive Logging**: All reference image operations include detailed logging to help debug issues:
+  - ViewSet operations log queryset retrieval, serialization steps, and CRUD operations
+  - Function operations log image creation, upload, and deletion steps
+  - Serialization logs image URL generation for each size variant
+  - All errors are logged with full stack traces
+- **Admin Panel Integration**: Reference images can be viewed and managed through Django Admin:
+  - Inline display when viewing/editing a User (shows all reference images with thumbnails)
+  - Standalone admin interface for direct management
+  - Image preview thumbnails for quick visual reference
+  - Enforces the 5-image limit per user
