@@ -166,10 +166,25 @@ class AdminIdentityViewSet(viewsets.GenericViewSet):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
-            # Convert to bytes
-            img_buffer = BytesIO()
-            pil_image.save(img_buffer, format="PNG")
-            image_bytes = img_buffer.getvalue()
+            # Convert Gemini image to bytes
+            # Gemini's as_image() returns a special image type that saves differently
+            import tempfile
+            import os as temp_os
+            
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
+                tmp_path = tmp_file.name
+            
+            try:
+                # Gemini image.save() takes just a path
+                pil_image.save(tmp_path)
+                
+                # Read the bytes back
+                with open(tmp_path, "rb") as f:
+                    image_bytes = f.read()
+            finally:
+                # Clean up temp file
+                if temp_os.path.exists(tmp_path):
+                    temp_os.unlink(tmp_path)
             
             # Encode as base64 for response
             image_base64 = base64.b64encode(image_bytes).decode("utf-8")

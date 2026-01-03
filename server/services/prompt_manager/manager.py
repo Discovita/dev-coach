@@ -24,7 +24,7 @@ from enums.prompt_type import PromptType
 from typing import Tuple, Union, Dict, Any
 from pydantic import BaseModel
 
-log = configure_logging(__name__, log_level="INFO")
+log = configure_logging(__name__, log_level="DEBUG")
 
 
 # NOTE: There might be other things we want to add in every time as well: user info (name, gender, age, etc.)
@@ -182,5 +182,6 @@ class PromptManager:
             identity_context=identity_context,
             additional_prompt=additional_prompt or "None provided",
         )
+        log.debug(f"Formatted image generation prompt: {formatted_prompt}")
 
         return formatted_prompt
