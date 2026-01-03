@@ -1253,10 +1253,11 @@ GEMINI_API_KEY=your_key_here
     - Created `client/src/hooks/use-image-generation.ts` with TanStack Query hook
     - All hooks centralized in `client/src/hooks/` as requested
 
-10. **Frontend: Basic Page Structure** (30 min)
-   - Add route and navbar link
-   - Create `Images.tsx` with basic layout
-    - Create `UserSelector` component
+10. ✅ **Frontend: Basic Page Structure** (30 min) - COMPLETED
+   - Added route `/images` to App.tsx (admin routes)
+   - Added "Images" link to AdminNavbar
+   - Created `Images.tsx` with basic layout
+   - Created `UserSelector` component for selecting current user or test accounts
 
 11. **Frontend: Reference Image Manager** (1 hr)
     - Create `ReferenceImageManager` component
@@ -1281,7 +1282,7 @@ GEMINI_API_KEY=your_key_here
 | Image Generation Orchestration | ✅ COMPLETE | Orchestration function + utils in services/ |
 | Admin Identity Endpoints | ✅ COMPLETE | Added generate-image and save-generated-image actions |
 | Frontend: API Layer | ✅ COMPLETE | API functions and TanStack Query hooks created |
-| Frontend: Page Structure | ⏳ Pending | |
+| Frontend: Page Structure | ✅ COMPLETE | Route, navbar link, Images page, UserSelector component |
 | Frontend: Reference Image Manager | ⏳ Pending | |
 | Frontend: Identity Selection & Generation | ⏳ Pending | |
 
@@ -1413,16 +1414,20 @@ client/src/hooks/
 └── use-image-generation.ts    # ✅ TanStack Query hook for image generation
 ```
 
-### Frontend - Page Components (Pending)
+### Frontend - Page Components
 ```
 client/src/pages/images/
-├── Images.tsx
+├── Images.tsx                    # ✅ COMPLETE: Main page with basic layout
 └── components/
-    ├── UserSelector.tsx
-    ├── IdentitySelector.tsx
-    ├── ReferenceImageManager.tsx
-    ├── ReferenceImageSlot.tsx
-    └── GeneratedImageDisplay.tsx
+    ├── UserSelector.tsx          # ✅ COMPLETE: User selection dropdown
+    ├── IdentitySelector.tsx      # ⏳ Pending
+    ├── ReferenceImageManager.tsx # ⏳ Pending
+    ├── ReferenceImageSlot.tsx   # ⏳ Pending
+    └── GeneratedImageDisplay.tsx # ⏳ Pending
+
+# Route and Navbar
+client/src/App.tsx                 # ✅ Updated: Added /images route
+client/src/components/AdminNavbar.tsx  # ✅ Updated: Added Images link
 ```
 
 ## Notes
