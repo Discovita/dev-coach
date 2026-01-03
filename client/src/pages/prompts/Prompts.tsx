@@ -25,6 +25,9 @@ import { toast } from "sonner";
 import { useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+// Prompt types that are shown as their own tabs (not tied to coaching_phase)
+const PROMPT_TYPE_TABS = ["image_generation", "sentinel"];
+
 /**
  * PromptsTabs
  * -------------
@@ -81,11 +84,16 @@ export function PromptsTabs() {
     }
   }, [enums?.coaching_phases]);
 
-  // Filter prompts for the selected coach state (in memory)
+  // Filter prompts for the selected tab (in memory)
+  // For prompt_type tabs, filter by prompt_type; otherwise filter by coaching_phase
   const prompts = useMemo(() => {
-    return allPrompts && activeCoachState && activeCoachState !== "new"
-      ? allPrompts.filter((p) => p.coaching_phase === activeCoachState)
-      : [];
+    if (!allPrompts || !activeCoachState || activeCoachState === "new") {
+      return [];
+    }
+    if (PROMPT_TYPE_TABS.includes(activeCoachState)) {
+      return allPrompts.filter((p) => p.prompt_type === activeCoachState);
+    }
+    return allPrompts.filter((p) => p.coaching_phase === activeCoachState);
   }, [allPrompts, activeCoachState]);
 
   // Extract available versions for the dropdown
@@ -208,8 +216,10 @@ export function PromptsTabs() {
     setSubmittingEdit(true);
     try {
       // Create a new prompt with the current form state (omit id/version)
+      // For image_generation prompts, coaching_phase is null, so we include prompt_type
       await createPrompt({
         coaching_phase: selectedPrompt.coaching_phase,
+        prompt_type: selectedPrompt.prompt_type,
         name: editName,
         description: editDescription,
         body: editBody,
@@ -221,11 +231,19 @@ export function PromptsTabs() {
       await queryClient.invalidateQueries({ queryKey: ["prompts", "all"] });
       const refetchResult = await refetchPrompts();
 
-      // Force select the highest version for this coaching phase using the refetched data
+      // Force select the highest version using the refetched data
+      // For prompt_type tabs (image_generation, sentinel), filter by prompt_type; otherwise by coaching_phase
       if (refetchResult.data) {
-        const updatedPrompts = refetchResult.data.filter(
-          (p) => p.coaching_phase === selectedPrompt.coaching_phase
+        const isPromptTypeTab = PROMPT_TYPE_TABS.includes(
+          selectedPrompt.prompt_type
         );
+        const updatedPrompts = isPromptTypeTab
+          ? refetchResult.data.filter(
+              (p) => p.prompt_type === selectedPrompt.prompt_type
+            )
+          : refetchResult.data.filter(
+              (p) => p.coaching_phase === selectedPrompt.coaching_phase
+            );
         const availableVersions = Array.from(
           new Set(updatedPrompts.map((p) => p.version))
         ).sort((a, b) => b - a);
@@ -305,7 +323,10 @@ export function PromptsTabs() {
   if (promptsError) return <div>Error loading prompts.</div>;
 
   // Add a special tab for creating a new prompt
+  // Prompt type tabs (Image Generation, Sentinel) come first, before coaching phases
   const allTabs = [
+    { value: "image_generation", label: "Image Generation" },
+    { value: "sentinel", label: "Sentinel" },
     ...enums.coaching_phases.map((state: { value: string; label: string }) => ({
       value: state.value,
       label: state.label,
@@ -321,13 +342,309 @@ export function PromptsTabs() {
         onValueChange={setActiveCoachState}
         className="flex flex-frow flex-col text-left flex-1 min-h-0 h-full"
       >
-        <TabsList className="border-b-2 bg-gold-200 border-gold-500 flex gap-2 w-full dark:text-gold-50">
+        <TabsList className="border-b-2 bg-gold-200 border-gold-500 flex gap-2 w-full dark:text-gold-50 overflow-x-auto">
           {allTabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {tab.label}
             </TabsTrigger>
           ))}
         </TabsList>
+        {/* Render tab panel for Image Generation prompts */}
+        <TabsContent
+          key="image_generation"
+          value="image_generation"
+          className="flex-1 flex flex-col min-h-0 h-full"
+        >
+          {selectedPrompt ? (
+            <form
+              onSubmit={handleEditSubmit}
+              className="border rounded p-4 bg-gold-50 dark:bg-gold-900 flex flex-col flex-1 min-h-0 h-full"
+              style={{ height: "100%" }}
+            >
+              <input
+                type="text"
+                className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Prompt name (optional)"
+              />
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Prompt description (optional)"
+              />
+              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">Allowed Actions:</span>
+                  <div className="gap-2 flex flex-wrap">
+                    <MultiSelect
+                      options={enums?.allowed_actions || []}
+                      value={editAllowedActions}
+                      onValueChange={setEditAllowedActions}
+                      placeholder="Choose Allowed Actions"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">Required Context Keys:</span>
+                  <div className="gap-2 flex flex-wrap">
+                    <MultiSelect
+                      options={enums?.context_keys || []}
+                      value={editContextKeys}
+                      onValueChange={setEditContextKeys}
+                      placeholder="Choose Context Keys"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 justify-between py-2">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <span className="font-semibold">Status:</span>{" "}
+                    <button
+                      type="button"
+                      className={`ml-2 px-2 py-1 rounded ${
+                        editIsActive
+                          ? "bg-green-600 text-white"
+                          : "bg-red-600 text-white"
+                      }`}
+                      onClick={() => setEditIsActive((v) => !v)}
+                    >
+                      {editIsActive ? "Active" : "Inactive"}
+                    </button>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Created:</span>{" "}
+                    {selectedPrompt.created_at}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Updated:</span>{" "}
+                    {selectedPrompt.updated_at}
+                  </div>
+                </div>
+                <div className="flex items-center justify-end">
+                  <label htmlFor="version-select" className="font-bold mr-2">
+                    Version:
+                  </label>
+                  <Select
+                    value={
+                      selectedVersion !== null ? String(selectedVersion) : ""
+                    }
+                    onValueChange={(val) =>
+                      setSelectedVersion(val ? Number(val) : null)
+                    }
+                    name="version-select"
+                  >
+                    <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
+                      <SelectValue placeholder="Select version" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Versions</SelectLabel>
+                        {versions.map((v) => (
+                          <SelectItem key={v} value={String(v)}>
+                            Version {v}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
+                <Textarea
+                  value={editBody}
+                  onChange={(e) => setEditBody(e.target.value)}
+                  name="body"
+                  className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
+                />
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleSaveAsNewVersion}
+                  disabled={submittingEdit}
+                >
+                  Save as New Version
+                </Button>
+                {hasUnsavedChanges() && (
+                  <Button
+                    type="button"
+                    variant={"outline"}
+                    onClick={resetEditState}
+                    disabled={submittingEdit}
+                  >
+                    Restore
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleOpenDeleteDialog}
+                  disabled={submittingEdit}
+                >
+                  Delete
+                </Button>
+                <Button type="submit" variant={"default"} disabled={submittingEdit}>
+                  {submittingEdit ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="text-neutral-500">
+              No image generation prompt found. Create one using the New Prompt tab.
+            </div>
+          )}
+        </TabsContent>
+        {/* Render tab panel for Sentinel prompts */}
+        <TabsContent
+          key="sentinel"
+          value="sentinel"
+          className="flex-1 flex flex-col min-h-0 h-full"
+        >
+          {selectedPrompt ? (
+            <form
+              onSubmit={handleEditSubmit}
+              className="border rounded p-4 bg-gold-50 dark:bg-gold-900 flex flex-col flex-1 min-h-0 h-full"
+              style={{ height: "100%" }}
+            >
+              <input
+                type="text"
+                className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Prompt name (optional)"
+              />
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Prompt description (optional)"
+              />
+              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">Allowed Actions:</span>
+                  <div className="gap-2 flex flex-wrap">
+                    <MultiSelect
+                      options={enums?.allowed_actions || []}
+                      value={editAllowedActions}
+                      onValueChange={setEditAllowedActions}
+                      placeholder="Choose Allowed Actions"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">Required Context Keys:</span>
+                  <div className="gap-2 flex flex-wrap">
+                    <MultiSelect
+                      options={enums?.context_keys || []}
+                      value={editContextKeys}
+                      onValueChange={setEditContextKeys}
+                      placeholder="Choose Context Keys"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 justify-between py-2">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <span className="font-semibold">Status:</span>{" "}
+                    <button
+                      type="button"
+                      className={`ml-2 px-2 py-1 rounded ${
+                        editIsActive
+                          ? "bg-green-600 text-white"
+                          : "bg-red-600 text-white"
+                      }`}
+                      onClick={() => setEditIsActive((v) => !v)}
+                    >
+                      {editIsActive ? "Active" : "Inactive"}
+                    </button>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Created:</span>{" "}
+                    {selectedPrompt.created_at}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Updated:</span>{" "}
+                    {selectedPrompt.updated_at}
+                  </div>
+                </div>
+                <div className="flex items-center justify-end">
+                  <label htmlFor="version-select" className="font-bold mr-2">
+                    Version:
+                  </label>
+                  <Select
+                    value={
+                      selectedVersion !== null ? String(selectedVersion) : ""
+                    }
+                    onValueChange={(val) =>
+                      setSelectedVersion(val ? Number(val) : null)
+                    }
+                    name="version-select"
+                  >
+                    <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
+                      <SelectValue placeholder="Select version" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Versions</SelectLabel>
+                        {versions.map((v) => (
+                          <SelectItem key={v} value={String(v)}>
+                            Version {v}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
+                <Textarea
+                  value={editBody}
+                  onChange={(e) => setEditBody(e.target.value)}
+                  name="body"
+                  className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
+                />
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleSaveAsNewVersion}
+                  disabled={submittingEdit}
+                >
+                  Save as New Version
+                </Button>
+                {hasUnsavedChanges() && (
+                  <Button
+                    type="button"
+                    variant={"outline"}
+                    onClick={resetEditState}
+                    disabled={submittingEdit}
+                  >
+                    Restore
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleOpenDeleteDialog}
+                  disabled={submittingEdit}
+                >
+                  Delete
+                </Button>
+                <Button type="submit" variant={"default"} disabled={submittingEdit}>
+                  {submittingEdit ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="text-neutral-500">
+              No sentinel prompt found. Create one using the New Prompt tab.
+            </div>
+          )}
+        </TabsContent>
         {/* Render a tab panel for each coach state */}
         {enums.coaching_phases.map(
           (state: { value: string; label: string }) => (

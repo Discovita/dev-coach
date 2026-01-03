@@ -157,6 +157,7 @@ const sidebars: SidebarsConfig = {
             "api/endpoints/core",
             "api/endpoints/prompts",
             "api/endpoints/identities",
+            "api/endpoints/reference-images",
             "api/endpoints/test-users",
             "api/endpoints/test-scenarios",
             "api/endpoints/actions",
@@ -181,6 +182,7 @@ const sidebars: SidebarsConfig = {
             "database/models/action",
             "database/models/test-scenario",
             "database/models/user-note",
+            "database/models/reference-image",
           ],
         },
         {

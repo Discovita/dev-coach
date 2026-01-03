@@ -46,4 +46,9 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
         return get_visualization_identities_context(coach_state)
     elif key == ContextKey.IDENTITY_IDS:
         return get_identity_ids_context(coach_state)
+    elif key == ContextKey.IDENTITY_FOR_IMAGE:
+        # NOTE: This context key is NOT used via CoachState.
+        # It's populated directly by PromptManager.create_image_generation_prompt()
+        # which passes an Identity object directly to get_identity_context_for_image().
+        return None
     # Add more context key handlers as needed

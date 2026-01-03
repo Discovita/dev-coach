@@ -9,6 +9,7 @@ import Signup from "@/pages/signup/Signup";
 import Test from "@/pages/test/Test";
 import Chat from "@/pages/chat/Chat";
 import Prompts from "@/pages/prompts/Prompts";
+import Images from "@/pages/images/Images";
 import { useProfile } from "@/hooks/use-profile";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { SessionRestorer } from "@/components/SessionRestorer";
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="/chat" element={<Chat />} />
             <Route path="/test" element={<Test />} />
             <Route path="/prompts" element={<Prompts />} />
+            <Route path="/images" element={<Images />} />
             <Route path="/demo" element={<Demo />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

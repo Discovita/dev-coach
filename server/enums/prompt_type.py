@@ -10,6 +10,7 @@ class PromptType(models.TextChoices):
     COACH = "coach", "Coach"
     SENTINEL = "sentinel", "Sentinel"
     SYSTEM = "system", "System"
+    IMAGE_GENERATION = "image_generation", "Image Generation"
 
     def get_all_actions() -> list:
         """Get all action types as a list."""

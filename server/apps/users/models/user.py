@@ -1,3 +1,10 @@
+"""
+User model and manager for the users app.
+
+This module contains the custom User model that uses email as the unique identifier
+instead of username, along with its custom manager.
+"""
+
 import uuid
 
 from django.db import models
@@ -138,3 +145,4 @@ class User(AbstractUser):
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+

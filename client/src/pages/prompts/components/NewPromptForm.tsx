@@ -29,6 +29,8 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
   >([]);
   const [selectedCoachState, setSelectedCoachState] =
     useState<PromptCreate["coaching_phase"]>("");
+  const [selectedPromptType, setSelectedPromptType] =
+    useState<PromptCreate["prompt_type"]>("coach");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState<PromptCreate["body"]>("");
   const [name, setName] = useState<PromptCreate["name"]>("");
@@ -47,23 +49,34 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
     setName("");
     setDescription("");
     setSelectedCoachState("");
+    setSelectedPromptType("coach");
     setSelectedActions([]);
     setSelectedContextKeys([]);
     setPrompt("");
   }
 
+  // Prompt types that don't require a coaching_phase
+  const nonCoachingPhasePromptTypes = ["image_generation", "sentinel"];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await onSubmit({
-        coaching_phase: selectedCoachState,
+      // For non-coaching-phase prompts (image_generation, sentinel), coaching_phase should be null
+      const promptData: PromptCreate = {
+        coaching_phase: nonCoachingPhasePromptTypes.includes(
+          selectedPromptType ?? ""
+        )
+          ? null
+          : selectedCoachState,
+        prompt_type: selectedPromptType,
         allowed_actions: selectedActions,
         required_context_keys: selectedContextKeys,
         body: prompt,
         name: name || undefined,
         description: description || undefined,
-      });
+      };
+      await onSubmit(promptData);
       toast.success("Prompt submitted successfully!");
       // Reset form after successful submit
       resetForm();
@@ -80,7 +93,8 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
     console.log("Selected actions:", selectedActions);
     console.log("Selected context keys:", selectedContextKeys);
     console.log("Selected coach state:", selectedCoachState);
-  }, [selectedActions, selectedContextKeys, selectedCoachState]);
+    console.log("Selected prompt type:", selectedPromptType);
+  }, [selectedActions, selectedContextKeys, selectedCoachState, selectedPromptType]);
 
   return (
     <div className="_NewPromptForm h-full flex flex-col">
@@ -106,32 +120,61 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
           placeholder="Prompt description (optional)"
         />
         {isLoading ? (
-          <div>Loading coach states...</div>
+          <div>Loading enums...</div>
         ) : isError ? (
-          <div>Error loading coach states</div>
+          <div>Error loading enums</div>
         ) : (
-          <div className="max-w-2xl mb-2">
-            <Select
-              value={selectedCoachState}
-              onValueChange={setSelectedCoachState}
-              name="coaching_phase"
-            >
-              <SelectTrigger className="min-w-[200px]">
-                <SelectValue placeholder="Choose Coach State" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Coach States</SelectLabel>
-                  {enums?.coaching_phases?.map(
-                    (state: { value: string; label: string }) => (
-                      <SelectItem key={state.value} value={state.value}>
-                        {state.label}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap gap-4 mb-2">
+            {/* Prompt Type selector */}
+            <div>
+              <Select
+                value={selectedPromptType}
+                onValueChange={setSelectedPromptType}
+                name="prompt_type"
+              >
+                <SelectTrigger className="min-w-[200px]">
+                  <SelectValue placeholder="Choose Prompt Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Prompt Type</SelectLabel>
+                    {enums?.prompt_types?.map(
+                      (type: { value: string; label: string }) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Coaching Phase selector (hidden for non-coaching-phase prompt types) */}
+            {!nonCoachingPhasePromptTypes.includes(selectedPromptType ?? "") && (
+              <div>
+                <Select
+                  value={selectedCoachState ?? ""}
+                  onValueChange={setSelectedCoachState}
+                  name="coaching_phase"
+                >
+                  <SelectTrigger className="min-w-[200px]">
+                    <SelectValue placeholder="Choose Coaching Phase" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Coaching Phases</SelectLabel>
+                      {enums?.coaching_phases?.map(
+                        (state: { value: string; label: string }) => (
+                          <SelectItem key={state.value} value={state.value}>
+                            {state.label}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         )}
         <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">

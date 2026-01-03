@@ -56,3 +56,5 @@ backend/public/*
 
 *storybook.log
 storybook-static
+server/services/ai/openai_service/scripts/images/
+server/services/gemini/images/

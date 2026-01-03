@@ -1,6 +1,7 @@
 from enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
 from enums.action_type import ActionType
+from enums.prompt_type import PromptType
 from rest_framework.response import Response
 from rest_framework import decorators, viewsets
 
@@ -23,15 +24,17 @@ class CoreViewSet(viewsets.GenericViewSet):
     def enums(self, request, *args, **kwargs):
         """
         GET /api/enums
-        Returns all enum values for coach_state, allowed_actions, and context_keys.
+        Returns all enum values for coach_state, allowed_actions, context_keys, and prompt_types.
         """
         coaching_phases = [{"value": c.value, "label": c.label} for c in CoachingPhase]
         allowed_actions = [{"value": a.value, "label": a.label} for a in ActionType]
         context_keys = [{"value": k.value, "label": k.label} for k in ContextKey]
+        prompt_types = [{"value": p.value, "label": p.label} for p in PromptType]
         return Response(
             {
                 "coaching_phases": coaching_phases,
                 "allowed_actions": allowed_actions,
                 "context_keys": context_keys,
+                "prompt_types": prompt_types,
             }
         )
