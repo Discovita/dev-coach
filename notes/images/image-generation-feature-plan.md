@@ -675,7 +675,7 @@ def get_identity_context_for_image(identity: Identity) -> str:
 # server/services/prompt_manager/manager.py - Add new method
 
 def create_image_generation_prompt(
-    self, 
+        self,
     identity: "Identity", 
     additional_prompt: str = ""
 ) -> str:
