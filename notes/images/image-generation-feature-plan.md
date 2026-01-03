@@ -1244,10 +1244,14 @@ GEMINI_API_KEY=your_key_here
 
 ### Frontend Implementation
 
-9. **Frontend: API Layer** (30 min)
-    - Create `client/src/api/referenceImages.ts`
-    - Create `client/src/api/imageGeneration.ts`
-    - Create TanStack Query hooks
+9. ✅ **Frontend: API Layer** (30 min) - COMPLETED
+    - Created `client/src/types/referenceImage.ts` with ReferenceImage types
+    - Created `client/src/types/imageGeneration.ts` with image generation types
+    - Created `client/src/api/referenceImages.ts` with CRUD API functions
+    - Created `client/src/api/imageGeneration.ts` with generation API functions
+    - Created `client/src/hooks/use-reference-images.ts` with TanStack Query hook
+    - Created `client/src/hooks/use-image-generation.ts` with TanStack Query hook
+    - All hooks centralized in `client/src/hooks/` as requested
 
 10. **Frontend: Basic Page Structure** (30 min)
    - Add route and navbar link
@@ -1276,7 +1280,7 @@ GEMINI_API_KEY=your_key_here
 | Image Generation Service | ✅ COMPLETE | GeminiImageService with generate_image() and generate_image_bytes() |
 | Image Generation Orchestration | ✅ COMPLETE | Orchestration function + utils in services/ |
 | Admin Identity Endpoints | ✅ COMPLETE | Added generate-image and save-generated-image actions |
-| Frontend: API Layer | ⏳ Pending | |
+| Frontend: API Layer | ✅ COMPLETE | API functions and TanStack Query hooks created |
 | Frontend: Page Structure | ⏳ Pending | |
 | Frontend: Reference Image Manager | ⏳ Pending | |
 | Frontend: Identity Selection & Generation | ⏳ Pending | |
@@ -1394,23 +1398,31 @@ server/services/image_generation/
                              #   - Configurable resolution ("4K" default)
 ```
 
-### Frontend
+### Frontend - API Layer ✅ COMPLETED
+```
+client/src/types/
+├── referenceImage.ts          # ✅ ReferenceImage, CreateReferenceImageRequest, UpdateReferenceImageRequest
+└── imageGeneration.ts         # ✅ GenerateImageRequest, GenerateImageResponse, SaveImageRequest, SaveImageResponse
+
+client/src/api/
+├── referenceImages.ts          # ✅ CRUD API functions for reference images
+└── imageGeneration.ts         # ✅ Generate and save image API functions
+
+client/src/hooks/
+├── use-reference-images.ts    # ✅ TanStack Query hook for reference images CRUD
+└── use-image-generation.ts    # ✅ TanStack Query hook for image generation
+```
+
+### Frontend - Page Components (Pending)
 ```
 client/src/pages/images/
 ├── Images.tsx
-├── components/
-│   ├── UserSelector.tsx
-│   ├── IdentitySelector.tsx
-│   ├── ReferenceImageManager.tsx
-│   ├── ReferenceImageSlot.tsx
-│   └── GeneratedImageDisplay.tsx
-└── hooks/
-    ├── use-image-generation.ts
-    └── use-reference-images.ts
-
-client/src/api/
-├── imageGeneration.ts
-└── referenceImages.ts
+└── components/
+    ├── UserSelector.tsx
+    ├── IdentitySelector.tsx
+    ├── ReferenceImageManager.tsx
+    ├── ReferenceImageSlot.tsx
+    └── GeneratedImageDisplay.tsx
 ```
 
 ## Notes
