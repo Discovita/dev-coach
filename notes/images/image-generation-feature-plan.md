@@ -39,7 +39,7 @@ Create an admin-only "Images" tab for generating identity images using Gemini's 
 
 ## Implementation Tasks
 
-### Phase 1: Backend - Reference Images App (New Coding Standards)
+### Phase 1: Backend - Reference Images App (New Coding Standards) ✅ COMPLETED
 
 #### 1.1 Create Reference Images App
 ```bash
@@ -535,6 +535,55 @@ python manage.py migrate
 
 ### Phase 2: Backend - Image Generation App (New Coding Standards)
 
+#### Prompt Construction Architecture - Using Existing PromptManager
+
+Rather than creating a standalone `build_identity_prompt.py` utility, we'll integrate with the **existing `prompt_manager` service** which already provides:
+
+- **Context gathering** - Functions that format identity data for prompts
+- **Database-stored templates** - Versioned prompts with `required_context_keys`
+- **Extensible pattern** - Just add new `ContextKey` values and context functions
+
+**Integration Approach:**
+
+1. **Add new PromptType** - `IMAGE_GENERATION` in `enums/prompt_type.py`
+2. **Add new ContextKey** - `IMAGE_IDENTITY` in `enums/context_keys.py`
+3. **Create context function** - `get_identity_context_for_image()` that formats identity for image generation
+4. **Store prompt template in DB** - Create Prompt record with the image generation template
+5. **Add method to PromptManager** - `create_image_generation_prompt(identity, additional_prompt)`
+
+**Why use PromptManager?**
+- **Consistency** - Same pattern as chat prompts
+- **Versioning** - Prompt templates stored in DB with version control
+- **Iteration** - Update prompts without code changes via admin/API
+- **Context reuse** - Leverage existing identity formatting functions
+- **Testability** - Same testing patterns as existing prompts
+
+**Data Flow:**
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  generate_identity_image() function                                  │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │ 1. Fetch Identity from database                                 ││
+│  │ 2. Fetch ReferenceImages for user                               ││
+│  │ 3. Call PromptManager.create_image_generation_prompt(identity)  ││
+│  │    └─> Fetches prompt template from DB                          ││
+│  │    └─> Gathers context using get_identity_context_for_image()       ││
+│  │    └─> Returns formatted prompt string                          ││
+│  │ 4. Call load_pil_images_from_references(reference_images)       ││
+│  │    └─> Returns: [PIL.Image, PIL.Image, ...]                     ││
+│  │ 5. Call GeminiImageService.generate_image(prompt, pil_images)   ││
+│  │    └─> Returns: bytes (PNG image data)                          ││
+│  │ 6. Save to S3 and return URL                                    ││
+│  └─────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Differences from Chat Prompts:**
+- Takes `Identity` directly (not from CoachState)
+- Returns just a string (no response_format model)
+- No action instructions or message history needed
+- Simpler context gathering (identity fields only)
+
 #### 2.1 Create Image Generation App
 ```bash
 cd server/apps/
@@ -558,12 +607,144 @@ server/apps/image_generation/
 │       └── save_image_to_identity.py
 ├── utils/
 │   ├── __init__.py
-│   ├── build_identity_prompt.py
-│   └── load_pil_images_from_references.py
+│   └── load_pil_images_from_references.py   # NOTE: build_identity_prompt moved to prompt_manager
 └── tests/
     ├── __init__.py
     ├── test_generate_identity_image.py
     └── test_list_available_users.py
+```
+
+#### 2.3 Integrate with PromptManager
+
+##### Step 1: Add new PromptType
+```python
+# enums/prompt_type.py - Add new type
+class PromptType(str, Enum):
+    COACH = "coach"
+    SENTINEL = "sentinel"
+    IMAGE_GENERATION = "image_generation"  # NEW
+```
+
+##### Step 2: Add new ContextKey
+```python
+# enums/context_keys.py - Add new key
+class ContextKey(str, Enum):
+    # ... existing keys ...
+    IMAGE_IDENTITY = "image_identity"  # NEW - Identity data for image generation
+```
+
+##### Step 3: Create context function
+```python
+# server/services/prompt_manager/utils/context/func/get_identity_context_for_image.py
+from apps.identities.models import Identity
+from services.logger import configure_logging
+
+log = configure_logging(__name__, log_level="DEBUG")
+
+
+def get_identity_context_for_image(identity: Identity) -> str:
+    """
+    Format identity data for image generation prompts.
+    
+    Unlike get_current_identity_context which uses CoachState,
+    this takes an Identity directly for image generation use cases.
+    
+    Args:
+        identity: The Identity model instance to format
+        
+    Returns:
+        Formatted string with identity details for image generation
+    """
+    parts = [
+        f'Identity Name: "{identity.name}"',
+        f"Category: {identity.category}",
+    ]
+    
+    if identity.i_am_statement:
+        parts.append(f"I Am Statement: {identity.i_am_statement}")
+    
+    if identity.visualization:
+        parts.append(f"Visualization: {identity.visualization}")
+    
+    if identity.notes:
+        notes_str = "; ".join(identity.notes)
+        parts.append(f"Notes: {notes_str}")
+    
+    return "\n".join(parts)
+```
+
+##### Step 4: Add method to PromptManager
+```python
+# server/services/prompt_manager/manager.py - Add new method
+
+def create_image_generation_prompt(
+    self, 
+    identity: "Identity", 
+    additional_prompt: str = ""
+) -> str:
+    """
+    Create a prompt for identity image generation.
+    
+    Unlike chat prompts, this:
+    - Takes an Identity directly (not from CoachState)
+    - Returns just a string (no response_format model)
+    - Uses a simpler context gathering flow
+    
+    Args:
+        identity: The Identity to generate an image for
+        additional_prompt: Optional extra instructions from admin
+        
+    Returns:
+        Formatted prompt string for Gemini
+    """
+    # Fetch the latest active image generation prompt
+    prompt = (
+        Prompt.objects.filter(
+            prompt_type=PromptType.IMAGE_GENERATION, 
+            is_active=True
+        )
+        .order_by("-version")
+        .first()
+    )
+    
+    if not prompt:
+        raise ValueError("No active image generation prompt found")
+    
+    log.info(f"Using Image Generation Prompt version: {prompt.version}")
+    
+    # Gather identity context
+    from services.prompt_manager.utils.context.func.get_identity_context_for_image import (
+        get_identity_context_for_image
+    )
+    identity_context = get_identity_context_for_image(identity)
+    
+    # Format the prompt template with context
+    formatted_prompt = prompt.body.format(
+        identity_context=identity_context,
+        additional_prompt=additional_prompt or "None provided",
+    )
+    
+    return formatted_prompt
+```
+
+##### Step 5: Create prompt template in database
+Create a new Prompt record (via admin or migration):
+
+```python
+# Example prompt body (stored in DB)
+"""
+We're creating an Identity Image for this person.
+
+{identity_context}
+
+Create a professional, confident, and inspiring image for this Identity.
+It is critical that the person's face remains intact and recognizable.
+The image should be an ideal visualization of them living as this Identity.
+Give it a movie poster quality aesthetic.
+Nothing negative should be conveyed - this is an aspirational image.
+
+Additional instructions: {additional_prompt}
+"""
 ```
 
 #### 2.3 Create Image Generation Service (in server/services/)
@@ -645,37 +826,10 @@ class GeminiImageService:
 ```
 
 #### 2.4 Create Utility Functions
-```python
-# server/apps/image_generation/utils/build_identity_prompt.py
-from apps.identities.models import Identity
 
+##### load_pil_images_from_references.py
 
-def build_identity_prompt(identity: Identity, additional_prompt: str = "") -> str:
-    """
-    Build the generation prompt from identity data.
-    
-    Args:
-        identity: The Identity model instance
-        additional_prompt: Additional context to append
-        
-    Returns:
-        The complete prompt string for image generation
-    """
-    base_prompt = f"""We're creating an Identity Image for this person. 
-One of their Identities is "{identity.name}". 
-Category: {identity.category}
-I Am Statement: {identity.i_am_statement}
-
-Create a professional, confident, and inspiring image for this Identity. 
-It is critical that the person's face remains intact and recognizable.
-The image should be an ideal visualization of them living as this Identity.
-Give it a movie poster quality aesthetic.
-"""
-    if additional_prompt:
-        base_prompt += f"\n\nAdditional context: {additional_prompt}"
-    
-    return base_prompt
-```
+This utility loads PIL Image objects from S3-stored reference images.
 
 ```python
 # server/apps/image_generation/utils/load_pil_images_from_references.py
@@ -714,10 +868,9 @@ def load_pil_images_from_references(reference_images: List[ReferenceImage]) -> L
 
 ```python
 # server/apps/image_generation/utils/__init__.py
-from .build_identity_prompt import build_identity_prompt
 from .load_pil_images_from_references import load_pil_images_from_references
 
-__all__ = ["build_identity_prompt", "load_pil_images_from_references"]
+__all__ = ["load_pil_images_from_references"]
 ```
 
 #### 2.5 Create Business Logic Functions
@@ -765,6 +918,14 @@ def list_available_users(current_user: User) -> List[Dict[str, Any]]:
     return users
 ```
 
+##### generate_identity_image.py
+
+This is the **orchestration function** that ties everything together. It:
+1. Fetches the identity and reference images from the database
+2. **Constructs the prompt** using `PromptManager.create_image_generation_prompt()`
+3. **Injects the prompt** into the Gemini service
+4. Saves the result to S3
+
 ```python
 # server/apps/image_generation/functions/admin/generate_identity_image.py
 from typing import Dict, Any
@@ -777,8 +938,9 @@ import logging
 
 from apps.identities.models import Identity
 from apps.reference_images.models import ReferenceImage
-from apps.image_generation.utils import build_identity_prompt, load_pil_images_from_references
+from apps.image_generation.utils import load_pil_images_from_references
 from services.image_generation import GeminiImageService
+from services.prompt_manager import PromptManager  # Use existing prompt manager
 
 log = logging.getLogger(__name__)
 
@@ -791,28 +953,37 @@ def generate_identity_image(
     """
     Generate an identity image using stored reference images.
     
+    This function orchestrates the prompt/generation flow:
+    1. FETCH: Get identity and reference images from database
+    2. CONSTRUCT: Build prompt using PromptManager (DB-stored template)
+    3. GENERATE: Pass prompt to GeminiImageService
+    4. SAVE: Store result in S3
+    
+    The PromptManager handles prompt construction using the same pattern
+    as chat prompts - templates stored in DB with context injection.
+    
     Args:
         identity_id: UUID of the identity to generate image for
         user_id: UUID of the user whose reference images to use
-        additional_prompt: Extra prompt text
+        additional_prompt: Extra prompt text from admin (optional)
         
     Returns:
         Dictionary containing:
             - success: bool
             - image_url: S3 URL of generated image
             - image_bytes: Raw image bytes (for saving to identity)
+            - prompt_used: The constructed prompt (for debugging/logging)
             
     Raises:
         NotFound: If identity not found
         ValidationError: If no reference images available
     """
-    # Get identity
+    # ===== STEP 1: Fetch data from database =====
     try:
         identity = Identity.objects.get(id=identity_id)
     except Identity.DoesNotExist:
         raise NotFound("Identity not found")
     
-    # Get reference images for the user
     reference_images = ReferenceImage.objects.filter(
         user_id=user_id
     ).exclude(image="").exclude(image__isnull=True)
@@ -820,23 +991,26 @@ def generate_identity_image(
     if not reference_images.exists():
         raise ValidationError("No reference images found for this user")
     
-    # Load PIL images
+    # ===== STEP 2: Prepare inputs =====
     pil_images = load_pil_images_from_references(reference_images)
     
     if not pil_images:
         raise ValidationError("Could not load any reference images")
     
-    # Build prompt
-    prompt = build_identity_prompt(identity, additional_prompt)
+    # ===== STEP 3: CONSTRUCT prompt using PromptManager =====
+    # Uses the existing prompt_manager pattern with DB-stored templates
+    prompt_manager = PromptManager()
+    prompt = prompt_manager.create_image_generation_prompt(identity, additional_prompt)
+    log.info(f"Constructed prompt for identity {identity.name}: {len(prompt)} chars")
     
-    # Generate image
+    # ===== STEP 4: GENERATE image =====
     service = GeminiImageService()
     image_bytes = service.generate_image(
         prompt=prompt,
         reference_images=pil_images,
     )
     
-    # Save to S3
+    # ===== STEP 5: Save to S3 =====
     filename = f"{uuid.uuid4()}.png"
     path = f"generated_images/{filename}"
     saved_path = default_storage.save(path, ContentFile(image_bytes))
@@ -847,6 +1021,7 @@ def generate_identity_image(
         "image_url": image_url,
         "image_bytes": image_bytes,
         "filename": filename,
+        "prompt_used": prompt,  # For debugging/logging
     }
 ```
 
@@ -1158,20 +1333,20 @@ GEMINI_API_KEY=your_key_here
 
 ### Backend Implementation
 
-1. **Reference Images App - Setup** (15 min)
+1. ✅ **Reference Images App - Setup** (15 min) - COMPLETED
    - Create app: `cd server/apps && python ../manage.py startapp reference_images`
    - Create directory structure (models/, serializers/, views/, functions/, utils/, tests/)
    - Update `apps.py` with correct name
    - Register in `settings/common.py` INSTALLED_APPS
 
-2. **Reference Images App - Model & Serializer** (30 min)
+2. ✅ **Reference Images App - Model & Serializer** (30 min) - COMPLETED
    - Create `models/reference_image.py`
    - Create `models/__init__.py`
    - Create `serializers/reference_image.py`
    - Create `serializers/__init__.py`
    - Run migrations
 
-3. **Reference Images App - Functions & Utils** (45 min)
+3. ✅ **Reference Images App - Functions & Utils** (45 min) - COMPLETED
    - Create `utils/get_next_available_order.py`
    - Create `functions/public/create_reference_image.py`
    - Create `functions/public/upload_reference_image.py`
@@ -1179,33 +1354,48 @@ GEMINI_API_KEY=your_key_here
    - Create `functions/admin/create_reference_image_for_user.py`
    - Create all `__init__.py` exports
 
-4. **Reference Images App - ViewSet** (30 min)
+4. ✅ **Reference Images App - ViewSet & Tests** (30 min) - COMPLETED
    - Create `views/reference_image_viewset.py` (thin, delegates to functions)
    - Create `views/__init__.py`
    - Register in `urls.py`
-   - Test with curl/Postman
+   - Created comprehensive test suite (45 tests, all passing)
+   - Added API documentation (`docs/docs/api/endpoints/reference-images.md`)
+   - Added model documentation (`docs/docs/database/models/reference-image.md`)
 
-5. **Image Generation Service** (30 min)
+5. ✅ **PromptManager Integration** (30 min) - COMPLETED
+   - Added `IMAGE_GENERATION` to `enums/prompt_type.py`
+   - Added `IDENTITY_FOR_IMAGE` to `enums/context_keys.py`
+   - Created `services/prompt_manager/utils/context/func/get_identity_context_for_image.py`
+   - Updated `services/prompt_manager/utils/context/func/__init__.py` exports
+   - Added `identity_for_image` field to `services/prompt_manager/models/prompt_context.py`
+   - Updated `services/prompt_manager/utils/context/get_context_value.py` for new key
+   - Updated `services/prompt_manager/utils/context_logging.py` for new key
+   - Added `create_image_generation_prompt()` method to `PromptManager`
+   - Created management command `seed_image_generation_prompt.py`
+   - Seeded Image Generation Prompt v1 into database
+   - **BONUS**: Updated frontend Prompts page to show Image Generation & Sentinel tabs
+   - **BONUS**: Added `prompt_types` to `/api/v1/core/enums` endpoint
+
+6. **Image Generation Service** (30 min)
    - Create `server/services/image_generation/__init__.py`
    - Create `server/services/image_generation/gemini_service.py`
    - Port from `server/services/gemini/text_and_image_to_image.py`
    - Add GEMINI_API_KEY to settings
 
-6. **Image Generation App - Setup** (15 min)
+7. **Image Generation App - Setup** (15 min)
    - Create app: `cd server/apps && python ../manage.py startapp image_generation`
    - Create directory structure (views/, functions/, utils/, tests/)
    - Update `apps.py` with correct name
    - Register in `settings/common.py` INSTALLED_APPS
 
-7. **Image Generation App - Functions & Utils** (45 min)
-   - Create `utils/build_identity_prompt.py`
+8. **Image Generation App - Functions & Utils** (30 min)
    - Create `utils/load_pil_images_from_references.py`
    - Create `functions/admin/list_available_users.py`
-   - Create `functions/admin/generate_identity_image.py`
+   - Create `functions/admin/generate_identity_image.py` (uses PromptManager)
    - Create `functions/admin/save_image_to_identity.py`
    - Create all `__init__.py` exports
 
-8. **Image Generation App - ViewSet** (30 min)
+9. **Image Generation App - ViewSet** (30 min)
    - Create `views/image_generation_viewset.py` (thin, delegates to functions)
    - Create `views/__init__.py`
    - Register in `urls.py`
@@ -1213,22 +1403,22 @@ GEMINI_API_KEY=your_key_here
 
 ### Frontend Implementation
 
-9. **Frontend: API Layer** (30 min)
-   - Create `client/src/api/referenceImages.ts`
-   - Create `client/src/api/imageGeneration.ts`
-   - Create TanStack Query hooks
+10. **Frontend: API Layer** (30 min)
+    - Create `client/src/api/referenceImages.ts`
+    - Create `client/src/api/imageGeneration.ts`
+    - Create TanStack Query hooks
 
-10. **Frontend: Basic Page Structure** (30 min)
+11. **Frontend: Basic Page Structure** (30 min)
     - Add route and navbar link
     - Create `Images.tsx` with basic layout
     - Create `UserSelector` component
 
-11. **Frontend: Reference Image Manager** (1 hr)
+12. **Frontend: Reference Image Manager** (1 hr)
     - Create `ReferenceImageManager` component
     - Create `ReferenceImageSlot` component
     - Wire up upload, delete, display
 
-12. **Frontend: Identity Selection & Generation** (1 hr)
+13. **Frontend: Identity Selection & Generation** (1 hr)
     - Create `IdentitySelector` component
     - Wire up generate button with loading state
     - Create `GeneratedImageDisplay` component
@@ -1236,14 +1426,30 @@ GEMINI_API_KEY=your_key_here
 
 ## Total Estimated Time: ~7-8 hours
 
+## Progress Summary
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| Reference Images App | ✅ COMPLETE | 45 tests passing, docs added |
+| PromptManager Integration | ✅ COMPLETE | Enums, context function, manager method, seed command, frontend tabs |
+| Image Generation Service | ⏳ Pending | GeminiImageService wrapper |
+| Image Generation App | ⏳ Pending | ViewSet, functions, utils |
+| Frontend: API Layer | ⏳ Pending | |
+| Frontend: Page Structure | ⏳ Pending | |
+| Frontend: Reference Image Manager | ⏳ Pending | |
+| Frontend: Identity Selection & Generation | ⏳ Pending | |
+
 ## Files to Create
 
-### Backend - Reference Images App
+### Backend - Reference Images App ✅ COMPLETED
 ```
 server/apps/reference_images/
 ├── __init__.py
 ├── admin.py
 ├── apps.py
+├── migrations/
+│   ├── __init__.py
+│   └── 0001_initial.py
 ├── models/
 │   ├── __init__.py
 │   └── reference_image.py
@@ -1268,9 +1474,47 @@ server/apps/reference_images/
 │   └── get_next_available_order.py
 └── tests/
     ├── __init__.py
+    ├── test_get_next_available_order.py
     ├── test_create_reference_image.py
     ├── test_upload_reference_image.py
-    └── test_delete_reference_image.py
+    ├── test_delete_reference_image.py
+    ├── test_create_reference_image_for_user.py
+    └── test_reference_image_viewset.py
+```
+
+**Also created:**
+- `docs/docs/api/endpoints/reference-images.md` - API documentation
+- `docs/docs/database/models/reference-image.md` - Model documentation
+- Updated `docs/sidebars.ts` with new doc entries
+
+### Backend - PromptManager Additions ✅ COMPLETED
+```
+# Updates to existing prompt_manager service
+server/services/prompt_manager/
+├── manager.py                              # Added create_image_generation_prompt() method
+├── models/prompt_context.py                # Added identity_for_image field
+└── utils/
+    ├── context_logging.py                  # Added IDENTITY_FOR_IMAGE logging
+    └── context/
+        ├── get_context_value.py            # Added IDENTITY_FOR_IMAGE handler
+        └── func/
+            ├── __init__.py                 # Updated exports
+            └── get_identity_context_for_image.py  # NEW - Format identity for image prompts
+
+# Enum additions
+enums/
+├── prompt_type.py               # Added IMAGE_GENERATION
+└── context_keys.py              # Added IDENTITY_FOR_IMAGE
+
+# Database seed command & data
+server/apps/prompts/management/commands/
+└── seed_image_generation_prompt.py   # NEW - Seeds Image Generation Prompt v1
+
+# Frontend additions (bonus)
+server/apps/core/views.py        # Added prompt_types to enums endpoint
+client/src/types/prompt.ts       # Added prompt_type field
+client/src/pages/prompts/Prompts.tsx           # Added Image Generation & Sentinel tabs
+client/src/pages/prompts/components/NewPromptForm.tsx  # Added prompt_type selector
 ```
 
 ### Backend - Image Generation App
@@ -1286,11 +1530,10 @@ server/apps/image_generation/
 │   └── admin/
 │       ├── __init__.py
 │       ├── list_available_users.py
-│       ├── generate_identity_image.py
+│       ├── generate_identity_image.py   # Uses PromptManager
 │       └── save_image_to_identity.py
 ├── utils/
 │   ├── __init__.py
-│   ├── build_identity_prompt.py
 │   └── load_pil_images_from_references.py
 └── tests/
     ├── __init__.py
