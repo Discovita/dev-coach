@@ -533,7 +533,9 @@ python manage.py makemigrations reference_images
 python manage.py migrate
 ```
 
-### Phase 2: Backend - Image Generation App (New Coding Standards)
+### Phase 2: Backend - Image Generation Orchestration & Admin Endpoints
+
+**Architectural Decision (2025-01-03):** We intentionally avoid creating a dedicated `image_generation` Django app. The orchestration logic lives in `services/image_generation/` (reusable by admin endpoints AND future Coach action) and admin endpoints are added to the existing `AdminIdentityViewSet` (since the result saves to Identity). This avoids duplication when the Coach action is added later.
 
 #### Prompt Construction Architecture - Using Existing PromptManager
 
@@ -584,34 +586,29 @@ Rather than creating a standalone `build_identity_prompt.py` utility, we'll inte
 - No action instructions or message history needed
 - Simpler context gathering (identity fields only)
 
-#### 2.1 Create Image Generation App
-```bash
-cd server/apps/
-python ../manage.py startapp image_generation
+#### 2.1 Create Orchestration Service
+
+Add orchestration function and utils to the existing `services/image_generation/` directory:
+
+```
+server/services/image_generation/
+├── __init__.py                    # Update exports
+├── gemini_service.py              # ✅ Already exists
+├── orchestration.py               # NEW: generate_identity_image() function
+└── utils/
+    ├── __init__.py
+    └── load_pil_images.py         # NEW: Load PIL images from ReferenceImage models
 ```
 
-#### 2.2 Set Up Directory Structure
-```
-server/apps/image_generation/
-├── __init__.py
-├── apps.py                           # Update name to 'apps.image_generation'
-├── views/
-│   ├── __init__.py                   # Export: from .image_generation_viewset import ImageGenerationViewSet
-│   └── image_generation_viewset.py   # Thin viewset
-├── functions/
-│   ├── __init__.py
-│   └── admin/
-│       ├── __init__.py
-│       ├── list_available_users.py
-│       ├── generate_identity_image.py
-│       └── save_image_to_identity.py
-├── utils/
-│   ├── __init__.py
-│   └── load_pil_images_from_references.py   # NOTE: build_identity_prompt moved to prompt_manager
-└── tests/
-    ├── __init__.py
-    ├── test_generate_identity_image.py
-    └── test_list_available_users.py
+#### 2.2 Add Admin Endpoints to Existing ViewSet
+
+Add endpoints to the existing `AdminIdentityViewSet` (no new app needed):
+
+```python
+# server/apps/identities/views/admin_identity_view_set.py
+# Add these actions to the existing class:
+#   - generate-image: POST - Generate image for an identity
+#   - save-generated-image: POST - Save generated image bytes to identity
 ```
 
 #### 2.3 Integrate with PromptManager
@@ -747,452 +744,300 @@ Additional instructions: {additional_prompt}
 """
 ```
 
-#### 2.3 Create Image Generation Service (in server/services/)
-```python
-# server/services/image_generation/__init__.py
-from .gemini_service import GeminiImageService
+#### 2.3 Orchestration Function (services/image_generation/orchestration.py)
 
-__all__ = ["GeminiImageService"]
-```
+The orchestration function ties everything together. It's used by both admin endpoints AND future Coach actions.
 
 ```python
-# server/services/image_generation/gemini_service.py
+# server/services/image_generation/orchestration.py
 """
-Gemini Image Generation Service.
-Wrapper around the Google Gemini API for generating images.
+Identity Image Generation Orchestration.
+
+This module provides the high-level orchestration function that combines:
+- PromptManager (for building the prompt from identity context)
+- GeminiImageService (for generating the image)
+- Reference image loading utilities
+
+Used by:
+- AdminIdentityViewSet.generate_image (admin endpoints)
+- Future: Coach action handler for image generation
 """
-from google import genai
-from google.genai import types
-from django.conf import settings
-from PIL import Image
-from io import BytesIO
-from typing import List
-import logging
+from PIL import Image as PILImage
+from typing import List, Optional
+from uuid import UUID
 
-log = logging.getLogger(__name__)
-
-
-class GeminiImageService:
-    """Service for generating images using Google Gemini API."""
-    
-    def __init__(self):
-        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    
-    def generate_image(
-        self,
-        prompt: str,
-        reference_images: List[Image.Image],
-        aspect_ratio: str = "16:9",
-        resolution: str = "4K",
-    ) -> bytes:
-        """
-        Generate an image using Gemini.
-        
-        Args:
-            prompt: The text prompt for image generation
-            reference_images: List of PIL Image objects as reference
-            aspect_ratio: One of "1:1","2:3","3:2","3:4","4:3","4:5","5:4","9:16","16:9","21:9"
-            resolution: One of "1K", "2K", "4K"
-        
-        Returns:
-            Image bytes (PNG format)
-            
-        Raises:
-            ValueError: If no image is generated in response
-        """
-        contents = [prompt] + reference_images
-        
-        response = self.client.models.generate_content(
-            model="gemini-3-pro-image-preview",
-            contents=contents,
-            config=types.GenerateContentConfig(
-                response_modalities=['TEXT', 'IMAGE'],
-                image_config=types.ImageConfig(
-                    aspect_ratio=aspect_ratio,
-                    image_size=resolution
-                ),
-            )
-        )
-        
-        # Extract image from response
-        for part in response.parts:
-            if part.inline_data is not None:
-                image = part.as_image()
-                buffer = BytesIO()
-                image.save(buffer, format="PNG")
-                return buffer.getvalue()
-        
-        raise ValueError("No image generated in response")
-```
-
-#### 2.4 Create Utility Functions
-
-##### load_pil_images_from_references.py
-
-This utility loads PIL Image objects from S3-stored reference images.
-
-```python
-# server/apps/image_generation/utils/load_pil_images_from_references.py
-from typing import List
-from PIL import Image
+from apps.identities.models import Identity
 from apps.reference_images.models import ReferenceImage
-import logging
+from services.image_generation.gemini_service import GeminiImageService
+from services.image_generation.utils.load_pil_images import load_pil_images_from_references
+from services.prompt_manager.manager import PromptManager
+from services.logger import configure_logging
 
-log = logging.getLogger(__name__)
+log = configure_logging(__name__)
 
 
-def load_pil_images_from_references(reference_images: List[ReferenceImage]) -> List[Image.Image]:
+def generate_identity_image(
+    identity: Identity,
+    reference_images: List[ReferenceImage],
+    additional_prompt: str = "",
+    aspect_ratio: str = "16:9",
+    resolution: str = "4K",
+) -> PILImage.Image:
     """
-    Load PIL Image objects from ReferenceImage model instances.
+    Generate an identity image using Gemini.
+    
+    This is the main orchestration function that:
+    1. Builds the prompt using PromptManager
+    2. Loads PIL images from ReferenceImage models
+    3. Calls GeminiImageService to generate the image
     
     Args:
-        reference_images: QuerySet or list of ReferenceImage instances
+        identity: The Identity to generate an image for
+        reference_images: List of ReferenceImage models for the user
+        additional_prompt: Optional extra instructions from admin
+        aspect_ratio: Image aspect ratio (default "16:9")
+        resolution: Image resolution (default "4K")
         
     Returns:
-        List of PIL Image objects that could be loaded
+        PIL Image object
         
     Note:
-        Images that fail to load are logged and skipped
+        This function is used by both admin endpoints and future Coach actions.
+        The caller is responsible for saving the image to S3 if needed.
+    """
+    log.info(f"Generating image for identity: {identity.name}")
+    
+    # 1. Build prompt using PromptManager
+    prompt_manager = PromptManager()
+    prompt = prompt_manager.create_image_generation_prompt(identity, additional_prompt)
+    log.debug(f"Built prompt: {prompt[:100]}...")
+    
+    # 2. Load PIL images from ReferenceImage models
+    pil_images = load_pil_images_from_references(reference_images)
+    log.info(f"Loaded {len(pil_images)} reference images")
+    
+    # 3. Generate image using Gemini
+    service = GeminiImageService()
+    image = service.generate_image(
+        prompt=prompt,
+        reference_images=pil_images,
+        aspect_ratio=aspect_ratio,
+        resolution=resolution,
+    )
+    
+    log.info(f"Successfully generated image for identity: {identity.name}")
+    return image
+```
+
+#### 2.4 Utility: Load PIL Images (services/image_generation/utils/load_pil_images.py)
+
+```python
+# server/services/image_generation/utils/load_pil_images.py
+"""
+Utility to load PIL Image objects from ReferenceImage models.
+"""
+from PIL import Image as PILImage
+from typing import List
+from io import BytesIO
+
+from apps.reference_images.models import ReferenceImage
+from services.logger import configure_logging
+
+log = configure_logging(__name__)
+
+
+def load_pil_images_from_references(reference_images: List[ReferenceImage]) -> List[PILImage.Image]:
+    """
+    Load PIL Image objects from ReferenceImage models.
+    
+    Args:
+        reference_images: List of ReferenceImage model instances
+        
+    Returns:
+        List of PIL Image objects (skips any that fail to load)
     """
     pil_images = []
     
-    for ref_img in reference_images:
+    for ref_image in reference_images:
+        if not ref_image.image:
+            log.warning(f"ReferenceImage {ref_image.id} has no image file")
+            continue
+            
         try:
-            img = Image.open(ref_img.image)
-            pil_images.append(img)
+            # Read from S3/storage backend
+            ref_image.image.open()
+            image_data = ref_image.image.read()
+            ref_image.image.close()
+            
+            # Convert to PIL Image
+            pil_image = PILImage.open(BytesIO(image_data))
+            pil_images.append(pil_image)
+            
         except Exception as e:
-            log.warning(f"Could not load reference image {ref_img.id}: {e}")
+            log.error(f"Failed to load ReferenceImage {ref_image.id}: {e}")
+            continue
     
     return pil_images
 ```
 
-```python
-# server/apps/image_generation/utils/__init__.py
-from .load_pil_images_from_references import load_pil_images_from_references
+#### 2.5 Admin ViewSet Updates (apps/identities/views/admin_identity_view_set.py)
 
-__all__ = ["load_pil_images_from_references"]
-```
-
-#### 2.5 Create Business Logic Functions
-```python
-# server/apps/image_generation/functions/admin/list_available_users.py
-from typing import List, Dict, Any
-from apps.users.models import User
-from apps.test_scenario.models import TestScenario
-
-
-def list_available_users(current_user: User) -> List[Dict[str, Any]]:
-    """
-    List available users for image generation.
-    Returns current user + all test scenario users.
-    
-    Args:
-        current_user: The currently authenticated admin user
-        
-    Returns:
-        List of user dictionaries with id, email, name, and type flags
-    """
-    users = []
-    
-    # Add current user
-    users.append({
-        "id": str(current_user.id),
-        "email": current_user.email,
-        "name": f"{current_user.first_name} {current_user.last_name}".strip() or current_user.email,
-        "is_current_user": True,
-        "is_test_user": False,
-    })
-    
-    # Add test scenario users
-    test_scenarios = TestScenario.objects.select_related("user").all()
-    for scenario in test_scenarios:
-        if scenario.user:
-            users.append({
-                "id": str(scenario.user.id),
-                "email": scenario.user.email,
-                "name": scenario.name,
-                "is_current_user": False,
-                "is_test_user": True,
-            })
-    
-    return users
-```
-
-##### generate_identity_image.py
-
-This is the **orchestration function** that ties everything together. It:
-1. Fetches the identity and reference images from the database
-2. **Constructs the prompt** using `PromptManager.create_image_generation_prompt()`
-3. **Injects the prompt** into the Gemini service
-4. Saves the result to S3
+Add these actions to the existing `AdminIdentityViewSet`:
 
 ```python
-# server/apps/image_generation/functions/admin/generate_identity_image.py
-from typing import Dict, Any
-from uuid import UUID
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from rest_framework.exceptions import NotFound, ValidationError
-import uuid
-import logging
-
-from apps.identities.models import Identity
-from apps.reference_images.models import ReferenceImage
-from apps.image_generation.utils import load_pil_images_from_references
-from services.image_generation import GeminiImageService
-from services.prompt_manager import PromptManager  # Use existing prompt manager
-
-log = logging.getLogger(__name__)
-
-
-def generate_identity_image(
-    identity_id: UUID,
-    user_id: UUID,
-    additional_prompt: str = "",
-) -> Dict[str, Any]:
-    """
-    Generate an identity image using stored reference images.
-    
-    This function orchestrates the prompt/generation flow:
-    1. FETCH: Get identity and reference images from database
-    2. CONSTRUCT: Build prompt using PromptManager (DB-stored template)
-    3. GENERATE: Pass prompt to GeminiImageService
-    4. SAVE: Store result in S3
-    
-    The PromptManager handles prompt construction using the same pattern
-    as chat prompts - templates stored in DB with context injection.
-    
-    Args:
-        identity_id: UUID of the identity to generate image for
-        user_id: UUID of the user whose reference images to use
-        additional_prompt: Extra prompt text from admin (optional)
-        
-    Returns:
-        Dictionary containing:
-            - success: bool
-            - image_url: S3 URL of generated image
-            - image_bytes: Raw image bytes (for saving to identity)
-            - prompt_used: The constructed prompt (for debugging/logging)
-            
-    Raises:
-        NotFound: If identity not found
-        ValidationError: If no reference images available
-    """
-    # ===== STEP 1: Fetch data from database =====
-    try:
-        identity = Identity.objects.get(id=identity_id)
-    except Identity.DoesNotExist:
-        raise NotFound("Identity not found")
-    
-    reference_images = ReferenceImage.objects.filter(
-        user_id=user_id
-    ).exclude(image="").exclude(image__isnull=True)
-    
-    if not reference_images.exists():
-        raise ValidationError("No reference images found for this user")
-    
-    # ===== STEP 2: Prepare inputs =====
-    pil_images = load_pil_images_from_references(reference_images)
-    
-    if not pil_images:
-        raise ValidationError("Could not load any reference images")
-    
-    # ===== STEP 3: CONSTRUCT prompt using PromptManager =====
-    # Uses the existing prompt_manager pattern with DB-stored templates
-    prompt_manager = PromptManager()
-    prompt = prompt_manager.create_image_generation_prompt(identity, additional_prompt)
-    log.info(f"Constructed prompt for identity {identity.name}: {len(prompt)} chars")
-    
-    # ===== STEP 4: GENERATE image =====
-    service = GeminiImageService()
-    image_bytes = service.generate_image(
-        prompt=prompt,
-        reference_images=pil_images,
-    )
-    
-    # ===== STEP 5: Save to S3 =====
-    filename = f"{uuid.uuid4()}.png"
-    path = f"generated_images/{filename}"
-    saved_path = default_storage.save(path, ContentFile(image_bytes))
-    image_url = default_storage.url(saved_path)
-    
-    return {
-        "success": True,
-        "image_url": image_url,
-        "image_bytes": image_bytes,
-        "filename": filename,
-        "prompt_used": prompt,  # For debugging/logging
-    }
-```
-
-```python
-# server/apps/image_generation/functions/admin/save_image_to_identity.py
-from uuid import UUID
-from django.core.files.base import ContentFile
-from rest_framework.exceptions import NotFound
-
-from apps.identities.models import Identity
-
-
-def save_image_to_identity(
-    identity_id: UUID,
-    image_bytes: bytes,
-    filename: str,
-) -> Identity:
-    """
-    Save generated image bytes to an identity's image field.
-    
-    Args:
-        identity_id: UUID of the identity to update
-        image_bytes: Raw image bytes to save
-        filename: Filename for the saved image
-        
-    Returns:
-        The updated Identity instance
-        
-    Raises:
-        NotFound: If identity not found
-    """
-    try:
-        identity = Identity.objects.get(id=identity_id)
-    except Identity.DoesNotExist:
-        raise NotFound("Identity not found")
-    
-    identity.image.save(filename, ContentFile(image_bytes))
-    identity.save()
-    
-    return identity
-```
-
-```python
-# server/apps/image_generation/functions/admin/__init__.py
-from .list_available_users import list_available_users
-from .generate_identity_image import generate_identity_image
-from .save_image_to_identity import save_image_to_identity
-
-__all__ = [
-    "list_available_users",
-    "generate_identity_image",
-    "save_image_to_identity",
-]
-```
-
-```python
-# server/apps/image_generation/functions/__init__.py
-from . import admin
-
-__all__ = ["admin"]
-```
-
-#### 2.6 Create Thin ViewSet
-```python
-# server/apps/image_generation/views/image_generation_viewset.py
-"""
-ViewSet for Identity Image Generation.
-Admin-only endpoints. Thin view layer - delegates to functions.
-"""
-from rest_framework import viewsets, status, decorators
-from rest_framework.response import Response
-from rest_framework.request import Request
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+# server/apps/identities/views/admin_identity_view_set.py
+# Add these imports at the top:
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-import logging
-
+from django.core.files.base import ContentFile
+from apps.identities.models import Identity
 from apps.identities.serializers import IdentitySerializer
-from apps.image_generation.functions.admin import (
-    list_available_users,
-    generate_identity_image,
-    save_image_to_identity,
-)
+from apps.reference_images.models import ReferenceImage
+from services.image_generation.orchestration import generate_identity_image
+import base64
+from io import BytesIO
 
-log = logging.getLogger(__name__)
-
-
-class ImageGenerationViewSet(viewsets.ViewSet):
-    """
-    Admin-only endpoints for generating identity images.
-    
-    Endpoints:
-    - GET /api/v1/image-generation/users/ - List available users
-    - POST /api/v1/image-generation/generate/ - Generate image for identity
-    """
-    permission_classes = [IsAuthenticated, IsAdminUser]
+# Add parser_classes to the class (if not already present)
+class AdminIdentityViewSet(viewsets.GenericViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     
-    @decorators.action(detail=False, methods=["GET"], url_path="users")
-    def list_users(self, request: Request) -> Response:
-        """List available users for image generation."""
-        users = list_available_users(request.user)
-        return Response(users)
+    # ... existing download_i_am_statements_pdf_for_user action ...
     
-    @decorators.action(detail=False, methods=["POST"], url_path="generate")
-    def generate(self, request: Request) -> Response:
+    @action(
+        detail=False,
+        methods=["POST"],
+        url_path="generate-image",
+        permission_classes=[IsAdminUser],
+    )
+    def generate_image(self, request):
         """
-        Generate an identity image using stored reference images.
+        Generate an identity image using Gemini.
         
-        POST /api/v1/image-generation/generate/
+        POST /api/v1/admin/identities/generate-image/
         Body (JSON):
-        - identity_id: UUID of the identity to generate image for
-        - user_id: UUID of the user whose reference images to use
-        - additional_prompt: Extra prompt text (optional)
-        - save_to_identity: Whether to save directly to identity (default: false)
+        - identity_id: UUID of the identity
+        - user_id: UUID of the user (for reference images)
+        - additional_prompt: Extra instructions (optional)
+        - save_to_identity: Whether to save to identity (default: false)
+        
+        Returns: Base64 encoded image and optionally updated identity
         """
         identity_id = request.data.get("identity_id")
         user_id = request.data.get("user_id")
         additional_prompt = request.data.get("additional_prompt", "")
         should_save = request.data.get("save_to_identity", False)
         
-        # Generate the image
-        result = generate_identity_image(
-            identity_id=identity_id,
-            user_id=user_id,
-            additional_prompt=additional_prompt,
-        )
-        
-        response_data = {
-            "success": result["success"],
-            "image_url": result["image_url"],
-        }
-        
-        # Optionally save to identity
-        if should_save:
-            identity = save_image_to_identity(
-                identity_id=identity_id,
-                image_bytes=result["image_bytes"],
-                filename=result["filename"],
+        # Fetch identity
+        try:
+            identity = Identity.objects.get(id=identity_id)
+        except Identity.DoesNotExist:
+            return Response(
+                {"error": f"Identity {identity_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
-            response_data["identity"] = IdentitySerializer(identity).data
         
-        return Response(response_data)
+        # Fetch reference images for the user
+        reference_images = list(ReferenceImage.objects.filter(user_id=user_id))
+        if not reference_images:
+            return Response(
+                {"error": f"No reference images found for user {user_id}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Generate the image
+            pil_image = generate_identity_image(
+                identity=identity,
+                reference_images=reference_images,
+                additional_prompt=additional_prompt,
+            )
+            
+            # Convert to bytes
+            img_buffer = BytesIO()
+            pil_image.save(img_buffer, format="PNG")
+            image_bytes = img_buffer.getvalue()
+            
+            # Encode as base64 for response
+            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+            
+            response_data = {
+                "success": True,
+                "image_base64": image_base64,
+            }
+            
+            # Optionally save to identity
+            if should_save:
+                filename = f"identity_{identity_id}.png"
+                identity.image.save(filename, ContentFile(image_bytes))
+                identity.save()
+                response_data["identity"] = IdentitySerializer(identity).data
+            
+            return Response(response_data)
+            
+        except Exception as e:
+            log.error(f"Image generation failed: {e}", exc_info=True)
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(
+        detail=False,
+        methods=["POST"],
+        url_path="save-generated-image",
+        permission_classes=[IsAdminUser],
+    )
+    def save_generated_image(self, request):
+        """
+        Save a previously generated image to an identity.
+        
+        POST /api/v1/admin/identities/save-generated-image/
+        Body (JSON):
+        - identity_id: UUID of the identity
+        - image_base64: Base64 encoded image data
+        
+        Returns: Updated identity
+        """
+        identity_id = request.data.get("identity_id")
+        image_base64 = request.data.get("image_base64")
+        
+        if not identity_id or not image_base64:
+            return Response(
+                {"error": "identity_id and image_base64 are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            identity = Identity.objects.get(id=identity_id)
+        except Identity.DoesNotExist:
+            return Response(
+                {"error": f"Identity {identity_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        try:
+            image_bytes = base64.b64decode(image_base64)
+            filename = f"identity_{identity_id}.png"
+            identity.image.save(filename, ContentFile(image_bytes))
+            identity.save()
+            
+            return Response({
+                "success": True,
+                "identity": IdentitySerializer(identity).data
+            })
+            
+        except Exception as e:
+            log.error(f"Failed to save image: {e}", exc_info=True)
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 ```
 
-```python
-# server/apps/image_generation/views/__init__.py
-from .image_generation_viewset import ImageGenerationViewSet
+**(Note: The GeminiImageService class was already created in Step 6 and is documented in the "Backend - Gemini Service ✅ COMPLETED" section below.)**
 
-__all__ = ["ImageGenerationViewSet"]
-```
+---
 
-#### 2.7 Update apps.py
-```python
-# server/apps/image_generation/apps.py
-from django.apps import AppConfig
-
-
-class ImageGenerationConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.image_generation'
-```
-
-#### 2.8 Register App and URLs
-```python
-# server/settings/common.py - Add to INSTALLED_APPS
-"apps.image_generation",
-
-# server/urls.py - Add to router
-from apps.image_generation.views import ImageGenerationViewSet
-router.register(r"image-generation", ImageGenerationViewSet, basename="image-generation")
-```
+**(Deprecated sections removed - they referenced creating a dedicated `apps/image_generation/` app. See sections 2.3-2.5 above for the updated architecture.)**
 
 ### Phase 3: Frontend - Images Page
 
@@ -1382,49 +1227,42 @@ GEMINI_API_KEY=your_key_here
    - Ported logic from `server/services/gemini/text_and_image_to_image.py`
    - `GEMINI_API_KEY` already in .env (reads via `os.getenv()`)
 
-7. **Image Generation App - Setup** (15 min)
-   - Create app: `cd server/apps && python ../manage.py startapp image_generation`
-   - Create directory structure (views/, functions/, utils/, tests/)
-   - Update `apps.py` with correct name
-   - Register in `settings/common.py` INSTALLED_APPS
+7. **Image Generation Orchestration** (30 min)
+   - Create `services/image_generation/orchestration.py` with `generate_identity_image()` function
+   - Create `services/image_generation/utils/load_pil_images.py` utility
+   - This orchestration function will be used by BOTH admin endpoints AND future Coach action
+   - Flow: PromptManager → GeminiService → return PIL Image
 
-8. **Image Generation App - Functions & Utils** (30 min)
-   - Create `utils/load_pil_images_from_references.py`
-   - Create `functions/admin/list_available_users.py`
-   - Create `functions/admin/generate_identity_image.py` (uses PromptManager)
-   - Create `functions/admin/save_image_to_identity.py`
-   - Create all `__init__.py` exports
-
-9. **Image Generation App - ViewSet** (30 min)
-   - Create `views/image_generation_viewset.py` (thin, delegates to functions)
-   - Create `views/__init__.py`
-   - Register in `urls.py`
-   - Test with curl/Postman
+8. **Admin Identity Endpoints** (30 min)
+   - Add `generate-image` action to existing `AdminIdentityViewSet`
+   - Add `save-generated-image` action to save image bytes to Identity
+   - ViewSet calls orchestration service directly (no intermediate functions layer)
+   - These are admin-only endpoints for the MVP UI
 
 ### Frontend Implementation
 
-10. **Frontend: API Layer** (30 min)
+9. **Frontend: API Layer** (30 min)
     - Create `client/src/api/referenceImages.ts`
     - Create `client/src/api/imageGeneration.ts`
     - Create TanStack Query hooks
 
-11. **Frontend: Basic Page Structure** (30 min)
+10. **Frontend: Basic Page Structure** (30 min)
     - Add route and navbar link
     - Create `Images.tsx` with basic layout
     - Create `UserSelector` component
 
-12. **Frontend: Reference Image Manager** (1 hr)
+11. **Frontend: Reference Image Manager** (1 hr)
     - Create `ReferenceImageManager` component
     - Create `ReferenceImageSlot` component
     - Wire up upload, delete, display
 
-13. **Frontend: Identity Selection & Generation** (1 hr)
+12. **Frontend: Identity Selection & Generation** (1 hr)
     - Create `IdentitySelector` component
     - Wire up generate button with loading state
     - Create `GeneratedImageDisplay` component
     - Add "Save to Identity" functionality
 
-## Total Estimated Time: ~7-8 hours
+## Total Estimated Time: ~6-7 hours
 
 ## Progress Summary
 
@@ -1433,7 +1271,8 @@ GEMINI_API_KEY=your_key_here
 | Reference Images App | ✅ COMPLETE | 45 tests passing, docs added |
 | PromptManager Integration | ✅ COMPLETE | Enums, context function, manager method, seed command, frontend tabs |
 | Image Generation Service | ✅ COMPLETE | GeminiImageService with generate_image() and generate_image_bytes() |
-| Image Generation App | ⏳ Pending | ViewSet, functions, utils |
+| Image Generation Orchestration | ⏳ Pending | Orchestration function + utils in services/ |
+| Admin Identity Endpoints | ⏳ Pending | Add generate-image action to AdminIdentityViewSet |
 | Frontend: API Layer | ⏳ Pending | |
 | Frontend: Page Structure | ⏳ Pending | |
 | Frontend: Reference Image Manager | ⏳ Pending | |
@@ -1517,29 +1356,29 @@ client/src/pages/prompts/Prompts.tsx           # Added Image Generation & Sentin
 client/src/pages/prompts/components/NewPromptForm.tsx  # Added prompt_type selector
 ```
 
-### Backend - Image Generation App
+### Backend - Image Generation Orchestration (NO NEW APP)
 ```
-server/apps/image_generation/
-├── __init__.py
-├── apps.py
-├── views/
-│   ├── __init__.py
-│   └── image_generation_viewset.py
-├── functions/
-│   ├── __init__.py
-│   └── admin/
-│       ├── __init__.py
-│       ├── list_available_users.py
-│       ├── generate_identity_image.py   # Uses PromptManager
-│       └── save_image_to_identity.py
-├── utils/
-│   ├── __init__.py
-│   └── load_pil_images_from_references.py
-└── tests/
+# Orchestration function and utils in existing service
+server/services/image_generation/
+├── __init__.py                    # Update exports
+├── gemini_service.py              # ✅ Already done
+├── orchestration.py               # NEW: generate_identity_image() function
+└── utils/
     ├── __init__.py
-    ├── test_generate_identity_image.py
-    └── test_list_available_users.py
+    └── load_pil_images.py         # NEW: Load PIL images from ReferenceImage models
+
+# Admin endpoints added to existing ViewSet (already exists at this path)
+server/apps/identities/views/
+└── admin_identity_view_set.py     # UPDATE: Add generate-image and save-generated-image actions
+                                   # ViewSet calls orchestration service directly
 ```
+
+**Why no dedicated app?**
+- The orchestration logic belongs in `services/` (reusable by admin endpoints AND future Coach action)
+- Admin endpoints belong in `AdminIdentityViewSet` (the result saves to Identity)
+- The ViewSet calls the orchestration service directly (no intermediate functions layer needed)
+- No new models, migrations, or app config needed
+- When the Coach action is added, it calls the same orchestration function
 
 ### Backend - Gemini Service ✅ COMPLETED
 ```
@@ -1573,6 +1412,7 @@ client/src/api/
 
 ## Notes
 
+- **No dedicated image_generation app**: We intentionally avoid creating a new Django app for image generation. The orchestration logic lives in `services/image_generation/` (reusable) and admin endpoints live in `AdminIdentityViewSet` (since the result saves to Identity). When the Coach action is added, it will call the same orchestration function.
 - **Reference Images are persistent**: Each user can have up to 5 reference images stored in S3. When you select a user, their stored reference images are loaded and displayed.
 - **Reference Images belong to users**: When you select yourself vs a test user, you see/manage different sets of reference images.
 - **Gemini API model**: `gemini-3-pro-image-preview` is used for text-and-image-to-image generation
