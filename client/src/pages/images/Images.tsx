@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { UserSelector } from "./components/UserSelector";
+import { ReferenceImageManager } from "./components/ReferenceImageManager";
 import { useProfile } from "@/hooks/use-profile";
 
 /**
@@ -35,8 +36,8 @@ export default function Images() {
       </div>
 
       {selectedUserId && (
-        <div className="flex-1 min-h-0">
-          {/* Reference Image Manager will go here */}
+        <div className="flex-1 min-h-0 space-y-8">
+          <ReferenceImageManager userId={selectedUserId} />
           {/* Identity Selection & Generation will go here */}
         </div>
       )}
