@@ -69,6 +69,11 @@ export default function Images() {
     setGeneratedImageBase64(null);
   }, [selectedUserId]);
 
+  // Clear generated image when identity changes
+  useEffect(() => {
+    setGeneratedImageBase64(null);
+  }, [selectedIdentityId]);
+
   // Update generated image when generation completes
   useEffect(() => {
     if (generateData?.image_base64) {

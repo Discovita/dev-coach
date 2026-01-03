@@ -55,7 +55,12 @@ export function ReferenceImageSlot({
 
   const displayNumber = slotNumber + 1;
   const hasImage = referenceImage?.image !== null && referenceImage?.image !== undefined;
-  const imageUrl = referenceImage?.image?.medium || referenceImage?.image?.thumbnail || referenceImage?.image?.original;
+  
+  // Add cache-busting param using updated_at timestamp to force reload after replace
+  const baseImageUrl = referenceImage?.image?.medium || referenceImage?.image?.thumbnail || referenceImage?.image?.original;
+  const imageUrl = baseImageUrl && referenceImage?.updated_at 
+    ? `${baseImageUrl}?t=${new Date(referenceImage.updated_at).getTime()}`
+    : baseImageUrl;
 
   return (
     <div
