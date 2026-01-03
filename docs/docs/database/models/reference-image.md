@@ -34,7 +34,7 @@ Reference Image inherits from:
 
 ## Methods
 
-- `__str__()`: Returns "{user.email} - Reference Image {order + 1}"
+- `__str__()`: Returns `"{user.email} - Reference Image {order + 1}"`
 - `create_image_sizes()`: Enables on-demand image size creation (inherited from ImageMixin)
 
 ## Relationships
@@ -81,30 +81,6 @@ Logs help identify:
 - Database constraint violations
 - Serialization issues
 
-## Admin Panel
-
-Reference images are integrated into the Django Admin panel:
-
-- **Inline Display**: Reference images appear inline when viewing/editing a User
-- **Thumbnail Previews**: Image thumbnails are displayed for quick visual reference
-- **Direct Management**: Standalone admin interface for managing reference images directly
-- **Read-Only Fields**: `id`, `created_at`, `updated_at` are read-only
-- **Image Upload**: Images can be uploaded directly through the admin panel
-
-## Logging
-
-All reference image operations include comprehensive logging:
-
-- **Model Operations**: Logs when images are created, updated, or deleted
-- **Image Processing**: Logs S3 upload operations and image size generation
-- **Error Tracking**: All errors are logged with full context for debugging
-
-Logs help identify:
-- Slow S3 operations
-- Image processing bottlenecks
-- Database constraint violations
-- Serialization issues
-
 ## Usage Context
 
 - Stores user's reference photos for AI image generation
@@ -112,8 +88,6 @@ Logs help identify:
 - Admin users can manage reference images for test users
 - Part of the admin-only Images tab workflow
 - Referenced when generating identity images via the Gemini API
-- Accessible through Django Admin panel with inline display
-- Frontend components provide user-friendly management interface
 - Accessible through Django Admin panel with inline display
 - Frontend components provide user-friendly management interface
 
