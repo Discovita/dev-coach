@@ -42,23 +42,33 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
-        """Filter by user_id query param or default to current user."""
+        """
+        Filter by user_id query param or default to current user.
+        Admins can access all reference images (for detail views like upload/delete).
+        """
         user_id = self.request.query_params.get("user_id")
-        log.info(f"Getting reference images queryset. user_id param: {user_id}, is_staff: {self.request.user.is_staff}")
+        log.info(f"Getting reference images queryset. user_id param: {user_id}, is_staff: {self.request.user.is_staff}, action: {self.action}")
         
         try:
+            # For detail actions (retrieve, update, destroy, upload_image), admins need access to all images
+            if self.request.user.is_staff and self.action in ['retrieve', 'update', 'partial_update', 'destroy', 'upload_image']:
+                log.info(f"Admin detail action: returning all reference images")
+                return ReferenceImage.objects.all()
+            
+            # For list action with user_id filter (admin viewing another user's images)
             if user_id and self.request.user.is_staff:
                 log.info(f"Admin query: filtering by user_id={user_id}")
                 queryset = ReferenceImage.objects.filter(user_id=user_id)
                 count = queryset.count()
                 log.info(f"Found {count} reference images for user {user_id}")
                 return queryset
-            else:
-                log.info(f"User query: filtering by current user={self.request.user.id}")
-                queryset = ReferenceImage.objects.filter(user=self.request.user)
-                count = queryset.count()
-                log.info(f"Found {count} reference images for current user")
-                return queryset
+            
+            # Default: current user's images only
+            log.info(f"User query: filtering by current user={self.request.user.id}")
+            queryset = ReferenceImage.objects.filter(user=self.request.user)
+            count = queryset.count()
+            log.info(f"Found {count} reference images for current user")
+            return queryset
         except Exception as e:
             log.error(f"Error in get_queryset: {e}", exc_info=True)
             raise
