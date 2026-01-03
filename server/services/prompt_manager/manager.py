@@ -8,6 +8,7 @@ from enums.ai import AIModel
 from apps.coach_states.models import CoachState
 from apps.prompts.models import Prompt
 from apps.users.models import User
+from apps.identities.models import Identity
 from enums.action_type import ActionType
 from services.prompt_manager import gather_prompt_context, format_for_provider
 from services.action_handler.utils import build_dynamic_response_format
@@ -137,7 +138,7 @@ class PromptManager:
 
     def create_image_generation_prompt(
         self,
-        identity: "Identity",
+        identity: Identity,
         additional_prompt: str = "",
     ) -> str:
         """
@@ -155,7 +156,6 @@ class PromptManager:
         Returns:
             Formatted prompt string for Gemini image generation
         """
-        from apps.identities.models import Identity
         from services.prompt_manager.utils.context.func import get_identity_context_for_image
 
         # Fetch the latest active image generation prompt
