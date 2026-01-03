@@ -49,4 +49,4 @@ for part in response.parts:
         print(part.text)
     elif part.inline_data is not None:
         image = part.as_image()
-        image.save("server/services/gemini/images/conductor_nano_banana_pro_06.png")
+        image.save("server/services/gemini/images/conductor_nano_banana_pro_0.png")
