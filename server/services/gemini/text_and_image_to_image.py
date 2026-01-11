@@ -16,32 +16,46 @@ while current != current.parent:
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-prompt = "We're creating Identity Images for this person. One of thier Identities is Conductor. This Identity is their Doer Of Things Category. It represents the user's role in managing tasks and responsibilities, akin to leading an orchestra. Create a professional, confident, and authoritative image for this Identity. It is important that the user is able to see themselves as a conductor, and that the image is a good representation of their Identity. Keeping thier face in tact is of the utmost importance. If their face isn't exactly right, the effect will be ruined. They must see themselves in the image and if the face is off even a little, it won't work. The image should be an inspiring and motivating picture of them living as this Identity. This image should be an ideal image of them living as this Identity. Nothing negative should be conveyed. Give it a movie poster quality."
-aspect_ratio = "16:9"  # "1:1","2:3","3:2","3:4","4:3","4:5","5:4","9:16","16:9","21:9"
+prompt = """Look at the reference photos provided. Study this person's face carefully - their face shape, eyes, nose, mouth, jawline, hairline, and all distinctive features.
+
+Now create a professional headshot of THIS EXACT PERSON.
+
+Shoulders up, facing camera, neutral gray background.
+Warm confident smile, bright eyes.
+Clean studio lighting with soft edge lighting for depth.
+
+CRITICAL: The output must be recognizably THE SAME PERSON from the reference photos. Do not generate a generic face. Use the reference photos as your guide for every facial feature.
+
+Style: Glamour photography with tasteful retouching.
+- Smooth, flawless skin - no visible pores, wrinkles, or blemishes
+- Even hair color - no gray or salt-and-pepper, natural consistent tone
+- Bright, youthful eyes
+- Polished and aspirational - the best version of this specific person
+- They should look 5-10 years younger and refreshed
+
+This person should look at the result and immediately recognize themselves.
+"""
+
+aspect_ratio = "3:4"  # "1:1","2:3","3:2","3:4","4:3","4:5","5:4","9:16","16:9","21:9"
 resolution = "4K"  # "1K", "2K", "4K"
 
-image = Image.open(
-    "/Users/caseyschmid/Programming/Business/Head Shots/casey_shot_01.jpg"
-)
 
 response = client.models.generate_content(
     model="gemini-3-pro-image-preview",
     contents=[
+        Image.open("server/services/gemini/images/reference/casey_regular_shot_01.png"),
+        Image.open("server/services/gemini/images/reference/casey_regular_shot_02.png"),
+        Image.open("server/services/gemini/images/reference/casey_regular_shot_03.png"),
+        Image.open("server/services/gemini/images/reference/casey_regular_shot_04.png"),
+        Image.open("server/services/gemini/images/reference/casey_shot_05.jpeg"),
         prompt,
-        Image.open(
-            "/Users/caseyschmid/Programming/Business/Head Shots/casey_shot_01.jpg"
-        ),
-        Image.open(
-            "/Users/caseyschmid/Programming/Business/Head Shots/casey_shot_02.jpg"
-        ),
     ],
     config=types.GenerateContentConfig(
-        response_modalities=['TEXT', 'IMAGE'],
+        response_modalities=["TEXT", "IMAGE"],
         image_config=types.ImageConfig(
-            aspect_ratio=aspect_ratio,
-            image_size=resolution
+            aspect_ratio=aspect_ratio, image_size=resolution
         ),
-    )
+    ),
 )
 
 for part in response.parts:
@@ -49,4 +63,4 @@ for part in response.parts:
         print(part.text)
     elif part.inline_data is not None:
         image = part.as_image()
-        image.save("server/services/gemini/images/conductor_nano_banana_pro_0.png")
+        image.save("server/services/gemini/images/casey_avatar.png")
