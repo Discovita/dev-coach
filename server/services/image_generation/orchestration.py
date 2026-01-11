@@ -15,7 +15,7 @@ from typing import List, Optional
 
 from apps.identities.models import Identity
 from apps.reference_images.models import ReferenceImage
-from services.image_generation.gemini_service import GeminiImageService
+from services.image_generation.gemini_image_service import GeminiImageService
 from services.image_generation.utils.load_pil_images import load_pil_images_from_references
 from services.prompt_manager.manager import PromptManager
 from services.logger import configure_logging
