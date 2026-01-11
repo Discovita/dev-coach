@@ -37,3 +37,4 @@ def log_context_stats(prompt_context: PromptContext):
     log.debug(f"I_AM_IDENTITIES: {getattr(prompt_context, 'i_am_identities', None)}")
     log.debug(f"VISUALIZATION_IDENTITIES: {getattr(prompt_context, 'visualization_identities', None)}")
     log.debug(f"IDENTITY_IDS: {getattr(prompt_context, 'identity_ids', None)}")
+    log.debug(f"IDENTITY_FOR_IMAGE: {getattr(prompt_context, 'identity_for_image', None)}")

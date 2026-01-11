@@ -1,15 +1,12 @@
 """
 Copy all prompts from local to staging database.
-This command connects directly to the staging database and overwrites all prompts.
+Uses pg_dump/psql for a clean table copy.
 """
 
 import subprocess
 import os
 import tempfile
 from django.core.management.base import BaseCommand, CommandError
-from apps.prompts.models import Prompt
-from django.core.serializers.json import DjangoJSONEncoder
-import json
 
 
 class Command(BaseCommand):
@@ -31,199 +28,161 @@ class Command(BaseCommand):
         dry_run = options['dry_run']
         force = options['force']
 
+        # Local DB config (from environment)
+        local_db = {
+            'host': os.environ.get('LOCAL_DB_HOST', 'db'),
+            'port': os.environ.get('LOCAL_DB_PORT', '5432'),
+            'name': os.environ.get('LOCAL_DB_NAME'),
+            'user': os.environ.get('LOCAL_DB_USER'),
+            'password': os.environ.get('LOCAL_DB_PASSWORD'),
+        }
+
+        # Staging DB config (from environment)
+        staging_db = {
+            'host': os.environ.get('STAGING_DB_HOST'),
+            'port': os.environ.get('STAGING_DB_PORT', '5432'),
+            'name': os.environ.get('STAGING_DB_NAME'),
+            'user': os.environ.get('STAGING_DB_USER'),
+            'password': os.environ.get('STAGING_DB_PASSWORD'),
+        }
+
+        # Validate required env vars
+        missing = []
+        for key in ['name', 'user', 'password']:
+            if not local_db[key]:
+                missing.append(f'LOCAL_DB_{key.upper()}')
+            if not staging_db[key]:
+                missing.append(f'STAGING_DB_{key.upper()}')
+        if not staging_db['host']:
+            missing.append('STAGING_DB_HOST')
+        
+        if missing:
+            raise CommandError(f"Missing required environment variables: {', '.join(missing)}")
+
         self.stdout.write("🔄 Copying prompts from LOCAL to STAGING...")
-        self.stdout.write("This will OVERWRITE all prompts in staging with your local prompts.")
         
         if dry_run:
             self.stdout.write(self.style.WARNING("DRY RUN MODE - No changes will be made"))
 
-        # Get local prompts
-        self.stdout.write("\n1. Getting prompts from local database...")
-        local_prompts = list(Prompt.objects.all().order_by('coaching_phase', 'version'))
-        self.stdout.write(f"Found {len(local_prompts)} prompts in local database")
+        # Step 1: Count local prompts
+        self.stdout.write("\n1. Counting local prompts...")
+        local_env = os.environ.copy()
+        local_env['PGPASSWORD'] = local_db['password']
+        
+        count_cmd = [
+            'psql',
+            '-h', local_db['host'],
+            '-p', local_db['port'],
+            '-U', local_db['user'],
+            '-d', local_db['name'],
+            '-t', '-c', 'SELECT COUNT(*) FROM prompts_prompt;'
+        ]
+        
+        result = subprocess.run(count_cmd, capture_output=True, text=True, env=local_env)
+        if result.returncode != 0:
+            raise CommandError(f"Failed to count local prompts: {result.stderr}")
+        
+        local_count = result.stdout.strip()
+        self.stdout.write(f"Found {local_count} prompts in local database")
 
-        if not local_prompts:
-            self.stdout.write(self.style.WARNING("No prompts found in local database"))
-            return
-
-        # Show confirmation
         if not force and not dry_run:
             self.stdout.write(
                 self.style.WARNING(
                     f"\n⚠️  This will DELETE ALL existing prompts in staging "
-                    f"and replace them with {len(local_prompts)} prompts from local"
+                    f"and replace them with {local_count} prompts from local"
                 )
             )
-            response = input('\nAre you sure you want to OVERWRITE ALL PROMPTS in staging? Type "YES" to confirm: ')
+            response = input('\nType "YES" to confirm: ')
             if response != 'YES':
-                raise CommandError('Copy cancelled - confirmation not provided')
-        elif force:
-            self.stdout.write(self.style.WARNING("⚠️  FORCE mode: Skipping confirmation"))
+                raise CommandError('Copy cancelled')
 
         if dry_run:
-            self.stdout.write("\nDRY RUN: Would copy the following prompts:")
-            for prompt in local_prompts:
-                self.stdout.write(f"  - {prompt.coaching_phase} v{prompt.version}: {prompt.name or 'Unnamed'}")
+            self.stdout.write("\nDRY RUN: Would copy all prompts from local to staging")
             return
 
-        # Create temporary JSON file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            prompts_data = []
-            for prompt in local_prompts:
-                prompt_data = {
-                    'coaching_phase': prompt.coaching_phase,
-                    'version': prompt.version,
-                    'name': prompt.name,
-                    'description': prompt.description,
-                    'body': prompt.body,
-                    'required_context_keys': prompt.required_context_keys,
-                    'allowed_actions': prompt.allowed_actions,
-                    'prompt_type': prompt.prompt_type,
-                    'is_active': prompt.is_active,
-                }
-                prompts_data.append(prompt_data)
-            
-            json.dump(prompts_data, f, indent=2, cls=DjangoJSONEncoder, ensure_ascii=False)
-            temp_file = f.name
+        # Step 2: Dump local prompts table to file
+        self.stdout.write("\n2. Dumping local prompts table...")
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as f:
+            dump_file = f.name
 
+        dump_cmd = [
+            'pg_dump',
+            '-h', local_db['host'],
+            '-p', local_db['port'],
+            '-U', local_db['user'],
+            '-d', local_db['name'],
+            '-t', 'prompts_prompt',
+            '--data-only',
+            '--column-inserts',
+            '-f', dump_file
+        ]
+        
+        result = subprocess.run(dump_cmd, capture_output=True, text=True, env=local_env)
+        if result.returncode != 0:
+            raise CommandError(f"Failed to dump local prompts: {result.stderr}")
+        
+        self.stdout.write(f"✅ Dumped to {dump_file}")
+
+        # Step 3: Clear staging table and restore
+        self.stdout.write("\n3. Clearing staging prompts and restoring...")
+        
+        staging_env = os.environ.copy()
+        staging_env['PGPASSWORD'] = staging_db['password']
+
+        # Delete existing prompts
+        delete_cmd = [
+            'psql',
+            '-h', staging_db['host'],
+            '-p', staging_db['port'],
+            '-U', staging_db['user'],
+            '-d', staging_db['name'],
+            '-c', 'DELETE FROM prompts_prompt;'
+        ]
+        
+        result = subprocess.run(delete_cmd, capture_output=True, text=True, env=staging_env)
+        if result.returncode != 0:
+            raise CommandError(f"Failed to clear staging prompts: {result.stderr}")
+        
+        self.stdout.write("✅ Cleared staging prompts")
+
+        # Restore from dump
+        restore_cmd = [
+            'psql',
+            '-h', staging_db['host'],
+            '-p', staging_db['port'],
+            '-U', staging_db['user'],
+            '-d', staging_db['name'],
+            '-f', dump_file
+        ]
+        
+        result = subprocess.run(restore_cmd, capture_output=True, text=True, env=staging_env)
+        if result.returncode != 0:
+            raise CommandError(f"Failed to restore prompts: {result.stderr}")
+        
+        self.stdout.write("✅ Restored prompts to staging")
+
+        # Step 4: Verify
+        self.stdout.write("\n4. Verifying...")
+        
+        verify_cmd = [
+            'psql',
+            '-h', staging_db['host'],
+            '-p', staging_db['port'],
+            '-U', staging_db['user'],
+            '-d', staging_db['name'],
+            '-t', '-c', 'SELECT COUNT(*) FROM prompts_prompt;'
+        ]
+        
+        result = subprocess.run(verify_cmd, capture_output=True, text=True, env=staging_env)
+        staging_count = result.stdout.strip()
+        
+        self.stdout.write(f"✅ Staging now has {staging_count} prompts (was {local_count} locally)")
+
+        # Cleanup
         try:
-            # Use psql to connect to staging database and execute SQL
-            self.stdout.write("\n2. Copying prompts to staging database...")
-            
-            # Test connection first
-            self.stdout.write("Testing connection to staging database...")
-            test_cmd = [
-                'psql',
-                '-h', 'dpg-d360k77fte5s739b8dj0-a.oregon-postgres.render.com',
-                '-p', '5432',
-                '-U', 'staging_coach_database_user',
-                '-d', 'staging_coach_database',
-                '-c', 'SELECT COUNT(*) FROM prompts_prompt;'
-            ]
-            
-            env = os.environ.copy()
-            env['PGPASSWORD'] = 'mwINn3AqfsluUHX2VXZSPWtIkMPffsIY'
-            
-            test_result = subprocess.run(test_cmd, capture_output=True, text=True, env=env)
-            if test_result.returncode == 0:
-                self.stdout.write(f"✅ Connection successful. Current prompts in staging: {test_result.stdout.strip()}")
-            else:
-                self.stdout.write(f"❌ Connection failed: {test_result.stderr}")
-                raise CommandError(f"Failed to connect to staging database: {test_result.stderr}")
-            
-            # Create SQL script
-            sql_script = f'''
--- Delete all existing prompts
-DELETE FROM prompts_prompt;
+            os.unlink(dump_file)
+        except:
+            pass
 
--- Insert new prompts
-'''
-            
-            for prompt_data in prompts_data:
-                # Escape single quotes in text fields
-                name = prompt_data.get('name', '').replace("'", "''") if prompt_data.get('name') else ''
-                description = prompt_data.get('description', '').replace("'", "''") if prompt_data.get('description') else ''
-                body = prompt_data['body'].replace("'", "''")
-                
-                # Convert lists to PostgreSQL array format
-                required_context_keys = prompt_data.get("required_context_keys", [])
-                allowed_actions = prompt_data.get("allowed_actions", [])
-                
-                # Format as PostgreSQL array: ARRAY['item1','item2'] or ARRAY[]::text[] for empty arrays
-                if required_context_keys:
-                    required_context_keys_array = "ARRAY[" + ",".join([f"'{key}'" for key in required_context_keys]) + "]"
-                else:
-                    required_context_keys_array = "ARRAY[]::text[]"
-                
-                if allowed_actions:
-                    allowed_actions_array = "ARRAY[" + ",".join([f"'{action}'" for action in allowed_actions]) + "]"
-                else:
-                    allowed_actions_array = "ARRAY[]::text[]"
-                
-                sql_script += f'''
-INSERT INTO prompts_prompt (
-    id, coaching_phase, version, name, description, body, 
-    required_context_keys, allowed_actions, prompt_type, is_active, 
-    created_at, updated_at
-) VALUES (
-    gen_random_uuid(), 
-    '{prompt_data["coaching_phase"]}', 
-    {prompt_data["version"]}, 
-    {f"'{name}'" if name else 'NULL'}, 
-    {f"'{description}'" if description else 'NULL'}, 
-    '{body}', 
-    {required_context_keys_array}, 
-    {allowed_actions_array}, 
-    '{prompt_data.get("prompt_type", "COACH")}', 
-    {str(prompt_data.get("is_active", True)).lower()}, 
-    NOW(), 
-    NOW()
-);
-'''
-
-            # Write SQL script to temp file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as sql_file:
-                sql_file.write(sql_script)
-                sql_script_file = sql_file.name
-
-            # Execute SQL on staging database
-            psql_cmd = [
-                'psql',
-                '-h', 'dpg-d360k77fte5s739b8dj0-a.oregon-postgres.render.com',
-                '-p', '5432',
-                '-U', 'staging_coach_database_user',
-                '-d', 'staging_coach_database',
-                '-f', sql_script_file
-            ]
-            
-            # Set password via environment variable
-            env = os.environ.copy()
-            env['PGPASSWORD'] = 'mwINn3AqfsluUHX2VXZSPWtIkMPffsIY'
-            
-            # Debug: Show the SQL script being executed
-            self.stdout.write(f"\n3. Executing SQL script ({len(prompts_data)} prompts)...")
-            self.stdout.write(f"SQL script length: {len(sql_script)} characters")
-            
-            result = subprocess.run(psql_cmd, capture_output=True, text=True, env=env, check=True)
-            
-            self.stdout.write(f"✅ Successfully copied {len(prompts_data)} prompts to staging database!")
-            if result.stdout:
-                self.stdout.write("SQL Output:")
-                self.stdout.write(result.stdout)
-            if result.stderr:
-                self.stdout.write("SQL Errors:")
-                self.stdout.write(result.stderr)
-            
-            # Verify the copy worked
-            self.stdout.write("\n4. Verifying copy...")
-            verify_cmd = [
-                'psql',
-                '-h', 'dpg-d360k77fte5s739b8dj0-a.oregon-postgres.render.com',
-                '-p', '5432',
-                '-U', 'staging_coach_database_user',
-                '-d', 'staging_coach_database',
-                '-c', 'SELECT COUNT(*) FROM prompts_prompt;'
-            ]
-            
-            verify_result = subprocess.run(verify_cmd, capture_output=True, text=True, env=env)
-            if verify_result.returncode == 0:
-                count = verify_result.stdout.strip()
-                self.stdout.write(f"✅ Verification: {count} prompts now in staging database")
-                if count == "0":
-                    self.stdout.write(self.style.ERROR("❌ WARNING: No prompts found in staging after copy!"))
-            else:
-                self.stdout.write(f"❌ Verification failed: {verify_result.stderr}")
-
-        except subprocess.CalledProcessError as e:
-            self.stdout.write(self.style.ERROR(f"❌ Failed to copy prompts: {e.stderr}"))
-            raise CommandError(f"Failed to copy prompts: {e.stderr}")
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"❌ Failed to copy prompts: {e}"))
-            raise CommandError(f"Failed to copy prompts: {e}")
-        finally:
-            # Clean up temp files
-            try:
-                os.unlink(temp_file)
-                os.unlink(sql_script_file)
-            except:
-                pass
+        self.stdout.write(self.style.SUCCESS("\n✅ Done!"))

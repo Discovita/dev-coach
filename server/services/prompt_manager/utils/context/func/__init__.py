@@ -18,6 +18,7 @@ from .get_commitment_identities_context import get_commitment_identities_context
 from .get_i_am_identities_context import get_i_am_identities_context
 from .get_visualization_identities_context import get_visualization_identities_context
 from .get_identity_ids_context import get_identity_ids_context
+from .get_identity_context_for_image import get_identity_context_for_image
 
 __all__ = [
     "get_user_name_context",
@@ -40,4 +41,5 @@ __all__ = [
     "get_i_am_identities_context",
     "get_visualization_identities_context",
     "get_identity_ids_context",
+    "get_identity_context_for_image",
 ]

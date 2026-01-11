@@ -19,6 +19,7 @@ export default function AdminNavbar() {
     { label: "Chat", to: "/chat" },
     { label: "Test", to: "/test" },
     { label: "Prompts", to: "/prompts" },
+    { label: "Images", to: "/images" },
     // Add more links here as needed
   ];
 

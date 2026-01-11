@@ -16,6 +16,7 @@ from apps.users.views import UserViewSet, TestUserViewSet
 from apps.test_scenario.views import TestScenarioViewSet
 from apps.actions.views import ActionViewSet
 from apps.identities.views import IdentityViewSet
+from apps.reference_images.views import ReferenceImageViewSet
 
 # Local Modules - Admin Viewsets
 from apps.coach.views import AdminCoachViewSet
@@ -37,6 +38,7 @@ default_router.register(r"test-user", TestUserViewSet, basename="test-user")
 default_router.register(r"test-scenarios", TestScenarioViewSet, basename="test-scenarios")
 default_router.register(r"actions", ActionViewSet, basename="actions")
 default_router.register(r"identities", IdentityViewSet, basename="identities")
+default_router.register(r"reference-images", ReferenceImageViewSet, basename="reference-images")
 
 # Register admin viewsets
 # These will be available at /api/v1/admin/{resource}/

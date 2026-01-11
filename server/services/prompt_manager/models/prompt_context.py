@@ -28,3 +28,4 @@ class PromptContext(BaseModel):
     i_am_identities: Optional[str]
     visualization_identities: Optional[str]
     identity_ids: Optional[str]
+    identity_for_image: Optional[str]

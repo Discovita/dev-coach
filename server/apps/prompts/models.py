@@ -50,4 +50,4 @@ class Prompt(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("coaching_phase", "version")
+        unique_together = ("prompt_type", "coaching_phase", "version")
