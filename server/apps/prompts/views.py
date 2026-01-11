@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 from enums.coaching_phase import CoachingPhase
+from enums.prompt_type import PromptType
 from apps.prompts.serializers import PromptSerializer
 
 from services.logger import configure_logging
@@ -65,23 +66,39 @@ class PromptViewSet(
         POST /api/prompts
         Body: Prompt fields (see PromptSerializer)
         Returns: 201 Created, created prompt object.
-        Automatically assigns the next version number for the given coaching_phase.
+        Automatically assigns the next version number based on coaching_phase and prompt_type.
+        For prompts with coaching_phase: versions are unique per (prompt_type, coaching_phase).
+        For prompts without coaching_phase: versions are unique per prompt_type.
         Ignores any version sent from the frontend.
         """
         data = request.data.copy()
         coaching_phase = data.get("coaching_phase")
+        prompt_type = data.get("prompt_type", PromptType.COACH)
+        
         if coaching_phase:
-            # Find the latest version for this coaching_phase
+            # Find the latest version for this coaching_phase and prompt_type
             latest = (
-                Prompt.objects.filter(coaching_phase=coaching_phase)
+                Prompt.objects.filter(
+                    coaching_phase=coaching_phase,
+                    prompt_type=prompt_type
+                )
                 .order_by("-version")
                 .first()
             )
             data["version"] = (latest.version + 1) if latest else 1
         else:
-            data["version"] = (
-                1  # fallback, should not happen if coaching_phase is required
+            # For prompts without coaching_phase (e.g., image_generation, sentinel),
+            # find latest version by prompt_type
+            latest = (
+                Prompt.objects.filter(
+                    coaching_phase__isnull=True,
+                    prompt_type=prompt_type
+                )
+                .order_by("-version")
+                .first()
             )
+            data["version"] = (latest.version + 1) if latest else 1
+        
         serializer = PromptSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

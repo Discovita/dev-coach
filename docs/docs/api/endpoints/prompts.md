@@ -89,7 +89,9 @@
 
 - **URL:** `/prompts/`
 - **Method:** `POST`
-- **Description:** Create a new prompt. Automatically assigns the next version number for the given coaching phase.
+- **Description:** Create a new prompt. Automatically assigns the next version number based on `prompt_type` and `coaching_phase`.
+  - For prompts with `coaching_phase`: versions are unique per (`prompt_type`, `coaching_phase`)
+  - For prompts without `coaching_phase` (e.g., `image_generation`, `sentinel`): versions are unique per `prompt_type`
 - **Authentication:** Required
 - **Request Body:**
   ```json
@@ -101,6 +103,20 @@
     "required_context_keys": ["user_name", "coaching_phase"],
     "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
     "prompt_type": "COACH",
+    "is_active": true
+  }
+  ```
+  
+  **Example for prompts without coaching_phase:**
+  ```json
+  {
+    "coaching_phase": null,
+    "name": "Identity Image Generation Prompt",
+    "description": "Prompt for generating identity images",
+    "body": "Create an image for this identity...",
+    "required_context_keys": ["identity_for_image"],
+    "allowed_actions": [],
+    "prompt_type": "IMAGE_GENERATION",
     "is_active": true
   }
   ```
@@ -127,7 +143,7 @@
 }
 ```
 
-**Note:** The `version` field is automatically assigned and ignores any value sent from the frontend.
+**Note:** The `version` field is automatically assigned and ignores any value sent from the frontend. Version numbers are unique per combination of `prompt_type`, `coaching_phase`, and `version`.
 
 ---
 
@@ -352,7 +368,9 @@ For detailed field information on the Prompt model, see:
 ## Notes
 
 - The `list` endpoint only returns prompts with `is_active=True`.
-- When creating a new prompt, the `version` field is automatically assigned as the next version number for the given `coaching_phase`. In a future update, we will add in the ability to specify a particular prompt version.
-- The combination of `coaching_phase` and `version` must be unique.
+- When creating a new prompt, the `version` field is automatically assigned as the next version number:
+  - For prompts with `coaching_phase`: versions are unique per (`prompt_type`, `coaching_phase`)
+  - For prompts without `coaching_phase` (e.g., `image_generation`, `sentinel`): versions are unique per `prompt_type`
+- The combination of `prompt_type`, `coaching_phase`, and `version` must be unique.
 - Soft delete is preferred over hard delete to maintain data integrity. The front end only uses the Soft Delete.
 - All endpoints require authentication.

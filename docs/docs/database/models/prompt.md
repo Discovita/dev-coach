@@ -27,7 +27,7 @@ The Prompt model enables version control for prompts, supports dynamic prompt se
 
 ## Configuration
 
-- `unique_together`: ("coaching_phase", "version") - Ensures unique version per phase
+- `unique_together`: ("prompt_type", "coaching_phase", "version") - Ensures unique version per combination of prompt type, coaching phase, and version
 
 ## Relationships
 
@@ -43,9 +43,10 @@ The Prompt model enables version control for prompts, supports dynamic prompt se
 
 ## Prompt Type Choices
 
-- `COACH`: Standard coaching prompts
-- `SENTINEL`: Sentinel agent prompts
-- `SYSTEM`: System-level prompts
+- `COACH`: Standard coaching prompts (have `coaching_phase`)
+- `SENTINEL`: Sentinel agent prompts (no `coaching_phase`)
+- `SYSTEM`: System-level prompts (no `coaching_phase`)
+- `IMAGE_GENERATION`: Image generation prompts (no `coaching_phase`)
 
 ## Context Key Choices
 
@@ -57,7 +58,9 @@ The Prompt model enables version control for prompts, supports dynamic prompt se
 
 ## Database Constraints
 
-- Unique constraint on combination of `coaching_phase` and `version`
+- Unique constraint on combination of `prompt_type`, `coaching_phase`, and `version`
+  - For prompts with `coaching_phase`: versions are unique per (`prompt_type`, `coaching_phase`)
+  - For prompts without `coaching_phase` (e.g., `image_generation`, `sentinel`): versions are unique per `prompt_type`
 - Primary key on `id`
 
 ## Usage Context
