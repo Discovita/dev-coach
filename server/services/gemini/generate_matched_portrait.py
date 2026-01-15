@@ -47,20 +47,18 @@ while current != current.parent:
 # ============================================================================
 
 # The generic identity image to match (from Step 2)
-GENERIC_IDENTITY_IMAGE = "server/services/gemini/images/generic_identity/conductor_02.png"
+GENERIC_IDENTITY_IMAGE = "server/services/gemini/images/generic_identity/conductor_05.png"
 
 # The character view images (from Step 1)
 # These provide the reference for the user's face
 CHARACTER_VIEW_IMAGES = [
-    "server/services/gemini/images/character_views/casey_multi_05/front.png",
-    "server/services/gemini/images/character_views/casey_multi_05/profile_left.png",
-    "server/services/gemini/images/character_views/casey_multi_05/profile_right.png",
-    "server/services/gemini/images/character_views/casey_multi_05/three_quarter_left.png",
-    "server/services/gemini/images/character_views/casey_multi_05/three_quarter_right.png",
+    "server/services/gemini/images/character_views/casey_multi_07/front.png",
+    "server/services/gemini/images/character_views/casey_multi_07/three_quarter_left.png",
+    "server/services/gemini/images/character_views/casey_multi_07/three_quarter_right.png",
 ]
 
 # Output name for the matched portrait
-OUTPUT_NAME = "conductor_02_matched"
+OUTPUT_NAME = "conductor_04_matched"
 
 # ============================================================================
 # OUTPUT CONFIGURATION
@@ -87,51 +85,59 @@ def build_prompt() -> str:
     
     The prompt instructs the model to:
     1. Study the scene image for head position, expression, lighting, and CLOTHING
-    2. Use the character views as face reference
-    3. Generate a new portrait matching all four key elements
+    2. Use the character views as the ONLY source for the face
+    3. Generate a new portrait - NO face blending allowed
     """
-    return """Study the FIRST IMAGE (the scene image) carefully. Pay attention to:
+    return """I am providing two types of images:
 
-1. FACIAL ANGLE - The exact position of the head AS IT APPEARS IN THE IMAGE:
-   - Which direction does the NOSE point in the frame? (toward left edge, toward right edge, straight at camera)
-   - If the nose points toward the LEFT edge of the frame, the output nose must also point toward the LEFT edge
-   - If the nose points toward the RIGHT edge of the frame, the output nose must also point toward the RIGHT edge
-   - How is the head tilted?
+IMAGE 1 (FIRST IMAGE): A "scene reference" image. This person is a STRANGER - ignore their face completely.
+IMAGES 2-4 (REMAINING IMAGES): Reference photos of "THE SUBJECT" - this is the person whose face you must reproduce.
 
-2. FACIAL EXPRESSION - The person's expression:
-   - Are they smiling? Serious? Neutral?
-   - Is their mouth open or closed?
-   - What are their eyes doing? (wide, relaxed, squinting)
+YOUR TASK: Generate a portrait of THE SUBJECT (from images 2-4) posed to match the scene reference (image 1).
 
-3. LIGHTING - The light on the face:
-   - Which side of the face is brighter/lit? (the left side of frame, or right side of frame)
-   - Where are the shadows falling on the face?
-   - What is the overall color grading of the scene? (warm, cool, neutral)
+=== WHAT TO EXTRACT FROM IMAGE 1 (SCENE REFERENCE) ===
+ONLY use this image for:
+- HEAD ANGLE: Which direction is the head turned? How is it tilted?
+- EXPRESSION: Smiling? Serious? Mouth open/closed?
+- LIGHTING: Which side is lit? Shadow direction? Color temperature?
+- CLOTHING: What outfit? What color? Copy this exactly.
+- BACKGROUND: General style/blur of background
 
-4. CLOTHING - What the person is wearing:
-   - What type of clothing? (suit, dress, casual, uniform, etc.)
-   - What color is the clothing?
-   - Any details like collar, lapels, accessories?
+COMPLETELY IGNORE the face in image 1. That person is not the subject.
 
-Now look at the REMAINING IMAGES - these are reference headshots of a specific person.
+=== WHAT TO EXTRACT FROM IMAGES 2-4 (THE SUBJECT) ===
+Use these images for EVERYTHING about the face:
+- Exact facial structure, bone structure, face shape
+- Exact eyes, nose, mouth, ears, eyebrows
+- Exact skin tone, skin texture, facial hair if any
+- Exact hair color, style, hairline
 
-YOUR TASK: Create a NEW head-and-shoulders portrait of the person from the reference images that EXACTLY MATCHES the scene image.
+=== CRITICAL RULES ===
 
-CRITICAL - MATCH THE DIRECTION EXACTLY:
-- If the person in the scene image has their nose pointing toward the LEFT side of the frame, your output must have the nose pointing toward the LEFT side of the frame
-- If the person in the scene image has their nose pointing toward the RIGHT side of the frame, your output must have the nose pointing toward the RIGHT side of the frame
-- DO NOT mirror or flip the direction - match it EXACTLY as it appears
+1. FACE IDENTITY: The output face must be 100% THE SUBJECT from images 2-4. 
+   - DO NOT blend faces
+   - DO NOT average features between the scene person and the subject
+   - DO NOT take any facial features from image 1
+   - If you showed this output to someone who knows THE SUBJECT, they must recognize them instantly
 
-CRITICAL REQUIREMENTS:
-- The face MUST be the person from the reference headshots - 100% identical facial features, bone structure, skin tone
-- The head angle MUST match the scene image exactly (same direction the nose points in the frame)
-- The expression MUST match the scene image exactly
-- The lighting direction MUST match the scene image exactly (same side of face is lit/shadowed)
-- The clothing MUST match the scene image - same outfit, same color, same style
-- Show head, neck, and upper shoulders/chest area to include visible clothing
-- Use a simple/blurred background similar to the scene
+2. POSE MATCHING: Match the head angle from image 1:
+   - If nose points LEFT in image 1, nose must point LEFT in output
+   - If nose points RIGHT in image 1, nose must point RIGHT in output
+   - Match the head tilt exactly
 
-DO NOT include any text, words, or watermarks in the image.
+3. EXPRESSION: Copy the expression from image 1 onto THE SUBJECT's face
+
+4. LIGHTING: Light THE SUBJECT's face exactly as the scene reference is lit
+
+5. CLOTHING: THE SUBJECT must wear the EXACT same outfit as in image 1
+
+=== OUTPUT FORMAT ===
+- Head-and-shoulders portrait (show upper chest for clothing)
+- Similar background style to image 1
+- NO text, words, or watermarks
+
+Remember: The face in your output should look NOTHING like the person in image 1. 
+It should look EXACTLY like the person in images 2-4, just posed/lit/dressed to match image 1.
 """
 
 

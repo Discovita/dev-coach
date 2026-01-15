@@ -113,20 +113,6 @@ def get_next_run_number() -> int:
     return max(numbers) + 1 if numbers else 1
 
 # ============================================================================
-# FRAMING REQUIREMENTS (for consistent distance/cropping)
-# ============================================================================
-
-FRAMING_REQUIREMENTS = """
-FRAMING (CRITICAL - must be consistent across all views):
-- Head and shoulders shot - crop from mid-chest up
-- Face should fill approximately 40-50% of the frame height
-- Top of head should have about 10-15% padding from top edge
-- Shoulders should be visible but cropped at mid-chest
-- Face should be centered horizontally in the frame
-- Same apparent distance from camera in every shot
-"""
-
-# ============================================================================
 # VIEW DEFINITIONS
 # All directions are described from the VIEWER'S PERSPECTIVE (what you see in the final image)
 # We use "left side of frame" and "right side of frame" to avoid confusion
@@ -147,42 +133,42 @@ VIEWS_TO_GENERATE = [
         - Both shoulders visible and level
         - Smiling with teeth visible"""
     ),
-    (
-        "profile_left",
-        """TRUE SIDE PROFILE - Nose pointing to the RIGHT side of the frame.
+    # (
+    #     "profile_left",
+    #     """TRUE SIDE PROFILE - Nose pointing to the RIGHT side of the frame.
         
-        EXPRESSION: Neutral, relaxed. Mouth closed, lips together naturally.
+    #     EXPRESSION: Neutral, relaxed. Mouth closed, lips together naturally.
         
-        Think of a coin portrait or silhouette cutout.
+    #     Think of a coin portrait or silhouette cutout.
         
-        IN THE FINAL IMAGE:
-        - The nose points toward the RIGHT edge of the image
-        - Only ONE eye is visible (no part of the second eye should be seen)
-        - ONE ear is visible on the LEFT side of the head
-        - The back/rear of the head is on the LEFT side of the frame
-        - The face/nose is on the RIGHT side of the frame
-        - You should see the profile outline: forehead, nose, lips, chin
+    #     IN THE FINAL IMAGE:
+    #     - The nose points toward the RIGHT edge of the image
+    #     - Only ONE eye is visible (no part of the second eye should be seen)
+    #     - ONE ear is visible on the LEFT side of the head
+    #     - The back/rear of the head is on the LEFT side of the frame
+    #     - The face/nose is on the RIGHT side of the frame
+    #     - You should see the profile outline: forehead, nose, lips, chin
         
-        THIS IS NOT A 3/4 VIEW. If you can see any part of the second eye, it's wrong."""
-    ),
-    (
-        "profile_right",
-        """TRUE SIDE PROFILE - Nose pointing to the LEFT side of the frame.
+    #     THIS IS NOT A 3/4 VIEW. If you can see any part of the second eye, it's wrong."""
+    # ),
+    # (
+    #     "profile_right",
+    #     """TRUE SIDE PROFILE - Nose pointing to the LEFT side of the frame.
         
-        EXPRESSION: Neutral, relaxed. Mouth closed, lips together naturally.
+    #     EXPRESSION: Neutral, relaxed. Mouth closed, lips together naturally.
         
-        Think of a coin portrait or silhouette cutout.
+    #     Think of a coin portrait or silhouette cutout.
         
-        IN THE FINAL IMAGE:
-        - The nose points toward the LEFT edge of the image
-        - Only ONE eye is visible (no part of the second eye should be seen)
-        - ONE ear is visible on the RIGHT side of the head
-        - The back/rear of the head is on the RIGHT side of the frame
-        - The face/nose is on the LEFT side of the frame
-        - You should see the profile outline: forehead, nose, lips, chin
+    #     IN THE FINAL IMAGE:
+    #     - The nose points toward the LEFT edge of the image
+    #     - Only ONE eye is visible (no part of the second eye should be seen)
+    #     - ONE ear is visible on the RIGHT side of the head
+    #     - The back/rear of the head is on the RIGHT side of the frame
+    #     - The face/nose is on the LEFT side of the frame
+    #     - You should see the profile outline: forehead, nose, lips, chin
         
-        THIS IS NOT A 3/4 VIEW. If you can see any part of the second eye, it's wrong."""
-    ),
+    #     THIS IS NOT A 3/4 VIEW. If you can see any part of the second eye, it's wrong."""
+    # ),
     (
         "three_quarter_left",
         """3/4 VIEW - Face angled, with nose pointing toward the RIGHT side of the frame.
@@ -196,7 +182,8 @@ VIEWS_TO_GENERATE = [
         - The ear on the RIGHT side of the image is hidden or barely visible
         - More of the cheek on the RIGHT side of the image is visible
         - The face is turned approximately 30-45 degrees from front
-        - Smiling with teeth visible"""
+        - Smiling with teeth visible
+        - The subject is NOT looking at the camera"""
     ),
     (
         "three_quarter_right",
@@ -210,7 +197,8 @@ VIEWS_TO_GENERATE = [
         - The ear on the RIGHT side of the image is fully visible
         - The ear on the LEFT side of the image is hidden or barely visible
         - More of the cheek on the LEFT side of the image is visible
-        - The face is turned approximately 30-45 degrees from front"""
+        - The face is turned approximately 30-45 degrees from front
+        - The subject is NOT looking at the camera"""
     ),
 ]
 
@@ -269,13 +257,19 @@ def generate_character_views(client: genai.Client, source_paths: list[str], outp
         else:
             reference_note = "Study the reference photo carefully."
         
-        prompt = f"""Create a professional studio headshot portrait of this {ETHNICITY} {GENDER} against a plain white background.
+        prompt = f"""Create a professional looking portrait of this {ETHNICITY} {GENDER} against a plain white background.
 
 {reference_note}
 
 {view_description}
 
-{FRAMING_REQUIREMENTS}
+FRAMING (CRITICAL - must be consistent across all views):
+- Head and shoulders shot - crop from mid-chest up
+- Face should fill approximately 40-50% of the frame height
+- Top of head should have about 10-15% padding from top edge
+- Shoulders should be visible but cropped at mid-chest
+- Face should be centered horizontally in the frame
+- Same apparent distance from camera in every shot
 
 CLOTHING: The person must be wearing {clothing}. This is required for consistency across all images.
 
@@ -291,10 +285,11 @@ CRITICAL - Maintain these specific features:
 
 IMPORTANT - Professional retouching requirements:
 - Smooth, flawless skin - minimize visible pores, blemishes, and imperfections
-- This should look like a professionally retouched headshot photo
-- Clean, polished appearance like a corporate or modeling headshot
+- Perfect hair
 - Soft, even studio lighting
 - Plain white background
+
+Its ok if this image looks too perfect. It should represent the ideal of what this person looks like. Make them look fantastic. Knock off a few years. 
 
 DO NOT change any facial features. DO NOT add or remove facial hair. DO NOT change the hairstyle.
 DO NOT change the eye color - eyes must be {EYE_COLOR}.

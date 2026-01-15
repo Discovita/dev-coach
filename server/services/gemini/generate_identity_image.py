@@ -1,26 +1,34 @@
 """
-Generate an identity image with character consistency.
+Generate Identity Image Script (Direct Approach)
 
-This script takes a SINGLE user photo and:
-1. Generates 5 clean, professional headshot views (front, profiles, 3/4 angles)
-   - This creates a quality baseline from potentially low-quality user uploads
-2. Uses those generated headshots as reference images for character consistency
-3. Generates the final identity image showing the person in their identity role
+This script generates an identity image directly from character reference images.
+Instead of creating a generic image and trying to face-swap, we use Gemini's
+"character consistency" feature to generate the scene with the subject's face
+from the start.
+
+Key insight from Gemini docs:
+- Up to 5 images of humans can be used to maintain character consistency
+- The model can place a person from reference images into a new scene
+
+This is an ALTERNATIVE approach to the multi-step pipeline:
+1. Generate Character Views (generate_character_views.py) - same
+2. Generate Identity Image (this script) <-- DIRECT GENERATION
 
 Usage:
-    python server/services/gemini/generate_identity_image.py <source_image>
+    python generate_identity_image.py [--output <name>]
 
-Example:
-    python server/services/gemini/generate_identity_image.py server/services/gemini/images/reference/face_only/casey_01.png
+Examples:
+    python generate_identity_image.py
+    python generate_identity_image.py --output conductor_01
 
 Output:
-    - Character views saved to server/services/gemini/images/character_views/
-    - Identity image saved to server/services/gemini/images/identity/
+    server/services/gemini/images/identity/<output_name>.png
 """
 
 import os
 import sys
 import glob
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 from PIL import Image
@@ -41,66 +49,65 @@ while current != current.parent:
 # ============================================================================
 
 OUTPUT_DIR = "server/services/gemini/images/identity"
-CHARACTER_VIEWS_DIR = "server/services/gemini/images/character_views"
+
+# Character view images (from Step 1) - these are the reference for the subject's face
+CHARACTER_VIEW_IMAGES = [
+    "server/services/gemini/images/character_views/jason_multi_02/front.png",
+    "server/services/gemini/images/character_views/jason_multi_02/three_quarter_left.png",
+    "server/services/gemini/images/character_views/jason_multi_02/three_quarter_right.png",
+]
 
 # ============================================================================
-# BODY DESCRIPTION CONSTANTS
-# Toggle these to test different body types
+# RETRY CONFIGURATION
 # ============================================================================
 
-# Gender options: "man", "woman", "person" (gender neutral)
-GENDER = "man"
-
-# Height options: "short", "below average height", "average height", "above average height", "tall"
-HEIGHT = "average height"
-
-# Build options: "slim", "athletic", "average build", "stocky", "large"
-BUILD = "athletic"
-
-# Skin tone / ethnicity options: "light-skinned", "medium-skinned", "dark-skinned", 
-# Or more specific: "Caucasian", "Asian", "Hispanic", "African American", "Middle Eastern", "South Asian"
-ETHNICITY = "Caucasian"
-
-# Age range: "young adult", "in their 30s", "middle-aged", "mature"
-AGE = "in their 30s"
-
-# Hair: "short brown hair", "long blonde hair", "bald", "gray hair", etc.
-HAIR = "short brown hair"
+RETRY_DELAY = 3  # seconds between retries
 
 # ============================================================================
-# IDENTITY CONFIGURATION
+# IMAGE CONFIG CONSTANTS
 # ============================================================================
 
-IDENTITY_NAME = "Conductor"
-IDENTITY_CATEGORY = "Passions & Talents"
-IDENTITY_I_AM_STATEMENT = "I am a conductor who leads with passion and precision"
-IDENTITY_VISUALIZATION = "Standing on a conductor's podium in a grand concert hall, arms raised dramatically with baton in hand, orchestra before me, audience applauding"
-
-# ============================================================================
-# IMAGE SETTINGS
-# ============================================================================
-
+# Aspect ratio options: "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"
 ASPECT_RATIO = "16:9"
+
+# Resolution options: "1K", "2K", "4K"
 RESOLUTION = "2K"
 
-# Headshot views to generate from the source photo
-# Each tuple: (filename_suffix, angle_description, camera_position_hint)
-VIEWS_TO_GENERATE = [
-    ("front", "looking directly at the camera, face pointed straight ahead", "camera directly in front"),
-    ("profile_left", "in a TRUE SIDE PROFILE view - the camera is positioned at exactly 90 degrees to the left side of their face, showing only the left side of their face with the nose pointing to the right edge of the frame", "camera at 90 degrees to their left"),
-    ("profile_right", "in a TRUE SIDE PROFILE view - the camera is positioned at exactly 90 degrees to the right side of their face, showing only the right side of their face with the nose pointing to the left edge of the frame", "camera at 90 degrees to their right"),
-    ("three_quarter_left", "at a 45-degree angle with the camera to their left - their face is turned slightly to their right so we see more of their left cheek, left ear visible", "camera at 45 degrees to their left"),
-    ("three_quarter_right", "at a 45-degree angle with the camera to their right - their face is turned slightly to their left so we see more of their right cheek, right ear visible", "camera at 45 degrees to their right"),
-]
+# ============================================================================
+# IDENTITY CONSTANTS
+# These define what identity/role the person is visualized as
+# ============================================================================
+
+# Identity Name: The name of the identity being visualized
+IDENTITY_NAME = "Castle Builder"
+
+# Category: The identity category (e.g., "Passions & Talents", "Career & Purpose", etc.)
+IDENTITY_CATEGORY = "Romantic Relation"
+
+# I Am Statement: Optional - the "I Am" statement for this identity
+IDENTITY_I_AM_STATEMENT = "I am a Castle Builder and I build a space that is safe for our nervous systems and I create a space for love, kindness, and safety to grow. I am going to build a castle with a moat on Hawaiian soil using agricultural land for our relationship to grow."
+
+# Visualization: Optional - the visualization/scene description for this identity
+IDENTITY_VISUALIZATION = """
+He's on a hill with the castle over Hawaiian agricultural land with view of the ocean
+He's wearing a linen button down shirt.
+He's proud and calm.
+"""
+
+# Notes: Optional - list of notes about this identity
+IDENTITY_NOTES = None  # e.g., ["Focus on leadership", "Emphasize creativity"]
+
 
 # ============================================================================
 # UTILITIES
 # ============================================================================
 
-def get_next_output_number() -> int:
-    """Find the next available number for output files."""
-    pattern = f"{OUTPUT_DIR}/identity_*.png"
-    existing_files = glob.glob(pattern)
+def get_next_run_number() -> int:
+    """Find the next available numbered output file."""
+    if not os.path.exists(OUTPUT_DIR):
+        return 1
+    
+    existing_files = glob.glob(f"{OUTPUT_DIR}/[0-9][0-9].png")
     
     if not existing_files:
         return 1
@@ -109,7 +116,7 @@ def get_next_output_number() -> int:
     for f in existing_files:
         basename = os.path.basename(f)
         try:
-            num = int(basename.replace("identity_", "").replace(".png", ""))
+            num = int(basename.replace(".png", ""))
             numbers.append(num)
         except ValueError:
             continue
@@ -117,15 +124,9 @@ def get_next_output_number() -> int:
     return max(numbers) + 1 if numbers else 1
 
 
-def get_body_description() -> str:
-    """Build the body description from individual constants."""
-    return f"a {HEIGHT} {BUILD} {ETHNICITY} {GENDER} {AGE} with {HAIR}"
-
-
 def get_identity_context() -> str:
     """
     Format identity context for the prompt.
-    Matches the format used in face_swap.py
     """
     parts = [
         f'Identity Name: "{IDENTITY_NAME}"',
@@ -138,281 +139,222 @@ def get_identity_context() -> str:
     if IDENTITY_VISUALIZATION:
         parts.append(f"Visualization: {IDENTITY_VISUALIZATION}")
     
+    if IDENTITY_NOTES:
+        notes_str = "; ".join(IDENTITY_NOTES)
+        parts.append(f"Notes: {notes_str}")
+    
     return "\n".join(parts)
 
 
-def build_identity_prompt() -> str:
+def build_prompt() -> str:
     """
-    Build the prompt for identity image generation.
-    Uses the same prompt style from face_swap.py (which produces great images)
-    but adds character consistency requirement for the reference photos.
+    Build the prompt for generating an identity image with the subject.
+    
+    Key approach: Use Gemini's character consistency feature.
+    The reference images show WHO the person is - their exact face.
+    The prompt describes the SCENE they should be placed into.
     """
-    body_description = get_body_description()
     identity_context = get_identity_context()
     
-    prompt = f"""We're creating an artistic, cinematic Identity Image for a {body_description}.
+    return f"""I am providing reference photos of a specific person (THE SUBJECT).
+Your task is to create a DREAM VISUALIZATION - an idealized, magical image of THE SUBJECT living their best life as this identity.
 
-STYLE REQUIREMENTS (CRITICAL - DO NOT IGNORE):
-- Movie poster quality aesthetic with dramatic, cinematic lighting
-- Golden hour or dramatic studio lighting with visible light rays
-- Idealized, aspirational, NOT documentary or photojournalistic
-- Think Hollywood movie poster, NOT a candid photo from a real event
-- Warm, golden tones with dramatic atmosphere
-- Professional, confident, and inspiring composition
+THE SUBJECT: The person shown in the reference photos. 
+- Study their face carefully: bone structure, eyes, nose, mouth, skin tone, hair
+- The output image MUST show this EXACT person - they must be immediately recognizable
+- Do NOT create a different person or blend features
 
+IDENTITY TO VISUALIZE:
 {identity_context}
 
-The person shown must have the face from the reference photos - same facial features, eyes, nose, mouth, jawline, skin tone, and hair. But the IMAGE STYLE must be cinematic and artistic, not realistic documentary photography.
+=== THIS IS A DREAM, NOT A DOCUMENTARY ===
 
-DO NOT create a realistic photo that looks like it was taken at an actual event.
-DO create an idealized, movie-poster quality visualization.
+This image should feel MAGICAL and IDEALIZED - like a movie poster for the best version of their life.
+This is NOT a candid photo. This is NOT realistic documentary photography.
+This is a VISUALIZATION OF A DREAM - aspirational, inspiring, and perfect.
 
-DO NOT include any text, words, letters, or watermarks in the image.
+CRITICAL - FACE IDENTITY:
+- The face in the output MUST be 100% THE SUBJECT from the reference photos
+- If someone who knows THE SUBJECT saw this image, they would immediately recognize them
+- Do NOT generate a generic face or blend with other faces
+
+Remember: This is a DREAM VISUALIZATION. Make them look like the hero of their own story.
+The face must be THE EXACT PERSON from the reference photos, looking proud and masterful.
 """
-    return prompt
 
 
 # ============================================================================
-# STEP 1: GENERATE CHARACTER VIEWS (optional)
+# GENERATION
 # ============================================================================
 
-def generate_character_views(client: genai.Client, source_path: str) -> list[str]:
+def generate_identity_image(client: genai.Client, output_name: str | None = None) -> tuple[str, Image.Image | None]:
     """
-    Generate multiple angle views of a person from a single reference photo.
+    Generate an identity image using character reference images.
     
-    Returns list of generated image paths.
-    """
-    os.makedirs(CHARACTER_VIEWS_DIR, exist_ok=True)
+    Args:
+        client: Gemini API client
+        output_name: Optional custom name for the output file (without extension)
     
-    source_basename = os.path.splitext(os.path.basename(source_path))[0]
-    source_image = Image.open(source_path)
-    
-    print("=" * 60)
-    print("STEP 1: GENERATING CHARACTER VIEWS")
-    print("=" * 60)
-    print(f"Source: {source_path}")
-    print()
-    
-    generated_paths = []
-    
-    for view_suffix, view_description, camera_hint in VIEWS_TO_GENERATE:
-        output_path = f"{CHARACTER_VIEWS_DIR}/{source_basename}_{view_suffix}.png"
-        print(f"Generating: {view_suffix}...")
-        
-        prompt = f"""A professional studio headshot portrait of this person against a plain white background, {view_description}.
-
-Camera position: {camera_hint}
-
-Keep the person's face EXACTLY the same - same facial features, same eyes, same nose, same mouth, same skin tone, same hair style and color. 
-This must be recognizably the same person, just from a different angle.
-
-IMPORTANT - Professional retouching requirements:
-- Smooth, flawless skin - minimize visible pores, blemishes, and imperfections
-- This should look like a professionally retouched headshot photo
-- Clean, polished appearance like a corporate or modeling headshot
-- Soft, even studio lighting
-
-DO NOT change any facial features. DO NOT add or remove facial hair. DO NOT change the hairstyle.
-The image should look like it was taken by a professional photographer with professional retouching applied.
-"""
-        
-        try:
-            response = client.models.generate_content(
-                model="gemini-3-pro-image-preview",
-                contents=[prompt, source_image],
-                config=types.GenerateContentConfig(
-                    response_modalities=["TEXT", "IMAGE"],
-                    image_config=types.ImageConfig(
-                        aspect_ratio="1:1",
-                        image_size="2K"
-                    ),
-                ),
-            )
-            
-            for part in response.parts:
-                if getattr(part, 'thought', False):
-                    continue
-                if part.inline_data is not None:
-                    image = part.as_image()
-                    image.save(output_path)
-                    print(f"  ✓ Saved: {output_path}")
-                    generated_paths.append(output_path)
-                    break
-        except Exception as e:
-            print(f"  ✗ Failed: {e}")
-        
-        print()
-    
-    return generated_paths
-
-
-# ============================================================================
-# STEP 2: GENERATE IDENTITY IMAGE
-# ============================================================================
-
-def generate_identity_image(client: genai.Client, reference_paths: list[str]) -> str | None:
-    """
-    Generate an identity image using reference photos for character consistency.
-    
-    Returns the output path if successful, None otherwise.
+    Returns:
+        Tuple of (output_path, PIL Image or None if failed)
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    run_num = get_next_output_number()
-    output_path = f"{OUTPUT_DIR}/identity_{run_num:02d}.png"
+    # Determine output path
+    if output_name:
+        output_path = f"{OUTPUT_DIR}/{output_name}.png"
+    else:
+        run_num = get_next_run_number()
+        output_path = f"{OUTPUT_DIR}/{run_num:02d}.png"
     
     print("=" * 60)
-    print("STEP 2: GENERATING IDENTITY IMAGE")
+    print("GENERATING IDENTITY IMAGE (DIRECT APPROACH)")
     print("=" * 60)
-    print(f"Run number: {run_num}")
     print(f"Identity: {IDENTITY_NAME}")
+    print(f"Reference images: {len(CHARACTER_VIEW_IMAGES)}")
+    for img_path in CHARACTER_VIEW_IMAGES:
+        print(f"  - {img_path}")
+    print(f"Output: {output_path}")
     print()
     
-    # Load reference images
-    print("Loading reference images...")
+    # Load character reference images
     reference_images = []
-    for ref_path in reference_paths[:5]:  # Max 5 for character consistency
+    for ref_path in CHARACTER_VIEW_IMAGES:
         if os.path.exists(ref_path):
             reference_images.append(Image.open(ref_path))
-            print(f"  ✓ {ref_path}")
+            print(f"✓ Loaded reference: {ref_path}")
         else:
-            print(f"  ✗ Not found: {ref_path}")
+            print(f"⚠ Reference not found: {ref_path}")
     
     if not reference_images:
-        print("ERROR: No reference images loaded!")
-        return None
+        print("ERROR: No character reference images found!")
+        return output_path, None
     
-    print(f"\nUsing {len(reference_images)} reference images")
     print()
     
-    # Build prompt
-    prompt = build_identity_prompt()
+    prompt = build_prompt()
     print("Prompt:")
     print("-" * 40)
     print(prompt)
     print("-" * 40)
     print()
     
-    # Contents: prompt first, then reference images (per docs)
-    contents = [prompt] + reference_images
+    # Build contents: reference images first, then prompt
+    # Per Gemini docs: up to 5 images of humans for character consistency
+    contents = reference_images + [prompt]
     
-    print("Generating identity image...")
-    
-    response = client.models.generate_content(
-        model="gemini-3-pro-image-preview",
-        contents=contents,
-        config=types.GenerateContentConfig(
-            response_modalities=["TEXT", "IMAGE"],
-            image_config=types.ImageConfig(
-                aspect_ratio=ASPECT_RATIO,
-                image_size=RESOLUTION
-            ),
-        ),
-    )
-    
-    # Process response
-    for part in response.parts:
-        if getattr(part, 'thought', False):
-            continue
-        if part.text:
-            print(f"[Model] {part.text}")
-        if part.inline_data is not None:
-            image = part.as_image()
-            image.save(output_path)
-            print(f"\n✓ Saved: {output_path}")
-            return output_path
-    
-    print("\nERROR: No image generated")
-    return None
+    # Retry loop - keep trying until success
+    attempt = 0
+    start_time = time.time()
+    while True:
+        attempt += 1
+        elapsed = time.time() - start_time
+        try:
+            print(f"Generating image (attempt {attempt}, elapsed: {elapsed:.0f}s)...")
+            attempt_start = time.time()
+            
+            response = client.models.generate_content(
+                model="gemini-3-pro-image-preview",
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    response_modalities=["TEXT", "IMAGE"],
+                    image_config=types.ImageConfig(
+                        aspect_ratio=ASPECT_RATIO,
+                        image_size=RESOLUTION
+                    ),
+                ),
+            )
+            
+            attempt_duration = time.time() - attempt_start
+            print(f"   API responded in {attempt_duration:.1f}s")
+            
+            # Check if we got a valid response
+            if not response.parts:
+                print(f"   WARNING: Response has no parts")
+                print(f"   Response object: {response}")
+                time.sleep(RETRY_DELAY)
+                continue
+            
+            for i, part in enumerate(response.parts):
+                print(f"   Processing part {i+1}/{len(response.parts)}...")
+                if getattr(part, 'thought', False):
+                    print(f"      (thought - skipping)")
+                    continue
+                if part.text:
+                    print(f"   [Model] {part.text}")
+                if part.inline_data is not None:
+                    print(f"   Found image data, saving...")
+                    image = part.as_image()
+                    image.save(output_path)
+                    total_time = time.time() - start_time
+                    print(f"\n✓ Saved: {output_path} (total time: {total_time:.1f}s)")
+                    return output_path, image
+            
+            print(f"   WARNING: No image in response parts, retrying...")
+            
+        except Exception as e:
+            error_str = str(e)
+            error_type = type(e).__name__
+            is_retryable = "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str.lower()
+            
+            if is_retryable:
+                print(f"⚠ Attempt {attempt} failed - retrying in {RETRY_DELAY}s...")
+                print(f"   Error type: {error_type}")
+                print(f"   Message: {error_str[:200]}{'...' if len(error_str) > 200 else ''}")
+                time.sleep(RETRY_DELAY)
+            else:
+                print(f"✗ Failed with non-retryable error:")
+                print(f"   Error type: {error_type}")
+                print(f"   Full message: {error_str}")
+                return output_path, None
 
 
 # ============================================================================
 # MAIN
 # ============================================================================
 
-def get_existing_character_views(source_basename: str) -> list[str]:
-    """Check if character views already exist for this source image."""
-    existing_paths = []
-    for view_suffix, _, _ in VIEWS_TO_GENERATE:
-        path = f"{CHARACTER_VIEWS_DIR}/{source_basename}_{view_suffix}.png"
-        if os.path.exists(path):
-            existing_paths.append(path)
-    return existing_paths
-
-
 def main():
     # Parse arguments
-    skip_views = "--skip-views" in sys.argv
-    args = [a for a in sys.argv[1:] if a != "--skip-views"]
+    output_name = None
+    if "--output" in sys.argv:
+        idx = sys.argv.index("--output")
+        if idx + 1 < len(sys.argv):
+            output_name = sys.argv[idx + 1]
     
-    if len(args) < 1:
-        print("Usage: python generate_identity_image.py <source_image> [--skip-views]")
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: python generate_identity_image.py [--output <name>]")
         print()
-        print("This script takes a single user photo and:")
-        print("  1. Generates 5 clean headshot views (front, profiles, 3/4 angles)")
-        print("  2. Uses those as reference images for character consistency")
-        print("  3. Generates the final identity image")
+        print("Generates an identity image directly using character reference images.")
+        print("This uses Gemini's character consistency feature to place the subject")
+        print("from the reference photos into an identity scene.")
         print()
         print("Options:")
-        print("  --skip-views    Skip step 1, reuse existing character views")
+        print("  --output <name>  Custom name for output file (default: numbered 01, 02, etc.)")
         print()
         print("Examples:")
-        print("  python generate_identity_image.py server/services/gemini/images/reference/face_only/casey_01.png")
-        print("  python generate_identity_image.py server/services/gemini/images/reference/face_only/casey_01.png --skip-views")
-        sys.exit(1)
-    
-    source_image_path = args[0]
-    
-    if not os.path.exists(source_image_path):
-        print(f"ERROR: Source image not found: {source_image_path}")
-        sys.exit(1)
-    
-    source_basename = os.path.splitext(os.path.basename(source_image_path))[0]
+        print("  python generate_identity_image.py")
+        print("  python generate_identity_image.py --output conductor_01")
+        print()
+        print("Configure the identity by editing the constants at the top of the script:")
+        print("  - IDENTITY_NAME, IDENTITY_CATEGORY, IDENTITY_VISUALIZATION")
+        print("  - CHARACTER_VIEW_IMAGES (reference photos of the subject)")
+        sys.exit(0)
     
     # Initialize client
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     
-    print("=" * 60)
-    print("IDENTITY IMAGE GENERATION")
-    print("=" * 60)
-    print(f"Source photo: {source_image_path}")
-    print(f"Identity: {IDENTITY_NAME}")
-    print()
-    
-    # Step 1: Generate or reuse character views
-    if skip_views:
-        # Check for existing character views
-        reference_paths = get_existing_character_views(source_basename)
-        if not reference_paths:
-            print("ERROR: --skip-views specified but no existing character views found")
-            print(f"Expected files in: {CHARACTER_VIEWS_DIR}/{source_basename}_*.png")
-            sys.exit(1)
-        print(f"Skipping character view generation, using {len(reference_paths)} existing views")
-        print()
-    else:
-        # Generate new character views
-        reference_paths = generate_character_views(client, source_image_path)
-        if not reference_paths:
-            print("ERROR: Failed to generate any character views")
-            sys.exit(1)
-        print()
-    
-    # Step 2: Generate identity image using the headshots
-    output_path = generate_identity_image(client, reference_paths)
+    # Generate the image
+    output_path, image = generate_identity_image(client, output_name)
     
     # Summary
     print()
     print("=" * 60)
     print("COMPLETE")
     print("=" * 60)
-    if not skip_views:
-        print(f"Generated {len(reference_paths)} character views in: {CHARACTER_VIEWS_DIR}/")
+    if image:
+        print(f"Generated: {output_path}")
     else:
-        print(f"Reused {len(reference_paths)} existing character views")
-    if output_path:
-        print(f"Identity image: {output_path}")
-    else:
-        print("Failed to generate identity image")
+        print("Failed to generate image")
 
 
 if __name__ == "__main__":

@@ -177,30 +177,36 @@ def build_prompt() -> str:
     
     return f"""We're creating a generic Identity Image for {body_description}.
 
-Create a professional, confident, and inspiring image for this Identity.
-The image should be an ideal visualization of them living as this Identity.
+Create a confident and inspiring image for this Identity.
+The image should be a magical ideal visualization of them living as this Identity.
 
 STYLE REQUIREMENTS:
-- Movie poster quality aesthetic
-- Cinematic, dramatic lighting (golden hour, studio lighting, or dramatic atmosphere)
 - Idealized and aspirational - NOT a candid documentary photo
-- Professional, confident composition
 - Nothing negative - this is an inspiring, aspirational image
 
-FRAMING REQUIREMENTS (CRITICAL):
-- The person should be the clear focal point of the image
-- Frame from approximately waist-up or chest-up - NOT a full body distant shot
-- The face should be clearly visible and prominent in the frame
-- Face should occupy roughly 15-25% of the image width
-- Think "movie poster close-up" not "wide establishing shot"
+FRAMING REQUIREMENTS (CRITICAL - MUST FOLLOW):
+- CLOSE-UP PORTRAIT FRAMING ONLY - chest-up or head-and-shoulders shot
+- The face MUST occupy at least 15-20% of the total image area
+- Frame as if taking a professional headshot or LinkedIn photo
+- Camera should be CLOSE to the subject - within 3-4 feet
+- DO NOT show anything below the chest/upper torso
+- DO NOT use wide shots, establishing shots, or full-body framing
+- DO NOT show legs, knees, or even the waist
+- The face is the HERO of this image - it must be large and prominent
+- Think "portrait photography" not "scene photography"
+- If in doubt, ZOOM IN CLOSER
 
 {identity_context}
 
-IMPORTANT: The face does not need to match any specific person. Generate any appropriate face for this body type.
-Focus on getting the body proportions, clothing, pose, and environment correct.
-The face will be replaced in a subsequent step, so focus on the scene, body, and overall composition.
+IMPORTANT: The head does not need to match any specific person. Generate any appropriate head for this body type.
+The face will be replaced in a subsequent step, so the face must be LARGE and CLEAR for face-swapping to work.
 
-DO NOT include any text, words, letters, or watermarks in the image. The image should be purely visual with no text elements.
+DO NOT include any text, words, letters, or watermarks in the image.
+
+FINAL REMINDER - FRAMING IS CRITICAL:
+This image will be used for face replacement. The face MUST be large in the frame.
+CLOSE-UP ONLY. Chest-up or head-and-shoulders. NO full body. NO waist-down. NO wide shots.
+The face should be the dominant feature of the image.
 """
 
 
@@ -245,10 +251,13 @@ def generate_generic_identity_image(client: genai.Client, output_name: str | Non
     
     # Retry loop - keep trying until success
     attempt = 0
+    start_time = time.time()
     while True:
         attempt += 1
+        elapsed = time.time() - start_time
         try:
-            print(f"Generating image (attempt {attempt})...")
+            print(f"Generating image (attempt {attempt}, elapsed: {elapsed:.0f}s)...")
+            attempt_start = time.time()
             
             response = client.models.generate_content(
                 model="gemini-3-pro-image-preview",
@@ -262,28 +271,47 @@ def generate_generic_identity_image(client: genai.Client, output_name: str | Non
                 ),
             )
             
-            for part in response.parts:
+            attempt_duration = time.time() - attempt_start
+            print(f"   API responded in {attempt_duration:.1f}s")
+            
+            # Check if we got a valid response
+            if not response.parts:
+                print(f"   WARNING: Response has no parts")
+                print(f"   Response object: {response}")
+                time.sleep(RETRY_DELAY)
+                continue
+            
+            for i, part in enumerate(response.parts):
+                print(f"   Processing part {i+1}/{len(response.parts)}...")
                 if getattr(part, 'thought', False):
+                    print(f"      (thought - skipping)")
                     continue
                 if part.text:
-                    print(f"[Model] {part.text}")
+                    print(f"   [Model] {part.text}")
                 if part.inline_data is not None:
+                    print(f"   Found image data, saving...")
                     image = part.as_image()
                     image.save(output_path)
-                    print(f"\n✓ Saved: {output_path}")
+                    total_time = time.time() - start_time
+                    print(f"\n✓ Saved: {output_path} (total time: {total_time:.1f}s)")
                     return output_path, image
             
-            print("WARNING: No image in response, retrying...")
+            print(f"   WARNING: No image in response parts, retrying...")
             
         except Exception as e:
             error_str = str(e)
+            error_type = type(e).__name__
             is_retryable = "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str.lower()
             
             if is_retryable:
-                print(f"⚠ Attempt {attempt} failed (overloaded), retrying in {RETRY_DELAY}s...")
+                print(f"⚠ Attempt {attempt} failed - retrying in {RETRY_DELAY}s...")
+                print(f"   Error type: {error_type}")
+                print(f"   Message: {error_str[:200]}{'...' if len(error_str) > 200 else ''}")
                 time.sleep(RETRY_DELAY)
             else:
-                print(f"✗ Failed with non-retryable error: {e}")
+                print(f"✗ Failed with non-retryable error:")
+                print(f"   Error type: {error_type}")
+                print(f"   Full message: {error_str}")
                 return output_path, None
 
 

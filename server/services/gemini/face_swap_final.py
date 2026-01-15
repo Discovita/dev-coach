@@ -49,13 +49,13 @@ while current != current.parent:
 # ============================================================================
 
 # The generic identity image (the scene - body, clothing, background stays the same)
-GENERIC_IDENTITY_IMAGE = "server/services/gemini/images/generic_identity/conductor_02.png"
+GENERIC_IDENTITY_IMAGE = "server/services/gemini/images/generic_identity/conductor_03.png"
 
 # The matched portrait (the face source - already has correct angle/lighting)
-MATCHED_PORTRAIT_IMAGE = "server/services/gemini/images/matched_portraits/conductor_02_matched.png"
+MATCHED_PORTRAIT_IMAGE = "server/services/gemini/images/matched_portraits/conductor_03_matched.png"
 
 # Output name for the final image
-OUTPUT_NAME = "conductor_06_final"
+OUTPUT_NAME = "conductor_07_final"
 
 # ============================================================================
 # OUTPUT CONFIGURATION
@@ -86,15 +86,22 @@ def build_prompt() -> str:
     """
     return """The following reference images show a person from multiple angles.
 
-Recreate the LAST IMAGE (the cinematic conductor scene) with this person as the conductor.
+You've been given two images. 
+The first image is a scene image.
+The second image is a portrait of another person that is matched to the scene image. 
+The portrait image has the head in the same position as the scene image.
+
+Goal:
+- Replace the face in the scene image with the face from the portrait image.
 
 Requirements:
 - The person must look exactly like the person in the reference headshots
-- Keep the same scene, pose, environment, and cinematic lighting from the last image
-- Same movie-poster quality aesthetic
-- Same dramatic composition
+- Keep the same scene, pose, environment, and lighting from the scene image
+- Same aesthetic
+- Same composition
 
 This is for a personal visualization project.
+DO NOT simply return the unedited scene image. Your goal is to switch the faces. Please ensure you accomplish this. 
 """
 
 
