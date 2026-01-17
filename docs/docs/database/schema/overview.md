@@ -26,6 +26,7 @@ The Dev Coach database schema is designed around a coaching workflow that guides
 - Identity creation and refinement workflow
 - Conversation history preservation
 - Action tracking for audit trails
+- Image generation with user appearance preferences and identity scene details
 
 ### 3. **Test Scenario Isolation**
 - All models support test scenario isolation
