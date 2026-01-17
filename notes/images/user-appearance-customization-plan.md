@@ -1205,6 +1205,196 @@ client/src/pages/images/Images.tsx
 
 ---
 
+### Phase 11: Scene Details Save Functionality ⬜
+
+#### Overview
+
+Currently, the Scene Details section (`SceneInputs` component) displays three text inputs (clothing, mood, setting) that are loaded from the selected identity. However, there is no explicit "Save" button - the data is only saved when the user clicks "Generate Image". This phase adds:
+
+1. A dedicated "Save Scene Details" button to the `SceneInputs` component
+2. Dirty state tracking (detect unsaved changes)
+3. Disable image generation until scene details are saved
+4. Auto-populate inputs when switching identities (already works)
+5. Success/error feedback on save
+
+#### Current Behavior
+
+- Scene inputs are loaded from identity when selected ✅
+- Scene inputs are saved to identity **only when Generate Image is clicked** ❌
+- No visual indication of unsaved changes ❌
+- Can generate image without explicitly saving scene details ❌
+
+#### Desired Behavior
+
+- Scene inputs are loaded from identity when selected ✅
+- Scene inputs can be saved independently via "Save Scene Details" button ✅
+- Visual indication when there are unsaved changes ✅
+- Cannot generate image until scene details are saved ✅
+- Success feedback after saving ✅
+
+#### Implementation Tasks
+
+##### 11.1 Update `SceneInputs` Component ⬜
+
+**File:** `client/src/pages/images/components/SceneInputs.tsx`
+
+**Changes:**
+1. Add props for:
+   - `savedValues: SceneInputsType` - the values currently saved on the identity
+   - `onSave: () => Promise<void>` - callback to save changes
+   - `isSaving: boolean` - loading state
+   - `disabled?: boolean` - disable inputs when no identity selected
+
+2. Add local state tracking:
+   - `isDirty` - computed by comparing `values` to `savedValues`
+   - `showSaveSuccess` - temporary success indicator
+
+3. Add footer section (similar to `AppearanceSelector`):
+   - Progress/status indicator (e.g., "Unsaved changes" or "All changes saved")
+   - "Save Scene Details" button
+   - Success indicator after save
+
+4. Style the component to match `AppearanceSelector` pattern
+
+**Reference Pattern:** `AppearanceSelector.tsx` lines 103-272
+
+##### 11.2 Update `Images.tsx` to Support Scene Save ⬜
+
+**File:** `client/src/pages/images/Images.tsx`
+
+**Changes:**
+
+1. Track saved scene values separately from local edits:
+   ```typescript
+   // Current local values (for editing)
+   const [sceneInputs, setSceneInputs] = useState<SceneInputsType>({...});
+   
+   // Track if scene has been saved (for enabling generate button)
+   const [sceneSaved, setSceneSaved] = useState(false);
+   ```
+
+2. Add `handleSceneSave` function:
+   - Calls `updateIdentity()` with scene fields
+   - Invalidates identity queries
+   - Sets `sceneSaved = true`
+   - Shows toast on success/error
+
+3. Update `useEffect` that loads scene inputs:
+   - When identity changes, load values AND set `sceneSaved = true` (if values exist) or `false` (if empty)
+
+4. Update `canGenerate` logic:
+   - Add condition: scene must be saved OR scene inputs must match saved values
+
+5. Remove scene save from `handleGenerate`:
+   - Currently `saveSceneInputsToIdentity()` is called before generating
+   - This should be removed - user must explicitly save first
+
+6. Pass new props to `SceneInputs`:
+   ```tsx
+   <SceneInputs
+     values={sceneInputs}
+     savedValues={selectedIdentity ? {
+       clothing: selectedIdentity.clothing || "",
+       mood: selectedIdentity.mood || "",
+       setting: selectedIdentity.setting || "",
+     } : { clothing: "", mood: "", setting: "" }}
+     onChange={setSceneInputs}
+     onSave={handleSceneSave}
+     isSaving={isSavingScene}
+     disabled={!selectedIdentityId}
+   />
+   ```
+
+##### 11.3 Add Save Loading State ⬜
+
+**File:** `client/src/pages/images/Images.tsx`
+
+**Changes:**
+1. Add `isSavingScene` state to track save operation
+2. Set to `true` when save starts, `false` when complete
+
+##### 11.4 Update Generate Button Disabled State ⬜
+
+**File:** `client/src/pages/images/Images.tsx`
+
+**Changes:**
+1. Update `canGenerate` to require scene details to be saved:
+   ```typescript
+   const sceneIsDirty = selectedIdentity && (
+     sceneInputs.clothing !== (selectedIdentity.clothing || "") ||
+     sceneInputs.mood !== (selectedIdentity.mood || "") ||
+     sceneInputs.setting !== (selectedIdentity.setting || "")
+   );
+   
+   const canGenerate =
+     selectedUserId &&
+     selectedIdentityId &&
+     hasReferenceImages &&
+     !isGenerating &&
+     !sceneIsDirty; // NEW: Must save scene details first
+   ```
+
+2. Add helper text below Generate button when disabled due to unsaved scene:
+   ```tsx
+   {sceneIsDirty && (
+     <p className="text-sm text-amber-600">
+       Save scene details before generating an image.
+     </p>
+   )}
+   ```
+
+##### 11.5 Add Validation Warning to SceneInputs ⬜
+
+**File:** `client/src/pages/images/components/SceneInputs.tsx`
+
+**Changes:**
+1. Add optional validation warning when fields are empty:
+   ```tsx
+   {!hasAllFields && (
+     <div className="flex items-start gap-2 p-3 bg-amber-50 ...">
+       <AlertCircle className="size-4 text-amber-600" />
+       <div className="text-sm text-amber-800">
+         <p className="font-medium">Fill in all scene details for best results</p>
+         <p className="text-xs mt-1">Missing: {missingFields.join(", ")}</p>
+       </div>
+     </div>
+   )}
+   ```
+
+2. Note: This is a soft warning, not a hard requirement - user can still save with empty fields
+
+#### Task Checklist
+
+| # | Task | File | Status |
+|---|------|------|--------|
+| 11.1 | Update SceneInputs with save button and dirty tracking | `SceneInputs.tsx` | ⬜ |
+| 11.2 | Update Images.tsx with handleSceneSave and new props | `Images.tsx` | ⬜ |
+| 11.3 | Add isSavingScene loading state | `Images.tsx` | ⬜ |
+| 11.4 | Update canGenerate to require saved scene | `Images.tsx` | ⬜ |
+| 11.5 | Add validation warning for empty fields | `SceneInputs.tsx` | ⬜ |
+
+#### Acceptance Criteria
+
+- [ ] When an identity is selected, scene details are auto-populated from the identity
+- [ ] Changes to scene inputs show "Unsaved changes" indicator
+- [ ] "Save Scene Details" button is enabled only when there are unsaved changes
+- [ ] Clicking "Save Scene Details" saves to the identity and shows success feedback
+- [ ] "Generate Image" button is disabled when scene details have unsaved changes
+- [ ] Helper text explains why Generate is disabled (if due to unsaved scene)
+- [ ] When switching identities, scene details are loaded from the new identity
+- [ ] Empty fields show a soft warning but don't block saving
+
+#### Files to Modify
+
+1. `client/src/pages/images/components/SceneInputs.tsx` - Add save button, dirty tracking, validation
+2. `client/src/pages/images/Images.tsx` - Add save handler, update canGenerate logic
+
+#### No Documentation Updates Required
+
+This is a frontend UX improvement - no API changes or new features that require documentation.
+
+---
+
 ### Testing & Verification ⬜
 - [ ] 34. Test appearance badge selection saves to user
 - [ ] 35. Test scene inputs save to identity
@@ -1228,8 +1418,9 @@ client/src/pages/images/Images.tsx
 | 6 | Frontend Types & Enums | ✅ | ✅ | ✅ Complete |
 | 7 | Frontend UI Components | ✅ | — | ✅ Complete |
 | 8 | Frontend API & Integration | ✅ | — | ✅ Complete |
-| 9 | Database & Prompt | 🔄 | ⬜ | 🔄 In Progress (prompt updated, migrations need manual application) |
+| 9 | Database & Prompt | ✅ | — | ✅
 | 10 | Appearance Selection UX | ✅ | — | ✅ Complete |
+| 11 | Scene Details Save UX | ⬜ | — | ⬜ Not Started |
 | ✓ | Testing & Verification | ⬜ | — | ⬜ Not Started |
 
 **Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Complete | — Not Applicable
