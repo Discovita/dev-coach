@@ -47,6 +47,21 @@ class Identity(ImageMixin, models.Model):
         null=True,
         blank=True,
     )
+    clothing = models.TextField(
+        null=True,
+        blank=True,
+        help_text="What the person is wearing in this identity visualization (e.g., 'linen button-down shirt')",
+    )
+    mood = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Emotional state/feeling in this identity visualization (e.g., 'proud and calm')",
+    )
+    setting = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Environment/location for this identity visualization (e.g., 'on a hill overlooking the ocean')",
+    )
     state = models.CharField(
         max_length=32,
         choices=IdentityState.choices,

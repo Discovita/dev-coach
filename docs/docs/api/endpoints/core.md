@@ -12,7 +12,7 @@
 
 - **URL:** `/core/enums/`
 - **Method:** `GET`
-- **Description:** Returns all enum values used throughout the application for populating dropdowns and select components in the frontend. This endpoint is primarily used by the Prompts management interface to populate form dropdowns.
+- **Description:** Returns all enum values used throughout the application for populating dropdowns and select components in the frontend. This endpoint is primarily used by the Prompts management interface to populate form dropdowns, and by the Images page for appearance customization options.
 - **Authentication:** Required
 - **Response:**
   - `200 OK`: Object containing all enum values with their display labels.
@@ -106,7 +106,171 @@
       "value": "user_goals",
       "label": "User Goals"
     }
-  ]
+  ],
+  "appearance": {
+    "genders": [
+      {
+        "value": "man",
+        "label": "Man"
+      },
+      {
+        "value": "woman",
+        "label": "Woman"
+      },
+      {
+        "value": "person",
+        "label": "Person"
+      }
+    ],
+    "skin_tones": [
+      {
+        "value": "light",
+        "label": "Light"
+      },
+      {
+        "value": "medium_light",
+        "label": "Medium-Light"
+      },
+      {
+        "value": "medium",
+        "label": "Medium"
+      },
+      {
+        "value": "medium_dark",
+        "label": "Medium-Dark"
+      },
+      {
+        "value": "dark",
+        "label": "Dark"
+      }
+    ],
+    "hair_colors": [
+      {
+        "value": "black",
+        "label": "Black"
+      },
+      {
+        "value": "brown",
+        "label": "Brown"
+      },
+      {
+        "value": "blonde",
+        "label": "Blonde"
+      },
+      {
+        "value": "red",
+        "label": "Red"
+      },
+      {
+        "value": "auburn",
+        "label": "Auburn"
+      },
+      {
+        "value": "gray",
+        "label": "Gray"
+      },
+      {
+        "value": "white",
+        "label": "White"
+      },
+      {
+        "value": "bald",
+        "label": "Bald"
+      }
+    ],
+    "eye_colors": [
+      {
+        "value": "brown",
+        "label": "Brown"
+      },
+      {
+        "value": "blue",
+        "label": "Blue"
+      },
+      {
+        "value": "green",
+        "label": "Green"
+      },
+      {
+        "value": "hazel",
+        "label": "Hazel"
+      },
+      {
+        "value": "gray",
+        "label": "Gray"
+      },
+      {
+        "value": "amber",
+        "label": "Amber"
+      }
+    ],
+    "heights": [
+      {
+        "value": "short",
+        "label": "Short"
+      },
+      {
+        "value": "below_average",
+        "label": "Below Average"
+      },
+      {
+        "value": "average",
+        "label": "Average"
+      },
+      {
+        "value": "above_average",
+        "label": "Above Average"
+      },
+      {
+        "value": "tall",
+        "label": "Tall"
+      }
+    ],
+    "builds": [
+      {
+        "value": "slim",
+        "label": "Slim"
+      },
+      {
+        "value": "athletic",
+        "label": "Athletic"
+      },
+      {
+        "value": "average",
+        "label": "Average"
+      },
+      {
+        "value": "stocky",
+        "label": "Stocky"
+      },
+      {
+        "value": "large",
+        "label": "Large"
+      }
+    ],
+    "age_ranges": [
+      {
+        "value": "twenties",
+        "label": "Young Adult (20s)"
+      },
+      {
+        "value": "thirties",
+        "label": "In Their 30s"
+      },
+      {
+        "value": "forties",
+        "label": "In Their 40s"
+      },
+      {
+        "value": "fifties",
+        "label": "Middle-Aged (50s)"
+      },
+      {
+        "value": "sixty_plus",
+        "label": "Mature (60+)"
+      }
+    ]
+  }
 }
 ```
 
@@ -135,6 +299,12 @@ This endpoint is primarily used by the Prompts management page (`/prompts`) to p
 - **Usage**: Multi-select component for choosing required context data
 - **Data Source**: `context_keys` array from the enums response
 - **Frontend Component**: Multi-select or checkbox group component
+
+#### 4. **Appearance Options (Images Page)**
+- **Purpose**: Provide appearance customization options for identity image generation
+- **Usage**: Badge selectors on the Images page for user appearance preferences
+- **Data Source**: `appearance` object containing arrays for genders, skin_tones, hair_colors, eye_colors, heights, builds, and age_ranges
+- **Frontend Component**: Badge selector components with visual swatches for skin tones
 
 ### Frontend Implementation
 

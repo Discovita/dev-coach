@@ -3,14 +3,21 @@ import { UserSelector } from "./components/UserSelector";
 import { ReferenceImageManager } from "./components/ReferenceImageManager";
 import { IdentitySelector } from "./components/IdentitySelector";
 import { GeneratedImageDisplay } from "./components/GeneratedImageDisplay";
+import { AppearanceSelector } from "./components/appearance/AppearanceSelector";
+import { SceneInputs } from "./components/SceneInputs";
 import { useProfile } from "@/hooks/use-profile";
 import { useImageGeneration } from "@/hooks/use-image-generation";
 import { useIdentities } from "@/hooks/use-identities";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
 import { useReferenceImages } from "@/hooks/use-reference-images";
+import { useUserAppearance } from "@/hooks/use-user-appearance";
+import { updateIdentity } from "@/api/identities";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Identity } from "@/types/identity";
+import { SceneInputs as SceneInputsType } from "@/types/sceneInputs";
+import { UserAppearance } from "@/types/userAppearance";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 
@@ -26,10 +33,29 @@ import { Sparkles } from "lucide-react";
  */
 export default function Images() {
   const { profile } = useProfile();
+  const queryClient = useQueryClient();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(null);
   const [additionalPrompt, setAdditionalPrompt] = useState("");
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
+  
+  // Appearance state (loaded from user profile)
+  const {
+    appearance,
+    isLoading: isLoadingAppearance,
+    updateAppearance,
+    isUpdating: isUpdatingAppearance,
+  } = useUserAppearance(selectedUserId);
+  
+  // Scene inputs state (loaded from selected identity)
+  const [sceneInputs, setSceneInputs] = useState<SceneInputsType>({
+    clothing: "",
+    mood: "",
+    setting: "",
+  });
+  
+  // Track if scene is being saved
+  const [isSavingScene, setIsSavingScene] = useState(false);
 
   const {
     generateImage,
@@ -74,12 +100,72 @@ export default function Images() {
     setGeneratedImageBase64(null);
   }, [selectedIdentityId]);
 
+  // Load scene inputs from selected identity when it changes
+  useEffect(() => {
+    if (selectedIdentity) {
+      setSceneInputs({
+        clothing: selectedIdentity.clothing || "",
+        mood: selectedIdentity.mood || "",
+        setting: selectedIdentity.setting || "",
+      });
+    } else {
+      setSceneInputs({
+        clothing: "",
+        mood: "",
+        setting: "",
+      });
+    }
+  }, [selectedIdentity]);
+
   // Update generated image when generation completes
   useEffect(() => {
     if (generateData?.image_base64) {
       setGeneratedImageBase64(generateData.image_base64);
     }
   }, [generateData]);
+
+  // Handle scene save - called when user clicks "Save Scene Details" button
+  const handleSceneSave = async () => {
+    if (!selectedIdentityId) {
+      toast.error("Please select an identity first");
+      return;
+    }
+    
+    setIsSavingScene(true);
+    try {
+      await updateIdentity(selectedIdentityId, {
+        clothing: sceneInputs.clothing || null,
+        mood: sceneInputs.mood || null,
+        setting: sceneInputs.setting || null,
+      });
+      // Invalidate identities queries to refresh
+      queryClient.invalidateQueries({ queryKey: ["user", "identities"] });
+      if (selectedUserId) {
+        queryClient.invalidateQueries({ queryKey: ["testScenarioUser", selectedUserId, "identities"] });
+      }
+      toast.success("Scene details saved");
+    } catch (error) {
+      toast.error("Failed to save scene details");
+      console.error("Failed to save scene inputs:", error);
+      throw error; // Re-throw so SceneInputs knows save failed
+    } finally {
+      setIsSavingScene(false);
+    }
+  };
+
+  // Handle appearance save - called when user clicks "Save Preferences" button
+  const handleAppearanceSave = async (newAppearance: UserAppearance) => {
+    if (!selectedUserId) return;
+    
+    try {
+      await updateAppearance(newAppearance);
+      toast.success("Appearance preferences saved");
+    } catch (error) {
+      toast.error("Failed to save appearance preferences");
+      console.error("Appearance update error:", error);
+      throw error; // Re-throw so AppearanceSelector knows save failed
+    }
+  };
 
   const handleGenerate = async () => {
     if (!selectedUserId || !selectedIdentityId) {
@@ -89,6 +175,18 @@ export default function Images() {
 
     if (!hasReferenceImages) {
       toast.error("Please upload at least one reference image before generating");
+      return;
+    }
+
+    // Check if scene details have unsaved changes
+    const sceneIsDirty = selectedIdentity && (
+      sceneInputs.clothing !== (selectedIdentity.clothing || "") ||
+      sceneInputs.mood !== (selectedIdentity.mood || "") ||
+      sceneInputs.setting !== (selectedIdentity.setting || "")
+    );
+
+    if (sceneIsDirty) {
+      toast.error("Please save scene details before generating an image");
       return;
     }
 
@@ -118,11 +216,19 @@ export default function Images() {
     handleGenerate();
   };
 
+  // Check if scene details have unsaved changes
+  const sceneIsDirty = selectedIdentity && (
+    sceneInputs.clothing !== (selectedIdentity.clothing || "") ||
+    sceneInputs.mood !== (selectedIdentity.mood || "") ||
+    sceneInputs.setting !== (selectedIdentity.setting || "")
+  );
+
   const canGenerate =
     selectedUserId &&
     selectedIdentityId &&
     hasReferenceImages &&
-    !isGenerating;
+    !isGenerating &&
+    !sceneIsDirty; // Must save scene details first
 
   return (
     <div className="flex flex-col h-full w-full p-6 overflow-y-auto">
@@ -139,6 +245,15 @@ export default function Images() {
         <div className="flex-1 min-h-0 space-y-8">
           <ReferenceImageManager userId={selectedUserId} />
 
+          {/* Appearance Selection Section (from User model) */}
+          {!isLoadingAppearance && (
+            <AppearanceSelector
+              appearance={appearance}
+              onSave={handleAppearanceSave}
+              isSaving={isUpdatingAppearance}
+            />
+          )}
+
           <div className="space-y-4">
             <IdentitySelector
               selectedUserId={selectedUserId}
@@ -148,6 +263,20 @@ export default function Images() {
 
             {selectedIdentityId && (
               <>
+                {/* Scene Inputs Section (from/to Identity model) */}
+                <SceneInputs
+                  values={sceneInputs}
+                  savedValues={selectedIdentity ? {
+                    clothing: selectedIdentity.clothing || "",
+                    mood: selectedIdentity.mood || "",
+                    setting: selectedIdentity.setting || "",
+                  } : { clothing: "", mood: "", setting: "" }}
+                  onChange={setSceneInputs}
+                  onSave={handleSceneSave}
+                  isSaving={isSavingScene}
+                  disabled={!selectedIdentityId}
+                />
+
                 {!hasReferenceImages && (
                   <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
@@ -173,31 +302,39 @@ export default function Images() {
                   </p>
                 </div>
 
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={handleGenerate}
-                  disabled={!canGenerate}
-                  className="h-12 px-6 text-base"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Sparkles className="size-5 animate-pulse" />
-                      Generating Image...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="size-5" />
-                      Generate Image
-                    </>
-                  )}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="default"
+                    onClick={handleGenerate}
+                    disabled={!canGenerate || isUpdatingAppearance}
+                    className="h-12 px-6 text-base"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Sparkles className="size-5 animate-pulse" />
+                        Generating Image...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="size-5" />
+                        Generate Image
+                      </>
+                    )}
+                  </Button>
 
-                {!hasReferenceImages && (
-                  <p className="text-sm text-neutral-500">
-                    Upload reference images above to enable image generation.
-                  </p>
-                )}
+                  {sceneIsDirty && (
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
+                      Save scene details before generating an image.
+                    </p>
+                  )}
+
+                  {!hasReferenceImages && (
+                    <p className="text-sm text-neutral-500">
+                      Upload reference images above to enable image generation.
+                    </p>
+                  )}
+                </div>
               </>
             )}
           </div>

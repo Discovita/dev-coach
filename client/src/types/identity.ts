@@ -27,4 +27,10 @@ export interface Identity {
   created_at?: string;
   /** Updated timestamp (optional) */
   updated_at?: string;
+  /** What the person is wearing in this identity visualization (optional) */
+  clothing?: string | null;
+  /** Emotional state/feeling in this identity visualization (optional) */
+  mood?: string | null;
+  /** Environment/location for this identity visualization (optional) */
+  setting?: string | null;
 }

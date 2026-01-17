@@ -39,6 +39,9 @@ GET /identities/?archived_only=true
     "name": "Creative Visionary",
     "i_am_statement": "I am a bold creator, transforming ideas into reality.",
     "visualization": "I see myself confidently presenting innovative solutions...",
+    "clothing": "linen button-down shirt",
+    "mood": "proud and calm",
+    "setting": "on a hill overlooking Hawaiian agricultural land",
     "state": "ACCEPTED",
     "notes": ["Note 1", "Note 2"],
     "category": "PASSIONS",
@@ -52,6 +55,9 @@ GET /identities/?archived_only=true
     "name": "Warrior",
     "i_am_statement": "I treat my body with strength, discipline, and respect.",
     "visualization": "I see myself in peak physical condition...",
+    "clothing": null,
+    "mood": null,
+    "setting": null,
     "state": "ACCEPTED",
     "notes": [],
     "category": "PHYSICAL_HEALTH",
@@ -84,6 +90,9 @@ GET /identities/?archived_only=true
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": "proud and calm",
+  "setting": "on a hill overlooking Hawaiian agricultural land",
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -107,6 +116,9 @@ GET /identities/?archived_only=true
     "name": "Creative Visionary",
     "i_am_statement": "I am a bold creator, transforming ideas into reality.",
     "visualization": "I see myself confidently presenting innovative solutions...",
+    "clothing": "linen button-down shirt",
+    "mood": "proud and calm",
+    "setting": "on a hill overlooking Hawaiian agricultural land",
     "state": "PROPOSED",
     "notes": ["Initial note about this identity"],
     "category": "PASSIONS"
@@ -126,6 +138,9 @@ GET /identities/?archived_only=true
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": "proud and calm",
+  "setting": "on a hill overlooking Hawaiian agricultural land",
   "state": "PROPOSED",
   "notes": ["Initial note about this identity"],
   "category": "PASSIONS",
@@ -151,6 +166,9 @@ GET /identities/?archived_only=true
     "name": "Updated Creative Visionary",
     "i_am_statement": "I am a bold creator, transforming ideas into reality with passion and purpose.",
     "visualization": "I see myself confidently presenting innovative solutions to large audiences...",
+    "clothing": "formal conductor's attire",
+    "mood": "passionate and focused",
+    "setting": "grand concert hall",
     "state": "ACCEPTED",
     "notes": ["Updated note 1", "Updated note 2"],
     "category": "PASSIONS"
@@ -171,6 +189,9 @@ GET /identities/?archived_only=true
   "name": "Updated Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality with passion and purpose.",
   "visualization": "I see myself confidently presenting innovative solutions to large audiences...",
+  "clothing": "formal conductor's attire",
+  "mood": "passionate and focused",
+  "setting": "grand concert hall",
   "state": "ACCEPTED",
   "notes": ["Updated note 1", "Updated note 2"],
   "category": "PASSIONS",
@@ -192,6 +213,7 @@ GET /identities/?archived_only=true
   ```json
   {
     "name": "Updated Creative Visionary",
+    "clothing": "linen button-down shirt",
     "state": "ACCEPTED"
   }
   ```
@@ -210,6 +232,9 @@ GET /identities/?archived_only=true
   "name": "Updated Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": null,
+  "setting": null,
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -270,6 +295,9 @@ image: [binary file data]
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": "proud and calm",
+  "setting": "on a hill overlooking Hawaiian agricultural land",
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -308,6 +336,9 @@ image: [binary file data]
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": null,
+  "mood": null,
+  "setting": null,
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -392,6 +423,9 @@ Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
 | `name` | String (max 255) | Optional | Concise label for the identity (e.g., 'Creative Visionary') |
 | `i_am_statement` | Text | Optional | An 'I am' statement with a brief description |
 | `visualization` | Text | Optional | A vivid mental image (added in the visualization stage) |
+| `clothing` | Text | Optional | What the person is wearing in this identity visualization (e.g., 'linen button-down shirt') |
+| `mood` | Text | Optional | Emotional state/feeling in this identity visualization (e.g., 'proud and calm') |
+| `setting` | Text | Optional | Environment/location for this identity visualization (e.g., 'on a hill overlooking the ocean') |
 | `state` | String | Optional | Current state of the identity. See [Identity State Choices](#identity-state-choices) |
 | `notes` | Array of Strings | Optional | List of notes about the identity |
 | `category` | String | Required | Category this identity belongs to. See [Identity Category Choices](#identity-category-choices) |

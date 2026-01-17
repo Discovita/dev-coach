@@ -38,6 +38,18 @@ class UserAdmin(BaseUserAdmin):
         ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
         ("Important dates", {"fields": ("last_login", "created_at", "updated_at")}),
         ("Verification", {"fields": ("verification_token", "email_verification_sent_at")}),
+        ("Appearance Preferences", {
+            "fields": (
+                "gender",
+                "skin_tone",
+                "hair_color",
+                "eye_color",
+                "height",
+                "build",
+                "age_range",
+            ),
+            "description": "User appearance preferences for image generation visualization.",
+        }),
     )
     add_fieldsets = (
         (None, {

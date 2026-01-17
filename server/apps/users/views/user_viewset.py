@@ -29,15 +29,34 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @decorators.action(
         detail=False,
-        methods=["get"],
+        methods=["get", "patch"],
         permission_classes=[IsAuthenticated],
         url_path="me",
     )
     def me(self, request: Request):
         """
-        Get current user data.
+        Get or update current user data.
+        
+        GET /api/v1/user/me/
+        Returns: UserProfileSerializer data
+        
+        PATCH /api/v1/user/me/
+        Body: Partial user data (see UserProfileSerializer)
+        Returns: 200 OK, updated user profile object.
         """
-        return Response(UserProfileSerializer(request.user).data)
+        from rest_framework import status
+
+        if request.method == "PATCH":
+            serializer = UserProfileSerializer(
+                request.user, data=request.data, partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # GET request
+            return Response(UserProfileSerializer(request.user).data)
 
     @decorators.action(
         detail=False,

@@ -1,5 +1,6 @@
 import { COACH_BASE_URL } from "@/constants/api";
 import { authFetch } from "@/utils/authFetch";
+import { Identity } from "@/types/identity";
 
 /**
  * Download I Am Statements PDF.
@@ -24,4 +25,26 @@ export async function downloadIAmStatementsPdf(userId?: string): Promise<Blob> {
   const response = await authFetch(url, {});
   if (!response.ok) throw new Error("Failed to download PDF");
   return response.blob();
+}
+
+/**
+ * Update an identity (partial update).
+ * PATCH /api/v1/identities/{id}/
+ * @param identityId - UUID of the identity to update
+ * @param data - Partial identity data to update
+ * @returns Updated Identity
+ */
+export async function updateIdentity(
+  identityId: string,
+  data: Partial<Identity>
+): Promise<Identity> {
+  const response = await authFetch(`${COACH_BASE_URL}/identities/${identityId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: "Failed to update identity" }));
+    throw new Error(error.error || "Failed to update identity");
+  }
+  return response.json();
 }

@@ -68,6 +68,8 @@ const sidebars: SidebarsConfig = {
                 "core-systems/prompt-manager/context-keys/current-message",
                 "core-systems/prompt-manager/context-keys/previous-message",
                 "core-systems/prompt-manager/context-keys/recent-messages",
+                "core-systems/prompt-manager/context-keys/appearance-context",
+                "core-systems/prompt-manager/context-keys/scene-context",
                 {
                   type: "category",
                   label: "Brainstorming Category Context",
@@ -202,6 +204,14 @@ const sidebars: SidebarsConfig = {
       items: [
         "frontend/react_query_implementation",
         "frontend/image-handling",
+        {
+          type: "category",
+          label: "Types",
+          items: [
+            "frontend/types/user-appearance",
+            "frontend/types/scene-inputs",
+          ],
+        },
       ],
     },
     {

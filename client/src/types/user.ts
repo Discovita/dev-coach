@@ -18,4 +18,12 @@ export interface User {
   identities?: Identity[];
   coach_state?: CoachState;
   chat_messages?: Message[];
+  /** Appearance preferences for image generation (optional) */
+  gender?: string | null;
+  skin_tone?: string | null;
+  hair_color?: string | null;
+  eye_color?: string | null;
+  height?: string | null;
+  build?: string | null;
+  age_range?: string | null;
 }
