@@ -51,6 +51,14 @@ class UserSerializer(serializers.ModelSerializer):
             "identities",  # User's identities
             "coach_state",  # User's coach state
             "chat_messages",  # User's chat messages
+            # Appearance/visualization preferences for image generation
+            "gender_visualization",  # Gender visualization preference
+            "skin_tone",  # Skin tone preference
+            "hair_color",  # Hair color preference
+            "eye_color",  # Eye color preference
+            "height_visualization",  # Height visualization preference
+            "build_visualization",  # Build visualization preference
+            "age_range_visualization",  # Age range visualization preference
         )
         read_only_fields = (
             "created_at",
