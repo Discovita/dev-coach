@@ -1077,16 +1077,16 @@ Update IMAGE_GENERATION prompt to include:
 
 ---
 
-### Phase 8: Frontend - API & Integration ⬜
-- [ ] 25. Add API functions for user appearance
-- [ ] 26. Create `useUserAppearance` hook
-- [ ] 27. Update `Images.tsx` to include `AppearanceSelector`
-- [ ] 28. Update `Images.tsx` to include `SceneInputs`
-- [ ] 29. Wire up save/load for appearance data
-- [ ] 30. Wire up save/load for scene data (to Identity)
+### Phase 8: Frontend - API & Integration ✅
+- [x] 25. Add API functions for user appearance
+- [x] 26. Create `useUserAppearance` hook
+- [x] 27. Update `Images.tsx` to include `AppearanceSelector`
+- [x] 28. Update `Images.tsx` to include `SceneInputs`
+- [x] 29. Wire up save/load for appearance data
+- [x] 30. Wire up save/load for scene data (to Identity)
 
 **📚 Phase 8 Documentation:**
-- [ ] (No docs needed - frontend implementation details)
+- [x] (No docs needed - frontend implementation details)
 
 ---
 
@@ -1122,7 +1122,7 @@ Update IMAGE_GENERATION prompt to include:
 | 5 | Prompt Integration | ✅ | ✅ | ✅ Complete |
 | 6 | Frontend Types & Enums | ✅ | ✅ | ✅ Complete |
 | 7 | Frontend UI Components | ✅ | — | ✅ Complete |
-| 8 | Frontend API & Integration | ⬜ | — | ⬜ Not Started |
+| 8 | Frontend API & Integration | ✅ | — | ✅ Complete |
 | 9 | Database & Prompt | ⬜ | ⬜ | ⬜ Not Started |
 | ✓ | Testing & Verification | ⬜ | — | ⬜ Not Started |
 
