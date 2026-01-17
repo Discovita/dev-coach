@@ -1205,7 +1205,7 @@ client/src/pages/images/Images.tsx
 
 ---
 
-### Phase 11: Scene Details Save Functionality ⬜
+### Phase 11: Scene Details Save Functionality ✅
 
 #### Overview
 
@@ -1226,15 +1226,15 @@ Currently, the Scene Details section (`SceneInputs` component) displays three te
 
 #### Desired Behavior
 
-- Scene inputs are loaded from identity when selected ✅
-- Scene inputs can be saved independently via "Save Scene Details" button ✅
-- Visual indication when there are unsaved changes ✅
-- Cannot generate image until scene details are saved ✅
-- Success feedback after saving ✅
+- Scene inputs are loaded from identity when selected ✅ **IMPLEMENTED**
+- Scene inputs can be saved independently via "Save Scene Details" button ✅ **IMPLEMENTED**
+- Visual indication when there are unsaved changes ✅ **IMPLEMENTED**
+- Cannot generate image until scene details are saved ✅ **IMPLEMENTED**
+- Success feedback after saving ✅ **IMPLEMENTED**
 
 #### Implementation Tasks
 
-##### 11.1 Update `SceneInputs` Component ⬜
+##### 11.1 Update `SceneInputs` Component ✅
 
 **File:** `client/src/pages/images/components/SceneInputs.tsx`
 
@@ -1258,7 +1258,7 @@ Currently, the Scene Details section (`SceneInputs` component) displays three te
 
 **Reference Pattern:** `AppearanceSelector.tsx` lines 103-272
 
-##### 11.2 Update `Images.tsx` to Support Scene Save ⬜
+##### 11.2 Update `Images.tsx` to Support Scene Save ✅
 
 **File:** `client/src/pages/images/Images.tsx`
 
@@ -1305,7 +1305,7 @@ Currently, the Scene Details section (`SceneInputs` component) displays three te
    />
    ```
 
-##### 11.3 Add Save Loading State ⬜
+##### 11.3 Add Save Loading State ✅
 
 **File:** `client/src/pages/images/Images.tsx`
 
@@ -1313,7 +1313,7 @@ Currently, the Scene Details section (`SceneInputs` component) displays three te
 1. Add `isSavingScene` state to track save operation
 2. Set to `true` when save starts, `false` when complete
 
-##### 11.4 Update Generate Button Disabled State ⬜
+##### 11.4 Update Generate Button Disabled State ✅
 
 **File:** `client/src/pages/images/Images.tsx`
 
@@ -1343,7 +1343,7 @@ Currently, the Scene Details section (`SceneInputs` component) displays three te
    )}
    ```
 
-##### 11.5 Add Validation Warning to SceneInputs ⬜
+##### 11.5 Add Validation Warning to SceneInputs ✅
 
 **File:** `client/src/pages/images/components/SceneInputs.tsx`
 
@@ -1367,22 +1367,22 @@ Currently, the Scene Details section (`SceneInputs` component) displays three te
 
 | # | Task | File | Status |
 |---|------|------|--------|
-| 11.1 | Update SceneInputs with save button and dirty tracking | `SceneInputs.tsx` | ⬜ |
-| 11.2 | Update Images.tsx with handleSceneSave and new props | `Images.tsx` | ⬜ |
-| 11.3 | Add isSavingScene loading state | `Images.tsx` | ⬜ |
-| 11.4 | Update canGenerate to require saved scene | `Images.tsx` | ⬜ |
-| 11.5 | Add validation warning for empty fields | `SceneInputs.tsx` | ⬜ |
+| 11.1 | Update SceneInputs with save button and dirty tracking | `SceneInputs.tsx` | ✅ |
+| 11.2 | Update Images.tsx with handleSceneSave and new props | `Images.tsx` | ✅ |
+| 11.3 | Add isSavingScene loading state | `Images.tsx` | ✅ |
+| 11.4 | Update canGenerate to require saved scene | `Images.tsx` | ✅ |
+| 11.5 | Add validation warning for empty fields | `SceneInputs.tsx` | ✅ |
 
 #### Acceptance Criteria
 
-- [ ] When an identity is selected, scene details are auto-populated from the identity
-- [ ] Changes to scene inputs show "Unsaved changes" indicator
-- [ ] "Save Scene Details" button is enabled only when there are unsaved changes
-- [ ] Clicking "Save Scene Details" saves to the identity and shows success feedback
-- [ ] "Generate Image" button is disabled when scene details have unsaved changes
-- [ ] Helper text explains why Generate is disabled (if due to unsaved scene)
-- [ ] When switching identities, scene details are loaded from the new identity
-- [ ] Empty fields show a soft warning but don't block saving
+- [x] When an identity is selected, scene details are auto-populated from the identity
+- [x] Changes to scene inputs show "Unsaved changes" indicator
+- [x] "Save Scene Details" button is enabled only when there are unsaved changes
+- [x] Clicking "Save Scene Details" saves to the identity and shows success feedback
+- [x] "Generate Image" button is disabled when scene details have unsaved changes
+- [x] Helper text explains why Generate is disabled (if due to unsaved scene)
+- [x] When switching identities, scene details are loaded from the new identity
+- [x] Empty fields show a soft warning but don't block saving
 
 #### Files to Modify
 
@@ -1420,7 +1420,7 @@ This is a frontend UX improvement - no API changes or new features that require 
 | 8 | Frontend API & Integration | ✅ | — | ✅ Complete |
 | 9 | Database & Prompt | ✅ | — | ✅
 | 10 | Appearance Selection UX | ✅ | — | ✅ Complete |
-| 11 | Scene Details Save UX | ⬜ | — | ⬜ Not Started |
+| 11 | Scene Details Save UX | ✅ | — | ✅ Complete |
 | ✓ | Testing & Verification | ⬜ | — | ⬜ Not Started |
 
 **Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Complete | — Not Applicable
