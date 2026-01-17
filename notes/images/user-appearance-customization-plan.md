@@ -135,13 +135,13 @@ Three scene-specific questions are stored on the **Identity Model**:
 ### User Model (New Fields for Appearance)
 ```python
 # Appearance preferences - set via Images page (future: Settings page)
-gender_visualization      # man, woman, person
+gender                    # man, woman, person
 skin_tone                 # light, medium_light, medium, medium_dark, dark
 hair_color                # black, brown, blonde, red, auburn, gray, white, bald
 eye_color                 # brown, blue, green, hazel, gray, amber
-height_visualization      # short, below_average, average, above_average, tall
-build_visualization       # slim, athletic, average, stocky, large
-age_range_visualization   # twenties, thirties, forties, fifties, sixty_plus
+height                    # short, below_average, average, above_average, tall
+build                     # slim, athletic, average, stocky, large
+age_range                 # twenties, thirties, forties, fifties, sixty_plus
 ```
 
 ### Identity Model (New Fields for Scene)
@@ -242,12 +242,12 @@ def enums(self, request, *args, **kwargs):
 # server/apps/users/models/user.py (add fields)
 
 # Appearance/visualization preferences for image generation
-gender_visualization = models.CharField(
+gender = models.CharField(
     max_length=20,
     choices=Gender.choices,
     null=True,
     blank=True,
-    help_text="How the user wants to be visualized (gender)"
+    help_text="Gender preference for image generation"
 )
 skin_tone = models.CharField(
     max_length=20,
@@ -270,26 +270,26 @@ eye_color = models.CharField(
     blank=True,
     help_text="Preferred eye color for image generation"
 )
-height_visualization = models.CharField(
+height = models.CharField(
     max_length=20,
     choices=Height.choices,
     null=True,
     blank=True,
-    help_text="How the user wants to be visualized (height)"
+    help_text="Height preference for image generation"
 )
-build_visualization = models.CharField(
+build = models.CharField(
     max_length=20,
     choices=Build.choices,
     null=True,
     blank=True,
-    help_text="How the user wants to be visualized (build)"
+    help_text="Build/body type preference for image generation"
 )
-age_range_visualization = models.CharField(
+age_range = models.CharField(
     max_length=20,
     choices=AgeRange.choices,
     null=True,
     blank=True,
-    help_text="How the user wants to be visualized (age)"
+    help_text="Age range preference for image generation"
 )
 ```
 
@@ -365,24 +365,24 @@ def get_appearance_context(user: User) -> str:
     parts = []
     
     # Height
-    if user.height_visualization:
-        parts.append(user.height_visualization.replace("_", " "))
+    if user.height:
+        parts.append(user.height.replace("_", " "))
     
     # Build
-    if user.build_visualization:
-        parts.append(user.build_visualization.replace("_", " "))
+    if user.build:
+        parts.append(user.build.replace("_", " "))
     
     # Skin tone
     if user.skin_tone:
         parts.append(f"{user.skin_tone.replace('_', '-')}-skinned")
     
     # Gender
-    if user.gender_visualization:
-        parts.append(user.gender_visualization)
+    if user.gender:
+        parts.append(user.gender)
     
     # Age
-    if user.age_range_visualization:
-        parts.append(user.age_range_visualization.replace("_", " "))
+    if user.age_range:
+        parts.append(user.age_range.replace("_", " "))
     
     # Hair and eyes
     hair_eye_parts = []
@@ -514,7 +514,7 @@ Could be part of existing user update endpoint or a dedicated endpoint:
 ```
 PATCH /api/v1/user/me/appearance
 {
-    "gender_visualization": "man",
+    "gender": "man",
     "skin_tone": "medium",
     "hair_color": "brown",
     ...
