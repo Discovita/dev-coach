@@ -37,7 +37,7 @@ export function BadgeSelector<T extends string = string>({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+              "px-3 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer",
               "border-2",
               value === option.value
                 ? "border-gold-500 bg-gold-500 text-black dark:bg-gold-600 dark:text-white"

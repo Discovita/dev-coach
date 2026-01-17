@@ -27,7 +27,7 @@ export function SkinToneSelector({ value, onChange }: SkinToneSelectorProps) {
             key={tone.value}
             type="button"
             onClick={() => onChange(tone.value)}
-            className={`w-10 h-10 rounded-full transition-all border-2 ${
+            className={`w-10 h-10 rounded-full transition-all border-2 cursor-pointer ${
               value === tone.value
                 ? "border-gold-500 ring-2 ring-gold-500 ring-offset-2 dark:ring-gold-600"
                 : "border-transparent hover:border-neutral-400 dark:hover:border-neutral-600"
