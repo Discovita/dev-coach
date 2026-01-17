@@ -1100,7 +1100,7 @@ Update IMAGE_GENERATION prompt to include:
 - [x] 33. Update IMAGE_GENERATION prompt with `{scene_context}` placeholder
 
 **📚 Phase 9 Documentation:**
-- [ ] Update `docs/docs/database/schema/overview.md` - Reflect schema changes (if applicable)
+- [x] Update `docs/docs/database/schema/overview.md` - Reflect schema changes (if applicable)
 
 ---
 
