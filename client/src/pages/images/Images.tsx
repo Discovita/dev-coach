@@ -142,8 +142,8 @@ export default function Images() {
     }
   };
 
-  // Handle appearance changes - save immediately
-  const handleAppearanceChange = async (newAppearance: UserAppearance) => {
+  // Handle appearance save - called when user clicks "Save Preferences" button
+  const handleAppearanceSave = async (newAppearance: UserAppearance) => {
     if (!selectedUserId) return;
     
     try {
@@ -152,6 +152,7 @@ export default function Images() {
     } catch (error) {
       toast.error("Failed to save appearance preferences");
       console.error("Appearance update error:", error);
+      throw error; // Re-throw so AppearanceSelector knows save failed
     }
   };
 
@@ -220,7 +221,8 @@ export default function Images() {
           {!isLoadingAppearance && (
             <AppearanceSelector
               appearance={appearance}
-              onAppearanceChange={handleAppearanceChange}
+              onSave={handleAppearanceSave}
+              isSaving={isUpdatingAppearance}
             />
           )}
 
