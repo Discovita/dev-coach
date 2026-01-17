@@ -28,8 +28,8 @@ export async function downloadIAmStatementsPdf(userId?: string): Promise<Blob> {
 }
 
 /**
- * Update an identity (partial update).
- * PATCH /api/v1/identities/{id}/
+ * Update an identity (partial update) for the current user.
+ * PATCH /api/v1/identities/{id}
  * @param identityId - UUID of the identity to update
  * @param data - Partial identity data to update
  * @returns Updated Identity
@@ -41,6 +41,29 @@ export async function updateIdentity(
   const response = await authFetch(`${COACH_BASE_URL}/identities/${identityId}`, {
     method: "PATCH",
     body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: "Failed to update identity" }));
+    throw new Error(error.error || "Failed to update identity");
+  }
+  return response.json();
+}
+
+/**
+ * Update any identity (admin only, partial update).
+ * Used for updating test user identities from admin pages.
+ * PATCH /api/v1/admin/identities/update-identity
+ * @param identityId - UUID of the identity to update
+ * @param data - Partial identity data to update
+ * @returns Updated Identity
+ */
+export async function adminUpdateIdentity(
+  identityId: string,
+  data: Partial<Identity>
+): Promise<Identity> {
+  const response = await authFetch(`${COACH_BASE_URL}/admin/identities/update-identity`, {
+    method: "PATCH",
+    body: JSON.stringify({ identity_id: identityId, ...data }),
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: "Failed to update identity" }));

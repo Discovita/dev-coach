@@ -34,11 +34,58 @@ class AdminIdentityViewSet(viewsets.GenericViewSet):
     
     Supported operations:
     - download_i_am_statements_pdf_for_user: GET /api/v1/admin/identities/download-i-am-statements-pdf-for-user/?user_id=<id>
-    - generate_image: POST /api/v1/admin/identities/generate-image/
-    - save_generated_image: POST /api/v1/admin/identities/save-generated-image/
+    - generate_image: POST /api/v1/admin/identities/generate-image
+    - save_generated_image: POST /api/v1/admin/identities/save-generated-image
+    - update_identity: PATCH /api/v1/admin/identities/update-identity
     """
     
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    @action(
+        detail=False,
+        methods=["PATCH"],
+        url_path="update-identity",
+        permission_classes=[IsAdminUser],
+    )
+    def update_identity(self, request):
+        """
+        Partially update any identity (admin only).
+        PATCH /api/v1/admin/identities/update-identity
+        
+        This endpoint allows admins to update any identity regardless of owner.
+        Used for updating test user identities from the admin image generation page.
+        
+        Body (JSON):
+        - identity_id: UUID of the identity to update
+        - ...other partial identity fields (see IdentitySerializer)
+        
+        Returns: 200 OK, updated identity object.
+        """
+        identity_id = request.data.get("identity_id")
+        
+        if not identity_id:
+            return Response(
+                {"success": False, "error": "identity_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        try:
+            identity = Identity.objects.get(id=identity_id)
+        except Identity.DoesNotExist:
+            return Response(
+                {"success": False, "error": "Identity not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        # Remove identity_id from data before passing to serializer
+        update_data = {k: v for k, v in request.data.items() if k != "identity_id"}
+        
+        serializer = IdentitySerializer(identity, data=update_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        log.info(f"Admin {request.user.id} updated identity {identity_id}")
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=False,

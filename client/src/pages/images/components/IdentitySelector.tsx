@@ -64,8 +64,11 @@ export function IdentitySelector({
     }
 
     try {
-      // Fetch the original image directly
-      const response = await fetch(selectedIdentity.image.original);
+      // Fetch the original image directly with CORS mode
+      const response = await fetch(selectedIdentity.image.original, {
+        mode: 'cors',
+        credentials: 'omit'
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch image");
       }

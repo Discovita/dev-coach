@@ -11,7 +11,7 @@ import { useIdentities } from "@/hooks/use-identities";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
 import { useReferenceImages } from "@/hooks/use-reference-images";
 import { useUserAppearance } from "@/hooks/use-user-appearance";
-import { updateIdentity } from "@/api/identities";
+import { updateIdentity, adminUpdateIdentity } from "@/api/identities";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -125,6 +125,7 @@ export default function Images() {
   }, [generateData]);
 
   // Handle scene save - called when user clicks "Save Scene Details" button
+  // Uses admin endpoint for test user identities, regular endpoint for own identities
   const handleSceneSave = async () => {
     if (!selectedIdentityId) {
       toast.error("Please select an identity first");
@@ -133,11 +134,19 @@ export default function Images() {
     
     setIsSavingScene(true);
     try {
-      await updateIdentity(selectedIdentityId, {
+      const updateData = {
         clothing: sceneInputs.clothing || null,
         mood: sceneInputs.mood || null,
         setting: sceneInputs.setting || null,
-      });
+      };
+      
+      // Use admin endpoint for test user identities, regular endpoint for own identities
+      if (isCurrentUser) {
+        await updateIdentity(selectedIdentityId, updateData);
+      } else {
+        await adminUpdateIdentity(selectedIdentityId, updateData);
+      }
+      
       // Invalidate identities queries to refresh
       queryClient.invalidateQueries({ queryKey: ["user", "identities"] });
       if (selectedUserId) {

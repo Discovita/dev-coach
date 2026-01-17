@@ -11,8 +11,8 @@ import { UserAppearance } from "@/types/userAppearance";
  * Endpoints covered:
  * - getUserAppearance:    GET    /api/v1/user/me/ (for current user)
  * - updateUserAppearance:  PATCH  /api/v1/user/me/ (for current user)
- * - getTestUserAppearance: GET    /api/v1/admin/users/{id}/profile/ (for admin/test users)
- * - updateTestUserAppearance: PATCH /api/v1/admin/users/{id}/profile/ (for admin/test users)
+ * - getTestUserAppearance: GET    /api/v1/test-user/{id}/profile (for admin/test users)
+ * - updateTestUserAppearance: PATCH /api/v1/test-user/{id}/update-profile (for admin/test users)
  */
 
 /**
@@ -66,12 +66,12 @@ export async function updateUserAppearance(
 
 /**
  * Get appearance preferences for a test scenario user (admin only).
- * GET /api/v1/admin/users/{id}/profile/
+ * GET /api/v1/test-user/{id}/profile
  * @param userId - UUID of the user
  * @returns UserAppearance from user profile
  */
 export async function getTestUserAppearance(userId: string): Promise<UserAppearance> {
-  const response = await authFetch(`${COACH_BASE_URL}/admin/users/${userId}/profile`, {});
+  const response = await authFetch(`${COACH_BASE_URL}/test-user/${userId}/profile`, {});
   if (!response.ok) throw new Error("Failed to fetch test user appearance");
   const data = await response.json();
   return {
@@ -87,7 +87,7 @@ export async function getTestUserAppearance(userId: string): Promise<UserAppeara
 
 /**
  * Update appearance preferences for a test scenario user (admin only).
- * PATCH /api/v1/admin/users/{id}/profile/
+ * PATCH /api/v1/test-user/{id}/update-profile
  * @param userId - UUID of the user
  * @param appearance - Partial UserAppearance to update
  * @returns Updated UserAppearance
@@ -96,7 +96,7 @@ export async function updateTestUserAppearance(
   userId: string,
   appearance: Partial<UserAppearance>
 ): Promise<UserAppearance> {
-  const response = await authFetch(`${COACH_BASE_URL}/admin/users/${userId}/profile`, {
+  const response = await authFetch(`${COACH_BASE_URL}/test-user/${userId}/update-profile`, {
     method: "PATCH",
     body: JSON.stringify(appearance),
   });
