@@ -1395,6 +1395,113 @@ This is a frontend UX improvement - no API changes or new features that require 
 
 ---
 
+### Phase 12: Prompts Page Dropdown Navigation ⬜
+
+#### Overview
+
+The Prompts page currently has 14 tabs (11 coaching phases + 2 prompt types + 1 "New Prompt") displayed in a horizontal `TabsList`. These tabs overflow even on large screens, making navigation difficult. This phase replaces the horizontal tabs with a grouped dropdown select for all screen sizes.
+
+#### Current Behavior
+
+- All 14 tabs displayed horizontally in a `TabsList` component
+- `overflow-x-auto` applied but horizontal scrolling is awkward
+- Tabs overflow even on large screens
+- Users cannot easily see or access all prompt types
+
+#### Desired Behavior
+
+- Replace horizontal tabs with a grouped `Select` dropdown
+- Dropdown groups options into logical categories:
+  - **Prompt Types:** Image Generation, Sentinel
+  - **Coaching Phases:** All 11 coaching phases
+  - **Actions:** New Prompt
+- Clean, consistent navigation on all screen sizes
+
+#### Implementation Tasks
+
+##### 12.1 Update `Prompts.tsx` to Use Dropdown Navigation
+
+**File:** `client/src/pages/prompts/Prompts.tsx`
+
+**Changes:**
+1. Replace the `TabsList` with a `Select` dropdown component
+2. Group options by category using `SelectGroup` and `SelectLabel`
+3. Keep the `Tabs` wrapper for content switching, just change the trigger UI
+
+**Before:**
+```tsx
+<TabsList className="border-b-2 bg-gold-200 border-gold-500 flex gap-2 w-full dark:text-gold-50 overflow-x-auto">
+  {allTabs.map((tab) => (
+    <TabsTrigger key={tab.value} value={tab.value}>
+      {tab.label}
+    </TabsTrigger>
+  ))}
+</TabsList>
+```
+
+**After:**
+```tsx
+<div className="w-full p-2 bg-gold-200 border-b-2 border-gold-500">
+  <Select value={activeCoachState ?? undefined} onValueChange={setActiveCoachState}>
+    <SelectTrigger className="w-full bg-white dark:bg-gold-800">
+      <SelectValue placeholder="Select prompt type..." />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectGroup>
+        <SelectLabel>Prompt Types</SelectLabel>
+        <SelectItem value="image_generation">Image Generation</SelectItem>
+        <SelectItem value="sentinel">Sentinel</SelectItem>
+      </SelectGroup>
+      <SelectGroup>
+        <SelectLabel>Coaching Phases</SelectLabel>
+        {enums.coaching_phases.map((phase) => (
+          <SelectItem key={phase.value} value={phase.value}>
+            {phase.label}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+      <SelectGroup>
+        <SelectLabel>Actions</SelectLabel>
+        <SelectItem value="new">New Prompt</SelectItem>
+      </SelectGroup>
+    </SelectContent>
+  </Select>
+</div>
+```
+
+##### 12.2 Remove Unused TabsList Import
+
+**File:** `client/src/pages/prompts/Prompts.tsx`
+
+**Changes:**
+- Remove `TabsList` and `TabsTrigger` from imports (no longer needed)
+- Keep `Tabs` and `TabsContent` for content switching
+
+#### Task Checklist
+
+| # | Task | File | Status |
+|---|------|------|--------|
+| 12.1 | Replace TabsList with grouped Select dropdown | `Prompts.tsx` | ⬜ |
+| 12.2 | Remove unused TabsList/TabsTrigger imports | `Prompts.tsx` | ⬜ |
+
+#### Acceptance Criteria
+
+- [ ] Dropdown displays with grouped options (Prompt Types, Coaching Phases, Actions)
+- [ ] Selecting from dropdown navigates to the correct tab content
+- [ ] All 14 prompt types are accessible via the dropdown
+- [ ] Dropdown styling matches the gold theme
+- [ ] Tab content continues to display correctly when selection changes
+
+#### Files to Modify
+
+1. `client/src/pages/prompts/Prompts.tsx` - Replace TabsList with Select dropdown
+
+#### No Documentation Updates Required
+
+This is a frontend UX improvement - no API changes or new features that require documentation.
+
+---
+
 ### Testing & Verification ⬜
 - [ ] 34. Test appearance badge selection saves to user
 - [ ] 35. Test scene inputs save to identity
@@ -1418,9 +1525,10 @@ This is a frontend UX improvement - no API changes or new features that require 
 | 6 | Frontend Types & Enums | ✅ | ✅ | ✅ Complete |
 | 7 | Frontend UI Components | ✅ | — | ✅ Complete |
 | 8 | Frontend API & Integration | ✅ | — | ✅ Complete |
-| 9 | Database & Prompt | ✅ | — | ✅
+| 9 | Database & Prompt | ✅ | — | ✅ Complete |
 | 10 | Appearance Selection UX | ✅ | — | ✅ Complete |
 | 11 | Scene Details Save UX | ✅ | — | ✅ Complete |
+| 12 | Prompts Page Responsive Tabs | ⬜ | — | ⬜ Not Started |
 | ✓ | Testing & Verification | ⬜ | — | ⬜ Not Started |
 
 **Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Complete | — Not Applicable
