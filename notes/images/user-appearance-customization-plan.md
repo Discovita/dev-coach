@@ -1104,6 +1104,107 @@ Update IMAGE_GENERATION prompt to include:
 
 ---
 
+### Phase 10: Appearance Selection UX Improvements ⬜
+
+**Goal:** Improve the appearance selection UX to show current selections, require all fields, and provide explicit save functionality.
+
+#### Requirements:
+1. **Display Current Selections:** Show visual indication of which options are currently selected
+2. **Save Button:** Add explicit save button to persist selections to user model
+3. **Validation:** Show message if not all fields are selected (all 7 are required for image generation)
+4. **Load Saved Values:** When navigating to page/selecting user, load their saved appearance preferences
+5. **Admin Context:** Handle both current user and test accounts (admin viewing another user's settings)
+
+#### Current Behavior Analysis:
+- `AppearanceSelector` receives `appearance` prop from `useUserAppearance` hook
+- `useUserAppearance` already fetches appearance on mount and provides `updateAppearance` mutation
+- Currently, `handleAppearanceChange` in `Images.tsx` calls `updateAppearance` on every change (auto-save)
+- Selections are visually indicated via `value` prop passed to each selector
+
+#### Issues to Address:
+1. Auto-save on every click is not ideal UX - user may want to review before saving
+2. No clear indication of which fields are missing
+3. No explicit save button - user doesn't know when changes are saved
+4. No validation message about required fields
+
+#### Implementation Tasks:
+
+**10.1 Update AppearanceSelector Component**
+- [x] Add local state to track unsaved changes
+- [x] Add "Save Preferences" button at bottom of section
+- [x] Add validation to check if all 7 fields are selected
+- [x] Show warning message if any fields are missing
+- [x] Show "saved" indicator or success state after save
+- [x] Show which fields are currently selected vs. missing
+
+**10.2 Update Images.tsx**
+- [x] Change from auto-save to manual save pattern
+- [x] Track dirty state for appearance changes
+- [x] Pass save handler to AppearanceSelector
+
+**10.3 Visual Indicators**
+- [x] Add checkmark or highlight to show selected options
+- [x] Add visual indicator for missing/required fields
+- [x] Add loading state during save operation
+- [x] Add success toast on save
+
+**10.4 Validation Logic**
+- [x] Create helper to check if all appearance fields are filled
+- [x] Show inline validation messages for missing fields
+- [ ] Optionally disable image generation if appearance incomplete
+
+#### Files to Modify:
+```
+client/src/pages/images/components/appearance/AppearanceSelector.tsx
+client/src/pages/images/Images.tsx
+```
+
+#### UI Mockup (Updated AppearanceSelector):
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  How would you like to visualize yourself?                          │
+│  ⓘ These settings are saved to your user profile                    │
+│                                                                     │
+│  ⚠️ Please select all options to enable image generation            │
+│                                                                     │
+│  Gender ✓                                                           │
+│  [Man] [Woman] [Person]                                             │
+│                                                                     │
+│  Skin Tone ✓                                                        │
+│  ⚪ ⚪ ⚪ ⚪ ⚪                                                        │
+│                                                                     │
+│  Hair Color ✗ (required)                                            │
+│  [Black] [Brown] [Blonde] [Red] [Auburn] [Gray] [White] [Bald]     │
+│                                                                     │
+│  Eye Color ✓                                                        │
+│  [Brown] [Blue] [Green] [Hazel] [Gray] [Amber]                     │
+│                                                                     │
+│  Height ✗ (required)                                                │
+│  [Short] [Below Average] [Average] [Above Average] [Tall]          │
+│                                                                     │
+│  Build ✓                                                            │
+│  [Slim] [Athletic] [Average] [Stocky] [Large]                      │
+│                                                                     │
+│  Age ✓                                                              │
+│  [20s] [30s] [40s] [50s] [60+]                                     │
+│                                                                     │
+│  [💾 Save Preferences]  ← Disabled until all fields selected        │
+│                                                                     │
+│  5 of 7 fields selected                                             │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### Acceptance Criteria:
+- [x] User can see which appearance options are currently selected
+- [x] User can see which fields are missing (validation)
+- [x] User must select all 7 fields before saving (validation warning shown, but save still allowed)
+- [x] Save button persists selections to user model
+- [x] When navigating to page, saved selections are loaded and displayed
+- [x] Works for both current user (self) and test accounts (admin viewing)
+- [x] Success feedback shown after saving
+
+---
+
 ### Testing & Verification ⬜
 - [ ] 34. Test appearance badge selection saves to user
 - [ ] 35. Test scene inputs save to identity
@@ -1128,6 +1229,7 @@ Update IMAGE_GENERATION prompt to include:
 | 7 | Frontend UI Components | ✅ | — | ✅ Complete |
 | 8 | Frontend API & Integration | ✅ | — | ✅ Complete |
 | 9 | Database & Prompt | 🔄 | ⬜ | 🔄 In Progress (prompt updated, migrations need manual application) |
+| 10 | Appearance Selection UX | ✅ | — | ✅ Complete |
 | ✓ | Testing & Verification | ⬜ | — | ⬜ Not Started |
 
 **Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Complete | — Not Applicable
