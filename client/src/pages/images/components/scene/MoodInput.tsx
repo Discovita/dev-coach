@@ -3,6 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface MoodInputProps {
   value: string | null | undefined;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
 /**
@@ -11,7 +12,7 @@ interface MoodInputProps {
  * Text input for "How do you feel?" scene question.
  * Allows free-form description of emotional state/feeling for identity visualization.
  */
-export function MoodInput({ value, onChange }: MoodInputProps) {
+export function MoodInput({ value, onChange, disabled = false }: MoodInputProps) {
   return (
     <div className="space-y-2">
       <label htmlFor="mood-input" className="text-sm font-medium">
@@ -24,6 +25,7 @@ export function MoodInput({ value, onChange }: MoodInputProps) {
         onChange={(e) => onChange(e.target.value)}
         rows={2}
         className="max-w-2xl"
+        disabled={disabled}
       />
     </div>
   );

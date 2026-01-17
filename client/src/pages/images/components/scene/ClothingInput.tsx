@@ -3,6 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface ClothingInputProps {
   value: string | null | undefined;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
 /**
@@ -11,7 +12,7 @@ interface ClothingInputProps {
  * Text input for "What are you wearing?" scene question.
  * Allows free-form description of clothing/attire for identity visualization.
  */
-export function ClothingInput({ value, onChange }: ClothingInputProps) {
+export function ClothingInput({ value, onChange, disabled = false }: ClothingInputProps) {
   return (
     <div className="space-y-2">
       <label htmlFor="clothing-input" className="text-sm font-medium">
@@ -24,6 +25,7 @@ export function ClothingInput({ value, onChange }: ClothingInputProps) {
         onChange={(e) => onChange(e.target.value)}
         rows={2}
         className="max-w-2xl"
+        disabled={disabled}
       />
     </div>
   );

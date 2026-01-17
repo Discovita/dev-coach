@@ -53,6 +53,9 @@ export default function Images() {
     mood: "",
     setting: "",
   });
+  
+  // Track if scene is being saved
+  const [isSavingScene, setIsSavingScene] = useState(false);
 
   const {
     generateImage,
@@ -121,10 +124,14 @@ export default function Images() {
     }
   }, [generateData]);
 
-  // Save scene inputs to identity before generating
-  const saveSceneInputsToIdentity = async () => {
-    if (!selectedIdentityId || !selectedIdentity) return;
+  // Handle scene save - called when user clicks "Save Scene Details" button
+  const handleSceneSave = async () => {
+    if (!selectedIdentityId) {
+      toast.error("Please select an identity first");
+      return;
+    }
     
+    setIsSavingScene(true);
     try {
       await updateIdentity(selectedIdentityId, {
         clothing: sceneInputs.clothing || null,
@@ -136,9 +143,13 @@ export default function Images() {
       if (selectedUserId) {
         queryClient.invalidateQueries({ queryKey: ["testScenarioUser", selectedUserId, "identities"] });
       }
+      toast.success("Scene details saved");
     } catch (error) {
+      toast.error("Failed to save scene details");
       console.error("Failed to save scene inputs:", error);
-      // Don't show error toast here - let generation proceed
+      throw error; // Re-throw so SceneInputs knows save failed
+    } finally {
+      setIsSavingScene(false);
     }
   };
 
@@ -167,8 +178,17 @@ export default function Images() {
       return;
     }
 
-    // Save scene inputs to identity before generating
-    await saveSceneInputsToIdentity();
+    // Check if scene details have unsaved changes
+    const sceneIsDirty = selectedIdentity && (
+      sceneInputs.clothing !== (selectedIdentity.clothing || "") ||
+      sceneInputs.mood !== (selectedIdentity.mood || "") ||
+      sceneInputs.setting !== (selectedIdentity.setting || "")
+    );
+
+    if (sceneIsDirty) {
+      toast.error("Please save scene details before generating an image");
+      return;
+    }
 
     try {
       await generateImage({
@@ -196,11 +216,19 @@ export default function Images() {
     handleGenerate();
   };
 
+  // Check if scene details have unsaved changes
+  const sceneIsDirty = selectedIdentity && (
+    sceneInputs.clothing !== (selectedIdentity.clothing || "") ||
+    sceneInputs.mood !== (selectedIdentity.mood || "") ||
+    sceneInputs.setting !== (selectedIdentity.setting || "")
+  );
+
   const canGenerate =
     selectedUserId &&
     selectedIdentityId &&
     hasReferenceImages &&
-    !isGenerating;
+    !isGenerating &&
+    !sceneIsDirty; // Must save scene details first
 
   return (
     <div className="flex flex-col h-full w-full p-6 overflow-y-auto">
@@ -238,7 +266,15 @@ export default function Images() {
                 {/* Scene Inputs Section (from/to Identity model) */}
                 <SceneInputs
                   values={sceneInputs}
+                  savedValues={selectedIdentity ? {
+                    clothing: selectedIdentity.clothing || "",
+                    mood: selectedIdentity.mood || "",
+                    setting: selectedIdentity.setting || "",
+                  } : { clothing: "", mood: "", setting: "" }}
                   onChange={setSceneInputs}
+                  onSave={handleSceneSave}
+                  isSaving={isSavingScene}
+                  disabled={!selectedIdentityId}
                 />
 
                 {!hasReferenceImages && (
@@ -266,31 +302,39 @@ export default function Images() {
                   </p>
                 </div>
 
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={handleGenerate}
-                  disabled={!canGenerate || isUpdatingAppearance}
-                  className="h-12 px-6 text-base"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Sparkles className="size-5 animate-pulse" />
-                      Generating Image...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="size-5" />
-                      Generate Image
-                    </>
-                  )}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="default"
+                    onClick={handleGenerate}
+                    disabled={!canGenerate || isUpdatingAppearance}
+                    className="h-12 px-6 text-base"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Sparkles className="size-5 animate-pulse" />
+                        Generating Image...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="size-5" />
+                        Generate Image
+                      </>
+                    )}
+                  </Button>
 
-                {!hasReferenceImages && (
-                  <p className="text-sm text-neutral-500">
-                    Upload reference images above to enable image generation.
-                  </p>
-                )}
+                  {sceneIsDirty && (
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
+                      Save scene details before generating an image.
+                    </p>
+                  )}
+
+                  {!hasReferenceImages && (
+                    <p className="text-sm text-neutral-500">
+                      Upload reference images above to enable image generation.
+                    </p>
+                  )}
+                </div>
               </>
             )}
           </div>

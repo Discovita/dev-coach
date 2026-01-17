@@ -3,6 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface SettingInputProps {
   value: string | null | undefined;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
 /**
@@ -11,7 +12,7 @@ interface SettingInputProps {
  * Text input for "What is the setting?" scene question.
  * Allows free-form description of environment/location for identity visualization.
  */
-export function SettingInput({ value, onChange }: SettingInputProps) {
+export function SettingInput({ value, onChange, disabled = false }: SettingInputProps) {
   return (
     <div className="space-y-2">
       <label htmlFor="setting-input" className="text-sm font-medium">
@@ -24,6 +25,7 @@ export function SettingInput({ value, onChange }: SettingInputProps) {
         onChange={(e) => onChange(e.target.value)}
         rows={3}
         className="max-w-2xl"
+        disabled={disabled}
       />
     </div>
   );
