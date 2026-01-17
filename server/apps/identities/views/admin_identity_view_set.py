@@ -144,6 +144,15 @@ class AdminIdentityViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
+        # Fetch user for appearance context
+        try:
+            target_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": f"User {user_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
         # Fetch reference images for the user
         reference_images = list(ReferenceImage.objects.filter(user_id=user_id))
         if not reference_images:
@@ -153,10 +162,11 @@ class AdminIdentityViewSet(viewsets.GenericViewSet):
             )
         
         try:
-            # Generate the image
+            # Generate the image (pass user for appearance context)
             pil_image = generate_identity_image(
                 identity=identity,
                 reference_images=reference_images,
+                user=target_user,
                 additional_prompt=additional_prompt,
             )
             

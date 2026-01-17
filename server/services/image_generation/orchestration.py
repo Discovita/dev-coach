@@ -15,6 +15,7 @@ from typing import List, Optional
 
 from apps.identities.models import Identity
 from apps.reference_images.models import ReferenceImage
+from apps.users.models import User
 from services.image_generation.gemini_image_service import GeminiImageService
 from services.image_generation.utils.load_pil_images import load_pil_images_from_references
 from services.prompt_manager.manager import PromptManager
@@ -26,6 +27,7 @@ log = configure_logging(__name__)
 def generate_identity_image(
     identity: Identity,
     reference_images: List[ReferenceImage],
+    user: User,
     additional_prompt: str = "",
     aspect_ratio: str = "16:9",
     resolution: str = "4K",
@@ -34,13 +36,14 @@ def generate_identity_image(
     Generate an identity image using Gemini.
     
     This is the main orchestration function that:
-    1. Builds the prompt using PromptManager
+    1. Builds the prompt using PromptManager (with user appearance context)
     2. Loads PIL images from ReferenceImage models
     3. Calls GeminiImageService to generate the image
     
     Args:
         identity: The Identity to generate an image for
         reference_images: List of ReferenceImage models for the user
+        user: The User for appearance preferences and context
         additional_prompt: Optional extra instructions from admin
         aspect_ratio: Image aspect ratio (default "16:9")
         resolution: Image resolution (default "4K")
@@ -54,9 +57,13 @@ def generate_identity_image(
     """
     log.info(f"Generating image for identity: {identity.name}")
     
-    # 1. Build prompt using PromptManager
+    # 1. Build prompt using PromptManager (includes user appearance context)
     prompt_manager = PromptManager()
-    prompt = prompt_manager.create_image_generation_prompt(identity, additional_prompt)
+    prompt = prompt_manager.create_image_generation_prompt(
+        identity=identity,
+        user=user,
+        additional_prompt=additional_prompt,
+    )
     log.debug(f"Built prompt: {prompt[:100]}...")
     
     # 2. Load PIL images from ReferenceImage models
