@@ -13,6 +13,10 @@ IMAGE_GENERATION_PROMPT_BODY = """We're creating an Identity Image for this pers
 
 {identity_context}
 
+{appearance_context}
+
+{scene_context}
+
 Create a professional, confident, and inspiring image for this Identity.
 It is critical that the person's face remains intact and recognizable.
 The image should be an ideal visualization of them living as this Identity.
@@ -67,7 +71,7 @@ class Command(BaseCommand):
             version=version,
             name="Identity Image Generation Prompt",
             description="Prompt template for generating identity images using Gemini. "
-                        "Uses {identity_context} and {additional_prompt} placeholders.",
+                        "Uses {identity_context}, {appearance_context}, {scene_context}, and {additional_prompt} placeholders.",
             body=IMAGE_GENERATION_PROMPT_BODY,
             required_context_keys=[ContextKey.IDENTITY_FOR_IMAGE],
             allowed_actions=[],  # No actions for image generation
