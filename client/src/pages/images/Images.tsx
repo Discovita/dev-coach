@@ -3,14 +3,21 @@ import { UserSelector } from "./components/UserSelector";
 import { ReferenceImageManager } from "./components/ReferenceImageManager";
 import { IdentitySelector } from "./components/IdentitySelector";
 import { GeneratedImageDisplay } from "./components/GeneratedImageDisplay";
+import { AppearanceSelector } from "./components/appearance/AppearanceSelector";
+import { SceneInputs } from "./components/SceneInputs";
 import { useProfile } from "@/hooks/use-profile";
 import { useImageGeneration } from "@/hooks/use-image-generation";
 import { useIdentities } from "@/hooks/use-identities";
 import { useTestScenarioUserIdentities } from "@/hooks/test-scenario/use-test-scenario-user-identities";
 import { useReferenceImages } from "@/hooks/use-reference-images";
+import { useUserAppearance } from "@/hooks/use-user-appearance";
+import { updateIdentity } from "@/api/identities";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Identity } from "@/types/identity";
+import { SceneInputs as SceneInputsType } from "@/types/sceneInputs";
+import { UserAppearance } from "@/types/userAppearance";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 
@@ -26,10 +33,26 @@ import { Sparkles } from "lucide-react";
  */
 export default function Images() {
   const { profile } = useProfile();
+  const queryClient = useQueryClient();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(null);
   const [additionalPrompt, setAdditionalPrompt] = useState("");
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
+  
+  // Appearance state (loaded from user profile)
+  const {
+    appearance,
+    isLoading: isLoadingAppearance,
+    updateAppearance,
+    isUpdating: isUpdatingAppearance,
+  } = useUserAppearance(selectedUserId);
+  
+  // Scene inputs state (loaded from selected identity)
+  const [sceneInputs, setSceneInputs] = useState<SceneInputsType>({
+    clothing: "",
+    mood: "",
+    setting: "",
+  });
 
   const {
     generateImage,
@@ -74,12 +97,63 @@ export default function Images() {
     setGeneratedImageBase64(null);
   }, [selectedIdentityId]);
 
+  // Load scene inputs from selected identity when it changes
+  useEffect(() => {
+    if (selectedIdentity) {
+      setSceneInputs({
+        clothing: selectedIdentity.clothing || "",
+        mood: selectedIdentity.mood || "",
+        setting: selectedIdentity.setting || "",
+      });
+    } else {
+      setSceneInputs({
+        clothing: "",
+        mood: "",
+        setting: "",
+      });
+    }
+  }, [selectedIdentity]);
+
   // Update generated image when generation completes
   useEffect(() => {
     if (generateData?.image_base64) {
       setGeneratedImageBase64(generateData.image_base64);
     }
   }, [generateData]);
+
+  // Save scene inputs to identity before generating
+  const saveSceneInputsToIdentity = async () => {
+    if (!selectedIdentityId || !selectedIdentity) return;
+    
+    try {
+      await updateIdentity(selectedIdentityId, {
+        clothing: sceneInputs.clothing || null,
+        mood: sceneInputs.mood || null,
+        setting: sceneInputs.setting || null,
+      });
+      // Invalidate identities queries to refresh
+      queryClient.invalidateQueries({ queryKey: ["user", "identities"] });
+      if (selectedUserId) {
+        queryClient.invalidateQueries({ queryKey: ["testScenarioUser", selectedUserId, "identities"] });
+      }
+    } catch (error) {
+      console.error("Failed to save scene inputs:", error);
+      // Don't show error toast here - let generation proceed
+    }
+  };
+
+  // Handle appearance changes - save immediately
+  const handleAppearanceChange = async (newAppearance: UserAppearance) => {
+    if (!selectedUserId) return;
+    
+    try {
+      await updateAppearance(newAppearance);
+      toast.success("Appearance preferences saved");
+    } catch (error) {
+      toast.error("Failed to save appearance preferences");
+      console.error("Appearance update error:", error);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!selectedUserId || !selectedIdentityId) {
@@ -91,6 +165,9 @@ export default function Images() {
       toast.error("Please upload at least one reference image before generating");
       return;
     }
+
+    // Save scene inputs to identity before generating
+    await saveSceneInputsToIdentity();
 
     try {
       await generateImage({
@@ -139,6 +216,14 @@ export default function Images() {
         <div className="flex-1 min-h-0 space-y-8">
           <ReferenceImageManager userId={selectedUserId} />
 
+          {/* Appearance Selection Section (from User model) */}
+          {!isLoadingAppearance && (
+            <AppearanceSelector
+              appearance={appearance}
+              onAppearanceChange={handleAppearanceChange}
+            />
+          )}
+
           <div className="space-y-4">
             <IdentitySelector
               selectedUserId={selectedUserId}
@@ -148,6 +233,12 @@ export default function Images() {
 
             {selectedIdentityId && (
               <>
+                {/* Scene Inputs Section (from/to Identity model) */}
+                <SceneInputs
+                  values={sceneInputs}
+                  onChange={setSceneInputs}
+                />
+
                 {!hasReferenceImages && (
                   <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
@@ -177,7 +268,7 @@ export default function Images() {
                   type="button"
                   variant="default"
                   onClick={handleGenerate}
-                  disabled={!canGenerate}
+                  disabled={!canGenerate || isUpdatingAppearance}
                   className="h-12 px-6 text-base"
                 >
                   {isGenerating ? (
