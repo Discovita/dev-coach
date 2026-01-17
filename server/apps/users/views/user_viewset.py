@@ -148,3 +148,26 @@ class UserViewSet(viewsets.GenericViewSet):
 
         messages = reset_user_coaching_data(request.user)
         return Response(ChatMessageSerializer(messages, many=True).data)
+
+    @decorators.action(
+        detail=False,
+        methods=["patch"],
+        permission_classes=[IsAuthenticated],
+        url_path="me",
+    )
+    def update_me(self, request: Request):
+        """
+        Update the authenticated user's profile data (partial update).
+        PATCH /api/v1/user/me/
+        Body: Partial user data (see UserProfileSerializer)
+        Returns: 200 OK, updated user profile object.
+        """
+        from rest_framework import status
+
+        serializer = UserProfileSerializer(
+            request.user, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

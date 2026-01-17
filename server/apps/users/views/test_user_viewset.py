@@ -167,3 +167,31 @@ class TestUserViewSet(viewsets.GenericViewSet):
 
         messages = get_user_chat_messages(user)
         return Response(ChatMessageSerializer(messages, many=True).data)
+
+    @decorators.action(
+        detail=True,
+        methods=["patch"],
+        permission_classes=[IsAuthenticated],
+        url_path="profile",
+    )
+    def update_profile(self, request, pk=None):
+        """
+        Update profile data for a test scenario user (admin only, partial update).
+        PATCH /api/v1/admin/users/{id}/profile/
+        Body: Partial user data (see UserProfileSerializer)
+        Returns: 200 OK, updated user profile object.
+        """
+        from rest_framework import status
+        from apps.users.serializers import UserProfileSerializer
+
+        if not self.admin_required(request):
+            return Response({"detail": "Not authorized."}, status=403)
+        user = self.get_test_user(pk)
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+
+        serializer = UserProfileSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
