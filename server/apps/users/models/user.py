@@ -129,12 +129,12 @@ class User(AbstractUser):
     )
 
     # Appearance/visualization preferences for image generation
-    gender_visualization = models.CharField(
+    gender = models.CharField(
         max_length=20,
         choices=Gender.choices,
         null=True,
         blank=True,
-        help_text="How the user wants to be visualized (gender)"
+        help_text="Gender preference for image generation"
     )
     skin_tone = models.CharField(
         max_length=20,
@@ -157,26 +157,26 @@ class User(AbstractUser):
         blank=True,
         help_text="Preferred eye color for image generation"
     )
-    height_visualization = models.CharField(
+    height = models.CharField(
         max_length=20,
         choices=Height.choices,
         null=True,
         blank=True,
-        help_text="How the user wants to be visualized (height)"
+        help_text="Height preference for image generation"
     )
-    build_visualization = models.CharField(
+    build = models.CharField(
         max_length=20,
         choices=Build.choices,
         null=True,
         blank=True,
-        help_text="How the user wants to be visualized (build)"
+        help_text="Build/body type preference for image generation"
     )
-    age_range_visualization = models.CharField(
+    age_range = models.CharField(
         max_length=20,
         choices=AgeRange.choices,
         null=True,
         blank=True,
-        help_text="How the user wants to be visualized (age)"
+        help_text="Age range preference for image generation"
     )
 
     objects = UserManager()

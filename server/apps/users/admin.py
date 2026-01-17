@@ -40,13 +40,13 @@ class UserAdmin(BaseUserAdmin):
         ("Verification", {"fields": ("verification_token", "email_verification_sent_at")}),
         ("Appearance Preferences", {
             "fields": (
-                "gender_visualization",
+                "gender",
                 "skin_tone",
                 "hair_color",
                 "eye_color",
-                "height_visualization",
-                "build_visualization",
-                "age_range_visualization",
+                "height",
+                "build",
+                "age_range",
             ),
             "description": "User appearance preferences for image generation visualization.",
         }),
