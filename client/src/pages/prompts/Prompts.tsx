@@ -1,7 +1,7 @@
 import { NewPromptForm } from "./components/NewPromptForm";
 import { useCoreEnums } from "@/hooks/use-core";
 import { useState, useEffect, useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { usePrompts } from "@/hooks/use-prompts";
 import {
   createPrompt,
@@ -322,18 +322,6 @@ export function PromptsTabs() {
   if (!enums?.coaching_phases) return <div>No coach states found.</div>;
   if (promptsError) return <div>Error loading prompts.</div>;
 
-  // Add a special tab for creating a new prompt
-  // Prompt type tabs (Image Generation, Sentinel) come first, before coaching phases
-  const allTabs = [
-    { value: "image_generation", label: "Image Generation" },
-    { value: "sentinel", label: "Sentinel" },
-    ...enums.coaching_phases.map((state: { value: string; label: string }) => ({
-      value: state.value,
-      label: state.label,
-    })),
-    { value: "new", label: "New Prompt" },
-  ];
-
   return (
     // Wrapper ensures height propagation for flex children (Textarea fill fix)
     <div className="flex-1 min-h-0 h-full flex flex-col">
@@ -342,13 +330,35 @@ export function PromptsTabs() {
         onValueChange={setActiveCoachState}
         className="flex flex-frow flex-col text-left flex-1 min-h-0 h-full"
       >
-        <TabsList className="border-b-2 bg-gold-200 border-gold-500 flex gap-2 w-full dark:text-gold-50 overflow-x-auto">
-          {allTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="w-full p-2 bg-gold-200 border-b-2 border-gold-500">
+          <Select
+            value={activeCoachState ?? undefined}
+            onValueChange={(value) => setActiveCoachState(value)}
+          >
+            <SelectTrigger className="w-full bg-white dark:bg-gold-800">
+              <SelectValue placeholder="Select prompt type..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Prompt Types</SelectLabel>
+                <SelectItem value="image_generation">Image Generation</SelectItem>
+                <SelectItem value="sentinel">Sentinel</SelectItem>
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>Coaching Phases</SelectLabel>
+                {enums.coaching_phases.map((phase: { value: string; label: string }) => (
+                  <SelectItem key={phase.value} value={phase.value}>
+                    {phase.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>Actions</SelectLabel>
+                <SelectItem value="new">New Prompt</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
         {/* Render tab panel for Image Generation prompts */}
         <TabsContent
           key="image_generation"

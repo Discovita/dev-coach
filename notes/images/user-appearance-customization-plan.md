@@ -1395,7 +1395,7 @@ This is a frontend UX improvement - no API changes or new features that require 
 
 ---
 
-### Phase 12: Prompts Page Dropdown Navigation ⬜
+### Phase 12: Prompts Page Dropdown Navigation ✅
 
 #### Overview
 
@@ -1481,16 +1481,16 @@ The Prompts page currently has 14 tabs (11 coaching phases + 2 prompt types + 1 
 
 | # | Task | File | Status |
 |---|------|------|--------|
-| 12.1 | Replace TabsList with grouped Select dropdown | `Prompts.tsx` | ⬜ |
-| 12.2 | Remove unused TabsList/TabsTrigger imports | `Prompts.tsx` | ⬜ |
+| 12.1 | Replace TabsList with grouped Select dropdown | `Prompts.tsx` | ✅ |
+| 12.2 | Remove unused TabsList/TabsTrigger imports | `Prompts.tsx` | ✅ |
 
 #### Acceptance Criteria
 
-- [ ] Dropdown displays with grouped options (Prompt Types, Coaching Phases, Actions)
-- [ ] Selecting from dropdown navigates to the correct tab content
-- [ ] All 14 prompt types are accessible via the dropdown
-- [ ] Dropdown styling matches the gold theme
-- [ ] Tab content continues to display correctly when selection changes
+- [x] Dropdown displays with grouped options (Prompt Types, Coaching Phases, Actions)
+- [x] Selecting from dropdown navigates to the correct tab content
+- [x] All 14 prompt types are accessible via the dropdown
+- [x] Dropdown styling matches the gold theme
+- [x] Tab content continues to display correctly when selection changes
 
 #### Files to Modify
 
@@ -1528,7 +1528,7 @@ This is a frontend UX improvement - no API changes or new features that require 
 | 9 | Database & Prompt | ✅ | — | ✅ Complete |
 | 10 | Appearance Selection UX | ✅ | — | ✅ Complete |
 | 11 | Scene Details Save UX | ✅ | — | ✅ Complete |
-| 12 | Prompts Page Responsive Tabs | ⬜ | — | ⬜ Not Started |
+| 12 | Prompts Page Responsive Tabs | ✅ | — | ✅ Complete |
 | ✓ | Testing & Verification | ⬜ | — | ⬜ Not Started |
 
 **Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Complete | — Not Applicable
