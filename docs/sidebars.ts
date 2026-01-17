@@ -204,6 +204,14 @@ const sidebars: SidebarsConfig = {
       items: [
         "frontend/react_query_implementation",
         "frontend/image-handling",
+        {
+          type: "category",
+          label: "Types",
+          items: [
+            "frontend/types/user-appearance",
+            "frontend/types/scene-inputs",
+          ],
+        },
       ],
     },
     {
