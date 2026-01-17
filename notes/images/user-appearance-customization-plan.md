@@ -1090,10 +1090,14 @@ Update IMAGE_GENERATION prompt to include:
 
 ---
 
-### Phase 9: Database & Prompt ⬜
-- [ ] 31. Apply all migrations
-- [ ] 32. Update IMAGE_GENERATION prompt with `{appearance_context}` placeholder
-- [ ] 33. Update IMAGE_GENERATION prompt with `{scene_context}` placeholder
+### Phase 9: Database & Prompt 🔄
+- [x] 31. Apply all migrations (requires manual execution with Docker access)
+  - ```sh
+  COMPOSE_PROJECT_NAME=dev-coach-local \
+    docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend python manage.py migrate
+  ```
+- [x] 32. Update IMAGE_GENERATION prompt with `{appearance_context}` placeholder
+- [x] 33. Update IMAGE_GENERATION prompt with `{scene_context}` placeholder
 
 **📚 Phase 9 Documentation:**
 - [ ] Update `docs/docs/database/schema/overview.md` - Reflect schema changes (if applicable)
@@ -1123,7 +1127,7 @@ Update IMAGE_GENERATION prompt to include:
 | 6 | Frontend Types & Enums | ✅ | ✅ | ✅ Complete |
 | 7 | Frontend UI Components | ✅ | — | ✅ Complete |
 | 8 | Frontend API & Integration | ✅ | — | ✅ Complete |
-| 9 | Database & Prompt | ⬜ | ⬜ | ⬜ Not Started |
+| 9 | Database & Prompt | 🔄 | ⬜ | 🔄 In Progress (prompt updated, migrations need manual application) |
 | ✓ | Testing & Verification | ⬜ | — | ⬜ Not Started |
 
 **Legend:** ⬜ Not Started | 🔄 In Progress | ✅ Complete | — Not Applicable
