@@ -984,22 +984,22 @@ Update IMAGE_GENERATION prompt to include:
 
 ## Implementation Progress
 
-> **Status:** Not Started | **Last Updated:** 2026-01-17
+> **Status:** In Progress | **Last Updated:** 2026-01-17
 
-### Phase 1-2: Backend Enums & API ⬜
-- [ ] 1. Create appearance enums (`server/enums/appearance/`)
-  - [ ] `gender.py`
-  - [ ] `skin_tone.py`
-  - [ ] `hair_color.py`
-  - [ ] `eye_color.py`
-  - [ ] `height.py`
-  - [ ] `build.py`
-  - [ ] `age_range.py`
-  - [ ] `__init__.py` (exports)
-- [ ] 2. Update CoreViewSet to serve appearance enums
+### Phase 1-2: Backend Enums & API ✅
+- [x] 1. Create appearance enums (`server/enums/appearance/`)
+  - [x] `gender.py`
+  - [x] `skin_tone.py`
+  - [x] `hair_color.py`
+  - [x] `eye_color.py`
+  - [x] `height.py`
+  - [x] `build.py`
+  - [x] `age_range.py`
+  - [x] `__init__.py` (exports)
+- [x] 2. Update CoreViewSet to serve appearance enums
 
 **📚 Phase 1-2 Documentation:**
-- [ ] Update `docs/docs/api/endpoints/core.md` - Add appearance enums to `/enums` endpoint docs
+- [x] Update `docs/docs/api/endpoints/core.md` - Add appearance enums to `/enums` endpoint docs
 
 ---
 
@@ -1104,7 +1104,7 @@ Update IMAGE_GENERATION prompt to include:
 
 | Phase | Description | Code | Docs | Status |
 |-------|-------------|------|------|--------|
-| 1-2 | Backend Enums & API | ⬜ | ⬜ | ⬜ Not Started |
+| 1-2 | Backend Enums & API | ✅ | ✅ | ✅ Complete |
 | 3 | Identity Model (scene fields) | ⬜ | ⬜ | ⬜ Not Started |
 | 4 | User Model (appearance fields) | ⬜ | ⬜ | ⬜ Not Started |
 | 5 | Prompt Integration | ⬜ | ⬜ | ⬜ Not Started |
