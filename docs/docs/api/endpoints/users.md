@@ -33,13 +33,13 @@
   "updated_at": "2024-06-01T12:00:00Z",
   "groups": [],
   "user_permissions": [],
-  "gender_visualization": "man",
+  "gender": "man",
   "skin_tone": "medium",
   "hair_color": "brown",
   "eye_color": "blue",
-  "height_visualization": "average",
-  "build_visualization": "athletic",
-  "age_range_visualization": "thirties"
+  "height": "average",
+  "build": "athletic",
+  "age_range": "thirties"
 }
 ```
 
@@ -70,13 +70,13 @@
   "updated_at": "2024-06-01T12:00:00Z",
   "groups": [],
   "user_permissions": [],
-  "gender_visualization": "man",
+  "gender": "man",
   "skin_tone": "medium",
   "hair_color": "brown",
   "eye_color": "blue",
-  "height_visualization": "average",
-  "build_visualization": "athletic",
-  "age_range_visualization": "thirties",
+  "height": "average",
+  "build": "athletic",
+  "age_range": "thirties",
   "identities": [
     {
       "id": "uuid-string",
@@ -334,12 +334,12 @@ For detailed field information on models returned by these endpoints, see:
   - `action_type`: see `enums/action_type.py`
   - `role`: see `enums/message_role.py`
   - `state`: see `enums/identity_state.py`
-  - `gender_visualization`: see `enums/appearance/gender.py`
+  - `gender`: see `enums/appearance/gender.py`
   - `skin_tone`: see `enums/appearance/skin_tone.py`
   - `hair_color`: see `enums/appearance/hair_color.py`
   - `eye_color`: see `enums/appearance/eye_color.py`
-  - `height_visualization`: see `enums/appearance/height.py`
-  - `build_visualization`: see `enums/appearance/build.py`
-  - `age_range_visualization`: see `enums/appearance/age_range.py`
-- Appearance preference fields (`gender_visualization`, `skin_tone`, `hair_color`, `eye_color`, `height_visualization`, `build_visualization`, `age_range_visualization`) are optional and used for image generation visualization. These fields can be updated via PATCH requests to user endpoints.
+  - `height`: see `enums/appearance/height.py`
+  - `build`: see `enums/appearance/build.py`
+  - `age_range`: see `enums/appearance/age_range.py`
+- Appearance preference fields (`gender`, `skin_tone`, `hair_color`, `eye_color`, `height`, `build`, `age_range`) are optional and used for image generation visualization. These fields can be updated via PATCH requests to user endpoints.
 - Update this document whenever the API changes.

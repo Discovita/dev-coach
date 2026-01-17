@@ -28,13 +28,13 @@ The User model uses email-based authentication (no username field) and includes 
 - `created_at` (DateTimeField): When user account was created, auto-set
 - `updated_at` (DateTimeField): When user account was last updated, auto-updated
 - `test_scenario` (ForeignKey): Link to [TestScenario](./test-scenario.md) for test data isolation, optional
-- `gender_visualization` (CharField): Gender visualization preference for image generation. Choices: `man`, `woman`, `person`. Optional
+- `gender` (CharField): Gender preference for image generation. Choices: `man`, `woman`, `person`. Optional
 - `skin_tone` (CharField): Skin tone preference for image generation. Choices: `light`, `medium_light`, `medium`, `medium_dark`, `dark`. Optional
 - `hair_color` (CharField): Hair color preference for image generation. Choices: `black`, `brown`, `blonde`, `red`, `auburn`, `gray`, `white`, `bald`. Optional
 - `eye_color` (CharField): Eye color preference for image generation. Choices: `brown`, `blue`, `green`, `hazel`, `gray`, `amber`. Optional
-- `height_visualization` (CharField): Height visualization preference for image generation. Choices: `short`, `below_average`, `average`, `above_average`, `tall`. Optional
-- `build_visualization` (CharField): Build/body type visualization preference for image generation. Choices: `slim`, `athletic`, `average`, `stocky`, `large`. Optional
-- `age_range_visualization` (CharField): Age range visualization preference for image generation. Choices: `twenties`, `thirties`, `forties`, `fifties`, `sixty_plus`. Optional
+- `height` (CharField): Height preference for image generation. Choices: `short`, `below_average`, `average`, `above_average`, `tall`. Optional
+- `build` (CharField): Build/body type preference for image generation. Choices: `slim`, `athletic`, `average`, `stocky`, `large`. Optional
+- `age_range` (CharField): Age range preference for image generation. Choices: `twenties`, `thirties`, `forties`, `fifties`, `sixty_plus`. Optional
 
 ## Configuration
 
