@@ -1027,18 +1027,18 @@ Update IMAGE_GENERATION prompt to include:
 
 ---
 
-### Phase 5: Backend - Prompt Integration ⬜
-- [ ] 11. Create `get_appearance_context()` function
-- [ ] 12. Create `get_scene_context()` function
-- [ ] 13. Update `PromptManager.create_image_generation_prompt()` to include both contexts
-- [ ] 14. Update `orchestration.generate_identity_image()` to pass user
-- [ ] 15. Update `AdminIdentityViewSet.generate_image()` to pass user to orchestration
+### Phase 5: Backend - Prompt Integration ✅
+- [x] 11. Create `get_appearance_context()` function
+- [x] 12. Create `get_scene_context()` function
+- [x] 13. Update `PromptManager.create_image_generation_prompt()` to include both contexts
+- [x] 14. Update `orchestration.generate_identity_image()` to pass user
+- [x] 15. Update `AdminIdentityViewSet.generate_image()` to pass user to orchestration
 
 **📚 Phase 5 Documentation:**
-- [ ] Create `docs/docs/core-systems/prompt-manager/context-keys/appearance-context.md`
-- [ ] Create `docs/docs/core-systems/prompt-manager/context-keys/scene-context.md`
-- [ ] Update `docs/docs/core-systems/prompt-manager/context-keys/overview.md` - Add new context keys
-- [ ] Update `sidebars.ts` - Add new context key docs to sidebar
+- [x] Create `docs/docs/core-systems/prompt-manager/context-keys/appearance-context.md`
+- [x] Create `docs/docs/core-systems/prompt-manager/context-keys/scene-context.md`
+- [x] Update `docs/docs/core-systems/prompt-manager/context-keys/overview.md` - Add new context keys
+- [x] Update `sidebars.ts` - Add new context key docs to sidebar
 
 ---
 
@@ -1107,7 +1107,7 @@ Update IMAGE_GENERATION prompt to include:
 | 1-2 | Backend Enums & API | ✅ | ✅ | ✅ Complete |
 | 3 | Identity Model (scene fields) | ✅ | ✅ | ✅ Complete |
 | 4 | User Model (appearance fields) | ✅ | ✅ | ✅ Complete |
-| 5 | Prompt Integration | ⬜ | ⬜ | ⬜ Not Started |
+| 5 | Prompt Integration | ✅ | ✅ | ✅ Complete |
 | 6 | Frontend Types & Enums | ⬜ | ⬜ | ⬜ Not Started |
 | 7 | Frontend UI Components | ⬜ | — | ⬜ Not Started |
 | 8 | Frontend API & Integration | ⬜ | — | ⬜ Not Started |
