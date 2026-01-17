@@ -1042,15 +1042,27 @@ Update IMAGE_GENERATION prompt to include:
 
 ---
 
-### Phase 6: Frontend - Types & Enums ⬜
-- [ ] 16. Create TypeScript appearance enums (`client/src/enums/appearance/`)
-- [ ] 17. Add `UserAppearance` type
-- [ ] 18. Add `SceneInputs` type
-- [ ] 19. Update `Identity` type with scene fields
-- [ ] 20. Update `User` type with appearance fields
+### Phase 6: Frontend - Types & Enums ✅
+- [x] 16. Create TypeScript appearance enums (`client/src/enums/appearance/`)
+  - [x] `gender.ts`
+  - [x] `skinTone.ts`
+  - [x] `hairColor.ts`
+  - [x] `eyeColor.ts`
+  - [x] `height.ts`
+  - [x] `build.ts`
+  - [x] `ageRange.ts`
+  - [x] `index.ts` (exports)
+- [x] 17. Add `UserAppearance` type (`client/src/types/userAppearance.ts`)
+- [x] 18. Add `SceneInputs` type (`client/src/types/sceneInputs.ts`)
+- [x] 19. Update `Identity` type with scene fields (`clothing`, `mood`, `setting`)
+- [x] 20. Update `User` type with appearance fields (7 fields)
+- [x] 21. Create `CoreEnumsResponse` type for API response
+- [x] 22. Update `useCoreEnums` hook with proper types
 
 **📚 Phase 6 Documentation:**
-- [ ] Update `docs/docs/frontend/` - Document new types (if frontend docs exist for types)
+- [x] Create `docs/docs/frontend/types/user-appearance.md`
+- [x] Create `docs/docs/frontend/types/scene-inputs.md`
+- [x] Update `sidebars.ts` - Add new type docs to sidebar
 
 ---
 
@@ -1108,7 +1120,7 @@ Update IMAGE_GENERATION prompt to include:
 | 3 | Identity Model (scene fields) | ✅ | ✅ | ✅ Complete |
 | 4 | User Model (appearance fields) | ✅ | ✅ | ✅ Complete |
 | 5 | Prompt Integration | ✅ | ✅ | ✅ Complete |
-| 6 | Frontend Types & Enums | ⬜ | ⬜ | ⬜ Not Started |
+| 6 | Frontend Types & Enums | ✅ | ✅ | ✅ Complete |
 | 7 | Frontend UI Components | ⬜ | — | ⬜ Not Started |
 | 8 | Frontend API & Integration | ⬜ | — | ⬜ Not Started |
 | 9 | Database & Prompt | ⬜ | ⬜ | ⬜ Not Started |
