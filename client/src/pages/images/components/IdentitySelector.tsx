@@ -10,7 +10,10 @@ import {
   SelectGroup,
   SelectLabel,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { Identity } from "@/types/identity";
+import { toast } from "sonner";
 
 interface IdentitySelectorProps {
   selectedUserId: string | null;
@@ -51,6 +54,39 @@ export function IdentitySelector({
       onIdentitySelect(null);
     } else {
       onIdentitySelect(value);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!selectedIdentity?.image?.original) {
+      toast.error("No image available to download");
+      return;
+    }
+
+    try {
+      // Fetch the original image directly
+      const response = await fetch(selectedIdentity.image.original);
+      if (!response.ok) {
+        throw new Error("Failed to fetch image");
+      }
+
+      // Convert to blob
+      const blob = await response.blob();
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `identity-image-${selectedIdentity.name || "identity"}-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success("Image downloaded successfully");
+    } catch (error) {
+      toast.error("Failed to download image");
+      console.error("Download error:", error);
     }
   };
 
@@ -119,6 +155,16 @@ export function IdentitySelector({
                     style={{ minHeight: '300px', objectFit: 'contain', backgroundColor: '#f5f5f5' }}
                   />
                   <p className="text-sm text-neutral-500 mt-2">Current Image</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownload}
+                    className="mt-2"
+                  >
+                    <Download className="size-4" />
+                    Download
+                  </Button>
                 </>
               ) : (
                 <div className="w-full aspect-video bg-neutral-200 dark:bg-neutral-800 rounded-lg flex items-center justify-center min-h-[300px]">
