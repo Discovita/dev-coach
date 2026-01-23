@@ -198,7 +198,7 @@ These endpoints accept a `user_id` parameter to allow admins to test image gener
 
 #### Start New Chat (Admin)
 
-**`POST /api/v1/admin/identities/start-image-chat/`**
+**`POST /api/v1/admin/identity-image-chat/start/`**
 
 Request:
 ```json
@@ -220,7 +220,7 @@ Response:
 
 #### Continue Chat (Admin)
 
-**`POST /api/v1/admin/identities/continue-image-chat/`**
+**`POST /api/v1/admin/identity-image-chat/continue/`**
 
 Request:
 ```json
@@ -247,7 +247,7 @@ These endpoints use the authenticated user from the request - no `user_id` param
 
 #### Start New Chat (User)
 
-**`POST /api/v1/identities/start-image-chat/`**
+**`POST /api/v1/identity-image-chat/start/`**
 
 Request:
 ```json
@@ -268,7 +268,7 @@ Response:
 
 #### Continue Chat (User)
 
-**`POST /api/v1/identities/continue-image-chat/`**
+**`POST /api/v1/identity-image-chat/continue/`**
 
 Request:
 ```json
@@ -342,13 +342,15 @@ Location: `client/src/api/imageGeneration.ts`
 export async function startImageChat(
   request: StartImageChatRequest
 ): Promise<StartImageChatResponse> {
-  // POST to /admin/identities/start-image-chat/
+  // Admin: POST to /api/v1/admin/identity-image-chat/start/
+  // Public: POST to /api/v1/identity-image-chat/start/
 }
 
 export async function continueImageChat(
   request: ContinueImageChatRequest
 ): Promise<ContinueImageChatResponse> {
-  // POST to /admin/identities/continue-image-chat/
+  // Admin: POST to /api/v1/admin/identity-image-chat/continue/
+  // Public: POST to /api/v1/identity-image-chat/continue/
 }
 ```
 
@@ -410,25 +412,24 @@ After successful generation, show edit section:
 
 ## Implementation Order
 
-### Step 1: Database Model
-- [ ] Create `server/apps/users/models/identity_image_chat.py`
-- [ ] Update `server/apps/users/models/__init__.py` to export the model
-- [ ] Run migrations: `python manage.py makemigrations users`
-- [ ] Apply migrations: `python manage.py migrate`
-- [ ] (Optional) Add to `server/apps/users/admin.py` for debugging
+### Step 1: Database Model ✅
+- [x] Create `server/apps/identities/models/identity_image_chat.py`
+- [x] Update `server/apps/identities/models/__init__.py` to export the model
+- [x] Run migrations: `python manage.py makemigrations identities`
+- [x] Apply migrations: `python manage.py migrate`
 
-### Step 2: Service Layer
-- [ ] Add chat methods to `GeminiImageService` (create, restore, serialize, extract)
-- [ ] Add `start_identity_image_chat()` to orchestration
-- [ ] Add `continue_identity_image_chat()` to orchestration
-- [ ] Add `get_chat_status()` helper
+### Step 2: Service Layer ✅
+- [x] Add chat methods to `GeminiImageService` (create_chat, send_chat_message)
+- [x] Add `start_identity_image_chat()` to orchestration
+- [x] Add `continue_identity_image_chat()` to orchestration
+- [x] Add chat history serialization utilities
 
-### Step 3: API Endpoints
-- [ ] Add admin `start-image-chat` endpoint (accepts user_id)
-- [ ] Add admin `continue-image-chat` endpoint (accepts user_id)
-- [ ] Add user `start-image-chat` endpoint (uses authenticated user)
-- [ ] Add user `continue-image-chat` endpoint (uses authenticated user)
-- [ ] Add proper error responses for all endpoints
+### Step 3: API Endpoints ✅
+- [x] Add admin `identity-image-chat/start/` endpoint (accepts user_id)
+- [x] Add admin `identity-image-chat/continue/` endpoint (accepts user_id)
+- [x] Add user `identity-image-chat/start/` endpoint (uses authenticated user)
+- [x] Add user `identity-image-chat/continue/` endpoint (uses authenticated user)
+- [x] Add proper error responses for all endpoints
 - [ ] (Optional) Deprecate old `generate-image` endpoint
 
 ### Step 4: Frontend - Types & API
@@ -441,12 +442,12 @@ After successful generation, show edit section:
 - [ ] Update Images page UI with edit flow
 - [ ] Wire up start/continue chat flows
 
-### Step 6: Testing
-- [ ] Test start → continue → continue flow
-- [ ] Test start → start (chat replacement)
-- [ ] Test error cases (no chat, empty prompt)
-- [ ] Test with different users (admin feature)
-- [ ] Verify chat history serialization/deserialization
+### Step 6: Testing ✅ (37 tests passing)
+- [x] Test start → continue → continue flow
+- [x] Test start → start (chat replacement)
+- [x] Test error cases (no chat, empty prompt)
+- [x] Test with different users (admin feature)
+- [x] Verify chat history serialization/deserialization
 
 ---
 
