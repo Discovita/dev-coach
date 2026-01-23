@@ -63,7 +63,15 @@ export default function Images() {
     isGenerating,
     isSaving,
     generateData,
+    startChat,
+    continueChat,
+    isStartingChat,
+    isContinuingChat,
+    startChatData,
+    continueChatData,
   } = useImageGeneration();
+  
+  const [editPrompt, setEditPrompt] = useState("");
 
   // Fetch identities to get the selected identity object
   const { identities: currentUserIdentities } = useIdentities();
@@ -123,6 +131,22 @@ export default function Images() {
       setGeneratedImageBase64(generateData.image_base64);
     }
   }, [generateData]);
+
+  // Update generated image when chat starts
+  useEffect(() => {
+    if (startChatData?.image_base64) {
+      setGeneratedImageBase64(startChatData.image_base64);
+      setEditPrompt(""); // Clear edit prompt when starting new chat
+    }
+  }, [startChatData]);
+
+  // Update generated image when chat continues
+  useEffect(() => {
+    if (continueChatData?.image_base64) {
+      setGeneratedImageBase64(continueChatData.image_base64);
+      setEditPrompt(""); // Clear edit prompt after successful edit
+    }
+  }, [continueChatData]);
 
   // Handle scene save - called when user clicks "Save Scene Details" button
   // Uses admin endpoint for test user identities, regular endpoint for own identities
@@ -200,15 +224,38 @@ export default function Images() {
     }
 
     try {
-      await generateImage({
+      // Use admin endpoint for test users, public endpoint for current user
+      await startChat({
         identity_id: selectedIdentityId,
-        user_id: selectedUserId,
+        ...(isCurrentUser ? {} : { user_id: selectedUserId }),
         additional_prompt: additionalPrompt.trim() || undefined,
-        save_to_identity: false, // We'll save manually after preview
       });
     } catch (error) {
       // Error is handled by the useImageGeneration hook
       console.error("Generation error:", error);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!selectedUserId) {
+      toast.error("Please select a user");
+      return;
+    }
+
+    if (!editPrompt.trim()) {
+      toast.error("Please enter an edit instruction");
+      return;
+    }
+
+    try {
+      // Use admin endpoint for test users, public endpoint for current user
+      await continueChat({
+        ...(isCurrentUser ? {} : { user_id: selectedUserId }),
+        edit_prompt: editPrompt.trim(),
+      });
+    } catch (error) {
+      // Error is handled by the useImageGeneration hook
+      console.error("Edit error:", error);
     }
   };
 
@@ -222,6 +269,7 @@ export default function Images() {
   };
 
   const handleRegenerate = () => {
+    // Regenerate calls handleGenerate which now uses startChat
     handleGenerate();
   };
 
@@ -236,8 +284,15 @@ export default function Images() {
     selectedUserId &&
     selectedIdentityId &&
     hasReferenceImages &&
+    !isStartingChat &&
     !isGenerating &&
     !sceneIsDirty; // Must save scene details first
+
+  const canEdit =
+    selectedUserId &&
+    generatedImageBase64 &&
+    editPrompt.trim() &&
+    !isContinuingChat;
 
   return (
     <div className="flex flex-col h-full w-full p-6 overflow-y-auto">
@@ -319,7 +374,7 @@ export default function Images() {
                     disabled={!canGenerate || isUpdatingAppearance}
                     className="h-12 px-6 text-base"
                   >
-                    {isGenerating ? (
+                    {isStartingChat || isGenerating ? (
                       <>
                         <Sparkles className="size-5 animate-pulse" />
                         Generating Image...
@@ -327,7 +382,7 @@ export default function Images() {
                     ) : (
                       <>
                         <Sparkles className="size-5" />
-                        Generate Image
+                        Generate New
                       </>
                     )}
                   </Button>
@@ -349,14 +404,58 @@ export default function Images() {
           </div>
 
           {generatedImageBase64 && selectedIdentity && (
-            <GeneratedImageDisplay
-              imageBase64={generatedImageBase64}
-              identity={selectedIdentity}
-              isGenerating={isGenerating}
-              isSaving={isSaving}
-              onSave={handleSave}
-              onRegenerate={handleRegenerate}
-            />
+            <>
+              <GeneratedImageDisplay
+                imageBase64={generatedImageBase64}
+                identity={selectedIdentity}
+                isGenerating={isGenerating || isStartingChat}
+                isSaving={isSaving}
+                onSave={handleSave}
+                onRegenerate={handleRegenerate}
+              />
+              
+              {/* Edit Image Section */}
+              <div className="flex flex-col gap-4 border rounded-lg p-4 bg-neutral-50 dark:bg-neutral-900">
+                <h2 className="text-xl font-semibold">Edit This Image</h2>
+                <div className="space-y-2">
+                  <label htmlFor="edit-prompt" className="text-sm font-medium">
+                    Edit Instruction
+                  </label>
+                  <Textarea
+                    id="edit-prompt"
+                    placeholder="e.g., make the lighting warmer, change the background to a beach, add more vibrant colors..."
+                    value={editPrompt}
+                    onChange={(e) => setEditPrompt(e.target.value)}
+                    rows={3}
+                    className="max-w-2xl"
+                  />
+                  <p className="text-xs text-neutral-500">
+                    Describe how you'd like to modify the current image
+                  </p>
+                </div>
+                <div>
+                  <Button
+                    type="button"
+                    variant="default"
+                    onClick={handleEdit}
+                    disabled={!canEdit}
+                    className="h-10 px-6"
+                  >
+                    {isContinuingChat ? (
+                      <>
+                        <Sparkles className="size-4 animate-pulse" />
+                        Applying Edit...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="size-4" />
+                        Apply Edit
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       )}
