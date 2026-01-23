@@ -30,6 +30,8 @@ venv/
 ENV/
 backups/
 
+server/docs/standards/
+
 # Node
 node_modules/
 npm-debug.log*
