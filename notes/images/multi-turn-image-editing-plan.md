@@ -2,66 +2,76 @@
 
 ## Overview
 
-Replace the current single-shot image generation with a session-based approach that allows iterative editing. Users generate an image, then make small tweaks without starting from scratch.
+Replace the current single-shot image generation with a chat-based approach using Gemini's multi-turn conversation feature. Users start a new image chat, then iteratively edit the image through conversation.
 
 ## Core Concept
 
 ```
-Generate New = Create session + Generate first image
-Edit Image = Load session + Pass previous image + Edit prompt → New image
+Start New Chat = Create Gemini chat session → Generate first image → Store chat history
+Continue Chat  = Restore chat from history → Send edit message → Update history
 ```
 
-Sessions are stored in the database, attached to users. Each user has one active session at a time.
+The Gemini chat maintains context of all previous messages and generated images. We serialize and store the chat history in the database to persist across requests.
 
 ---
 
 ## Phase 1: Database Model
 
-### New Model: `ImageGenerationSession`
+### New Model: `IdentityImageChat`
 
-Location: `server/apps/image_generation/models.py` (new app) or add to existing app
+Location: `server/apps/users/models/identity_image_chat.py`
+
+This model is added to the `users` app since it's per-user session state.
 
 ```python
-class ImageGenerationSession(Base):
+class IdentityImageChat(Base):
     """
-    Stores the current image generation session for a user.
-    One session per user - replaced when starting fresh.
+    Persists Gemini chat state for multi-turn identity image editing.
+    One chat per user - replaced when starting a new image generation.
     """
     user = models.OneToOneField(
-        User,
+        "users.User",
         on_delete=models.CASCADE,
-        related_name="image_generation_session"
+        related_name="identity_image_chat"
     )
     
-    # The most recently generated image (base64 encoded)
-    # Used as input for edit operations
-    current_image_base64 = models.TextField(blank=True, null=True)
-    
-    # The identity this session is generating for
     identity = models.ForeignKey(
-        Identity,
+        "identities.Identity",
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
     
-    # The prompt used to generate the current image
-    # Useful for debugging and potentially for context
-    last_prompt = models.TextField(blank=True)
-    
-    # Track when reference images were last updated
-    # If references change, we might want to indicate this to user
-    reference_images_hash = models.CharField(max_length=64, blank=True)
+    # Serialized Gemini chat history - list of Content objects as JSON
+    # Images and thought signatures are automatically base64 encoded/decoded
+    # by the Google genai SDK's pydantic models
+    chat_history = models.JSONField(default=list)
     
     class Meta:
-        verbose_name = "Image Generation Session"
-        verbose_name_plural = "Image Generation Sessions"
+        verbose_name = "Identity Image Chat"
+        verbose_name_plural = "Identity Image Chats"
 ```
 
-### Migration
+### Why This Works
 
-- Create new model
-- One-to-one relationship with User ensures one session per user
+The Google genai SDK's `Content` models use pydantic with:
+- `ser_json_bytes='base64'` - bytes (images, thought signatures) serialize to base64
+- `val_json_bytes='base64'` - base64 strings deserialize back to bytes
+
+This means we can:
+1. Call `chat.get_history(curated=True)` to get `list[Content]`
+2. Serialize with `[content.to_json_dict() for content in history]`
+3. Store in JSONField
+4. Restore with `[Content.model_validate(c) for c in stored_history]`
+5. Pass to `client.chats.create(history=restored_history)`
+
+### Files to Update
+
+1. Create `server/apps/users/models/identity_image_chat.py`
+2. Update `server/apps/users/models/__init__.py` to export the model
+3. Run migrations: `python manage.py makemigrations users`
+4. Apply migrations: `python manage.py migrate`
+5. (Optional) Add to `server/apps/users/admin.py` for debugging
 
 ---
 
@@ -71,85 +81,131 @@ class ImageGenerationSession(Base):
 
 Location: `server/services/image_generation/gemini_image_service.py`
 
-**Changes:**
-1. Keep existing `generate_image()` method (low-level, just calls Gemini)
-2. Add `edit_image()` method that accepts previous image + edit prompt
+**New Methods:**
 
 ```python
-def edit_image(
+def create_chat(
     self,
-    edit_prompt: str,
-    previous_image: Image.Image,
-    reference_images: List[Image.Image],
-    aspect_ratio: str = "16:9",
-    resolution: str = "4K",
+    config: Optional[types.GenerateContentConfig] = None
+) -> Chat:
+    """Create a new Gemini chat session for image generation."""
+    return self.client.chats.create(
+        model=self.MODEL,
+        config=config or types.GenerateContentConfig(
+            response_modalities=["TEXT", "IMAGE"],
+        ),
+        history=[],
+    )
+
+def restore_chat(
+    self,
+    history: list[dict],
+    config: Optional[types.GenerateContentConfig] = None
+) -> Chat:
+    """Restore a chat session from serialized history."""
+    from google.genai.types import Content
+    restored_history = [Content.model_validate(c) for c in history]
+    return self.client.chats.create(
+        model=self.MODEL,
+        config=config or types.GenerateContentConfig(
+            response_modalities=["TEXT", "IMAGE"],
+        ),
+        history=restored_history,
+    )
+
+def serialize_chat_history(self, chat: Chat) -> list[dict]:
+    """Serialize chat history for database storage."""
+    history = chat.get_history(curated=True)
+    return [content.to_json_dict() for content in history]
+
+def extract_image_from_response(
+    self, 
+    response: GenerateContentResponse
 ) -> Optional[Image.Image]:
-    """
-    Edit an existing image using Gemini.
-    
-    Passes the previous image along with reference images and edit prompt.
-    Gemini understands this as an edit request.
-    """
-    # Contents: edit_prompt + previous_image + reference_images
-    contents = [edit_prompt, previous_image] + reference_images
-    
-    # Same generate_content call, but with previous image included
-    ...
+    """Extract the generated image from a chat response."""
+    for part in response.parts:
+        if part.inline_data is not None:
+            return part.as_image()
+    return None
 ```
 
 ### Orchestration Layer Updates
 
 Location: `server/services/image_generation/orchestration.py`
 
-**New/Modified Functions:**
+**New Functions:**
 
-1. `start_image_session(identity, reference_images, user, additional_prompt, ...)` 
-   - Creates/replaces ImageGenerationSession for user
-   - Generates initial image
-   - Stores image in session
-   - Returns image
+```python
+def start_identity_image_chat(
+    identity: Identity,
+    reference_images: List[ReferenceImage],
+    user: User,
+    additional_prompt: str = "",
+    aspect_ratio: str = "16:9",
+    resolution: str = "4K",
+) -> tuple[Optional[PILImage.Image], IdentityImageChat]:
+    """
+    Start a new image generation chat session.
+    
+    - Creates a new Gemini chat
+    - Sends initial prompt with reference images
+    - Stores chat history in database (replaces any existing chat for user)
+    - Returns generated image and the chat record
+    """
+    ...
 
-2. `edit_image_session(user, edit_prompt, reference_images)`
-   - Loads existing session for user
-   - Validates session exists and has image
-   - Calls `edit_image()` with previous image
-   - Updates session with new image
-   - Returns image
+def continue_identity_image_chat(
+    user: User,
+    edit_prompt: str,
+    aspect_ratio: str = "16:9",
+    resolution: str = "4K",
+) -> tuple[Optional[PILImage.Image], IdentityImageChat]:
+    """
+    Continue an existing image chat with an edit request.
+    
+    - Loads existing chat history from database
+    - Restores Gemini chat session
+    - Sends edit message
+    - Updates stored history
+    - Returns new image and updated chat record
+    
+    Raises:
+        ValueError: If user has no active chat session
+    """
+    ...
 
-3. `get_session_status(user)` (optional helper)
-   - Returns whether user has active session
-   - Used by frontend to show/hide edit UI
+def get_chat_status(user: User) -> dict:
+    """
+    Get the status of a user's image chat.
+    
+    Returns:
+        {
+            "has_active_chat": bool,
+            "identity_id": str | None,
+            "identity_name": str | None,
+        }
+    """
+    ...
+```
 
 ---
 
 ## Phase 3: API Endpoints
 
-### Modify Existing Endpoint
+### Admin Endpoints (for testing with different users)
 
-**`POST /api/v1/admin/identities/generate-image/`**
+These endpoints accept a `user_id` parameter to allow admins to test image generation for any user.
 
-Current behavior: Generate image for identity
+#### Start New Chat (Admin)
 
-New behavior: Generate image AND create/replace session
-
-**Response additions:**
-```json
-{
-  "image_base64": "...",
-  "has_active_session": true,
-  "session_identity_id": "uuid"
-}
-```
-
-### New Endpoint: Edit Image
-
-**`POST /api/v1/admin/identities/edit-image/`**
+**`POST /api/v1/admin/identities/start-image-chat/`**
 
 Request:
 ```json
 {
-  "user_id": "uuid",          // Required for admin, can test different users
-  "edit_prompt": "string"     // What to change
+  "identity_id": "uuid",
+  "user_id": "uuid",
+  "additional_prompt": "string (optional)"
 }
 ```
 
@@ -157,24 +213,92 @@ Response:
 ```json
 {
   "image_base64": "...",
-  "has_active_session": true,
-  "session_identity_id": "uuid"
+  "identity_id": "uuid",
+  "identity_name": "string"
 }
 ```
 
-**Error Responses:**
-- `400`: No active session - "Please generate an image first before editing"
-- `400`: Missing edit_prompt
-- `404`: User not found
-- `500`: Image generation failed
+#### Continue Chat (Admin)
 
-### Future: Non-Admin Endpoints
+**`POST /api/v1/admin/identities/continue-image-chat/`**
 
-When ready for production users:
-- `POST /api/v1/identities/generate-image/` - Uses authenticated user
-- `POST /api/v1/identities/edit-image/` - Uses authenticated user
+Request:
+```json
+{
+  "user_id": "uuid",
+  "edit_prompt": "string"
+}
+```
 
-These won't need `user_id` parameter - they use the request's authenticated user.
+Response:
+```json
+{
+  "image_base64": "...",
+  "identity_id": "uuid",
+  "identity_name": "string"
+}
+```
+
+---
+
+### User Endpoints (for production)
+
+These endpoints use the authenticated user from the request - no `user_id` parameter needed.
+
+#### Start New Chat (User)
+
+**`POST /api/v1/identities/start-image-chat/`**
+
+Request:
+```json
+{
+  "identity_id": "uuid",
+  "additional_prompt": "string (optional)"
+}
+```
+
+Response:
+```json
+{
+  "image_base64": "...",
+  "identity_id": "uuid",
+  "identity_name": "string"
+}
+```
+
+#### Continue Chat (User)
+
+**`POST /api/v1/identities/continue-image-chat/`**
+
+Request:
+```json
+{
+  "edit_prompt": "string"
+}
+```
+
+Response:
+```json
+{
+  "image_base64": "...",
+  "identity_id": "uuid",
+  "identity_name": "string"
+}
+```
+
+---
+
+### Error Responses (Both Admin & User)
+
+| Status | Condition | Message |
+|--------|-----------|---------|
+| 400 | No active chat | "No active image chat. Please start a new chat first." |
+| 400 | Missing edit_prompt | "Edit prompt is required." |
+| 400 | Missing identity_id | "Identity ID is required." |
+| 400 | No reference images | "Reference images are required for image generation." |
+| 404 | User not found (admin) | "User not found." |
+| 404 | Identity not found | "Identity not found." |
+| 500 | Gemini API failure | "Image generation failed. Please try again." |
 
 ---
 
@@ -185,22 +309,28 @@ These won't need `user_id` parameter - they use the request's authenticated user
 Location: `client/src/types/imageGeneration.ts`
 
 ```typescript
-// Add to existing types
-interface GenerateImageResponse {
-  image_base64: string;
-  has_active_session: boolean;
-  session_identity_id: string | null;
+// Rename/update existing types
+interface StartImageChatRequest {
+  identity_id: string;
+  user_id: string;
+  additional_prompt?: string;
 }
 
-interface EditImageRequest {
+interface StartImageChatResponse {
+  image_base64: string;
+  identity_id: string;
+  identity_name: string;
+}
+
+interface ContinueImageChatRequest {
   user_id: string;
   edit_prompt: string;
 }
 
-interface EditImageResponse {
+interface ContinueImageChatResponse {
   image_base64: string;
-  has_active_session: boolean;
-  session_identity_id: string | null;
+  identity_id: string;
+  identity_name: string;
 }
 ```
 
@@ -208,12 +338,17 @@ interface EditImageResponse {
 
 Location: `client/src/api/imageGeneration.ts`
 
-Add:
 ```typescript
-export async function editIdentityImage(
-  request: EditImageRequest
-): Promise<EditImageResponse> {
-  // POST to /admin/identities/edit-image/
+export async function startImageChat(
+  request: StartImageChatRequest
+): Promise<StartImageChatResponse> {
+  // POST to /admin/identities/start-image-chat/
+}
+
+export async function continueImageChat(
+  request: ContinueImageChatRequest
+): Promise<ContinueImageChatResponse> {
+  // POST to /admin/identities/continue-image-chat/
 }
 ```
 
@@ -221,11 +356,10 @@ export async function editIdentityImage(
 
 Location: `client/src/hooks/use-image-generation.ts`
 
-Add:
-- `editImage` mutation
-- `isEditing` state
-- `editError` state
-- Track `hasActiveSession` from responses
+- Rename `generateImage` → `startChat`
+- Add `continueChat` mutation
+- Add `isContinuing` state
+- Track chat status from responses
 
 ### UI Updates
 
@@ -241,16 +375,15 @@ After successful generation, show edit section:
 │  │ Edit this image:                │    │
 │  │ [Text input for edit prompt   ] │    │
 │  │                                 │    │
-│  │ [Apply Edit]  [Generate New]    │    │
+│  │ [Apply Edit]  [Start New]       │    │
 │  └─────────────────────────────────┘    │
 └─────────────────────────────────────────┘
 ```
 
 **Behavior:**
-- "Apply Edit" → Calls edit endpoint, updates displayed image
-- "Generate New" → Calls generate endpoint (replaces session), updates displayed image
+- "Apply Edit" → Calls continue-chat endpoint, updates displayed image
+- "Start New" → Calls start-chat endpoint (replaces chat), updates displayed image
 - Both buttons disabled while loading
-- Show loading state during edit
 
 ---
 
@@ -260,68 +393,90 @@ After successful generation, show edit section:
 
 | Scenario | Response | Message |
 |----------|----------|---------|
-| Edit with no session | 400 | "No active image session. Please generate an image first." |
-| Edit with empty prompt | 400 | "Edit prompt is required." |
-| Session for different identity | 400 | "Current session is for a different identity. Generate a new image to start editing." |
+| Continue with no chat | 400 | "No active image chat. Please start a new chat first." |
+| Continue with empty prompt | 400 | "Edit prompt is required." |
+| User not found | 404 | "User not found." |
 | Gemini API failure | 500 | "Image generation failed. Please try again." |
 | Reference images missing | 400 | "Reference images are required for image generation." |
 
 ### Frontend
 
-- Display error messages in toast notifications (already using sonner)
-- Disable edit UI if `has_active_session` is false
+- Display error messages in toast notifications (using sonner)
+- Disable edit UI if no active chat
 - Clear edit input after successful edit
-- Show "No active session" state gracefully
+- Show "No active chat" state gracefully
 
 ---
 
 ## Implementation Order
 
 ### Step 1: Database Model
-- [ ] Create `ImageGenerationSession` model
-- [ ] Run migrations
-- [ ] Add admin registration (optional, for debugging)
+- [ ] Create `server/apps/users/models/identity_image_chat.py`
+- [ ] Update `server/apps/users/models/__init__.py` to export the model
+- [ ] Run migrations: `python manage.py makemigrations users`
+- [ ] Apply migrations: `python manage.py migrate`
+- [ ] (Optional) Add to `server/apps/users/admin.py` for debugging
 
 ### Step 2: Service Layer
-- [ ] Add `edit_image()` to `GeminiImageService`
-- [ ] Add `start_image_session()` to orchestration
-- [ ] Add `edit_image_session()` to orchestration
-- [ ] Add session management helpers
+- [ ] Add chat methods to `GeminiImageService` (create, restore, serialize, extract)
+- [ ] Add `start_identity_image_chat()` to orchestration
+- [ ] Add `continue_identity_image_chat()` to orchestration
+- [ ] Add `get_chat_status()` helper
 
 ### Step 3: API Endpoints
-- [ ] Modify `generate-image` to create/update session
-- [ ] Add `edit-image` endpoint
-- [ ] Add proper error responses
+- [ ] Add admin `start-image-chat` endpoint (accepts user_id)
+- [ ] Add admin `continue-image-chat` endpoint (accepts user_id)
+- [ ] Add user `start-image-chat` endpoint (uses authenticated user)
+- [ ] Add user `continue-image-chat` endpoint (uses authenticated user)
+- [ ] Add proper error responses for all endpoints
+- [ ] (Optional) Deprecate old `generate-image` endpoint
 
 ### Step 4: Frontend - Types & API
-- [ ] Update types for new response fields
-- [ ] Add `editIdentityImage` API function
+- [ ] Update types for new request/response shapes
+- [ ] Add `startImageChat` API function
+- [ ] Add `continueImageChat` API function
 
 ### Step 5: Frontend - Hook & UI
-- [ ] Update `useImageGeneration` hook
-- [ ] Add edit UI to Images page
-- [ ] Wire up edit flow
+- [ ] Update `useImageGeneration` hook with new methods
+- [ ] Update Images page UI with edit flow
+- [ ] Wire up start/continue chat flows
 
 ### Step 6: Testing
-- [ ] Test generate → edit → edit flow
-- [ ] Test generate → generate (session replacement)
-- [ ] Test error cases (no session, empty prompt)
+- [ ] Test start → continue → continue flow
+- [ ] Test start → start (chat replacement)
+- [ ] Test error cases (no chat, empty prompt)
 - [ ] Test with different users (admin feature)
+- [ ] Verify chat history serialization/deserialization
 
 ---
 
-## Future Considerations
+## Key Technical Details
 
-1. **Session expiration**: Consider adding `expires_at` field and cleaning up old sessions
-2. **Image storage**: Currently storing base64 in DB. For production scale, might want to store in S3 and reference URL
-3. **Edit history**: If users want to "undo" an edit, we'd need to store history
-4. **Non-admin endpoints**: When feature is ready for all users, add user-facing endpoints
+### Chat History Contains Everything
+
+The serialized chat history includes:
+- User messages (prompts)
+- Model responses (text + generated images)
+- Thought signatures (for model reasoning continuity)
+
+Images are base64 encoded in the `inline_data` field. The SDK handles encoding/decoding automatically.
+
+### No Need to Pass Previous Image
+
+When continuing a chat, we DON'T need to explicitly pass the previous image. The restored chat history contains all context, including previously generated images. Gemini uses this context to understand edit requests.
+
+### Reference Images
+
+Reference images are sent with the initial prompt when starting a new chat. For edits, we may want to include them again if they're relevant to the edit request.
 
 ---
 
 ## Questions Resolved
 
-- **Session scope**: Per-user, replaced on any "Generate New" action
-- **Reference images**: Sent with every request (generate and edit)
-- **Error handling**: User-friendly messages, graceful UI states
-- **Storage**: Database (ImageGenerationSession model)
+- **Model name**: `IdentityImageChat` (specific to purpose)
+- **Session scope**: Per-user, replaced on "Start New"
+- **What we store**: Serialized chat history (includes images + thought signatures)
+- **Image in history**: Yes, automatically - no separate storage needed
+- **Reference images**: Sent with initial chat; optional on continue
+- **Storage location**: `users` app (per-user session state)
+- **Endpoints**: Both admin (with user_id) and user (authenticated) endpoints built together
