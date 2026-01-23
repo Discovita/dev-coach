@@ -116,7 +116,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
         if not user:
             return Response({"detail": "User not found."}, status=404)
         from apps.coach_states.models import CoachState
-        from apps.coach_states.serializer import CoachStateSerializer
+        from apps.coach_states.serializers import CoachStateSerializer
 
         try:
             coach_state = CoachState.objects.get(user=user)

@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from apps.users.models import User
 from apps.identities.serializer import IdentitySerializer
-from apps.coach_states.serializer import CoachStateSerializer
+from apps.coach_states.serializers import CoachStateSerializer
 from apps.chat_messages.serializer import ChatMessageSerializer
 
 
