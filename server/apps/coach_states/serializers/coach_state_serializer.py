@@ -10,7 +10,7 @@ identity being refined.
 from rest_framework import serializers
 
 from apps.coach_states.models import CoachState
-from apps.identities.serializer import IdentitySerializer
+from apps.identities.serializers import IdentitySerializer
 
 
 class CoachStateSerializer(serializers.ModelSerializer):

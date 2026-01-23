@@ -17,7 +17,7 @@ from io import BytesIO
 import base64
 
 from apps.identities.models import Identity
-from apps.identities.serializer import IdentitySerializer
+from apps.identities.serializers import IdentitySerializer
 from apps.reference_images.models import ReferenceImage
 from services.image_generation.orchestration import generate_identity_image
 from services.logger import configure_logging

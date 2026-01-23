@@ -104,7 +104,7 @@ class UserViewSet(viewsets.GenericViewSet):
         - archived_only=true: Return only archived identities
         By default, excludes archived identities.
         """
-        from apps.identities.serializer import IdentitySerializer
+        from apps.identities.serializers import IdentitySerializer
 
         log.debug(f"Identities Request: {request.user}")
 
