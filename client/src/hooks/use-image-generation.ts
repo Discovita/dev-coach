@@ -11,12 +11,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   generateIdentityImage,
   saveGeneratedImage,
+  startImageChat,
+  continueImageChat,
 } from "@/api/imageGeneration";
 import {
   GenerateImageRequest,
   GenerateImageResponse,
   SaveImageRequest,
   SaveImageResponse,
+  StartImageChatRequest,
+  StartImageChatResponse,
+  ContinueImageChatRequest,
+  ContinueImageChatResponse,
 } from "@/types/imageGeneration";
 import { toast } from "sonner";
 
@@ -58,7 +64,38 @@ export function useImageGeneration() {
     }
   );
 
+  // Start chat mutation
+  const startChatMutation = useMutation<
+    StartImageChatResponse,
+    Error,
+    StartImageChatRequest
+  >({
+    mutationFn: startImageChat,
+    onSuccess: () => {
+      toast.success("Image generated successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to generate image: ${error.message}`);
+    },
+  });
+
+  // Continue chat mutation
+  const continueChatMutation = useMutation<
+    ContinueImageChatResponse,
+    Error,
+    ContinueImageChatRequest
+  >({
+    mutationFn: continueImageChat,
+    onSuccess: () => {
+      toast.success("Image edited successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to edit image: ${error.message}`);
+    },
+  });
+
   return {
+    // Legacy generate/save (kept for backwards compatibility)
     generateImage: generateMutation.mutateAsync,
     saveImage: saveMutation.mutateAsync,
     isGenerating: generateMutation.isPending,
@@ -69,6 +106,17 @@ export function useImageGeneration() {
     saveData: saveMutation.data,
     resetGenerate: generateMutation.reset,
     resetSave: saveMutation.reset,
+    // New chat-based mutations
+    startChat: startChatMutation.mutateAsync,
+    continueChat: continueChatMutation.mutateAsync,
+    isStartingChat: startChatMutation.isPending,
+    isContinuingChat: continueChatMutation.isPending,
+    startChatError: startChatMutation.error,
+    continueChatError: continueChatMutation.error,
+    startChatData: startChatMutation.data,
+    continueChatData: continueChatMutation.data,
+    resetStartChat: startChatMutation.reset,
+    resetContinueChat: continueChatMutation.reset,
   };
 }
 

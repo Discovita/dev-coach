@@ -82,7 +82,7 @@ class UserViewSet(viewsets.GenericViewSet):
         Get the authenticated user's coach state.
         """
         from apps.coach_states.models import CoachState
-        from apps.coach_states.serializer import CoachStateSerializer
+        from apps.coach_states.serializers import CoachStateSerializer
 
         try:
             coach_state = CoachState.objects.get(user=request.user)
@@ -104,7 +104,7 @@ class UserViewSet(viewsets.GenericViewSet):
         - archived_only=true: Return only archived identities
         By default, excludes archived identities.
         """
-        from apps.identities.serializer import IdentitySerializer
+        from apps.identities.serializers import IdentitySerializer
 
         log.debug(f"Identities Request: {request.user}")
 

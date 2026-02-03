@@ -50,3 +50,49 @@ export interface SaveImageResponse {
   error?: string;
 }
 
+/**
+ * Request payload for starting a new image chat session.
+ */
+export interface StartImageChatRequest {
+  /** UUID of the identity to generate image for */
+  identity_id: string;
+  /** UUID of the user (for admin endpoints only) */
+  user_id?: string;
+  /** Extra instructions (optional) */
+  additional_prompt?: string;
+}
+
+/**
+ * Response from start image chat endpoint.
+ */
+export interface StartImageChatResponse {
+  /** Base64 encoded image data */
+  image_base64: string;
+  /** UUID of the identity */
+  identity_id: string;
+  /** Name of the identity */
+  identity_name: string;
+}
+
+/**
+ * Request payload for continuing an image chat session.
+ */
+export interface ContinueImageChatRequest {
+  /** UUID of the user (for admin endpoints only) */
+  user_id?: string;
+  /** Edit instruction */
+  edit_prompt: string;
+}
+
+/**
+ * Response from continue image chat endpoint.
+ */
+export interface ContinueImageChatResponse {
+  /** Base64 encoded image data */
+  image_base64: string;
+  /** UUID of the identity */
+  identity_id: string;
+  /** Name of the identity */
+  identity_name: string;
+}
+

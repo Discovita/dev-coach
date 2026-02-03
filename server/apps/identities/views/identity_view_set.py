@@ -13,7 +13,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.http import Http404, FileResponse
 from apps.identities.models import Identity
-from apps.identities.serializer import IdentitySerializer
+from apps.identities.serializers import IdentitySerializer
 from enums.identity_state import IdentityState
 from services.logger import configure_logging
 from services.pdf import PDFService
