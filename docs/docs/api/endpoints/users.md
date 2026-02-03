@@ -32,7 +32,14 @@
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T12:00:00Z",
   "groups": [],
-  "user_permissions": []
+  "user_permissions": [],
+  "gender": "man",
+  "skin_tone": "medium",
+  "hair_color": "brown",
+  "eye_color": "blue",
+  "height": "average",
+  "build": "athletic",
+  "age_range": "thirties"
 }
 ```
 
@@ -63,6 +70,13 @@
   "updated_at": "2024-06-01T12:00:00Z",
   "groups": [],
   "user_permissions": [],
+  "gender": "man",
+  "skin_tone": "medium",
+  "hair_color": "brown",
+  "eye_color": "blue",
+  "height": "average",
+  "build": "athletic",
+  "age_range": "thirties",
   "identities": [
     {
       "id": "uuid-string",
@@ -320,4 +334,12 @@ For detailed field information on models returned by these endpoints, see:
   - `action_type`: see `enums/action_type.py`
   - `role`: see `enums/message_role.py`
   - `state`: see `enums/identity_state.py`
+  - `gender`: see `enums/appearance/gender.py`
+  - `skin_tone`: see `enums/appearance/skin_tone.py`
+  - `hair_color`: see `enums/appearance/hair_color.py`
+  - `eye_color`: see `enums/appearance/eye_color.py`
+  - `height`: see `enums/appearance/height.py`
+  - `build`: see `enums/appearance/build.py`
+  - `age_range`: see `enums/appearance/age_range.py`
+- Appearance preference fields (`gender`, `skin_tone`, `hair_color`, `eye_color`, `height`, `build`, `age_range`) are optional and used for image generation visualization. These fields can be updated via PATCH requests to user endpoints.
 - Update this document whenever the API changes.

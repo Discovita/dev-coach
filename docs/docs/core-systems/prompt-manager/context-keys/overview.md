@@ -57,6 +57,15 @@ Phase-specific process information:
 
 - `brainstorming_category_context`: Context for identity brainstorming
 
+### Image Generation Context
+
+Context used specifically for image generation prompts:
+
+- `appearance_context`: User appearance preferences (height, build, skin tone, gender, age, hair, eyes)
+- `scene_context`: Identity scene details (clothing, mood, setting)
+
+**Note**: These context functions are used directly in `PromptManager.create_image_generation_prompt()` rather than through the standard ContextKey enum system, as they are specific to image generation workflows.
+
 ## Phase-Specific Context
 
 Some context keys provide different data depending on the current coaching phase:

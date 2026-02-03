@@ -6,10 +6,12 @@ Used for generating identity images from reference photos and prompts.
 """
 
 import os
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from PIL import Image
 from google import genai
 from google.genai import types
+from google.genai.chats import Chat
+from google.genai.types import Content, GenerateContentConfig, GenerateContentResponse
 
 from services.logger import configure_logging
 
@@ -148,4 +150,72 @@ class GeminiImageService:
         image.save(buffer, format=format)
         buffer.seek(0)
         return buffer.getvalue()
+
+    def create_chat(
+        self,
+        history: Optional[List[Content]] = None,
+        config: Optional[GenerateContentConfig] = None,
+    ) -> Chat:
+        """
+        Create a new Gemini chat session for image generation.
+
+        Args:
+            history: Optional existing history to restore a session
+            config: Optional config override
+
+        Returns:
+            Gemini Chat object
+        """
+        default_config = GenerateContentConfig(
+            response_modalities=["TEXT", "IMAGE"],
+            image_config=types.ImageConfig(
+                aspect_ratio="16:9",
+                image_size="4K",
+            ),
+        )
+
+        return self.client.chats.create(
+            model=self.MODEL,
+            config=config or default_config,
+            history=history or [],
+        )
+
+    def send_chat_message(
+        self,
+        chat: Chat,
+        message: str,
+        images: Optional[List[Image.Image]] = None,
+    ) -> Tuple[Optional[Image.Image], GenerateContentResponse]:
+        """
+        Send a message to a chat session and extract the generated image.
+
+        Args:
+            chat: The Gemini chat session
+            message: Text message/prompt to send
+            images: Optional PIL images to include with the message
+
+        Returns:
+            Tuple of (generated PIL Image or None, full response)
+        """
+        # Build content: text + optional images
+        contents = [message]
+        if images:
+            contents.extend(images)
+
+        log.info(f"Sending chat message with {len(images) if images else 0} images")
+        log.debug(f"Message: {message[:200]}...")
+
+        response = chat.send_message(contents)
+
+        # Extract image from response
+        generated_image = None
+        for part in response.parts:
+            if part.inline_data is not None:
+                generated_image = part.as_image()
+                log.info("Image generated successfully from chat")
+                break
+            if part.text is not None:
+                log.debug(f"Chat response text: {part.text[:200]}...")
+
+        return generated_image, response
 

@@ -11,6 +11,16 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.mail import send_mail
 
+from enums.appearance import (
+    Gender,
+    SkinTone,
+    HairColor,
+    EyeColor,
+    Height,
+    Build,
+    AgeRange,
+)
+
 
 class UserManager(BaseUserManager):
     """
@@ -116,6 +126,57 @@ class User(AbstractUser):
         blank=True,
         on_delete=models.CASCADE,  # Important: ensures test users are deleted when their scenario is deleted
         help_text="Test scenario this user is associated with (for test data isolation)."
+    )
+
+    # Appearance/visualization preferences for image generation
+    gender = models.CharField(
+        max_length=20,
+        choices=Gender.choices,
+        null=True,
+        blank=True,
+        help_text="Gender preference for image generation"
+    )
+    skin_tone = models.CharField(
+        max_length=20,
+        choices=SkinTone.choices,
+        null=True,
+        blank=True,
+        help_text="Preferred skin tone for image generation"
+    )
+    hair_color = models.CharField(
+        max_length=20,
+        choices=HairColor.choices,
+        null=True,
+        blank=True,
+        help_text="Preferred hair color for image generation"
+    )
+    eye_color = models.CharField(
+        max_length=20,
+        choices=EyeColor.choices,
+        null=True,
+        blank=True,
+        help_text="Preferred eye color for image generation"
+    )
+    height = models.CharField(
+        max_length=20,
+        choices=Height.choices,
+        null=True,
+        blank=True,
+        help_text="Height preference for image generation"
+    )
+    build = models.CharField(
+        max_length=20,
+        choices=Build.choices,
+        null=True,
+        blank=True,
+        help_text="Build/body type preference for image generation"
+    )
+    age_range = models.CharField(
+        max_length=20,
+        choices=AgeRange.choices,
+        null=True,
+        blank=True,
+        help_text="Age range preference for image generation"
     )
 
     objects = UserManager()

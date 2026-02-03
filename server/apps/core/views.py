@@ -2,6 +2,15 @@ from enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
 from enums.action_type import ActionType
 from enums.prompt_type import PromptType
+from enums.appearance import (
+    Gender,
+    SkinTone,
+    HairColor,
+    EyeColor,
+    Height,
+    Build,
+    AgeRange,
+)
 from rest_framework.response import Response
 from rest_framework import decorators, viewsets
 
@@ -24,17 +33,36 @@ class CoreViewSet(viewsets.GenericViewSet):
     def enums(self, request, *args, **kwargs):
         """
         GET /api/enums
-        Returns all enum values for coach_state, allowed_actions, context_keys, and prompt_types.
+        Returns all enum values for coach_state, allowed_actions, context_keys, prompt_types, and appearance options.
         """
         coaching_phases = [{"value": c.value, "label": c.label} for c in CoachingPhase]
         allowed_actions = [{"value": a.value, "label": a.label} for a in ActionType]
         context_keys = [{"value": k.value, "label": k.label} for k in ContextKey]
         prompt_types = [{"value": p.value, "label": p.label} for p in PromptType]
+        
+        # Appearance enums
+        genders = [{"value": g.value, "label": g.label} for g in Gender]
+        skin_tones = [{"value": s.value, "label": s.label} for s in SkinTone]
+        hair_colors = [{"value": h.value, "label": h.label} for h in HairColor]
+        eye_colors = [{"value": e.value, "label": e.label} for e in EyeColor]
+        heights = [{"value": h.value, "label": h.label} for h in Height]
+        builds = [{"value": b.value, "label": b.label} for b in Build]
+        age_ranges = [{"value": a.value, "label": a.label} for a in AgeRange]
+        
         return Response(
             {
                 "coaching_phases": coaching_phases,
                 "allowed_actions": allowed_actions,
                 "context_keys": context_keys,
                 "prompt_types": prompt_types,
+                "appearance": {
+                    "genders": genders,
+                    "skin_tones": skin_tones,
+                    "hair_colors": hair_colors,
+                    "eye_colors": eye_colors,
+                    "heights": heights,
+                    "builds": builds,
+                    "age_ranges": age_ranges,
+                },
             }
         )

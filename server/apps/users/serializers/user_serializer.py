@@ -7,8 +7,8 @@ This serializer includes nested related data like identities, coach state, and c
 from rest_framework import serializers
 
 from apps.users.models import User
-from apps.identities.serializer import IdentitySerializer
-from apps.coach_states.serializer import CoachStateSerializer
+from apps.identities.serializers import IdentitySerializer
+from apps.coach_states.serializers import CoachStateSerializer
 from apps.chat_messages.serializer import ChatMessageSerializer
 
 
@@ -51,6 +51,14 @@ class UserSerializer(serializers.ModelSerializer):
             "identities",  # User's identities
             "coach_state",  # User's coach state
             "chat_messages",  # User's chat messages
+            # Appearance/visualization preferences for image generation
+            "gender",  # Gender preference
+            "skin_tone",  # Skin tone preference
+            "hair_color",  # Hair color preference
+            "eye_color",  # Eye color preference
+            "height",  # Height preference
+            "build",  # Build preference
+            "age_range",  # Age range preference
         )
         read_only_fields = (
             "created_at",

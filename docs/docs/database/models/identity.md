@@ -17,6 +17,9 @@ The Identity model stores user identities with their components (name, "I Am" St
 - `name` (CharField): Concise identity label, max 255 characters, optional
 - `i_am_statement` (TextField): "I am" statement with description, optional
 - `visualization` (TextField): Vivid mental image, optional
+- `clothing` (TextField): What the person is wearing in this identity visualization, optional
+- `mood` (TextField): Emotional state/feeling in this identity visualization, optional
+- `setting` (TextField): Environment/location for this identity visualization, optional
 - `state` (CharField): Current identity state, max 32 characters, defaults to ACCEPTED
 - `notes` (ArrayField): List of notes about the identity
 - `category` (CharField): Identity category, max 32 characters

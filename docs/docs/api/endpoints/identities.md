@@ -39,6 +39,9 @@ GET /identities/?archived_only=true
     "name": "Creative Visionary",
     "i_am_statement": "I am a bold creator, transforming ideas into reality.",
     "visualization": "I see myself confidently presenting innovative solutions...",
+    "clothing": "linen button-down shirt",
+    "mood": "proud and calm",
+    "setting": "on a hill overlooking Hawaiian agricultural land",
     "state": "ACCEPTED",
     "notes": ["Note 1", "Note 2"],
     "category": "PASSIONS",
@@ -52,6 +55,9 @@ GET /identities/?archived_only=true
     "name": "Warrior",
     "i_am_statement": "I treat my body with strength, discipline, and respect.",
     "visualization": "I see myself in peak physical condition...",
+    "clothing": null,
+    "mood": null,
+    "setting": null,
     "state": "ACCEPTED",
     "notes": [],
     "category": "PHYSICAL_HEALTH",
@@ -84,6 +90,9 @@ GET /identities/?archived_only=true
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": "proud and calm",
+  "setting": "on a hill overlooking Hawaiian agricultural land",
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -107,6 +116,9 @@ GET /identities/?archived_only=true
     "name": "Creative Visionary",
     "i_am_statement": "I am a bold creator, transforming ideas into reality.",
     "visualization": "I see myself confidently presenting innovative solutions...",
+    "clothing": "linen button-down shirt",
+    "mood": "proud and calm",
+    "setting": "on a hill overlooking Hawaiian agricultural land",
     "state": "PROPOSED",
     "notes": ["Initial note about this identity"],
     "category": "PASSIONS"
@@ -126,6 +138,9 @@ GET /identities/?archived_only=true
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": "proud and calm",
+  "setting": "on a hill overlooking Hawaiian agricultural land",
   "state": "PROPOSED",
   "notes": ["Initial note about this identity"],
   "category": "PASSIONS",
@@ -151,6 +166,9 @@ GET /identities/?archived_only=true
     "name": "Updated Creative Visionary",
     "i_am_statement": "I am a bold creator, transforming ideas into reality with passion and purpose.",
     "visualization": "I see myself confidently presenting innovative solutions to large audiences...",
+    "clothing": "formal conductor's attire",
+    "mood": "passionate and focused",
+    "setting": "grand concert hall",
     "state": "ACCEPTED",
     "notes": ["Updated note 1", "Updated note 2"],
     "category": "PASSIONS"
@@ -171,6 +189,9 @@ GET /identities/?archived_only=true
   "name": "Updated Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality with passion and purpose.",
   "visualization": "I see myself confidently presenting innovative solutions to large audiences...",
+  "clothing": "formal conductor's attire",
+  "mood": "passionate and focused",
+  "setting": "grand concert hall",
   "state": "ACCEPTED",
   "notes": ["Updated note 1", "Updated note 2"],
   "category": "PASSIONS",
@@ -192,6 +213,7 @@ GET /identities/?archived_only=true
   ```json
   {
     "name": "Updated Creative Visionary",
+    "clothing": "linen button-down shirt",
     "state": "ACCEPTED"
   }
   ```
@@ -210,6 +232,9 @@ GET /identities/?archived_only=true
   "name": "Updated Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": null,
+  "setting": null,
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -270,6 +295,9 @@ image: [binary file data]
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": "linen button-down shirt",
+  "mood": "proud and calm",
+  "setting": "on a hill overlooking Hawaiian agricultural land",
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -308,6 +336,9 @@ image: [binary file data]
   "name": "Creative Visionary",
   "i_am_statement": "I am a bold creator, transforming ideas into reality.",
   "visualization": "I see myself confidently presenting innovative solutions...",
+  "clothing": null,
+  "mood": null,
+  "setting": null,
   "state": "ACCEPTED",
   "notes": ["Note 1", "Note 2"],
   "category": "PASSIONS",
@@ -392,6 +423,9 @@ Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
 | `name` | String (max 255) | Optional | Concise label for the identity (e.g., 'Creative Visionary') |
 | `i_am_statement` | Text | Optional | An 'I am' statement with a brief description |
 | `visualization` | Text | Optional | A vivid mental image (added in the visualization stage) |
+| `clothing` | Text | Optional | What the person is wearing in this identity visualization (e.g., 'linen button-down shirt') |
+| `mood` | Text | Optional | Emotional state/feeling in this identity visualization (e.g., 'proud and calm') |
+| `setting` | Text | Optional | Environment/location for this identity visualization (e.g., 'on a hill overlooking the ocean') |
 | `state` | String | Optional | Current state of the identity. See [Identity State Choices](#identity-state-choices) |
 | `notes` | Array of Strings | Optional | List of notes about the identity |
 | `category` | String | Required | Category this identity belongs to. See [Identity Category Choices](#identity-category-choices) |
@@ -428,6 +462,195 @@ The `category` field accepts the following values (see `enums/identity_category.
 
 ---
 
+## Identity Image Chat Endpoints
+
+These endpoints enable multi-turn image generation using Gemini's chat functionality. Users can start a new image generation session and then iteratively refine the generated image through conversation.
+
+### 11. Start Image Chat
+
+- **URL:** `/identity-image-chat/start/`
+- **Method:** `POST`
+- **Description:** Start a new image generation chat session for an identity. Creates a new Gemini chat, generates the initial image using the user's reference images and identity context, and stores the chat history for future edits. If a chat session already exists for the user, it will be replaced.
+- **Authentication:** Required
+- **Request Body:**
+  ```json
+  {
+    "identity_id": "uuid-string",
+    "additional_prompt": "optional extra instructions for the image generation"
+  }
+  ```
+- **Response:**
+  - `200 OK`: Generated image and identity information.
+  - `400 Bad Request`: No reference images found for user, or validation errors.
+  - `404 Not Found`: Identity not found.
+  - `500 Internal Server Error`: Image generation failed.
+
+#### Example Request
+
+```
+POST /identity-image-chat/start/
+Content-Type: application/json
+
+{
+  "identity_id": "abc123-uuid",
+  "additional_prompt": "Make the lighting dramatic"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "image_base64": "iVBORw0KGgoAAAANSUhEUgAA...",
+  "identity_id": "abc123-uuid",
+  "identity_name": "The Artist"
+}
+```
+
+**Note:**
+- Requires at least one reference image uploaded for the user.
+- The chat session is stored and can be continued with the Continue Image Chat endpoint.
+- Only one chat session exists per user; starting a new chat replaces any existing session.
+
+---
+
+### 12. Continue Image Chat
+
+- **URL:** `/identity-image-chat/continue/`
+- **Method:** `POST`
+- **Description:** Continue an existing image chat session with an edit request. Loads the user's existing chat history, sends the edit prompt to Gemini, and returns the newly generated image.
+- **Authentication:** Required
+- **Request Body:**
+  ```json
+  {
+    "edit_prompt": "make the lighting warmer"
+  }
+  ```
+- **Response:**
+  - `200 OK`: Generated image and identity information.
+  - `400 Bad Request`: No active chat session, empty edit prompt, or validation errors.
+  - `500 Internal Server Error`: Image generation failed.
+
+#### Example Request
+
+```
+POST /identity-image-chat/continue/
+Content-Type: application/json
+
+{
+  "edit_prompt": "Add more vibrant colors to the background"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "image_base64": "iVBORw0KGgoAAAANSUhEUgAA...",
+  "identity_id": "abc123-uuid",
+  "identity_name": "The Artist"
+}
+```
+
+**Note:**
+- Requires an active chat session (must call Start Image Chat first).
+- The chat history is preserved, allowing Gemini to understand the context of previous messages and images.
+- Multiple edit requests can be made to iteratively refine the image.
+
+---
+
+### 13. Start Image Chat (Admin)
+
+- **URL:** `/admin/identity-image-chat/start/`
+- **Method:** `POST`
+- **Description:** Admin endpoint to start a new image generation chat session for any user by ID.
+- **Authentication:** Required (Admin only)
+- **Request Body:**
+  ```json
+  {
+    "identity_id": "uuid-string",
+    "user_id": "uuid-string",
+    "additional_prompt": "optional extra instructions"
+  }
+  ```
+- **Response:**
+  - `200 OK`: Generated image and identity information.
+  - `400 Bad Request`: No reference images found for user, or validation errors.
+  - `404 Not Found`: Identity or user not found.
+  - `500 Internal Server Error`: Image generation failed.
+
+#### Example Request
+
+```
+POST /admin/identity-image-chat/start/
+Content-Type: application/json
+
+{
+  "identity_id": "abc123-uuid",
+  "user_id": "user456-uuid",
+  "additional_prompt": "Make it more vibrant"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "image_base64": "iVBORw0KGgoAAAANSUhEUgAA...",
+  "identity_id": "abc123-uuid",
+  "identity_name": "The Artist"
+}
+```
+
+**Note:** This endpoint is only accessible to admin users.
+
+---
+
+### 14. Continue Image Chat (Admin)
+
+- **URL:** `/admin/identity-image-chat/continue/`
+- **Method:** `POST`
+- **Description:** Admin endpoint to continue an existing image chat session for any user by ID.
+- **Authentication:** Required (Admin only)
+- **Request Body:**
+  ```json
+  {
+    "user_id": "uuid-string",
+    "edit_prompt": "make the lighting warmer"
+  }
+  ```
+- **Response:**
+  - `200 OK`: Generated image and identity information.
+  - `400 Bad Request`: No active chat session, empty edit prompt, or validation errors.
+  - `404 Not Found`: User not found.
+  - `500 Internal Server Error`: Image generation failed.
+
+#### Example Request
+
+```
+POST /admin/identity-image-chat/continue/
+Content-Type: application/json
+
+{
+  "user_id": "user456-uuid",
+  "edit_prompt": "Remove the hat"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "image_base64": "iVBORw0KGgoAAAANSUhEUgAA...",
+  "identity_id": "abc123-uuid",
+  "identity_name": "The Artist"
+}
+```
+
+**Note:** This endpoint is only accessible to admin users.
+
+---
+
 ## Notes
 
 - All endpoints require authentication. See the authentication documentation for details.
@@ -448,5 +671,20 @@ The `category` field accepts the following values (see `enums/identity_category.
   - `state`: see `enums/identity_state.py`
   - `category`: see `enums/identity_category.py`
 - The `notes` field is an array of strings. When updating, you can provide a new array to replace all notes, or use partial update to modify specific fields.
+
+### Image Chat Notes
+
+- **Multi-turn Image Generation**: The identity image chat endpoints use Gemini's multi-turn conversation feature to enable iterative image refinement.
+- **Chat Session Persistence**: Chat history is stored in the `IdentityImageChat` model. Only one session exists per user; starting a new chat replaces any existing session.
+- **Reference Images Required**: The user must have at least one reference image uploaded before starting an image chat.
+- **Base64 Response**: Generated images are returned as base64-encoded PNG strings in the `image_base64` field.
+- **Context Preservation**: The chat history includes all previous messages and generated images, allowing Gemini to understand the full context when processing edit requests.
+- **Typical Workflow**:
+  1. Upload reference images (see Reference Images API)
+  2. Call `/identity-image-chat/start/` to generate the initial image
+  3. Call `/identity-image-chat/continue/` with edit prompts to refine the image
+  4. Repeat step 3 as needed until satisfied
+  5. Save the final image to the identity using `/identities/{id}/upload-image/`
+
 - Update this document whenever the API changes.
 

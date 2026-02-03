@@ -1,0 +1,27 @@
+{
+  "CORSRules": [
+    {
+      "AllowedHeaders": [
+        "*"
+      ],
+      "AllowedMethods": [
+        "GET",
+        "HEAD"
+      ],
+      "AllowedOrigins": [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://neovita.ai",
+        "https://www.neovita.ai",
+        "https://prod-coach-frontend.onrender.com",
+        "https://prod-dev-coach-frontend.onrender.com"
+      ],
+      "ExposeHeaders": [
+        "ETag",
+        "Content-Length",
+        "Content-Type"
+      ],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}

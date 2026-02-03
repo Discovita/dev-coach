@@ -36,6 +36,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "updated_at",  # Updated at timestamp
             "groups",  # Group memberships (IDs)
             "user_permissions",  # User permissions (IDs)
+            # Appearance/visualization preferences for image generation
+            "gender",  # Gender preference
+            "skin_tone",  # Skin tone preference
+            "hair_color",  # Hair color preference
+            "eye_color",  # Eye color preference
+            "height",  # Height preference
+            "build",  # Build preference
+            "age_range",  # Age range preference
         )
         read_only_fields = (
             "created_at",
