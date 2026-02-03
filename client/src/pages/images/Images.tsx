@@ -58,7 +58,6 @@ export default function Images() {
   const [isSavingScene, setIsSavingScene] = useState(false);
 
   const {
-    generateImage,
     saveImage,
     isGenerating,
     isSaving,
