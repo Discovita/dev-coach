@@ -1,8 +1,20 @@
 from google import genai
 from google.genai import types
 from google.genai.chats import Chat
+from pathlib import Path
+from dotenv import load_dotenv
+import os
 
-client = genai.Client()
+# Load environment variables from server/.env
+script_path = Path(__file__).resolve()
+current = script_path.parent
+while current != current.parent:
+    if current.name == "server":
+        load_dotenv(current / ".env")
+        break
+    current = current.parent
+
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 chat: Chat = client.chats.create(
     model="gemini-3-pro-image-preview",
