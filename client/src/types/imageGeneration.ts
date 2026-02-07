@@ -1,6 +1,47 @@
 import { Identity } from "./identity";
 
 /**
+ * Error codes returned by the image generation API.
+ * Used for frontend handling of specific error types.
+ */
+export type ImageGenerationErrorCode =
+  | "BLOCKED_PROMPT"
+  | "BLOCKED_RESPONSE"
+  | "EMPTY_RESPONSE"
+  | "SAFETY_BLOCK"
+  | "RECITATION"
+  | "RATE_LIMITED"
+  | "MODEL_OVERLOADED"
+  | "UNKNOWN";
+
+/**
+ * Error response from image generation endpoints.
+ */
+export interface ImageGenerationErrorResponse {
+  /** Human-readable error message */
+  error: string;
+  /** Machine-readable error code */
+  error_code: ImageGenerationErrorCode;
+  /** Additional details about the error */
+  details: string | null;
+}
+
+/**
+ * Custom error class for image generation failures.
+ */
+export class ImageGenerationError extends Error {
+  error_code: ImageGenerationErrorCode;
+  details: string | null;
+
+  constructor(response: ImageGenerationErrorResponse) {
+    super(response.error);
+    this.name = "ImageGenerationError";
+    this.error_code = response.error_code;
+    this.details = response.details;
+  }
+}
+
+/**
  * Request payload for generating an identity image.
  */
 export interface GenerateImageRequest {

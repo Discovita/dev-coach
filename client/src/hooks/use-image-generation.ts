@@ -23,8 +23,76 @@ import {
   StartImageChatResponse,
   ContinueImageChatRequest,
   ContinueImageChatResponse,
+  ImageGenerationError,
+  ImageGenerationErrorCode,
 } from "@/types/imageGeneration";
 import { toast } from "sonner";
+
+/**
+ * Parsed error information for display in UI.
+ */
+export interface ParsedImageError {
+  message: string;
+  errorCode: ImageGenerationErrorCode;
+  details: string | null;
+  isRetryable: boolean;
+}
+
+/**
+ * Parse an error into a structured format for UI display.
+ */
+export function parseImageError(error: Error | null): ParsedImageError | null {
+  if (!error) return null;
+  
+  if (error instanceof ImageGenerationError) {
+    // Determine if the error is retryable (user can try again without changes)
+    const retryableCodes: ImageGenerationErrorCode[] = [
+      "MODEL_OVERLOADED",
+      "RATE_LIMITED",
+      "EMPTY_RESPONSE",
+    ];
+    
+    return {
+      message: error.message,
+      errorCode: error.error_code,
+      details: error.details,
+      isRetryable: retryableCodes.includes(error.error_code),
+    };
+  }
+  
+  // Generic error
+  return {
+    message: error.message || "An unexpected error occurred. Please try again.",
+    errorCode: "UNKNOWN",
+    details: null,
+    isRetryable: true,
+  };
+}
+
+/**
+ * Get a user-friendly error message based on the error type.
+ * Provides specific guidance for different error scenarios.
+ */
+function getErrorMessage(error: Error): string {
+  if (error instanceof ImageGenerationError) {
+    // The error message from the backend is already user-friendly
+    return error.message;
+  }
+  // Fallback for generic errors
+  return error.message || "An unexpected error occurred. Please try again.";
+}
+
+/**
+ * Get the appropriate toast duration based on error type.
+ * Longer duration for errors that need user action.
+ */
+function getToastDuration(error: Error): number {
+  if (error instanceof ImageGenerationError) {
+    // Give users more time to read actionable error messages
+    return 8000;
+  }
+  return 5000;
+}
 
 /**
  * Hook for generating and saving identity images.
@@ -44,7 +112,8 @@ export function useImageGeneration() {
       toast.success("Image generated successfully!");
     },
     onError: (error) => {
-      toast.error(`Failed to generate image: ${error.message}`);
+      const message = getErrorMessage(error);
+      toast.error(message, { duration: getToastDuration(error) });
     },
   });
 
@@ -75,7 +144,8 @@ export function useImageGeneration() {
       toast.success("Image generated successfully!");
     },
     onError: (error) => {
-      toast.error(`Failed to generate image: ${error.message}`);
+      const message = getErrorMessage(error);
+      toast.error(message, { duration: getToastDuration(error) });
     },
   });
 
@@ -90,7 +160,8 @@ export function useImageGeneration() {
       toast.success("Image edited successfully!");
     },
     onError: (error) => {
-      toast.error(`Failed to edit image: ${error.message}`);
+      const message = getErrorMessage(error);
+      toast.error(message, { duration: getToastDuration(error) });
     },
   });
 

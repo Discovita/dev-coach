@@ -9,6 +9,8 @@ import {
   StartImageChatResponse,
   ContinueImageChatRequest,
   ContinueImageChatResponse,
+  ImageGenerationError,
+  ImageGenerationErrorResponse,
 } from "@/types/imageGeneration";
 
 /**
@@ -74,6 +76,7 @@ export async function saveGeneratedImage(
  * Public: POST /api/v1/identity-image-chat/start/
  * @param request - Start chat request with identity_id, optional user_id (admin), optional additional_prompt
  * @returns StartImageChatResponse with base64 image and identity info
+ * @throws ImageGenerationError with detailed error info if generation fails
  */
 export async function startImageChat(
   request: StartImageChatRequest
@@ -89,8 +92,13 @@ export async function startImageChat(
   });
   
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to start image chat" }));
-    throw new Error(error.error || "Failed to start image chat");
+    const errorData = await response.json().catch(() => ({ 
+      error: "Failed to start image chat",
+      error_code: "UNKNOWN",
+      details: null,
+    })) as ImageGenerationErrorResponse;
+    
+    throw new ImageGenerationError(errorData);
   }
   return response.json();
 }
@@ -101,6 +109,7 @@ export async function startImageChat(
  * Public: POST /api/v1/identity-image-chat/continue/
  * @param request - Continue chat request with edit_prompt, optional user_id (admin)
  * @returns ContinueImageChatResponse with base64 image and identity info
+ * @throws ImageGenerationError with detailed error info if edit fails
  */
 export async function continueImageChat(
   request: ContinueImageChatRequest
@@ -116,8 +125,13 @@ export async function continueImageChat(
   });
   
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to continue image chat" }));
-    throw new Error(error.error || "Failed to continue image chat");
+    const errorData = await response.json().catch(() => ({ 
+      error: "Failed to continue image chat",
+      error_code: "UNKNOWN",
+      details: null,
+    })) as ImageGenerationErrorResponse;
+    
+    throw new ImageGenerationError(errorData);
   }
   return response.json();
 }
