@@ -27,6 +27,7 @@ export const IdentitiesBulletin: React.FC<{
   const shouldShowIdentities =
     coachState?.current_phase === CoachingPhase.IDENTITY_BRAINSTORMING ||
     coachState?.current_phase === CoachingPhase.BRAINSTORMING_REVIEW ||
+    coachState?.current_phase === CoachingPhase.ANYTHING_MISSING ||
     coachState?.current_phase === CoachingPhase.IDENTITY_COMMITMENT;
   if (!shouldShowIdentities) return null;
 
