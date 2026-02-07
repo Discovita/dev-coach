@@ -207,15 +207,20 @@ class GeminiImageService:
 
         response = chat.send_message(contents)
 
-        # Extract image from response
+        # Extract image from response. Use the *last* image part so that in
+        # multi-turn edits we return the newly generated image, not an earlier
+        # part (e.g. reference echo or thinking image). See research scripts
+        # that skip thought parts and take the final image.
         generated_image = None
         for part in response.parts:
-            if part.inline_data is not None:
-                generated_image = part.as_image()
-                log.info("Image generated successfully from chat")
-                break
+            if getattr(part, "thought", False):
+                continue
             if part.text is not None:
                 log.debug(f"Chat response text: {part.text[:200]}...")
+            if part.inline_data is not None:
+                generated_image = part.as_image()
+        if generated_image is not None:
+            log.info("Image generated successfully from chat")
 
         return generated_image, response
 
