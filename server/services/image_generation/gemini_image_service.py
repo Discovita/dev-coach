@@ -18,6 +18,85 @@ from services.logger import configure_logging
 log = configure_logging(__name__, log_level="INFO")
 
 
+class ImageGenerationError(Exception):
+    """
+    Custom exception for image generation failures with detailed information.
+    
+    Attributes:
+        message: Human-readable error message
+        error_code: Machine-readable error code for frontend handling
+        details: Additional details about the error
+    """
+    
+    # Error codes for frontend handling
+    BLOCKED_PROMPT = "BLOCKED_PROMPT"
+    BLOCKED_RESPONSE = "BLOCKED_RESPONSE"
+    EMPTY_RESPONSE = "EMPTY_RESPONSE"
+    SAFETY_BLOCK = "SAFETY_BLOCK"
+    RECITATION = "RECITATION"
+    RATE_LIMITED = "RATE_LIMITED"
+    MODEL_OVERLOADED = "MODEL_OVERLOADED"
+    UNKNOWN = "UNKNOWN"
+    
+    def __init__(self, message: str, error_code: str = "UNKNOWN", details: Optional[str] = None):
+        self.message = message
+        self.error_code = error_code
+        self.details = details
+        super().__init__(self.message)
+    
+    def to_dict(self):
+        return {
+            "message": self.message,
+            "error_code": self.error_code,
+            "details": self.details,
+        }
+    
+    @classmethod
+    def from_exception(cls, e: Exception) -> "ImageGenerationError":
+        """
+        Create an ImageGenerationError from a generic exception.
+        Parses common error patterns to provide specific error codes.
+        
+        Args:
+            e: The exception to convert
+            
+        Returns:
+            ImageGenerationError with appropriate error code and message
+        """
+        error_str = str(e).lower()
+        
+        # Check for model overloaded (503 UNAVAILABLE)
+        if "503" in str(e) or "unavailable" in error_str or "overloaded" in error_str:
+            return cls(
+                message="The AI model is currently overloaded. Please wait a moment and try again.",
+                error_code=cls.MODEL_OVERLOADED,
+                details=str(e),
+            )
+        
+        # Check for rate limiting (429)
+        if "429" in str(e) or "rate limit" in error_str or "quota" in error_str:
+            return cls(
+                message="Too many requests. Please wait a moment before trying again.",
+                error_code=cls.RATE_LIMITED,
+                details=str(e),
+            )
+        
+        # Check for safety blocks
+        if "safety" in error_str or "blocked" in error_str:
+            return cls(
+                message="Your request was blocked by safety filters. Please modify your prompt and try again.",
+                error_code=cls.SAFETY_BLOCK,
+                details=str(e),
+            )
+        
+        # Default unknown error
+        return cls(
+            message=f"Image generation failed: {str(e)}",
+            error_code=cls.UNKNOWN,
+            details=str(e),
+        )
+
+
 class GeminiImageService:
     """
     Service for generating images using Google's Gemini API.
@@ -196,6 +275,9 @@ class GeminiImageService:
 
         Returns:
             Tuple of (generated PIL Image or None, full response)
+            
+        Raises:
+            ImageGenerationError: If the response is blocked, empty, or API fails
         """
         # Build content: text + optional images
         contents = [message]
@@ -205,17 +287,113 @@ class GeminiImageService:
         log.info(f"Sending chat message with {len(images) if images else 0} images")
         log.debug(f"Message: {message[:200]}...")
 
-        response = chat.send_message(contents)
+        try:
+            response = chat.send_message(contents)
+        except Exception as e:
+            # Convert API exceptions to ImageGenerationError with proper error codes
+            log.error(f"Gemini API error: {e}", exc_info=True)
+            raise ImageGenerationError.from_exception(e)
 
-        # Extract image from response
+        # Extract image from response. Use the *last* image part so that in
+        # multi-turn edits we return the newly generated image, not an earlier
+        # part (e.g. reference echo or thinking image). See research scripts
+        # that skip thought parts and take the final image.
         generated_image = None
+        
+        # Handle case where response.parts is None (blocked or empty response)
+        if response.parts is None:
+            error_info = self._extract_error_info(response)
+            log.warning(f"Gemini returned empty response: {error_info}")
+            raise ImageGenerationError(**error_info)
+        
         for part in response.parts:
-            if part.inline_data is not None:
-                generated_image = part.as_image()
-                log.info("Image generated successfully from chat")
-                break
+            if getattr(part, "thought", False):
+                continue
             if part.text is not None:
                 log.debug(f"Chat response text: {part.text[:200]}...")
+            if part.inline_data is not None:
+                generated_image = part.as_image()
+        
+        if generated_image is not None:
+            log.info("Image generated successfully from chat")
+        else:
+            # We got parts but no image - check for finish reason
+            error_info = self._extract_error_info(response)
+            if error_info["error_code"] != ImageGenerationError.UNKNOWN:
+                log.warning(f"No image in response: {error_info}")
+                raise ImageGenerationError(**error_info)
 
         return generated_image, response
+    
+    def _extract_error_info(self, response: GenerateContentResponse) -> dict:
+        """
+        Extract detailed error information from a Gemini response.
+        
+        Args:
+            response: The Gemini API response
+            
+        Returns:
+            Dict with message, error_code, and details for ImageGenerationError
+        """
+        # Check for prompt feedback (input was blocked)
+        if hasattr(response, 'prompt_feedback') and response.prompt_feedback:
+            feedback = response.prompt_feedback
+            block_reason = getattr(feedback, 'block_reason', None)
+            
+            if block_reason:
+                block_reason_str = str(block_reason)
+                log.warning(f"Prompt blocked: {block_reason_str}")
+                
+                if "SAFETY" in block_reason_str.upper():
+                    return {
+                        "message": "Your request was blocked by safety filters. Please modify your prompt and try again.",
+                        "error_code": ImageGenerationError.SAFETY_BLOCK,
+                        "details": f"Block reason: {block_reason_str}",
+                    }
+                elif "OTHER" in block_reason_str.upper():
+                    return {
+                        "message": "Your request could not be processed. It may violate content policies. Please try a different prompt.",
+                        "error_code": ImageGenerationError.BLOCKED_PROMPT,
+                        "details": f"Block reason: {block_reason_str}",
+                    }
+                else:
+                    return {
+                        "message": f"Your prompt was blocked: {block_reason_str}. Please modify and try again.",
+                        "error_code": ImageGenerationError.BLOCKED_PROMPT,
+                        "details": f"Block reason: {block_reason_str}",
+                    }
+        
+        # Check candidates for finish reason (output was blocked)
+        if hasattr(response, 'candidates') and response.candidates:
+            for candidate in response.candidates:
+                finish_reason = getattr(candidate, 'finish_reason', None)
+                if finish_reason:
+                    finish_reason_str = str(finish_reason)
+                    log.warning(f"Generation stopped: {finish_reason_str}")
+                    
+                    if "SAFETY" in finish_reason_str.upper():
+                        return {
+                            "message": "The generated image was blocked by safety filters. Please try a different prompt.",
+                            "error_code": ImageGenerationError.SAFETY_BLOCK,
+                            "details": f"Finish reason: {finish_reason_str}",
+                        }
+                    elif "RECITATION" in finish_reason_str.upper():
+                        return {
+                            "message": "The request was blocked due to potential copyright concerns. Please try a more unique prompt.",
+                            "error_code": ImageGenerationError.RECITATION,
+                            "details": f"Finish reason: {finish_reason_str}",
+                        }
+                    elif "STOP" not in finish_reason_str.upper():
+                        return {
+                            "message": f"Image generation stopped: {finish_reason_str}. Please try again.",
+                            "error_code": ImageGenerationError.BLOCKED_RESPONSE,
+                            "details": f"Finish reason: {finish_reason_str}",
+                        }
+        
+        # Default: empty response with no clear reason
+        return {
+            "message": "No image was generated. The AI could not process your request. Please try a different prompt.",
+            "error_code": ImageGenerationError.EMPTY_RESPONSE,
+            "details": "Response contained no image data",
+        }
 

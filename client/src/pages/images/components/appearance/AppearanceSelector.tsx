@@ -9,6 +9,8 @@ import { BuildSelector } from "./BuildSelector";
 import { AgeRangeSelector } from "./AgeRangeSelector";
 import { Button } from "@/components/ui/button";
 import { Info, Save, Check, AlertCircle } from "lucide-react";
+import { Gender } from "@/enums/appearance/gender";
+import { BUILDS_BY_GENDER } from "@/enums/appearance/build";
 
 /**
  * List of all appearance fields that are required for image generation.
@@ -135,10 +137,24 @@ export function AppearanceSelector({
     field: K,
     value: UserAppearance[K]
   ) => {
-    setLocalAppearance((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setLocalAppearance((prev) => {
+      const updated = {
+        ...prev,
+        [field]: value,
+      };
+      
+      // If gender changed, check if current build is still valid
+      // Clear build if it's not valid for the new gender
+      if (field === "gender" && prev.build) {
+        const newGender = value as Gender;
+        const validBuilds = BUILDS_BY_GENDER[newGender] || BUILDS_BY_GENDER[Gender.PERSON];
+        if (!validBuilds.includes(prev.build)) {
+          updated.build = undefined;
+        }
+      }
+      
+      return updated;
+    });
     // Clear success indicator when user makes changes
     setShowSaveSuccess(false);
   };
@@ -213,6 +229,7 @@ export function AppearanceSelector({
         <BuildSelector
           value={localAppearance.build}
           onChange={(value) => handleChange("build", value)}
+          gender={localAppearance.gender}
         />
 
         <AgeRangeSelector

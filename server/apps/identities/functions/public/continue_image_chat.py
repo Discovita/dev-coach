@@ -11,9 +11,9 @@ import os
 from rest_framework.response import Response
 from rest_framework import status
 
-from apps.reference_images.models import ReferenceImage
 from apps.users.models import User
 from services.image_generation.orchestration import continue_identity_image_chat
+from services.image_generation import ImageGenerationError
 from services.logger import configure_logging
 
 log = configure_logging(__name__)
@@ -35,30 +35,52 @@ def continue_image_chat(
 
     Returns:
         Response with image_base64, identity_id, identity_name
+        Or error response with error, error_code, details
 
     Raises:
         DRF exceptions for validation errors (400, 404, 500)
     """
-    from rest_framework.exceptions import ValidationError, APIException
+    from rest_framework.exceptions import ValidationError
 
-    # Optionally get reference images (include with edit if available)
-    reference_images = list(ReferenceImage.objects.filter(user_id=user.id))
-
-    # Continue the chat session
+    # Continue the chat session (no reference images - chat history has the context)
     try:
         pil_image, chat_record = continue_identity_image_chat(
             user=user,
             edit_prompt=edit_prompt,
-            reference_images=reference_images if reference_images else None,
         )
     except ValueError as e:
         raise ValidationError(str(e))
+    except ImageGenerationError as e:
+        # Return structured error response for frontend handling
+        log.warning(f"Image generation error: {e.error_code} - {e.message}")
+        return Response(
+            {
+                "error": e.message,
+                "error_code": e.error_code,
+                "details": e.details,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     except Exception as e:
         log.error(f"Image edit failed: {e}", exc_info=True)
-        raise APIException(f"Image edit failed: {str(e)}")
+        return Response(
+            {
+                "error": f"Image edit failed: {str(e)}",
+                "error_code": "UNKNOWN",
+                "details": None,
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     if not pil_image:
-        raise APIException("Image edit failed - no image was generated")
+        return Response(
+            {
+                "error": "No image was generated. Please try a different prompt.",
+                "error_code": "EMPTY_RESPONSE",
+                "details": None,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Convert PIL image to base64
     image_base64 = _pil_to_base64(pil_image)

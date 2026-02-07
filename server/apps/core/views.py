@@ -11,6 +11,7 @@ from enums.appearance import (
     Build,
     AgeRange,
 )
+from enums.appearance.build import BUILDS_MALE, BUILDS_FEMALE, BUILDS_NEUTRAL
 from rest_framework.response import Response
 from rest_framework import decorators, viewsets
 
@@ -46,8 +47,12 @@ class CoreViewSet(viewsets.GenericViewSet):
         hair_colors = [{"value": h.value, "label": h.label} for h in HairColor]
         eye_colors = [{"value": e.value, "label": e.label} for e in EyeColor]
         heights = [{"value": h.value, "label": h.label} for h in Height]
-        builds = [{"value": b.value, "label": b.label} for b in Build]
         age_ranges = [{"value": a.value, "label": a.label} for a in AgeRange]
+        
+        # Build enums - grouped by gender for frontend filtering
+        builds_male = [{"value": b.value, "label": b.label} for b in BUILDS_MALE]
+        builds_female = [{"value": b.value, "label": b.label} for b in BUILDS_FEMALE]
+        builds_neutral = [{"value": b.value, "label": b.label} for b in BUILDS_NEUTRAL]
         
         return Response(
             {
@@ -61,7 +66,9 @@ class CoreViewSet(viewsets.GenericViewSet):
                     "hair_colors": hair_colors,
                     "eye_colors": eye_colors,
                     "heights": heights,
-                    "builds": builds,
+                    "builds_male": builds_male,
+                    "builds_female": builds_female,
+                    "builds_neutral": builds_neutral,
                     "age_ranges": age_ranges,
                 },
             }

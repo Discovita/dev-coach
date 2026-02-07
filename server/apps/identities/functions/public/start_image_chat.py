@@ -15,6 +15,7 @@ from apps.identities.models import Identity
 from apps.reference_images.models import ReferenceImage
 from apps.users.models import User
 from services.image_generation.orchestration import start_identity_image_chat
+from services.image_generation import ImageGenerationError
 from services.logger import configure_logging
 
 log = configure_logging(__name__)
@@ -38,6 +39,7 @@ def start_image_chat(
 
     Returns:
         Response with image_base64, identity_id, identity_name
+        Or error response with error, error_code, details
 
     Raises:
         DRF exceptions for validation errors (400, 404, 500)
@@ -68,16 +70,37 @@ def start_image_chat(
         )
     except ValueError as e:
         raise ValidationError(str(e))
+    except ImageGenerationError as e:
+        # Return structured error response for frontend handling
+        log.warning(f"Image generation error: {e.error_code} - {e.message}")
+        return Response(
+            {
+                "error": e.message,
+                "error_code": e.error_code,
+                "details": e.details,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     except Exception as e:
         log.error(f"Image generation failed: {e}", exc_info=True)
-        from rest_framework.exceptions import APIException
-
-        raise APIException(f"Image generation failed: {str(e)}")
+        return Response(
+            {
+                "error": f"Image generation failed: {str(e)}",
+                "error_code": "UNKNOWN",
+                "details": None,
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     if not pil_image:
-        from rest_framework.exceptions import APIException
-
-        raise APIException("Image generation failed - no image was generated")
+        return Response(
+            {
+                "error": "No image was generated. Please try a different prompt.",
+                "error_code": "EMPTY_RESPONSE",
+                "details": None,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Convert PIL image to base64
     image_base64 = _pil_to_base64(pil_image)
