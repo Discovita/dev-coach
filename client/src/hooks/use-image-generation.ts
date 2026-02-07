@@ -95,11 +95,24 @@ function getToastDuration(error: Error): number {
 }
 
 /**
+ * Options for the useImageGeneration hook.
+ * Allows components to provide callbacks that fire reliably on mutation success.
+ */
+export interface UseImageGenerationOptions {
+  /** Called when startChat succeeds with the response data */
+  onStartChatSuccess?: (data: StartImageChatResponse) => void;
+  /** Called when continueChat succeeds with the response data */
+  onContinueChatSuccess?: (data: ContinueImageChatResponse) => void;
+}
+
+/**
  * Hook for generating and saving identity images.
+ * @param options - Optional callbacks for mutation success events
  * @returns Mutation functions for image generation and saving
  */
-export function useImageGeneration() {
+export function useImageGeneration(options: UseImageGenerationOptions = {}) {
   const queryClient = useQueryClient();
+  const { onStartChatSuccess, onContinueChatSuccess } = options;
 
   // Generate image mutation
   const generateMutation = useMutation<
@@ -133,15 +146,16 @@ export function useImageGeneration() {
     }
   );
 
-  // Start chat mutation
+  // Start chat mutation - fires callback reliably on every success
   const startChatMutation = useMutation<
     StartImageChatResponse,
     Error,
     StartImageChatRequest
   >({
     mutationFn: startImageChat,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Image generated successfully!");
+      onStartChatSuccess?.(data);
     },
     onError: (error) => {
       const message = getErrorMessage(error);
@@ -149,15 +163,16 @@ export function useImageGeneration() {
     },
   });
 
-  // Continue chat mutation
+  // Continue chat mutation - fires callback reliably on every success
   const continueChatMutation = useMutation<
     ContinueImageChatResponse,
     Error,
     ContinueImageChatRequest
   >({
     mutationFn: continueImageChat,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Image edited successfully!");
+      onContinueChatSuccess?.(data);
     },
     onError: (error) => {
       const message = getErrorMessage(error);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { UserSelector } from "./components/UserSelector";
 import { ReferenceImageManager } from "./components/ReferenceImageManager";
 import { IdentitySelector } from "./components/IdentitySelector";
@@ -20,6 +20,7 @@ import { SceneInputs as SceneInputsType } from "@/types/sceneInputs";
 import { UserAppearance } from "@/types/userAppearance";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
+import type { StartImageChatResponse, ContinueImageChatResponse } from "@/types/imageGeneration";
 
 /**
  * Images Page
@@ -38,6 +39,7 @@ export default function Images() {
   const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(null);
   const [additionalPrompt, setAdditionalPrompt] = useState("");
   const [generatedImageBase64, setGeneratedImageBase64] = useState<string | null>(null);
+  const [editPrompt, setEditPrompt] = useState("");
   
   // Appearance state (loaded from user profile)
   const {
@@ -57,6 +59,22 @@ export default function Images() {
   // Track if scene is being saved
   const [isSavingScene, setIsSavingScene] = useState(false);
 
+  // Callbacks for image generation - these fire reliably on every mutation success
+  // Using callbacks instead of useEffect on mutation data avoids React reference comparison issues
+  const handleStartChatSuccess = useCallback((data: StartImageChatResponse) => {
+    if (data.image_base64) {
+      setGeneratedImageBase64(data.image_base64);
+      setEditPrompt(""); // Clear edit prompt when starting new chat
+    }
+  }, []);
+
+  const handleContinueChatSuccess = useCallback((data: ContinueImageChatResponse) => {
+    if (data.image_base64) {
+      setGeneratedImageBase64(data.image_base64);
+      setEditPrompt(""); // Clear edit prompt after successful edit
+    }
+  }, []);
+
   const {
     saveImage,
     isGenerating,
@@ -66,11 +84,10 @@ export default function Images() {
     continueChat,
     isStartingChat,
     isContinuingChat,
-    startChatData,
-    continueChatData,
-  } = useImageGeneration();
-  
-  const [editPrompt, setEditPrompt] = useState("");
+  } = useImageGeneration({
+    onStartChatSuccess: handleStartChatSuccess,
+    onContinueChatSuccess: handleContinueChatSuccess,
+  });
 
   // Fetch identities to get the selected identity object
   const { identities: currentUserIdentities } = useIdentities();
@@ -124,28 +141,12 @@ export default function Images() {
     }
   }, [selectedIdentity]);
 
-  // Update generated image when generation completes
+  // Update generated image when legacy generation completes
   useEffect(() => {
     if (generateData?.image_base64) {
       setGeneratedImageBase64(generateData.image_base64);
     }
   }, [generateData]);
-
-  // Update generated image when chat starts
-  useEffect(() => {
-    if (startChatData?.image_base64) {
-      setGeneratedImageBase64(startChatData.image_base64);
-      setEditPrompt(""); // Clear edit prompt when starting new chat
-    }
-  }, [startChatData]);
-
-  // Update generated image when chat continues
-  useEffect(() => {
-    if (continueChatData?.image_base64) {
-      setGeneratedImageBase64(continueChatData.image_base64);
-      setEditPrompt(""); // Clear edit prompt after successful edit
-    }
-  }, [continueChatData]);
 
   // Handle scene save - called when user clicks "Save Scene Details" button
   // Uses admin endpoint for test user identities, regular endpoint for own identities
