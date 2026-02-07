@@ -5,8 +5,9 @@
 [x] Warmup Phase examples need to be simpler
     - Fixed in prompt V10: Added simple examples (father, mother, friend, etc.), negative examples (not job titles, temporary states), "ask until done" approach with varied follow-ups
 [x] Show Identity Bulletin on the Anything Missing Phase
-[ ] Identity statements need gramatical rules
+[x] Identity statements need gramatical rules
     - https://loom.com/share/318ee38531cf49f8affc66ad07e41b2e
+    - Fixed in i_am_statement prompt V18: Added critical grammar rules - multiple short sentences each starting with "I" instead of complex participial phrases
 [ ] Be able to tile and rearrange the identies on the the identies page on the purple one
 [ ] Image loading is slow
     - Look into lazy loading, loading one at a time, only loading when the user scrolls to it
