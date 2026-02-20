@@ -250,7 +250,7 @@ A persistent component requires:
    PERSIST_YOUR_COMPONENT = "persist_your_component",
    ```
 
-### 15. Create the React component in `client/src/pages/chat/components/coach-message-with-component.tsx/YourComponentConfirmation.tsx`.
+### 15. Create the React component in `client/src/pages/chat/components/coach-message-with-component/YourComponentConfirmation.tsx`.
 
    This component should:
    - Accept `coachMessage`, `config`, `onSendUserMessageToCoach`, and `disabled` props
