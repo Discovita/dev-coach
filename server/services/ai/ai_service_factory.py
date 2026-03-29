@@ -19,8 +19,8 @@ log = configure_logging(__name__, log_level="INFO")
 
 from enums.ai import AIModel, AIProvider
 
-# Import the AIService interface and implementations
-from services.ai import AIService
+# Import directly from base module to avoid circular import through __init__.py
+from services.ai.base import AIService
 
 # Import the new OpenAIService and the plugin/adapter for legacy compatibility
 from services.ai.openai_service.core.base import OpenAIService
