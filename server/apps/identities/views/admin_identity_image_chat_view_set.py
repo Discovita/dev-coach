@@ -7,7 +7,6 @@ Allows admins to test image chat for any user.
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -19,6 +18,7 @@ from apps.identities.serializers import (
     ContinueImageChatRequestSerializer,
     StartImageChatRequestSerializer,
 )
+from permissions import IsAdminUser
 from services.logger import configure_logging
 
 log = configure_logging(__name__)
