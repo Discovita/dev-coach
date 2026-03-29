@@ -1,12 +1,18 @@
+"""
+Admin registration for the UserNote model.
+
+See: apps/user_notes/admin/__init__.py
+"""
+
 from django.contrib import admin
 
-from .models import UserNote
-
-# Register your models here.
+from apps.user_notes.models import UserNote
 
 
 @admin.register(UserNote)
 class UserNoteAdmin(admin.ModelAdmin):
+    """Admin interface for managing user notes."""
+
     list_display = ("user", "note", "created_at", "test_scenario_display")
     list_filter = ("test_scenario", "created_at")
     search_fields = ("user__email", "note", "test_scenario__name")

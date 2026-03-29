@@ -1,3 +1,9 @@
+"""
+UserNote model definition.
+
+See: apps/user_notes/models/__init__.py
+"""
+
 import uuid
 
 from django.db import models
@@ -8,9 +14,11 @@ from apps.users.models import User
 
 class UserNote(models.Model):
     """
-    Stores a single note about a user, extracted by the Sentinel agent.
-    Each note is associated with a user and may reference the chat message that prompted its creation.
-    Used by the Sentinel User Notes system to provide long-term memory for the coach.
+    A note about a user, extracted by the Sentinel agent from chat messages.
+
+    Each note is associated with a user and may reference the chat message
+    that prompted its creation.  Used by the Sentinel User Notes system to
+    provide long-term memory for the coach.
     """
 
     id = models.UUIDField(
