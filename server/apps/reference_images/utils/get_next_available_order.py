@@ -1,3 +1,9 @@
+"""
+Compute the next available order slot for a user's reference images.
+
+See: apps/reference_images/utils/__init__.py
+"""
+
 from typing import Set
 
 from apps.reference_images.models import ReferenceImage

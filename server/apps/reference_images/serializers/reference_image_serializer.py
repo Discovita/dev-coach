@@ -1,3 +1,9 @@
+"""
+Serializer for the ReferenceImage model.
+
+See: apps/reference_images/serializers/__init__.py
+"""
+
 from rest_framework import serializers
 
 from apps.core.serializers import VersatileImageFieldWithSizes

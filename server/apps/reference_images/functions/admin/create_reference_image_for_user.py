@@ -1,3 +1,9 @@
+"""
+Admin function to create a reference image for any user by ID.
+
+See: apps/reference_images/functions/admin/__init__.py
+"""
+
 from typing import Any, Optional
 from uuid import UUID
 
