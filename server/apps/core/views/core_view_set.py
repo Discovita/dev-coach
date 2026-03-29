@@ -1,4 +1,10 @@
+"""
+CoreViewSet — utility endpoints for the frontend (enums, config, etc.).
+"""
+
 from rest_framework import decorators, viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from enums.action_type import ActionType
@@ -16,32 +22,31 @@ from enums.context_keys import ContextKey
 from enums.prompt_type import PromptType
 
 
-# CoreView: Class-based view for core utility endpoints
-#
-# Step-by-step for enums endpoint:
-# 1. Handle GET requests to /api/enums.
-# 2. Collect all possible values for each enum (coach_state, allowed_actions, context_keys).
-# 3. Return them in a single JSON response for use in frontend dropdowns/selects.
-# 4. Each enum is returned as a list of objects with 'value' and 'label' for display and value use.
 class CoreViewSet(viewsets.GenericViewSet):
     """
-    CoreView provides utility endpoints for the frontend, such as enums for dropdowns.
-    Used for populating dropdowns/selects in the frontend prompt management UI.
+    Utility endpoints for the frontend.
+
+    Endpoints (trailing_slash=False router):
+    - GET /api/v1/core/enums → enums()
     """
+
+    permission_classes = [IsAuthenticated]
 
     # TODO: Remove certain ActionTypes enums that are not needed for the frontend.
     @decorators.action(detail=False, methods=["get"], url_path="enums")
-    def enums(self, request, *args, **kwargs):
+    def enums(self, request: Request) -> Response:
         """
-        GET /api/enums
-        Returns all enum values for coach_state, allowed_actions, context_keys, prompt_types, and appearance options.
+        GET /api/v1/core/enums
+
+        Returns all enum values for coaching phases, allowed actions,
+        context keys, prompt types, and appearance options. Used for
+        populating dropdowns/selects in the frontend prompt management UI.
         """
         coaching_phases = [{"value": c.value, "label": c.label} for c in CoachingPhase]
         allowed_actions = [{"value": a.value, "label": a.label} for a in ActionType]
         context_keys = [{"value": k.value, "label": k.label} for k in ContextKey]
         prompt_types = [{"value": p.value, "label": p.label} for p in PromptType]
 
-        # Appearance enums
         genders = [{"value": g.value, "label": g.label} for g in Gender]
         skin_tones = [{"value": s.value, "label": s.label} for s in SkinTone]
         hair_colors = [{"value": h.value, "label": h.label} for h in HairColor]
@@ -49,7 +54,6 @@ class CoreViewSet(viewsets.GenericViewSet):
         heights = [{"value": h.value, "label": h.label} for h in Height]
         age_ranges = [{"value": a.value, "label": a.label} for a in AgeRange]
 
-        # Build enums - grouped by gender for frontend filtering
         builds_male = [{"value": b.value, "label": b.label} for b in BUILDS_MALE]
         builds_female = [{"value": b.value, "label": b.label} for b in BUILDS_FEMALE]
         builds_neutral = [{"value": b.value, "label": b.label} for b in BUILDS_NEUTRAL]

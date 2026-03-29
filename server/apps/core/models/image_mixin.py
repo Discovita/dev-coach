@@ -1,3 +1,11 @@
+"""
+ImageMixin — abstract base model providing a VersatileImageField with PPOI.
+
+Used by:
+- apps.identities.models.Identity
+- apps.reference_images.models.ReferenceImage
+"""
+
 from uuid_upload_path import upload_to
 from versatileimagefield.fields import PPOIField, VersatileImageField
 
@@ -6,14 +14,14 @@ from django.db import models
 
 class ImageMixin(models.Model):
     """
-    An abstract base class model that provides a VersatileImageField Image with PPOI
+    Abstract base model that provides a VersatileImageField image with
+    Point-of-Interest (PPOI) support and automatic thumbnail generation.
     """
 
     image = VersatileImageField(
         "Image",
         upload_to=upload_to,
         ppoi_field="image_ppoi",
-        # placeholder_image=OnStoragePlaceholderImage(path='path/to/placeholder-image.jpg'),
         null=True,
     )
     image_ppoi = PPOIField("Image PPOI")
