@@ -1,8 +1,9 @@
 """
-UserProfileSerializer for basic user profile data.
+UserProfileSerializer for lightweight user profile data.
 
-This serializer provides a lightweight representation of user data
-without nested related objects.
+Does not include nested related objects (identities, coach state, etc.).
+
+See: apps/users/serializers/__init__.py
 """
 
 from rest_framework import serializers
@@ -12,38 +13,37 @@ from apps.users.models import User
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """
-    Serializer for User model for profile data.
-    Used for: Profile data serialization
+    Lightweight User serializer for profile endpoints.
+
+    Used for ``me/`` GET and PATCH — returns core user fields and
+    appearance preferences without nested relations.
     """
 
-    # Groups and permissions as lists of IDs
     groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     user_permissions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
-        # Expose all safe fields for the frontend
         fields = (
-            "id",  # User ID
-            "email",  # Email address
-            "first_name",  # First name
-            "last_name",  # Last name
-            "is_active",  # Active status
-            "is_superuser",  # Django superuser flag
-            "is_staff",  # Staff/admin page access
-            "last_login",  # Last login timestamp
-            "created_at",  # Created at timestamp
-            "updated_at",  # Updated at timestamp
-            "groups",  # Group memberships (IDs)
-            "user_permissions",  # User permissions (IDs)
-            # Appearance/visualization preferences for image generation
-            "gender",  # Gender preference
-            "skin_tone",  # Skin tone preference
-            "hair_color",  # Hair color preference
-            "eye_color",  # Eye color preference
-            "height",  # Height preference
-            "build",  # Build preference
-            "age_range",  # Age range preference
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_superuser",
+            "is_staff",
+            "last_login",
+            "created_at",
+            "updated_at",
+            "groups",
+            "user_permissions",
+            "gender",
+            "skin_tone",
+            "hair_color",
+            "eye_color",
+            "height",
+            "build",
+            "age_range",
         )
         read_only_fields = (
             "created_at",

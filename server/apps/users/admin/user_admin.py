@@ -1,13 +1,11 @@
 """
-Admin configuration for users app.
+Admin registration for the User model.
 
-This module provides a rich admin interface for managing User models with:
-- Comprehensive list display
-- Filtering capabilities
-- Search functionality
-- Field organization
-- Custom actions
-- Email-based authentication (login with email, not username)
+Provides a rich admin interface with email-based authentication,
+comprehensive filtering, appearance-preference fieldsets, and
+inline reference images.
+
+See: apps/users/admin/__init__.py
 """
 
 from django.contrib import admin
@@ -20,14 +18,10 @@ from apps.users.models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    """
-    Admin configuration for the custom User model.
-    """
+    """Admin interface for the custom User model."""
 
-    # Inline models
     inlines = [ReferenceImageInline]
 
-    # Fields to display in the admin list view
     list_display = (
         "email",
         "first_name",
@@ -38,11 +32,8 @@ class UserAdmin(BaseUserAdmin):
         "created_at",
         "test_scenario_display",
     )
-    # Fields to filter by in the admin list view
     list_filter = ("is_staff", "is_active", "is_superuser", "test_scenario")
-    # Fields to search by
     search_fields = ("email", "first_name", "last_name", "test_scenario__name")
-    # Fieldsets for the detail/edit view
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name")}),
@@ -103,18 +94,17 @@ class UserAdmin(BaseUserAdmin):
         "email_verification_sent_at",
     )
 
-    # Use email as the unique identifier
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.add_fieldsets
         return super().get_fieldsets(request, obj)
 
     def get_full_name(self, obj):
-        """Get user's full name or email if name not set."""
+        """Return user's full name, falling back to email."""
         return obj.get_full_name() or obj.email
 
     get_full_name.short_description = _("Full Name")
-    get_full_name.admin_order_field = "first_name"  # Allows sorting by this field
+    get_full_name.admin_order_field = "first_name"
 
     def test_scenario_display(self, obj):
         """Display the name of the associated test scenario, if any."""
