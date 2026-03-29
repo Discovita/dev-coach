@@ -1,5 +1,5 @@
 """
-Full detail serializer for Action API responses.
+Read-only serializer for Action API responses.
 """
 
 from rest_framework import serializers
@@ -10,7 +10,10 @@ from apps.chat_messages.serializer import ChatMessageSerializer
 
 class ActionSerializer(serializers.ModelSerializer):
     """
-    Serializes Action for detail responses and nested coach message context.
+    Serializes Action for read-only detail responses.
+
+    Used by UserViewSet and TestUserViewSet to return actions
+    with nested coach message context.
     """
 
     coach_message = ChatMessageSerializer(read_only=True)
@@ -40,27 +43,7 @@ class ActionSerializer(serializers.ModelSerializer):
             "coach_message",
             "test_scenario",
         ]
-        read_only_fields = [
-            "id",
-            "timestamp",
-            "updated_at",
-            "timestamp_formatted",
-            "action_type_display",
-        ]
+        read_only_fields = fields
 
     def get_timestamp_formatted(self, obj: Action) -> str:
         return obj.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-
-    def validate_parameters(self, value):
-        if not isinstance(value, dict):
-            raise serializers.ValidationError("Parameters must be a JSON object.")
-        return value
-
-    def validate(self, data):
-        if "coach_message" in data:
-            coach_message = data["coach_message"]
-            if coach_message.role != "coach":
-                raise serializers.ValidationError(
-                    "Actions can only be linked to coach messages."
-                )
-        return data
