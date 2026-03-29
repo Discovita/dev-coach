@@ -10,6 +10,16 @@ from enums.prompt_type import PromptType
 
 
 class Prompt(models.Model):
+    """
+    Versioned prompt template used by the coaching AI.
+
+    Each prompt is tied to a coaching phase and prompt type, with automatic
+    versioning on creation. The body contains template placeholders that are
+    filled by the PromptManager using the required_context_keys.
+
+    Uniqueness: (prompt_type, coaching_phase, version).
+    """
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,

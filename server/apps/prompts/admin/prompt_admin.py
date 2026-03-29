@@ -1,14 +1,21 @@
+"""
+Admin configuration for the Prompt model.
+
+See: apps/prompts/admin/__init__.py
+"""
+
 from django.contrib import admin
 
-from .models import Prompt
+from apps.prompts.models import Prompt
 
 
-# Custom admin for the Prompt model
+@admin.register(Prompt)
 class PromptAdmin(admin.ModelAdmin):
     """
-    Admin configuration for the Prompt model.
-    Shows key fields in the list display, enables search and filtering.
-    Used for managing prompts in the Django admin panel.
+    Admin panel configuration for viewing and managing Prompt records.
+
+    Provides search, filtering, and ordering capabilities for
+    prompt management.
     """
 
     list_display = (
@@ -24,7 +31,3 @@ class PromptAdmin(admin.ModelAdmin):
     search_fields = ("id", "coaching_phase", "name", "description", "body")
     list_filter = ("coaching_phase", "is_active", "created_at", "updated_at")
     ordering = ("-created_at",)
-
-
-# Register the Prompt model with the custom admin
-admin.site.register(Prompt, PromptAdmin)
