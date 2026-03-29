@@ -1,3 +1,9 @@
+"""
+TestScenario model definition.
+
+See: apps/test_scenario/models/__init__.py
+"""
+
 import uuid
 
 from django.contrib.auth import get_user_model
@@ -6,15 +12,12 @@ from django.db import models
 
 class TestScenario(models.Model):
     """
-    TestScenario
-    -------------
-    Represents a template-based test scenario for the Discovita Dev Coach.
-    Stores a declarative JSON template describing the initial state for all relevant models (User, CoachState, Identity, ChatMessage, UserNote).
-    Used for creating, editing, resetting, and managing test user states for comprehensive chatbot testing.
+    Template-based test scenario for the Discovita Dev Coach.
 
-    Used by:
-      - Scenario management logic in the backend (see docs/Testing_Implementation_Plan.md)
-      - Admin UI for test scenario management (list, view, edit, create)
+    Stores a declarative JSON template describing the initial state for all
+    relevant models (User, CoachState, Identity, ChatMessage, UserNote, Action).
+    Used for creating, resetting, and managing test user states for
+    comprehensive chatbot testing.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -44,6 +47,3 @@ class TestScenario(models.Model):
         verbose_name = "Test Scenario"
         verbose_name_plural = "Test Scenarios"
         ordering = ["-created_at"]
-
-
-# This model is referenced in docs/Testing_Implementation_Plan.md and is the core of the test scenario system.

@@ -1,3 +1,14 @@
+"""
+Declarative serializers for validating test scenario template blocks.
+
+Each serializer corresponds to one section of the JSON template stored on
+``TestScenario.template``.  They are used during ``freeze_session`` to
+validate the captured state before persisting, and in ``validate_scenario_template``
+to validate inbound payloads.
+
+See: apps/test_scenario/serializers/__init__.py
+"""
+
 from rest_framework import serializers
 
 from enums.get_to_know_you_questions import GetToKnowYouQuestions
@@ -5,8 +16,8 @@ from enums.get_to_know_you_questions import GetToKnowYouQuestions
 
 class ForbidExtraFieldsMixin:
     """
-    Mixin to forbid extra/unknown fields in template serializers.
-    Raises a validation error if any field is present in the input that is not explicitly defined.
+    Mixin that raises a validation error for any field present in the
+    input that is not explicitly declared on the serializer.
     """
 
     def to_internal_value(self, data):
@@ -19,9 +30,9 @@ class ForbidExtraFieldsMixin:
 
 class TemplateUserSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     """
-    Serializer for user data in a test scenario template.
-    Only includes fields required for user creation in a scenario.
-    This must be kept in sync with the user creation logic in UserManager and User model.
+    Validates the ``user`` block of a scenario template.
+
+    Must stay in sync with ``UserManager`` and ``User`` model fields.
     """
 
     email = serializers.EmailField(
@@ -34,7 +45,6 @@ class TemplateUserSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     )
     first_name = serializers.CharField(help_text="First name of the user. Required.")
     last_name = serializers.CharField(help_text="Last name of the user. Required.")
-    # these fields are here to maintain integrity with the db models to prevent errors.
     is_active = serializers.BooleanField(
         required=False, help_text="Is the user active?"
     )
@@ -53,10 +63,7 @@ class TemplateUserSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
 
 
 class TemplateCoachStateSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
-    """
-    Serializer for coach state data in a test scenario template.
-    Only includes fields required for coach state creation.
-    """
+    """Validates the ``coach_state`` block of a scenario template."""
 
     current_phase = serializers.CharField(
         help_text="Current phase of the coaching session. Required."
@@ -98,10 +105,7 @@ class TemplateCoachStateSerializer(ForbidExtraFieldsMixin, serializers.Serialize
 
 
 class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer):
-    """
-    Serializer for identity data in a test scenario template.
-    Only includes fields required for identity creation.
-    """
+    """Validates individual identity entries inside ``template.identities``."""
 
     name = serializers.CharField(help_text="Name of the identity. Required.")
     category = serializers.CharField(
@@ -129,15 +133,12 @@ class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer)
         required=False,
         allow_null=True,
         allow_blank=True,
-        help_text="S3 URL for the identity image. Stored as URL in template, copied to new S3 location during instantiation.",
+        help_text="S3 URL for the identity image. Copied to a new S3 location during instantiation.",
     )
 
 
 class TemplateChatMessageSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
-    """
-    Serializer for chat message data in a test scenario template.
-    Only includes fields required for chat message creation.
-    """
+    """Validates individual chat-message entries inside ``template.chat_messages``."""
 
     role = serializers.CharField(
         help_text="Role of the message sender (user or coach). Required."
@@ -154,10 +155,7 @@ class TemplateChatMessageSerializer(ForbidExtraFieldsMixin, serializers.Serializ
 
 
 class TemplateUserNoteSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
-    """
-    Serializer for user note data in a test scenario template.
-    Only includes fields required for user note creation.
-    """
+    """Validates individual user-note entries inside ``template.user_notes``."""
 
     note = serializers.CharField(
         help_text="A note about the user, extracted from chat. Required."
@@ -173,11 +171,7 @@ class TemplateUserNoteSerializer(ForbidExtraFieldsMixin, serializers.Serializer)
 
 
 class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
-    """
-    Serializer for action data in a test scenario template.
-    Only includes fields required for action creation.
-    Used for capturing coach actions during test scenario creation and instantiation.
-    """
+    """Validates individual action entries inside ``template.actions``."""
 
     action_type = serializers.CharField(
         help_text="Type of action performed by the coach. Required."
@@ -198,9 +192,8 @@ class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
         allow_blank=True,
         help_text="ID of the original coach message that triggered this action (for robust linking during instantiation).",
     )
-    # Keep coach_message_content for backward compatibility with old templates
     coach_message_content = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Content of the coach message that triggered this action (for linking during instantiation). DEPRECATED: Use original_coach_message_id instead.",
+        help_text="DEPRECATED: Use original_coach_message_id instead.",
     )
