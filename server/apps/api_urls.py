@@ -8,8 +8,6 @@ from rest_framework_simplejwt.views import (
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from apps.actions.views import ActionViewSet
-
 # Local Modules - Regular Viewsets
 from apps.authentication.views import AuthViewSet
 
@@ -43,7 +41,6 @@ default_router.register(r"test-user", TestUserViewSet, basename="test-user")
 default_router.register(
     r"test-scenarios", TestScenarioViewSet, basename="test-scenarios"
 )
-default_router.register(r"actions", ActionViewSet, basename="actions")
 default_router.register(r"identities", IdentityViewSet, basename="identities")
 default_router.register(
     r"identity-image-chat", IdentityImageChatViewSet, basename="identity-image-chat"
