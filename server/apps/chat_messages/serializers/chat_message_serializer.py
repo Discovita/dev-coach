@@ -1,3 +1,13 @@
+"""
+ChatMessage serializer.
+
+Used by:
+    - apps.users.views.user_viewset.UserViewSet (chat_messages endpoint)
+    - apps.users.views.test_user_viewset.TestUserViewSet (chat_messages endpoint)
+    - apps.users.serializers.user_serializer.UserSerializer (nested)
+    - apps.actions.serializers.action_serializer.ActionSerializer (nested)
+"""
+
 from rest_framework import serializers
 
 from apps.chat_messages.models import ChatMessage
@@ -20,15 +30,15 @@ class ChatMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatMessage
         fields = (
-            "id",  # Unique identifier for the message
-            "role",  # Role of the message sender (user or coach)
-            "content",  # Content of the message
-            "timestamp",  # When the message was sent
-            "component_config",  # Optional component configuration for persistent rendering
+            "id",
+            "role",
+            "content",
+            "timestamp",
+            "component_config",
         )
         read_only_fields = (
-            "id",  # Unique identifier for the message
-            "role",  # Role of the message sender (user or coach)
-            "content",  # Content of the message
-            "timestamp",  # When the message was sent
+            "id",
+            "role",
+            "content",
+            "timestamp",
         )

@@ -10,13 +10,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.chat_messages.utils import ensure_initial_message_exists
 from apps.users.functions import (
     get_user_chat_messages,
     get_user_identities,
     reset_user_coaching_data,
 )
 from apps.users.serializers import UserProfileSerializer, UserSerializer
-from apps.users.utils import ensure_initial_message_exists
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -152,7 +152,7 @@ class UserViewSet(viewsets.GenericViewSet):
         Get the authenticated user's chat messages.
         If the chat history is empty, add the initial bot message and return it.
         """
-        from apps.chat_messages.serializer import ChatMessageSerializer
+        from apps.chat_messages.serializers import ChatMessageSerializer
 
         messages = get_user_chat_messages(request.user)
         return Response(ChatMessageSerializer(messages, many=True).data)
@@ -167,7 +167,7 @@ class UserViewSet(viewsets.GenericViewSet):
         """
         Reset (delete) all chat messages, identities, and user notes for the authenticated user, and reset their CoachState.
         """
-        from apps.chat_messages.serializer import ChatMessageSerializer
+        from apps.chat_messages.serializers import ChatMessageSerializer
 
         messages = reset_user_coaching_data(request.user)
         return Response(ChatMessageSerializer(messages, many=True).data)

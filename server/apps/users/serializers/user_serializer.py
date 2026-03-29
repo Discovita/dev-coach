@@ -6,7 +6,7 @@ This serializer includes nested related data like identities, coach state, and c
 
 from rest_framework import serializers
 
-from apps.chat_messages.serializer import ChatMessageSerializer
+from apps.chat_messages.serializers import ChatMessageSerializer
 from apps.coach_states.serializers import CoachStateSerializer
 from apps.identities.serializers import IdentitySerializer
 from apps.users.models import User

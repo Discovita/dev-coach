@@ -9,8 +9,8 @@ from rest_framework import decorators, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.chat_messages.utils import ensure_initial_message_exists
 from apps.users.functions import get_user_chat_messages, get_user_identities
-from apps.users.utils import ensure_initial_message_exists
 
 
 class TestUserViewSet(viewsets.GenericViewSet):
@@ -198,7 +198,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
         user = self.get_test_user(pk)
         if not user:
             return Response({"detail": "User not found."}, status=404)
-        from apps.chat_messages.serializer import ChatMessageSerializer
+        from apps.chat_messages.serializers import ChatMessageSerializer
 
         messages = get_user_chat_messages(user)
         return Response(ChatMessageSerializer(messages, many=True).data)
