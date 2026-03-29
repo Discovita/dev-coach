@@ -1,0 +1,35 @@
+# --------------------------------------------------------------------------
+# Black: Auto-formatter
+# Line length 88 matches DRF contribution guidelines.
+# --------------------------------------------------------------------------
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+# --------------------------------------------------------------------------
+# isort: Import sorting
+# profile = "black" ensures isort's output is compatible with black.
+# known_django keeps Django imports in their own section.
+# known_first_party should list your project's own packages so they sort last.
+# --------------------------------------------------------------------------
+[tool.isort]
+profile = "black"
+line_length = 88
+known_django = ["django", "rest_framework"]
+known_first_party = ["apps", "enums", "services"]
+sections = [
+    "FUTURE",
+    "STDLIB",
+    "THIRDPARTY",
+    "DJANGO",
+    "FIRSTPARTY",
+    "LOCALFOLDER",
+]
+
+# --------------------------------------------------------------------------
+# Pyright/Pylance: Type checking
+# Tells the IDE where the virtual environment lives so it can resolve imports.
+# --------------------------------------------------------------------------
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

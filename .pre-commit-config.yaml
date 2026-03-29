@@ -1,0 +1,38 @@
+# --------------------------------------------------------------------------
+# Pre-commit hooks
+#
+# Install:
+#   pip install pre-commit   (or: pipx install pre-commit)
+#   pre-commit install
+#
+# Usage:
+#   Hooks run automatically on `git commit`.
+#   To run manually against all files: pre-commit run --all-files
+#
+# If a hook changes files, the commit is aborted so you can review
+# the changes, re-stage, and commit again.
+# --------------------------------------------------------------------------
+repos:
+  # isort — import sorting (runs before black so black gets final say on format)
+  - repo: https://github.com/pycqa/isort
+    rev: 8.0.1
+    hooks:
+      - id: isort
+        args: ["--settings-path", "server/pyproject.toml"]
+        files: ^server/
+
+  # black — code formatting
+  - repo: https://github.com/psf/black
+    rev: 26.3.1
+    hooks:
+      - id: black
+        args: ["--config", "server/pyproject.toml"]
+        files: ^server/
+
+  # flake8 — linting
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        args: ["--config", "server/.flake8"]
+        files: ^server/
