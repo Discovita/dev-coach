@@ -136,7 +136,7 @@ class UserViewSet(viewsets.GenericViewSet):
         Get the authenticated user's actions.
         """
         from apps.actions.models import Action
-        from apps.actions.serializer import ActionSerializer
+        from apps.actions.serializers import ActionSerializer
 
         actions = Action.objects.filter(user=request.user).order_by("-timestamp")
         return Response(ActionSerializer(actions, many=True).data)

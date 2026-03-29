@@ -177,7 +177,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
         if not user:
             return Response({"detail": "User not found."}, status=404)
         from apps.actions.models import Action
-        from apps.actions.serializer import ActionSerializer
+        from apps.actions.serializers import ActionSerializer
 
         actions = Action.objects.filter(user=user).order_by("-timestamp")
         return Response(ActionSerializer(actions, many=True).data)

@@ -1,3 +1,12 @@
+"""
+Action model
+
+Records each coach-triggered action for a user, linked to the coach message
+that caused it.
+
+See: docs/docs/core-systems/action-handler/overview.md (Procedures / Dev Coach).
+"""
+
 import uuid
 
 from django.db import models
@@ -12,8 +21,10 @@ class Action(models.Model):
     Tracks actions taken by the coach during conversations.
     Each action is linked to the specific coach message that triggered it.
 
-    Used in: Coach action tracking, conversation reconstruction, debugging
-    Referenced in: Coach views, action handler, admin interface
+    Related to:
+    - apps.users.models.User (FK via user)
+    - apps.chat_messages.models.ChatMessage (FK via coach_message)
+    - apps.test_scenario.models.TestScenario (optional FK via test_scenario)
     """
 
     id = models.UUIDField(
@@ -39,7 +50,7 @@ class Action(models.Model):
     )
 
     parameters = models.JSONField(
-        help_text="Parameters passed to the action (stored as JSON)."
+        help_text="Parameters passed to the action (stored as JSON).",
     )
 
     result_summary = models.TextField(
@@ -50,11 +61,16 @@ class Action(models.Model):
 
     timestamp = models.DateTimeField(
         auto_now_add=True,
-        help_text="When the action was performed.",
+        help_text="When the action was first recorded.",
         db_index=True,
     )
 
-    # Link to the coach message that triggered this action
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="When this row was last updated (e.g. summary tweaks).",
+        db_index=True,
+    )
+
     coach_message = models.ForeignKey(
         ChatMessage,
         on_delete=models.CASCADE,
@@ -67,7 +83,9 @@ class Action(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        help_text="Test scenario this action is associated with (for test data isolation).",
+        help_text=(
+            "Test scenario this action is associated with (for test data isolation)."
+        ),
     )
 
     class Meta:
@@ -80,8 +98,5 @@ class Action(models.Model):
             models.Index(fields=["action_type"]),
         ]
 
-    def __str__(self):
-        """
-        String representation of the action for admin/debugging.
-        """
-        return f"{self.action_type} - {self.user.username} - {self.timestamp}"
+    def __str__(self) -> str:
+        return f"{self.action_type} - {self.user.email} - {self.timestamp}"
