@@ -33,7 +33,6 @@ def trigger_sentinel_on_user_message(sender, instance, created, **kwargs):
     Skips extraction if the message is associated with a test scenario (test data isolation).
     """
     if created and instance.role == MessageRole.USER:
-        # Do not extract notes for test scenario messages
         if instance.test_scenario_id is not None:
             log.debug(
                 f"Skipping user note extraction for test scenario message: {instance.id}"

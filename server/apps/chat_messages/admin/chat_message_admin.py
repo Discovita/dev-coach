@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ChatMessage
+from apps.chat_messages.models import ChatMessage
 
 
 @admin.register(ChatMessage)
