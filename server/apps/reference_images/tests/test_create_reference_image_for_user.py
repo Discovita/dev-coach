@@ -2,14 +2,14 @@
 Tests for create_reference_image_for_user admin function.
 """
 
+import uuid
+
 from django.test import TestCase
 from rest_framework.exceptions import NotFound, ValidationError
 
-from apps.users.models import User
-from apps.reference_images.models import ReferenceImage
 from apps.reference_images.functions.admin import create_reference_image_for_user
 from apps.reference_images.utils import MAX_REFERENCE_IMAGES
-import uuid
+from apps.users.models import User
 
 
 class CreateReferenceImageForUserTests(TestCase):
@@ -18,15 +18,13 @@ class CreateReferenceImageForUserTests(TestCase):
     def setUp(self):
         """Set up test data."""
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="testpass123"
+            email="test@example.com", password="testpass123"
         )
 
     def test_creates_reference_image_for_valid_user(self):
         """Test that a reference image is created for a valid user ID."""
         ref_image = create_reference_image_for_user(
-            user_id=self.user.id,
-            name="Admin Created"
+            user_id=self.user.id, name="Admin Created"
         )
 
         self.assertIsNotNone(ref_image.id)
@@ -44,10 +42,7 @@ class CreateReferenceImageForUserTests(TestCase):
 
     def test_can_specify_order(self):
         """Test that a specific order can be provided."""
-        ref_image = create_reference_image_for_user(
-            user_id=self.user.id,
-            order=3
-        )
+        ref_image = create_reference_image_for_user(user_id=self.user.id, order=3)
 
         self.assertEqual(ref_image.order, 3)
 
@@ -66,4 +61,3 @@ class CreateReferenceImageForUserTests(TestCase):
 
         with self.assertRaises(ValidationError):
             create_reference_image_for_user(user_id=self.user.id)
-

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import os
 import base64
+import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -29,24 +30,28 @@ else:
 
 def main():
     import sys
-    
+
     if len(sys.argv) < 3:
         print("Usage: python edit_image.py <input_image_path> <prompt> [output_path]")
         sys.exit(1)
-    
+
     input_image_path = sys.argv[1]
     prompt = sys.argv[2]
-    output_path = sys.argv[3] if len(sys.argv) > 3 else "server/services/ai/openai_service/scripts/images/edited_image.png"
-    
+    output_path = (
+        sys.argv[3]
+        if len(sys.argv) > 3
+        else "server/services/ai/openai_service/scripts/images/edited_image.png"
+    )
+
     api_key = os.getenv("NEW_OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
-    
+
     # Encode image as base64 for Responses API
     with open(input_image_path, "rb") as f:
         image_bytes = f.read()
         image_base64_encoded = base64.b64encode(image_bytes).decode("utf-8")
         image_url = f"data:image/png;base64,{image_base64_encoded}"
-    
+
     response = client.responses.create(
         model="gpt-5",
         input=[
@@ -63,15 +68,15 @@ def main():
         ],
         tools=[{"type": "image_generation", "input_fidelity": "high"}],
     )
-    
+
     image_data = [
         output.result
         for output in response.output
         if output.type == "image_generation_call"
     ]
-    
+
     image_base64 = image_data[0]
-    
+
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file, "wb") as f:

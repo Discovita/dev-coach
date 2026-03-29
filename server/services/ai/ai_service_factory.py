@@ -7,19 +7,20 @@ to request AI services without knowing the specific implementation details.
 """
 
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Load environment variables from .env in project root
 load_dotenv(Path(__file__).parents[3] / ".env")
 from services.logger import configure_logging
 
-
 log = configure_logging(__name__, log_level="INFO")
+
+from enums.ai import AIModel, AIProvider
 
 # Import the AIService interface and implementations
 from services.ai import AIService
-from enums.ai import AIModel, AIProvider
 
 # Import the new OpenAIService and the plugin/adapter for legacy compatibility
 from services.ai.openai_service.core.base import OpenAIService

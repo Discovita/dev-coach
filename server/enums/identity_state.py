@@ -3,7 +3,7 @@ from django.db import models
 # IdentityState is used to represent the state of an identity in the coaching process.
 # This enum is referenced in the Identity model (see apps/coach/models.py or similar).
 """
-Proposed: Every identity starts as proposed. 
+Proposed: Every identity starts as proposed.
 Accepted: An identity is accepted when it makes it to the Identity Refinement Phase. All existing identities are set to accepted when the Identity Refinement Phase is entered.
 Refinement Complete: An identity is refinement complete when the user has refined it to their liking.
 Commitment Complete: An identity is commitment complete when the user has committed to it and wants to advance to the I Am Statement Phase with it.

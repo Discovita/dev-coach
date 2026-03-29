@@ -1,7 +1,8 @@
-from google import genai
-from pathlib import Path
-from dotenv import load_dotenv
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google import genai
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()
@@ -14,7 +15,9 @@ while current != current.parent:
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-prompt = ("Create a picture of a nano banana dish in a fancy restaurant with a Gemini theme")
+prompt = (
+    "Create a picture of a nano banana dish in a fancy restaurant with a Gemini theme"
+)
 response = client.models.generate_content(
     model="gemini-2.5-flash-image",
     contents=[prompt],

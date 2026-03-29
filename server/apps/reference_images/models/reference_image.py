@@ -1,7 +1,9 @@
 import uuid
+
 from django.db import models
-from apps.users.models import User
+
 from apps.core.models import ImageMixin
+from apps.users.models import User
 
 
 class ReferenceImage(ImageMixin, models.Model):
@@ -40,4 +42,3 @@ class ReferenceImage(ImageMixin, models.Model):
 
     def __str__(self):
         return f"{self.user.email} - Reference Image {self.order + 1}"
-

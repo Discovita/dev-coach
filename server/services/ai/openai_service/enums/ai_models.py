@@ -5,20 +5,18 @@ This module contains the AIModel enum for identifying
 different AI models and their capabilities.
 """
 
-from enum import Enum
-from typing import Union, Set, Optional
-
 import logging
-
-log = logging.getLogger(__name__)
+from enum import Enum
+from typing import Optional, Set, Union
 
 from .ai_providers import AIProvider
-
 from .model_features import (
-    STRUCTURED_OUTPUT_MODELS,
     COMPLETION_TOKEN_MODELS,
+    STRUCTURED_OUTPUT_MODELS,
     UNSUPPORTED_PARAMETERS,
 )
+
+log = logging.getLogger(__name__)
 
 
 class AIModel(Enum):

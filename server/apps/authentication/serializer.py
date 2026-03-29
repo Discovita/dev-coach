@@ -7,11 +7,12 @@ This module contains serializers for:
 - LTI launch request validation
 """
 
-from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from rest_framework import serializers
+
+from apps.authentication.utils import AuthErrorMessages, PasswordValidator
 from apps.users.models import User
-from apps.authentication.utils import PasswordValidator, AuthErrorMessages
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -24,7 +25,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     Fields:
     - email: User's email (must be unique)
     - password: User's password (must meet requirements)
-    
+
     Returns:
     - On success: Validated data
     - On error: Formatted error message matching interface:
@@ -50,7 +51,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             - Missing uppercase letter
             - Missing number
             - Missing special character
-            
+
         Returns:
             dict: Validated data if validation passes
         """
@@ -61,12 +62,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             validator.validate(password)
         except ValidationError as e:
             # Raise a dict with 'error' key to match the interface
-            raise serializers.ValidationError({
-                'error': str(e.message)
-            })
+            raise serializers.ValidationError({"error": str(e.message)})
 
         return data
-
 
 
 class LoginSerializer(serializers.Serializer):
@@ -99,4 +97,5 @@ class LoginSerializer(serializers.Serializer):
 
 class ResourceLinkSerializer(serializers.Serializer):
     """Serializer for the resourceLink object in LTI requests."""
+
     id = serializers.CharField()

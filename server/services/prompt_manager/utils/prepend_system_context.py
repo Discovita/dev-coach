@@ -5,6 +5,7 @@ Used by prompt_manager.manager and other prompt modules to add system context fr
 
 import os
 import time
+
 from apps.prompts.models import Prompt
 from enums.coaching_phase import CoachingPhase
 from services.logger import configure_logging
@@ -18,7 +19,7 @@ def prepend_system_context(
     """
     Prepend the system context from the most recent version of the SYSTEM_CONTEXT to the given system message.
     """
-    
+
     system_prompt_queryset = Prompt.objects.filter(
         coaching_phase=CoachingPhase.SYSTEM_CONTEXT,
         is_active=True,
@@ -36,5 +37,5 @@ def prepend_system_context(
             f"System context not found for state {CoachingPhase.SYSTEM_CONTEXT}"
         )
         result = system_message
-    
+
     return result

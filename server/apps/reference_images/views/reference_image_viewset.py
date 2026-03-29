@@ -3,21 +3,21 @@ ViewSet for Reference Images CRUD operations.
 Thin view layer - delegates all business logic to functions.
 """
 
-from rest_framework import viewsets, status, decorators
-from rest_framework.response import Response
-from rest_framework.request import Request
+from rest_framework import decorators, status, viewsets
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from services.logger import configure_logging
+from rest_framework.request import Request
+from rest_framework.response import Response
 
-from apps.reference_images.models import ReferenceImage
-from apps.reference_images.serializers import ReferenceImageSerializer
+from apps.reference_images.functions.admin import create_reference_image_for_user
 from apps.reference_images.functions.public import (
     create_reference_image,
-    upload_reference_image,
     delete_reference_image,
+    upload_reference_image,
 )
-from apps.reference_images.functions.admin import create_reference_image_for_user
+from apps.reference_images.models import ReferenceImage
+from apps.reference_images.serializers import ReferenceImageSerializer
+from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -47,14 +47,22 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
         Admins can access all reference images (for detail views like upload/delete).
         """
         user_id = self.request.query_params.get("user_id")
-        log.info(f"Getting reference images queryset. user_id param: {user_id}, is_staff: {self.request.user.is_staff}, action: {self.action}")
-        
+        log.info(
+            f"Getting reference images queryset. user_id param: {user_id}, is_staff: {self.request.user.is_staff}, action: {self.action}"
+        )
+
         try:
             # For detail actions (retrieve, update, destroy, upload_image), admins need access to all images
-            if self.request.user.is_staff and self.action in ['retrieve', 'update', 'partial_update', 'destroy', 'upload_image']:
-                log.info(f"Admin detail action: returning all reference images")
+            if self.request.user.is_staff and self.action in [
+                "retrieve",
+                "update",
+                "partial_update",
+                "destroy",
+                "upload_image",
+            ]:
+                log.info("Admin detail action: returning all reference images")
                 return ReferenceImage.objects.all()
-            
+
             # For list action with user_id filter (admin viewing another user's images)
             if user_id and self.request.user.is_staff:
                 log.info(f"Admin query: filtering by user_id={user_id}")
@@ -62,7 +70,7 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
                 count = queryset.count()
                 log.info(f"Found {count} reference images for user {user_id}")
                 return queryset
-            
+
             # Default: current user's images only
             log.info(f"User query: filtering by current user={self.request.user.id}")
             queryset = ReferenceImage.objects.filter(user=self.request.user)
@@ -75,11 +83,13 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         """Create a new reference image."""
-        log.info(f"Creating reference image. user_id: {request.data.get('user_id')}, order: {request.data.get('order')}, has_image: {bool(request.FILES.get('image'))}")
-        
+        log.info(
+            f"Creating reference image. user_id: {request.data.get('user_id')}, order: {request.data.get('order')}, has_image: {bool(request.FILES.get('image'))}"
+        )
+
         try:
             user_id = request.data.get("user_id")
-            
+
             # Convert order to int if provided (FormData sends strings)
             order_raw = request.data.get("order")
             order = None
@@ -91,7 +101,7 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
                     log.warning(f"Invalid order value: {order_raw}, error: {e}")
                     return Response(
                         {"error": "Order must be a valid integer"},
-                        status=status.HTTP_400_BAD_REQUEST
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
 
             # Admin creating for another user
@@ -103,51 +113,53 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
                     order=order,
                     image_file=request.FILES.get("image"),
                 )
-                log.info(f"Successfully created reference image {ref_image.id} for user {user_id}")
+                log.info(
+                    f"Successfully created reference image {ref_image.id} for user {user_id}"
+                )
             else:
                 # User creating for themselves
-                log.info(f"User creating reference image for themselves")
+                log.info("User creating reference image for themselves")
                 ref_image = create_reference_image(
                     user=request.user,
                     name=request.data.get("name", ""),
                     order=order,
                     image_file=request.FILES.get("image"),
                 )
-                log.info(f"Successfully created reference image {ref_image.id} for user {request.user.id}")
+                log.info(
+                    f"Successfully created reference image {ref_image.id} for user {request.user.id}"
+                )
 
             log.info(f"Serializing reference image {ref_image.id}")
             serializer_data = ReferenceImageSerializer(ref_image).data
             log.info(f"Successfully serialized reference image {ref_image.id}")
-            
+
             return Response(serializer_data, status=status.HTTP_201_CREATED)
         except Exception as e:
             log.error(f"Error creating reference image: {e}", exc_info=True)
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def list(self, request: Request, *args, **kwargs) -> Response:
         """List reference images."""
-        log.info(f"Listing reference images for request")
+        log.info("Listing reference images for request")
         try:
             queryset = self.get_queryset()
             log.info(f"Queryset retrieved, serializing {queryset.count()} images")
-            
+
             serializer = ReferenceImageSerializer(queryset, many=True)
             log.info(f"Serialization complete, returning {len(serializer.data)} images")
-            
+
             return Response(serializer.data)
         except Exception as e:
             log.error(f"Error listing reference images: {e}", exc_info=True)
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         """Delete a reference image."""
-        log.info(f"Deleting reference image")
+        log.info("Deleting reference image")
         try:
             ref_image = self.get_object()
             log.info(f"Found reference image {ref_image.id}, deleting")
@@ -157,8 +169,7 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
         except Exception as e:
             log.error(f"Error deleting reference image: {e}", exc_info=True)
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     @decorators.action(detail=True, methods=["POST"], url_path="upload-image")
@@ -167,7 +178,9 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
         log.info(f"Uploading image for reference image {pk}")
         try:
             ref_image = self.get_object()
-            log.info(f"Found reference image {ref_image.id} for user {ref_image.user_id}")
+            log.info(
+                f"Found reference image {ref_image.id} for user {ref_image.user_id}"
+            )
 
             updated = upload_reference_image(
                 reference_image=ref_image,
@@ -177,12 +190,10 @@ class ReferenceImageViewSet(viewsets.ModelViewSet):
 
             serializer_data = ReferenceImageSerializer(updated).data
             log.info(f"Successfully serialized updated reference image {updated.id}")
-            
+
             return Response(serializer_data)
         except Exception as e:
             log.error(f"Error uploading image: {e}", exc_info=True)
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-

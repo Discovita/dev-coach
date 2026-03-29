@@ -7,7 +7,10 @@ class ActionType(models.TextChoices):
     """
 
     CREATE_IDENTITY = "create_identity", "Create Identity"
-    CREATE_MULTIPLE_IDENTITIES = "create_multiple_identities", "Create Multiple Identities"
+    CREATE_MULTIPLE_IDENTITIES = (
+        "create_multiple_identities",
+        "Create Multiple Identities",
+    )
     UPDATE_IDENTITY = "update_identity", "Update Identity"
     UPDATE_IDENTITY_NAME = "update_identity_name", "Update Identity Name"
     UPDATE_I_AM_STATEMENT = (
@@ -52,8 +55,14 @@ class ActionType(models.TextChoices):
     UPDATE_USER_NOTE = "update_user_note", "Update User Note"
     DELETE_USER_NOTE = "delete_user_note", "Delete User Note"
     # Component actions
-    SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT = "show_introduction_canned_response_component", "Show Introduction Canned Response Component"
-    SHOW_ACCEPT_I_AM_COMPONENT = "show_accept_i_am_component", "Show Accept I Am Component"
+    SHOW_INTRODUCTION_CANNED_RESPONSE_COMPONENT = (
+        "show_introduction_canned_response_component",
+        "Show Introduction Canned Response Component",
+    )
+    SHOW_ACCEPT_I_AM_COMPONENT = (
+        "show_accept_i_am_component",
+        "Show Accept I Am Component",
+    )
     SHOW_SUGGEST_I_AM_STATEMENT_COMPONENT = (
         "show_suggest_i_am_statement_component",
         "Show Suggest I Am Statement Component",
@@ -66,7 +75,10 @@ class ActionType(models.TextChoices):
     SHOW_NEST_IDENTITIES = "show_nest_identities", "Show Nest Identities"
     SHOW_ARCHIVE_IDENTITY = "show_archive_identity", "Show Archive Identity"
     # Persistent component actions
-    PERSIST_COMBINE_IDENTITIES = "persist_combine_identities", "Persist Combine Identities"
+    PERSIST_COMBINE_IDENTITIES = (
+        "persist_combine_identities",
+        "Persist Combine Identities",
+    )
     PERSIST_NEST_IDENTITIES = "persist_nest_identities", "Persist Nest Identities"
     PERSIST_ARCHIVE_IDENTITY = "persist_archive_identity", "Persist Archive Identity"
     PERSIST_SUGGEST_I_AM_STATEMENT_COMPONENT = (

@@ -1,8 +1,9 @@
-from typing import Optional, Dict, Type, List
-from pydantic import Field, create_model, BaseModel
+from typing import Dict, List, Optional, Type
+
+from pydantic import BaseModel, Field, create_model
+
 from enums.action_type import ActionType
 from services.action_handler.models.actions import *
-
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")

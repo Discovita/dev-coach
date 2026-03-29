@@ -5,9 +5,9 @@ This utility checks if a user has any chat messages and adds the initial
 bot message if the chat history is empty.
 """
 
-from apps.users.models import User
 from apps.chat_messages.models import ChatMessage
-from apps.chat_messages.utils import get_initial_message, add_chat_message
+from apps.chat_messages.utils import add_chat_message, get_initial_message
+from apps.users.models import User
 from enums.message_role import MessageRole
 
 
@@ -41,4 +41,3 @@ def ensure_initial_message_exists(user: User) -> bool:
         return True
 
     return False
-

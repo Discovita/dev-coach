@@ -15,9 +15,10 @@ This decouples the note extraction logic from the main request/response cycle, k
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from apps.chat_messages.models import ChatMessage
-from enums.message_role import MessageRole
 from apps.user_notes.tasks import extract_user_notes
+from enums.message_role import MessageRole
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -34,6 +35,8 @@ def trigger_sentinel_on_user_message(sender, instance, created, **kwargs):
     if created and instance.role == MessageRole.USER:
         # Do not extract notes for test scenario messages
         if instance.test_scenario_id is not None:
-            log.debug(f"Skipping user note extraction for test scenario message: {instance.id}")
+            log.debug(
+                f"Skipping user note extraction for test scenario message: {instance.id}"
+            )
             return
         extract_user_notes.delay_on_commit(instance.pk)

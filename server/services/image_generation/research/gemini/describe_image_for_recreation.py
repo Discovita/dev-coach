@@ -28,10 +28,11 @@ import os
 import sys
 import time
 from pathlib import Path
+
 from dotenv import load_dotenv
-from PIL import Image
 from google import genai
 from google.genai import types
+from PIL import Image
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()
@@ -50,7 +51,9 @@ while current != current.parent:
 IMAGE_TO_DESCRIBE = "server/services/gemini/images/generic_identity/conductor_01.png"
 
 # Output file for the description
-OUTPUT_FILE = "server/services/gemini/images/generic_identity/conductor_01_description.txt"
+OUTPUT_FILE = (
+    "server/services/gemini/images/generic_identity/conductor_01_description.txt"
+)
 
 # ============================================================================
 # RETRY CONFIGURATION
@@ -65,10 +68,11 @@ RETRY_BACKOFF_MULTIPLIER = 2
 # PROMPT
 # ============================================================================
 
+
 def build_prompt() -> str:
     """
     Build the prompt for describing the image.
-    
+
     We want a description that:
     1. Is detailed enough to recreate the image
     2. Focuses on everything EXCEPT the specific person's face
@@ -133,13 +137,14 @@ Begin the prompt with: "A cinematic, movie-poster quality image of a person..."
 # MAIN FUNCTION
 # ============================================================================
 
+
 def describe_image(client: genai.Client) -> str | None:
     """
     Generate a detailed description of the image for recreation.
-    
+
     Args:
         client: Gemini API client
-    
+
     Returns:
         The description text, or None if failed
     """
@@ -149,29 +154,29 @@ def describe_image(client: genai.Client) -> str | None:
     print(f"Image: {IMAGE_TO_DESCRIBE}")
     print(f"Output: {OUTPUT_FILE}")
     print()
-    
+
     # Load the image
     if not os.path.exists(IMAGE_TO_DESCRIBE):
         print(f"ERROR: Image not found: {IMAGE_TO_DESCRIBE}")
         return None
-    
+
     image = Image.open(IMAGE_TO_DESCRIBE)
     print(f"✓ Loaded image: {IMAGE_TO_DESCRIBE}")
     print()
-    
+
     # Build prompt
     prompt = build_prompt()
-    
+
     # Build contents: image first, then prompt
     contents = [image, prompt]
-    
+
     # Retry loop
     retry_delay = INITIAL_RETRY_DELAY
-    
+
     for attempt in range(MAX_RETRIES):
         try:
             print("Generating description...")
-            
+
             response = client.models.generate_content(
                 model="gemini-3-pro-image-preview",
                 contents=contents,
@@ -179,14 +184,14 @@ def describe_image(client: genai.Client) -> str | None:
                     response_modalities=["TEXT"],  # Text only for this step
                 ),
             )
-            
+
             # Extract text from response
             description = None
             for part in response.parts:
                 if part.text:
                     description = part.text
                     break
-            
+
             if description:
                 print()
                 print("=" * 60)
@@ -194,21 +199,25 @@ def describe_image(client: genai.Client) -> str | None:
                 print("=" * 60)
                 print(description)
                 print()
-                
+
                 # Save to file
                 os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
                 with open(OUTPUT_FILE, "w") as f:
                     f.write(description)
                 print(f"✓ Saved to: {OUTPUT_FILE}")
-                
+
                 return description
             else:
                 print("WARNING: No text in response, retrying...")
-            
+
         except Exception as e:
             error_str = str(e)
-            is_retryable = "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str.lower()
-            
+            is_retryable = (
+                "503" in error_str
+                or "UNAVAILABLE" in error_str
+                or "overloaded" in error_str.lower()
+            )
+
             if is_retryable and attempt < MAX_RETRIES - 1:
                 print(f"⚠ Attempt {attempt + 1}/{MAX_RETRIES} failed: {e}")
                 print(f"  Retrying in {retry_delay} seconds...")
@@ -217,13 +226,14 @@ def describe_image(client: genai.Client) -> str | None:
             else:
                 print(f"✗ Failed after {attempt + 1} attempts: {e}")
                 return None
-    
+
     return None
 
 
 # ============================================================================
 # MAIN
 # ============================================================================
+
 
 def main():
     if "--help" in sys.argv or "-h" in sys.argv:
@@ -236,13 +246,13 @@ def main():
         print("  - IMAGE_TO_DESCRIBE: Path to the image to analyze")
         print("  - OUTPUT_FILE: Path to save the description")
         sys.exit(0)
-    
+
     # Initialize client
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
+
     # Generate description
     description = describe_image(client)
-    
+
     # Summary
     print()
     print("=" * 60)

@@ -7,13 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('coach_states', '0010_alter_coachstate_current_identity_and_more'),
+        ("coach_states", "0010_alter_coachstate_current_identity_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='coachstate',
-            name='asked_questions',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=255), blank=True, default=list, help_text='List of questions that have been asked during the Get To Know You phase.', size=None),
+            model_name="coachstate",
+            name="asked_questions",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=255),
+                blank=True,
+                default=list,
+                help_text="List of questions that have been asked during the Get To Know You phase.",
+                size=None,
+            ),
         ),
     ]

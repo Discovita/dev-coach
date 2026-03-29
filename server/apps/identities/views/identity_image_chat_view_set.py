@@ -5,19 +5,19 @@ User-facing endpoints for image generation chat sessions.
 Uses the authenticated user - no user_id parameter needed.
 """
 
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
+from rest_framework.response import Response
 
-from apps.identities.serializers import (
-    StartImageChatRequestSerializer,
-    ContinueImageChatRequestSerializer,
-)
 from apps.identities.functions.public import (
-    start_image_chat,
     continue_image_chat,
+    start_image_chat,
+)
+from apps.identities.serializers import (
+    ContinueImageChatRequestSerializer,
+    StartImageChatRequestSerializer,
 )
 from services.logger import configure_logging
 

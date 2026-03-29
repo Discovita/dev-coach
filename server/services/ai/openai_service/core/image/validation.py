@@ -1,8 +1,15 @@
 """Validation utilities for image generation parameters."""
 
 import logging
-from typing import Optional, Union, Dict, Any
-from ...models.image import ImageSize, ImageQuality, ImageStyle, ImageResponseFormat, ImageModel
+from typing import Any, Dict, Optional, Union
+
+from ...models.image import (
+    ImageModel,
+    ImageQuality,
+    ImageResponseFormat,
+    ImageSize,
+    ImageStyle,
+)
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +27,7 @@ def validate_and_process_image_params(
 ) -> Dict[str, Any]:
     """
     Validate and process parameters for image generation.
-    
+
     Args:
         prompt: Text prompt for image generation
         model: DALL-E model to use
@@ -31,7 +38,7 @@ def validate_and_process_image_params(
         response_format: Format for the response
         save_to_path: Directory to save images to
         user: Unique identifier for end-user
-        
+
     Returns:
         Dict containing processed parameters
     """
@@ -39,7 +46,7 @@ def validate_and_process_image_params(
     model_value = model.value if isinstance(model, ImageModel) else model
     if not model_value:
         model_value = ImageModel.default_model()
-        
+
     # Check prompt length restrictions
     if model_value == ImageModel.DALL_E_2.value and len(prompt) > 1000:
         log.warning(
@@ -108,9 +115,7 @@ def validate_and_process_image_params(
 
         # Style parameter only applies to DALL-E 3
         if style:
-            log.warning(
-                "Style parameter only applies to DALL-E 3. It will be ignored."
-            )
+            log.warning("Style parameter only applies to DALL-E 3. It will be ignored.")
             style_value = None
 
     # Create request parameters, only adding non-None values
@@ -133,5 +138,5 @@ def validate_and_process_image_params(
             params["quality"] = quality_value
         if style_value is not None:
             params["style"] = style_value
-            
-    return params 
+
+    return params

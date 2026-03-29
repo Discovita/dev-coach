@@ -18,7 +18,7 @@ class CreateCoachStateSignalTests(TestCase):
             email="newuser@example.com",
             password="testpass123",
         )
-        
+
         # Signal should have created the coach state
         self.assertTrue(hasattr(user, "coach_state"))
         self.assertIsInstance(user.coach_state, CoachState)
@@ -29,7 +29,7 @@ class CreateCoachStateSignalTests(TestCase):
             email="newuser@example.com",
             password="testpass123",
         )
-        
+
         self.assertEqual(user.coach_state.current_phase, CoachingPhase.INTRODUCTION)
 
     def test_does_not_create_coach_state_on_user_update(self):
@@ -38,14 +38,14 @@ class CreateCoachStateSignalTests(TestCase):
             email="existing@example.com",
             password="testpass123",
         )
-        
+
         # Get initial count
         initial_count = CoachState.objects.count()
-        
+
         # Update user
         user.first_name = "Updated"
         user.save()
-        
+
         # Count should not have changed
         self.assertEqual(CoachState.objects.count(), initial_count)
 
@@ -55,17 +55,17 @@ class CreateCoachStateSignalTests(TestCase):
             email="newuser@example.com",
             password="testpass123",
         )
-        
+
         # Get the coach state created by signal
         coach_state_id = user.coach_state.id
-        
+
         # Manually save user again (should not trigger creation)
         user.save()
-        
+
         # Should still be the same coach state
         user.refresh_from_db()
         self.assertEqual(user.coach_state.id, coach_state_id)
-        
+
         # Should only be one coach state for this user
         self.assertEqual(CoachState.objects.filter(user=user).count(), 1)
 
@@ -79,7 +79,7 @@ class CreateCoachStateSignalTests(TestCase):
             email="user2@example.com",
             password="testpass123",
         )
-        
+
         # Each should have their own coach state
         self.assertIsNotNone(user1.coach_state)
         self.assertIsNotNone(user2.coach_state)
@@ -91,9 +91,9 @@ class CreateCoachStateSignalTests(TestCase):
             email="newuser@example.com",
             password="testpass123",
         )
-        
+
         coach_state = user.coach_state
-        
+
         # Check defaults
         self.assertEqual(coach_state.current_phase, CoachingPhase.INTRODUCTION)
         self.assertIsNone(coach_state.current_identity)

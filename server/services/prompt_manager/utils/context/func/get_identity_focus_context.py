@@ -11,7 +11,9 @@ def get_identity_focus_context(coach_state: CoachState) -> str:
     identity_focus_value = coach_state.identity_focus
     if identity_focus_value:
         try:
-            identity_category_member = IdentityCategory.from_string(identity_focus_value)
+            identity_category_member = IdentityCategory.from_string(
+                identity_focus_value
+            )
             return identity_category_member.label
         except ValueError:
             # Fallback or error handling if the value is not a valid IdentityCategory

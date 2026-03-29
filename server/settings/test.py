@@ -4,8 +4,9 @@ Test settings for Django test suite.
 Extends common settings with test-specific configurations.
 """
 
-from settings.common import *
 import os
+
+from settings.common import *
 
 # Use a separate test database
 DATABASES = {
@@ -44,6 +45,6 @@ LOGGING = {
 }
 
 # Disable Celery during tests
-CELERY_BROKER_URL = "redis://redis:6379/0" # Local Redis instance
+CELERY_BROKER_URL = "redis://redis:6379/0"  # Local Redis instance
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True

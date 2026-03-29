@@ -35,7 +35,7 @@ Usage:
 
 from .core import OpenAIService, OpenAIServicePlugin
 from .enums import AIModel, AIProvider
-from .models import ImageSize, ImageQuality, ImageResponseFormat, ImageModel, ImageStyle
+from .models import ImageModel, ImageQuality, ImageResponseFormat, ImageSize, ImageStyle
 
 __all__ = [
     "OpenAIServicePlugin",

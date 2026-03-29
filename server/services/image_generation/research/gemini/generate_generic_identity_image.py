@@ -23,15 +23,16 @@ Output:
     With --output: server/services/gemini/images/generic_identity/<name>.png
 """
 
+import glob
 import os
 import sys
-import glob
 import time
 from pathlib import Path
+
 from dotenv import load_dotenv
-from PIL import Image
 from google import genai
 from google.genai import types
+from PIL import Image
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()
@@ -78,7 +79,7 @@ HEIGHT = "average height"
 # Build options: "slim", "athletic", "average build", "stocky", "large"
 BUILD = "athletic"
 
-# Skin tone / ethnicity options: "light-skinned", "medium-skinned", "dark-skinned", 
+# Skin tone / ethnicity options: "light-skinned", "medium-skinned", "dark-skinned",
 # Or more specific: "Caucasian", "Asian", "Hispanic", "African American", "Middle Eastern", "South Asian"
 ETHNICITY = "Caucasian"
 
@@ -113,16 +114,17 @@ IDENTITY_NOTES = None  # e.g., ["Focus on leadership", "Emphasize creativity"]
 # UTILITIES
 # ============================================================================
 
+
 def get_next_run_number() -> int:
     """Find the next available numbered output file."""
     if not os.path.exists(OUTPUT_DIR):
         return 1
-    
+
     existing_files = glob.glob(f"{OUTPUT_DIR}/[0-9][0-9].png")
-    
+
     if not existing_files:
         return 1
-    
+
     numbers = []
     for f in existing_files:
         basename = os.path.basename(f)
@@ -131,7 +133,7 @@ def get_next_run_number() -> int:
             numbers.append(num)
         except ValueError:
             continue
-    
+
     return max(numbers) + 1 if numbers else 1
 
 
@@ -148,24 +150,24 @@ def get_identity_context() -> str:
         f'Identity Name: "{IDENTITY_NAME}"',
         f"Category: {IDENTITY_CATEGORY}",
     ]
-    
+
     if IDENTITY_I_AM_STATEMENT:
         parts.append(f"I Am Statement: {IDENTITY_I_AM_STATEMENT}")
-    
+
     if IDENTITY_VISUALIZATION:
         parts.append(f"Visualization: {IDENTITY_VISUALIZATION}")
-    
+
     if IDENTITY_NOTES:
         notes_str = "; ".join(IDENTITY_NOTES)
         parts.append(f"Notes: {notes_str}")
-    
+
     return "\n".join(parts)
 
 
 def build_prompt() -> str:
     """
     Build the prompt for generating a generic identity image.
-    
+
     The key points:
     - Movie poster quality aesthetic
     - Cinematic, dramatic lighting
@@ -174,7 +176,7 @@ def build_prompt() -> str:
     """
     body_description = get_body_description()
     identity_context = get_identity_context()
-    
+
     return f"""We're creating a generic Identity Image for {body_description}.
 
 Create a confident and inspiring image for this Identity.
@@ -214,26 +216,29 @@ The face should be the dominant feature of the image.
 # GENERATION
 # ============================================================================
 
-def generate_generic_identity_image(client: genai.Client, output_name: str | None = None) -> tuple[str, Image.Image | None]:
+
+def generate_generic_identity_image(
+    client: genai.Client, output_name: str | None = None
+) -> tuple[str, Image.Image | None]:
     """
     Generate a generic identity image.
-    
+
     Args:
         client: Gemini API client
         output_name: Optional custom name for the output file (without extension)
-    
+
     Returns:
         Tuple of (output_path, PIL Image or None if failed)
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     # Determine output path
     if output_name:
         output_path = f"{OUTPUT_DIR}/{output_name}.png"
     else:
         run_num = get_next_run_number()
         output_path = f"{OUTPUT_DIR}/{run_num:02d}.png"
-    
+
     print("=" * 60)
     print("GENERATING GENERIC IDENTITY IMAGE")
     print("=" * 60)
@@ -241,14 +246,14 @@ def generate_generic_identity_image(client: genai.Client, output_name: str | Non
     print(f"Body: {get_body_description()}")
     print(f"Output: {output_path}")
     print()
-    
+
     prompt = build_prompt()
     print("Prompt:")
     print("-" * 40)
     print(prompt)
     print("-" * 40)
     print()
-    
+
     # Retry loop - keep trying until success
     attempt = 0
     start_time = time.time()
@@ -258,58 +263,63 @@ def generate_generic_identity_image(client: genai.Client, output_name: str | Non
         try:
             print(f"Generating image (attempt {attempt}, elapsed: {elapsed:.0f}s)...")
             attempt_start = time.time()
-            
+
             response = client.models.generate_content(
                 model="gemini-3-pro-image-preview",
                 contents=[prompt],
                 config=types.GenerateContentConfig(
                     response_modalities=["TEXT", "IMAGE"],
                     image_config=types.ImageConfig(
-                        aspect_ratio=ASPECT_RATIO,
-                        image_size=RESOLUTION
+                        aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION
                     ),
                 ),
             )
-            
+
             attempt_duration = time.time() - attempt_start
             print(f"   API responded in {attempt_duration:.1f}s")
-            
+
             # Check if we got a valid response
             if not response.parts:
-                print(f"   WARNING: Response has no parts")
+                print("   WARNING: Response has no parts")
                 print(f"   Response object: {response}")
                 time.sleep(RETRY_DELAY)
                 continue
-            
+
             for i, part in enumerate(response.parts):
                 print(f"   Processing part {i+1}/{len(response.parts)}...")
-                if getattr(part, 'thought', False):
-                    print(f"      (thought - skipping)")
+                if getattr(part, "thought", False):
+                    print("      (thought - skipping)")
                     continue
                 if part.text:
                     print(f"   [Model] {part.text}")
                 if part.inline_data is not None:
-                    print(f"   Found image data, saving...")
+                    print("   Found image data, saving...")
                     image = part.as_image()
                     image.save(output_path)
                     total_time = time.time() - start_time
                     print(f"\n✓ Saved: {output_path} (total time: {total_time:.1f}s)")
                     return output_path, image
-            
-            print(f"   WARNING: No image in response parts, retrying...")
-            
+
+            print("   WARNING: No image in response parts, retrying...")
+
         except Exception as e:
             error_str = str(e)
             error_type = type(e).__name__
-            is_retryable = "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str.lower()
-            
+            is_retryable = (
+                "503" in error_str
+                or "UNAVAILABLE" in error_str
+                or "overloaded" in error_str.lower()
+            )
+
             if is_retryable:
                 print(f"⚠ Attempt {attempt} failed - retrying in {RETRY_DELAY}s...")
                 print(f"   Error type: {error_type}")
-                print(f"   Message: {error_str[:200]}{'...' if len(error_str) > 200 else ''}")
+                print(
+                    f"   Message: {error_str[:200]}{'...' if len(error_str) > 200 else ''}"
+                )
                 time.sleep(RETRY_DELAY)
             else:
-                print(f"✗ Failed with non-retryable error:")
+                print("✗ Failed with non-retryable error:")
                 print(f"   Error type: {error_type}")
                 print(f"   Full message: {error_str}")
                 return output_path, None
@@ -319,6 +329,7 @@ def generate_generic_identity_image(client: genai.Client, output_name: str | Non
 # MAIN
 # ============================================================================
 
+
 def main():
     # Parse arguments
     output_name = None
@@ -326,7 +337,7 @@ def main():
         idx = sys.argv.index("--output")
         if idx + 1 < len(sys.argv):
             output_name = sys.argv[idx + 1]
-    
+
     if "--help" in sys.argv or "-h" in sys.argv:
         print("Usage: python generate_generic_identity_image.py [--output <name>]")
         print()
@@ -334,23 +345,27 @@ def main():
         print("The face will be replaced in a subsequent step.")
         print()
         print("Options:")
-        print("  --output <name>  Custom name for output file (default: numbered 01, 02, etc.)")
+        print(
+            "  --output <name>  Custom name for output file (default: numbered 01, 02, etc.)"
+        )
         print()
         print("Examples:")
         print("  python generate_generic_identity_image.py")
         print("  python generate_generic_identity_image.py --output conductor_01")
         print()
-        print("Configure the identity by editing the constants at the top of the script:")
+        print(
+            "Configure the identity by editing the constants at the top of the script:"
+        )
         print("  - IDENTITY_NAME, IDENTITY_CATEGORY, IDENTITY_VISUALIZATION")
         print("  - GENDER, HEIGHT, BUILD, ETHNICITY, AGE, HAIR")
         sys.exit(0)
-    
+
     # Initialize client
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
+
     # Generate the image
     output_path, image = generate_generic_identity_image(client, output_name)
-    
+
     # Summary
     print()
     print("=" * 60)
@@ -359,7 +374,9 @@ def main():
     if image:
         print(f"Generated: {output_path}")
         print()
-        print("Next step: Use this image as input for Step 3 (Generate Matched Character View)")
+        print(
+            "Next step: Use this image as input for Step 3 (Generate Matched Character View)"
+        )
     else:
         print("Failed to generate image")
 

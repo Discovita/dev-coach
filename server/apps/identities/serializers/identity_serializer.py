@@ -1,6 +1,7 @@
-from apps.identities.models import Identity
 from rest_framework import serializers
+
 from apps.core.serializers import VersatileImageFieldWithSizes
+from apps.identities.models import Identity
 
 
 class IdentitySerializer(serializers.ModelSerializer):
@@ -12,7 +13,9 @@ class IdentitySerializer(serializers.ModelSerializer):
     # Force UUID to be serialized as a string (read-only, set by viewset)
     user = serializers.CharField(source="user_id", read_only=True)
     # Image field returns URLs for all sizes
-    image = VersatileImageFieldWithSizes(required=False, allow_null=True, read_only=True)
+    image = VersatileImageFieldWithSizes(
+        required=False, allow_null=True, read_only=True
+    )
 
     class Meta:
         model = Identity

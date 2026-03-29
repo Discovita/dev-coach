@@ -5,11 +5,10 @@ This module provides utility functions for working with different
 AI models, managing model-specific parameters, and compatibility.
 """
 
-import os
-from typing import Dict, Any, Set, Union
-from importlib.metadata import version
-
 import logging
+import os
+from importlib.metadata import version
+from typing import Any, Dict
 
 log = logging.getLogger(__name__)
 

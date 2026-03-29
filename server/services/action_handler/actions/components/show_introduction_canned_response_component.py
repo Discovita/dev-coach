@@ -1,16 +1,16 @@
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from enums.action_type import ActionType
+from enums.component_type import ComponentType
+from models.components.ComponentConfig import (
+    ComponentAction,
+    ComponentButton,
+    ComponentConfig,
+)
 from services.action_handler.models.params import (
     ShowIntroductionCannedResponseComponentParams,
 )
-from models.components.ComponentConfig import (
-    ComponentConfig,
-    ComponentButton,
-    ComponentAction,
-)
-from enums.component_type import ComponentType
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")

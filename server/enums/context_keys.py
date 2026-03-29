@@ -17,7 +17,10 @@ class ContextKey(models.TextChoices):
     CURRENT_MESSAGE = "current_message", "Current Message"
     PREVIOUS_MESSAGE = "previous_message", "Previous Message"
     CURRENT_PHASE = "current_phase", "Current Phase"
-    BRAINSTORMING_CATEGORY_CONTEXT = "brainstorming_category_context", "Brainstorming Category Context"
+    BRAINSTORMING_CATEGORY_CONTEXT = (
+        "brainstorming_category_context",
+        "Brainstorming Category Context",
+    )
     CURRENT_IDENTITY = "current_identity", "Current Identity"
     ASKED_QUESTIONS = "asked_questions", "Asked Questions"
     REFINEMENT_IDENTITIES = "refinement_identities", "Refinement Identities"

@@ -1,16 +1,16 @@
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.action_type import ActionType
-from services.action_handler.models.params import (
-    PersistArchiveIdentityParams,
-)
+from enums.component_type import ComponentType
 from models.components.ComponentConfig import (
     ComponentConfig,
     ComponentIdentity,
 )
-from enums.component_type import ComponentType
+from services.action_handler.models.params import (
+    PersistArchiveIdentityParams,
+)
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -28,11 +28,11 @@ def persist_archive_identity(
 
     # Fetch the identity and construct display object
     try:
-        identity = Identity.objects.get(
-            id=params.identity_id, user=coach_state.user
-        )
+        identity = Identity.objects.get(id=params.identity_id, user=coach_state.user)
     except Identity.DoesNotExist:
-        log.warning(f"Identity {params.identity_id} not found for user {coach_state.user.id}")
+        log.warning(
+            f"Identity {params.identity_id} not found for user {coach_state.user.id}"
+        )
         return None
 
     component_identities = [
@@ -51,16 +51,16 @@ def persist_archive_identity(
     # Get the coach message from the parameters
     try:
         coach_message = ChatMessage.objects.get(
-            id=params.coach_message_id,
-            user=coach_state.user,
-            role="coach"
+            id=params.coach_message_id, user=coach_state.user, role="coach"
         )
         # Update the coach message with persistent component
         coach_message.component_config = display_component.model_dump()
-        coach_message.save(update_fields=['component_config'])
+        coach_message.save(update_fields=["component_config"])
         log.info(f"Persisted archive identity component to message {coach_message.id}")
     except ChatMessage.DoesNotExist:
-        log.warning(f"Coach message {params.coach_message_id} not found for user {coach_state.user.id}")
+        log.warning(
+            f"Coach message {params.coach_message_id} not found for user {coach_state.user.id}"
+        )
 
     # Log the action
     Action.objects.create(
@@ -81,4 +81,3 @@ def persist_archive_identity(
     log.info("Successfully persisted archive identity component")
 
     return None
-

@@ -2,12 +2,13 @@
 Tests for chat history serialization utilities.
 """
 
-from django.test import TestCase
 from unittest.mock import MagicMock
 
+from django.test import TestCase
+
 from services.image_generation.utils.chat_history_serializer import (
-    serialize_chat_history,
     deserialize_chat_history,
+    serialize_chat_history,
 )
 
 
@@ -20,21 +21,21 @@ class ChatHistorySerializerTests(TestCase):
         mock_content1 = MagicMock()
         mock_content1.to_json_dict.return_value = {
             "role": "user",
-            "parts": [{"text": "Generate an image"}]
+            "parts": [{"text": "Generate an image"}],
         }
-        
+
         mock_content2 = MagicMock()
         mock_content2.to_json_dict.return_value = {
             "role": "model",
             "parts": [
                 {"text": "I'll generate that"},
-                {"inline_data": {"mime_type": "image/png", "data": "base64data"}}
-            ]
+                {"inline_data": {"mime_type": "image/png", "data": "base64data"}},
+            ],
         }
-        
+
         history = [mock_content1, mock_content2]
         result = serialize_chat_history(history)
-        
+
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0]["role"], "user")
         self.assertEqual(result[1]["role"], "model")
@@ -44,29 +45,27 @@ class ChatHistorySerializerTests(TestCase):
 
     def test_deserialize_chat_history(self):
         """Test that JSON dicts are deserialized back to Content objects."""
-        from google.genai.types import Content
         import base64
-        
+
+        from google.genai.types import Content
+
         # Create valid base64 data
         test_image_bytes = b"fake image data"
-        base64_data = base64.b64encode(test_image_bytes).decode('utf-8')
-        
+        base64_data = base64.b64encode(test_image_bytes).decode("utf-8")
+
         history_data = [
-            {
-                "role": "user",
-                "parts": [{"text": "Generate an image"}]
-            },
+            {"role": "user", "parts": [{"text": "Generate an image"}]},
             {
                 "role": "model",
                 "parts": [
                     {"text": "I'll generate that"},
-                    {"inline_data": {"mime_type": "image/png", "data": base64_data}}
-                ]
-            }
+                    {"inline_data": {"mime_type": "image/png", "data": base64_data}},
+                ],
+            },
         ]
-        
+
         result = deserialize_chat_history(history_data)
-        
+
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], Content)
         self.assertIsInstance(result[1], Content)
@@ -75,34 +74,36 @@ class ChatHistorySerializerTests(TestCase):
 
     def test_serialization_round_trip(self):
         """Test that serialize → deserialize preserves data."""
-        from google.genai.types import Content
         import base64
-        
+
+        from google.genai.types import Content
+
         # Create valid base64 data
         test_image_bytes = b"fake image data"
-        base64_data = base64.b64encode(test_image_bytes).decode('utf-8')
-        
+        base64_data = base64.b64encode(test_image_bytes).decode("utf-8")
+
         # Create actual Content objects
-        content1 = Content.model_validate({
-            "role": "user",
-            "parts": [{"text": "Generate an image"}]
-        })
-        content2 = Content.model_validate({
-            "role": "model",
-            "parts": [
-                {"text": "I'll generate that"},
-                {"inline_data": {"mime_type": "image/png", "data": base64_data}}
-            ]
-        })
-        
+        content1 = Content.model_validate(
+            {"role": "user", "parts": [{"text": "Generate an image"}]}
+        )
+        content2 = Content.model_validate(
+            {
+                "role": "model",
+                "parts": [
+                    {"text": "I'll generate that"},
+                    {"inline_data": {"mime_type": "image/png", "data": base64_data}},
+                ],
+            }
+        )
+
         original_history = [content1, content2]
-        
+
         # Serialize
         serialized = serialize_chat_history(original_history)
-        
+
         # Deserialize
         deserialized = deserialize_chat_history(serialized)
-        
+
         # Verify round trip
         self.assertEqual(len(deserialized), len(original_history))
         self.assertEqual(deserialized[0].role, original_history[0].role)
@@ -126,11 +127,11 @@ class ChatHistorySerializerTests(TestCase):
         # When get_history() returns dicts (e.g., from mocks or already serialized)
         dict_history = [
             {"role": "user", "parts": [{"text": "test"}]},
-            {"role": "model", "parts": [{"text": "response"}]}
+            {"role": "model", "parts": [{"text": "response"}]},
         ]
-        
+
         result = serialize_chat_history(dict_history)
-        
+
         # Should return the dicts as-is
         self.assertEqual(result, dict_history)
         self.assertEqual(len(result), 2)

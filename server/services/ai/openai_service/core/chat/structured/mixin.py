@@ -3,26 +3,27 @@ Mixin for structured completion functionality in OpenAIService.
 """
 
 from typing import (
-    List,
-    TypeVar,
-    Type,
     Any,
-    Optional,
     Dict,
-    Union,
-    Iterable,
     Generator,
+    Iterable,
+    List,
+    Optional,
     Tuple,
+    Type,
+    TypeVar,
+    Union,
 )
+
 from openai.types.chat import (
     ChatCompletionMessageParam,
     ChatCompletionToolChoiceOptionParam,
     ChatCompletionToolParam,
     ParsedChatCompletion,
 )
-
 from pydantic import BaseModel
-from ....models.openai_compatibility import NotGiven, NOT_GIVEN
+
+from ....models.openai_compatibility import NOT_GIVEN, NotGiven
 
 ResponseFormatT = TypeVar("ResponseFormatT", bound=BaseModel)
 
@@ -37,7 +38,7 @@ class StructuredCompletionMixin:
         messages: List[ChatCompletionMessageParam],
         model: str,
         response_format: Type[ResponseFormatT],
-        **kwargs: Any
+        **kwargs: Any,
     ) -> ParsedChatCompletion[ResponseFormatT]:
         """
         Creates a structured chat completion using the beta.chat.completions.parse endpoint.
@@ -68,7 +69,7 @@ class StructuredCompletionMixin:
         messages: List[ChatCompletionMessageParam],
         model: str,
         response_format: Type[ResponseFormatT],
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Generator[Tuple[ParsedChatCompletion[ResponseFormatT], bool], None, None]:
         """
         Stream a structured chat completion using the beta.chat.completions.parse endpoint.

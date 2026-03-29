@@ -21,15 +21,16 @@ Examples:
   python face_swap_matched_view.py server/services/gemini/images/reference/face_only/casey_01.png --skip-views --intermediate server/services/gemini/images/face_swap/face_swap_intermediate_10.png
 """
 
-import sys
-import re
 import glob
-from google import genai
-from pathlib import Path
-from dotenv import load_dotenv
 import os
-from PIL import Image
+import re
+import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google import genai
 from google.genai import types
+from PIL import Image
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()
@@ -84,16 +85,37 @@ IDENTITY_NOTES = None
 # ============================================================================
 
 VIEWS_TO_GENERATE = [
-    ("front", "looking directly at the camera, face pointed straight ahead", "camera directly in front"),
-    ("profile_left", "in a TRUE SIDE PROFILE view - the camera is positioned at exactly 90 degrees to the left side of their face, showing only the left side of their face with the nose pointing to the right edge of the frame", "camera at 90 degrees to their left"),
-    ("profile_right", "in a TRUE SIDE PROFILE view - the camera is positioned at exactly 90 degrees to the right side of their face, showing only the right side of their face with the nose pointing to the left edge of the frame", "camera at 90 degrees to their right"),
-    ("three_quarter_left", "at a 45-degree angle with the camera to their left - their face is turned slightly to their right so we see more of their left cheek, left ear visible", "camera at 45 degrees to their left"),
-    ("three_quarter_right", "at a 45-degree angle with the camera to their right - their face is turned slightly to their left so we see more of their right cheek, right ear visible", "camera at 45 degrees to their right"),
+    (
+        "front",
+        "looking directly at the camera, face pointed straight ahead",
+        "camera directly in front",
+    ),
+    (
+        "profile_left",
+        "in a TRUE SIDE PROFILE view - the camera is positioned at exactly 90 degrees to the left side of their face, showing only the left side of their face with the nose pointing to the right edge of the frame",
+        "camera at 90 degrees to their left",
+    ),
+    (
+        "profile_right",
+        "in a TRUE SIDE PROFILE view - the camera is positioned at exactly 90 degrees to the right side of their face, showing only the right side of their face with the nose pointing to the left edge of the frame",
+        "camera at 90 degrees to their right",
+    ),
+    (
+        "three_quarter_left",
+        "at a 45-degree angle with the camera to their left - their face is turned slightly to their right so we see more of their left cheek, left ear visible",
+        "camera at 45 degrees to their left",
+    ),
+    (
+        "three_quarter_right",
+        "at a 45-degree angle with the camera to their right - their face is turned slightly to their left so we see more of their right cheek, right ear visible",
+        "camera at 45 degrees to their right",
+    ),
 ]
 
 # ============================================================================
 # PROMPTS
 # ============================================================================
+
 
 def get_identity_context() -> str:
     """Format identity context for the prompt."""
@@ -115,7 +137,7 @@ def get_generic_identity_prompt() -> str:
     """Build the prompt for generating a generic identity image."""
     body_description = f"a {HEIGHT} {BUILD} {ETHNICITY} {GENDER} {AGE} with {HAIR}"
     identity_context = get_identity_context()
-    
+
     return f"""We're creating a generic Identity Image for a {body_description}.
 
 Create a professional, confident, and inspiring image for this Identity.
@@ -137,20 +159,21 @@ DO NOT include any text, words, letters, or watermarks in the image. The image s
 # UTILITIES
 # ============================================================================
 
+
 def get_next_run_number() -> int:
     """Find the next available number for outputs."""
     pattern = f"{OUTPUT_DIR}/final_*.png"
     existing_files = glob.glob(pattern)
-    
+
     if not existing_files:
         return 1
-    
+
     numbers = []
     for f in existing_files:
-        match = re.search(r'final_(\d+)\.png', f)
+        match = re.search(r"final_(\d+)\.png", f)
         if match:
             numbers.append(int(match.group(1)))
-    
+
     return max(numbers) + 1 if numbers else 1
 
 
@@ -168,30 +191,31 @@ def get_existing_character_views(source_basename: str) -> list[str]:
 # STEP 1: Generate Character Views
 # ============================================================================
 
+
 def generate_character_views(source_path: str) -> list[str]:
     """Generate multiple angle views of a person from a single reference photo."""
     os.makedirs(CHARACTER_VIEWS_DIR, exist_ok=True)
-    
+
     source_basename = os.path.splitext(os.path.basename(source_path))[0]
     source_image = Image.open(source_path)
-    
+
     print("=" * 60)
     print("STEP 1: GENERATING CHARACTER VIEWS")
     print("=" * 60)
     print(f"Source: {source_path}")
     print()
-    
+
     generated_paths = []
-    
+
     for view_suffix, view_description, camera_hint in VIEWS_TO_GENERATE:
         output_path = f"{CHARACTER_VIEWS_DIR}/{source_basename}_{view_suffix}.png"
         print(f"Generating: {view_suffix}...")
-        
+
         prompt = f"""A professional studio headshot portrait of this person against a plain white background, {view_description}.
 
 Camera position: {camera_hint}
 
-Keep the person's face EXACTLY the same - same facial features, same eyes, same nose, same mouth, same skin tone, same hair style and color. 
+Keep the person's face EXACTLY the same - same facial features, same eyes, same nose, same mouth, same skin tone, same hair style and color.
 This must be recognizably the same person, just from a different angle.
 
 IMPORTANT - Professional retouching requirements:
@@ -202,7 +226,7 @@ IMPORTANT - Professional retouching requirements:
 
 DO NOT change any facial features. DO NOT add or remove facial hair. DO NOT change the hairstyle.
 """
-        
+
         try:
             response = client.models.generate_content(
                 model="gemini-3-pro-image-preview",
@@ -212,9 +236,9 @@ DO NOT change any facial features. DO NOT add or remove facial hair. DO NOT chan
                     image_config=types.ImageConfig(aspect_ratio="1:1", image_size="2K"),
                 ),
             )
-            
+
             for part in response.parts:
-                if getattr(part, 'thought', False):
+                if getattr(part, "thought", False):
                     continue
                 if part.inline_data is not None:
                     image = part.as_image()
@@ -225,13 +249,14 @@ DO NOT change any facial features. DO NOT add or remove facial hair. DO NOT chan
         except Exception as e:
             print(f"  ✗ Failed: {e}")
         print()
-    
+
     return generated_paths
 
 
 # ============================================================================
 # STEP 2: Generate Generic Identity Image
 # ============================================================================
+
 
 def generate_generic_identity(run_num: int) -> tuple[Image.Image, str]:
     """Generate a generic identity image (cinematic, movie-poster quality)."""
@@ -240,34 +265,36 @@ def generate_generic_identity(run_num: int) -> tuple[Image.Image, str]:
     print("=" * 60)
     print(f"Body description: {GENDER}, {HEIGHT}, {BUILD}, {ETHNICITY}, {AGE}, {HAIR}")
     print()
-    
+
     prompt = get_generic_identity_prompt()
     print(f"Prompt:\n{prompt}\n")
-    
+
     response = client.models.generate_content(
         model="gemini-3-pro-image-preview",
         contents=[prompt],
         config=types.GenerateContentConfig(
             response_modalities=["TEXT", "IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION),
+            image_config=types.ImageConfig(
+                aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION
+            ),
         ),
     )
-    
+
     final_image = None
     intermediate_path = f"{OUTPUT_DIR}/intermediate_{run_num:02d}.png"
-    
+
     for part in response.parts:
-        if getattr(part, 'thought', False):
+        if getattr(part, "thought", False):
             continue
         if part.inline_data is not None:
             final_image = part.as_image()
             final_image.save(intermediate_path)
             print(f"Saved intermediate image: {intermediate_path}")
-    
+
     if final_image is None:
         print("ERROR: Failed to generate generic identity image")
         sys.exit(1)
-    
+
     return Image.open(intermediate_path), intermediate_path
 
 
@@ -275,10 +302,9 @@ def generate_generic_identity(run_num: int) -> tuple[Image.Image, str]:
 # STEP 3: Generate Matched Character View
 # ============================================================================
 
+
 def generate_matched_character_view(
-    intermediate_image: Image.Image,
-    character_view_paths: list[str],
-    run_num: int
+    intermediate_image: Image.Image, character_view_paths: list[str], run_num: int
 ) -> tuple[Image.Image, str]:
     """
     Generate a character view that matches the head position and lighting
@@ -291,22 +317,22 @@ def generate_matched_character_view(
     print("Creating a character view that matches the intermediate image's")
     print("head position, angle, and lighting...")
     print()
-    
+
     # Load all character views as reference for the person's face
     reference_images = []
     for ref_path in character_view_paths:
         if os.path.exists(ref_path):
             reference_images.append(Image.open(ref_path))
             print(f"  Loaded reference: {ref_path}")
-    
+
     if not reference_images:
         print("ERROR: No character view images found!")
         sys.exit(1)
-    
+
     print()
-    
+
     matched_path = f"{OUTPUT_DIR}/matched_view_{run_num:02d}.png"
-    
+
     prompt = """Look at the FIRST IMAGE (the scene image). Study the person in it carefully:
 - What direction is their head facing?
 - What angle is their head tilted?
@@ -319,7 +345,7 @@ Now, using the REMAINING IMAGES (the reference headshots), create a NEW headshot
    - Same direction the face is pointing
    - Same tilt of the head
    - Same turn of the neck
-   
+
 2. LIGHTING: Match the lighting from the scene image
    - Same direction of light source
    - Same warmth/coolness of light
@@ -338,7 +364,7 @@ DO NOT include any text in the image.
 
     # Contents: scene image first, then reference headshots, then prompt
     contents = [intermediate_image] + reference_images + [prompt]
-    
+
     response = client.models.generate_content(
         model="gemini-3-pro-image-preview",
         contents=contents,
@@ -347,10 +373,10 @@ DO NOT include any text in the image.
             image_config=types.ImageConfig(aspect_ratio="1:1", image_size="2K"),
         ),
     )
-    
+
     matched_image = None
     for part in response.parts:
-        if getattr(part, 'thought', False):
+        if getattr(part, "thought", False):
             continue
         if part.text:
             print(f"Response: {part.text}")
@@ -358,11 +384,11 @@ DO NOT include any text in the image.
             matched_image = part.as_image()
             matched_image.save(matched_path)
             print(f"Saved matched character view: {matched_path}")
-    
+
     if matched_image is None:
         print("ERROR: Failed to generate matched character view")
         sys.exit(1)
-    
+
     return Image.open(matched_path), matched_path
 
 
@@ -370,10 +396,9 @@ DO NOT include any text in the image.
 # STEP 4: Face Swap with Single Matched View
 # ============================================================================
 
+
 def face_swap_single(
-    intermediate_image: Image.Image,
-    matched_view_image: Image.Image,
-    run_num: int
+    intermediate_image: Image.Image, matched_view_image: Image.Image, run_num: int
 ) -> Image.Image:
     """
     Swap the face using ONLY the single matched character view.
@@ -385,9 +410,9 @@ def face_swap_single(
     print("=" * 60)
     print("Swapping face using the matched character view...")
     print()
-    
+
     final_path = f"{OUTPUT_DIR}/final_{run_num:02d}.png"
-    
+
     prompt = """Replace the face in the FIRST IMAGE with the face from the SECOND IMAGE.
 
 The second image has been specifically created to match:
@@ -409,19 +434,21 @@ Output a single edited image.
 """
 
     contents = [intermediate_image, matched_view_image, prompt]
-    
+
     response = client.models.generate_content(
         model="gemini-3-pro-image-preview",
         contents=contents,
         config=types.GenerateContentConfig(
             response_modalities=["TEXT", "IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION),
+            image_config=types.ImageConfig(
+                aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION
+            ),
         ),
     )
-    
+
     final_image = None
     for part in response.parts:
-        if getattr(part, 'thought', False):
+        if getattr(part, "thought", False):
             continue
         if part.text:
             print(f"Response: {part.text}")
@@ -429,11 +456,11 @@ Output a single edited image.
             final_image = part.as_image()
             final_image.save(final_path)
             print(f"Saved final image: {final_path}")
-    
+
     if final_image is None:
         print("ERROR: Failed to perform face swap")
         sys.exit(1)
-    
+
     return final_image
 
 
@@ -444,22 +471,28 @@ Output a single edited image.
 if __name__ == "__main__":
     # Parse arguments
     skip_views = "--skip-views" in sys.argv
-    
+
     intermediate_path = None
     if "--intermediate" in sys.argv:
         idx = sys.argv.index("--intermediate")
         if idx + 1 < len(sys.argv):
             intermediate_path = sys.argv[idx + 1]
-    
-    args = [a for a in sys.argv[1:] if not a.startswith("--") and a != intermediate_path]
-    
+
+    args = [
+        a for a in sys.argv[1:] if not a.startswith("--") and a != intermediate_path
+    ]
+
     if len(args) < 1:
-        print("Usage: python face_swap_matched_view.py <source_image> [--skip-views] [--intermediate <path>]")
+        print(
+            "Usage: python face_swap_matched_view.py <source_image> [--skip-views] [--intermediate <path>]"
+        )
         print()
         print("4-step approach:")
         print("  1. Generate character views from source photo")
         print("  2. Generate cinematic intermediate identity image")
-        print("  3. Generate matched character view (same head position/lighting as intermediate)")
+        print(
+            "  3. Generate matched character view (same head position/lighting as intermediate)"
+        )
         print("  4. Face swap using only the matched view")
         print()
         print("Options:")
@@ -467,24 +500,28 @@ if __name__ == "__main__":
         print("  --intermediate <path>  Use provided intermediate image")
         print()
         print("Examples:")
-        print("  python face_swap_matched_view.py server/services/gemini/images/reference/face_only/casey_01.png")
-        print("  python face_swap_matched_view.py server/services/gemini/images/reference/face_only/casey_01.png --skip-views --intermediate server/services/gemini/images/face_swap/face_swap_intermediate_10.png")
+        print(
+            "  python face_swap_matched_view.py server/services/gemini/images/reference/face_only/casey_01.png"
+        )
+        print(
+            "  python face_swap_matched_view.py server/services/gemini/images/reference/face_only/casey_01.png --skip-views --intermediate server/services/gemini/images/face_swap/face_swap_intermediate_10.png"
+        )
         sys.exit(1)
-    
+
     source_image_path = args[0]
-    
+
     if not os.path.exists(source_image_path):
         print(f"ERROR: Source image not found: {source_image_path}")
         sys.exit(1)
-    
+
     source_basename = os.path.splitext(os.path.basename(source_image_path))[0]
-    
+
     # Create output directory
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     # Get run number
     run_num = get_next_run_number()
-    
+
     print("=" * 60)
     print("FACE SWAP WITH MATCHED CHARACTER VIEW")
     print("=" * 60)
@@ -492,14 +529,16 @@ if __name__ == "__main__":
     print(f"Source photo: {source_image_path}")
     print(f"Identity: {IDENTITY_NAME}")
     print()
-    
+
     # Step 1: Character views
     if skip_views:
         character_view_paths = get_existing_character_views(source_basename)
         if not character_view_paths:
             print("ERROR: --skip-views specified but no existing character views found")
             sys.exit(1)
-        print(f"Skipping character view generation, using {len(character_view_paths)} existing views")
+        print(
+            f"Skipping character view generation, using {len(character_view_paths)} existing views"
+        )
         for p in character_view_paths:
             print(f"  - {p}")
         print()
@@ -508,7 +547,7 @@ if __name__ == "__main__":
         if not character_view_paths:
             print("ERROR: Failed to generate any character views")
             sys.exit(1)
-    
+
     # Step 2: Intermediate image
     if intermediate_path:
         if not os.path.exists(intermediate_path):
@@ -522,17 +561,15 @@ if __name__ == "__main__":
         intermediate_image = Image.open(intermediate_save_path)
     else:
         intermediate_image, _ = generate_generic_identity(run_num)
-    
+
     # Step 3: Matched character view
     matched_image, matched_path = generate_matched_character_view(
-        intermediate_image, 
-        character_view_paths, 
-        run_num
+        intermediate_image, character_view_paths, run_num
     )
-    
+
     # Step 4: Face swap with single matched view
     final_image = face_swap_single(intermediate_image, matched_image, run_num)
-    
+
     # Summary
     print()
     print("=" * 60)

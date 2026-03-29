@@ -1,8 +1,10 @@
 from typing import Any, Optional
+
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+
 from apps.reference_images.models import ReferenceImage
-from apps.reference_images.utils import get_next_available_order, MAX_REFERENCE_IMAGES
+from apps.reference_images.utils import MAX_REFERENCE_IMAGES, get_next_available_order
 from apps.users.models import User
 from services.logger import configure_logging
 
@@ -31,25 +33,35 @@ def create_reference_image(
     Raises:
         ValidationError: If user has reached maximum images or order is invalid
     """
-    log.info(f"create_reference_image called for user {user.id}, order={order}, has_image={bool(image_file)}")
-    
+    log.info(
+        f"create_reference_image called for user {user.id}, order={order}, has_image={bool(image_file)}"
+    )
+
     try:
         # Check limit
         log.debug(f"Checking image limit for user {user.id}")
         existing_count = ReferenceImage.objects.filter(user=user).count()
         log.debug(f"User {user.id} has {existing_count} existing reference images")
         if existing_count >= MAX_REFERENCE_IMAGES:
-            log.warning(f"User {user.id} has reached maximum {MAX_REFERENCE_IMAGES} reference images")
-            raise ValidationError(f"Maximum {MAX_REFERENCE_IMAGES} reference images allowed")
+            log.warning(
+                f"User {user.id} has reached maximum {MAX_REFERENCE_IMAGES} reference images"
+            )
+            raise ValidationError(
+                f"Maximum {MAX_REFERENCE_IMAGES} reference images allowed"
+            )
 
         # Determine order
         if order is None:
-            log.debug(f"Order not specified, finding next available order for user {user.id}")
+            log.debug(
+                f"Order not specified, finding next available order for user {user.id}"
+            )
             order = get_next_available_order(user)
             log.info(f"Auto-assigned order {order} for user {user.id}")
         elif order < 0 or order >= MAX_REFERENCE_IMAGES:
             log.warning(f"Invalid order {order} for user {user.id}")
-            raise ValidationError(f"Order must be between 0 and {MAX_REFERENCE_IMAGES - 1}")
+            raise ValidationError(
+                f"Order must be between 0 and {MAX_REFERENCE_IMAGES - 1}"
+            )
         elif ReferenceImage.objects.filter(user=user, order=order).exists():
             log.warning(f"Order {order} already in use for user {user.id}")
             raise ValidationError(f"Order {order} is already in use")
@@ -61,7 +73,9 @@ def create_reference_image(
             name=name,
             order=order,
         )
-        log.info(f"Successfully created ReferenceImage {ref_image.id} for user {user.id}")
+        log.info(
+            f"Successfully created ReferenceImage {ref_image.id} for user {user.id}"
+        )
 
         # Upload image if provided
         if image_file:
@@ -70,11 +84,12 @@ def create_reference_image(
             ref_image.save()
             log.info(f"Successfully saved image file for ReferenceImage {ref_image.id}")
 
-        log.info(f"create_reference_image completed successfully for ReferenceImage {ref_image.id}")
+        log.info(
+            f"create_reference_image completed successfully for ReferenceImage {ref_image.id}"
+        )
         return ref_image
     except ValidationError:
         raise
     except Exception as e:
         log.error(f"Unexpected error in create_reference_image: {e}", exc_info=True)
         raise
-

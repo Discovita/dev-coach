@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import Identity, IdentityImageChat
 
 
@@ -32,6 +33,7 @@ class IdentityAdmin(admin.ModelAdmin):
     def test_scenario_display(self, obj):
         """Display the name of the associated test scenario, if any."""
         return obj.test_scenario.name if obj.test_scenario else None
+
     test_scenario_display.short_description = "Test Scenario"
     test_scenario_display.admin_order_field = "test_scenario__name"
 
@@ -40,6 +42,7 @@ class IdentityAdmin(admin.ModelAdmin):
         if obj.image:
             return obj.image.url
         return "No image"
+
     image_url_display.short_description = "Image URL"
 
 
@@ -65,4 +68,5 @@ class IdentityImageChatAdmin(admin.ModelAdmin):
         if obj.chat_history:
             return f"{len(obj.chat_history)} messages"
         return "No history"
+
     chat_history_preview.short_description = "Chat History"

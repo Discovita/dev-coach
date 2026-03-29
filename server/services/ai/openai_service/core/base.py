@@ -5,19 +5,25 @@ This module contains the main OpenAIService class which provides
 a simplified interface to OpenAI's API.
 """
 
-from openai import OpenAI
-from typing import Annotated, Optional
 import logging
+from typing import Annotated, Optional
+
+from openai import OpenAI
+
 from ..utils.model_utils import check_dependency_versions
-from .messages import MessageMixin
-from .chat.structured import StructuredCompletionMixin
 from .chat.generic import GenericChatCompletionMixin
+from .chat.structured import StructuredCompletionMixin
 from .image import ImageGenerationMixin
+from .messages import MessageMixin
 
 log = logging.getLogger(__name__)
 
+
 class OpenAIService(
-    MessageMixin, StructuredCompletionMixin, GenericChatCompletionMixin, ImageGenerationMixin
+    MessageMixin,
+    StructuredCompletionMixin,
+    GenericChatCompletionMixin,
+    ImageGenerationMixin,
 ):
     """
     A helper class for interacting with the OpenAI API.
@@ -39,7 +45,9 @@ class OpenAIService(
     def __init__(
         self,
         api_key: Annotated[str, "The OpenAI API Key you wish to use"],
-        organization: Optional[Annotated[str, "Your OpenAI organization ID (optional)"]] = None,
+        organization: Optional[
+            Annotated[str, "Your OpenAI organization ID (optional)"]
+        ] = None,
     ):
         """
         Initialize the OpenAI helper with your API key and organization.

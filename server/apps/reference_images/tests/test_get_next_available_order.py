@@ -3,11 +3,10 @@ Tests for get_next_available_order utility function.
 """
 
 from django.test import TestCase
-from django.core.files.uploadedfile import SimpleUploadedFile
 
-from apps.users.models import User
 from apps.reference_images.models import ReferenceImage
-from apps.reference_images.utils import get_next_available_order, MAX_REFERENCE_IMAGES
+from apps.reference_images.utils import MAX_REFERENCE_IMAGES, get_next_available_order
+from apps.users.models import User
 
 
 class GetNextAvailableOrderTests(TestCase):
@@ -16,8 +15,7 @@ class GetNextAvailableOrderTests(TestCase):
     def setUp(self):
         """Set up test data."""
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="testpass123"
+            email="test@example.com", password="testpass123"
         )
 
     def test_returns_zero_when_no_images_exist(self):
@@ -56,8 +54,7 @@ class GetNextAvailableOrderTests(TestCase):
     def test_does_not_consider_other_users_images(self):
         """Test that other users' images don't affect available slots."""
         other_user = User.objects.create_user(
-            email="other@example.com",
-            password="testpass123"
+            email="other@example.com", password="testpass123"
         )
 
         # Fill all slots for other user
@@ -67,4 +64,3 @@ class GetNextAvailableOrderTests(TestCase):
         # Current user should still have slot 0 available
         result = get_next_available_order(self.user)
         self.assertEqual(result, 0)
-

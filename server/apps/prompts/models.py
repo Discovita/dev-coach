@@ -1,10 +1,11 @@
 import uuid
-from django.db import models
 
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
+
+from enums.action_type import ActionType
 from enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
-from enums.action_type import ActionType
 from enums.prompt_type import PromptType
 
 
@@ -43,7 +44,7 @@ class Prompt(models.Model):
         max_length=32,
         choices=PromptType.choices,
         default=PromptType.COACH,
-        help_text="Type of prompt (coach, sentinel, system, etc.)"
+        help_text="Type of prompt (coach, sentinel, system, etc.)",
     )
     is_active = models.BooleanField(default=True, help_text="Is this prompt active?")
     created_at = models.DateTimeField(auto_now_add=True)

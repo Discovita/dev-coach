@@ -1,16 +1,17 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from apps.test_scenario.template_serializers import (
-    TemplateUserSerializer,
+    TemplateActionSerializer,
+    TemplateChatMessageSerializer,
     TemplateCoachStateSerializer,
     TemplateIdentitySerializer,
-    TemplateChatMessageSerializer,
     TemplateUserNoteSerializer,
-    TemplateActionSerializer,
+    TemplateUserSerializer,
 )
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
+
 
 def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     """
@@ -25,7 +26,7 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     Example error:
         [{"section": "user", "error": "Missing required field: email"}]
     """
-    log.debug(f"[TestScenario.validation] Validating scenario template")
+    log.debug("[TestScenario.validation] Validating scenario template")
     errors = []
 
     # --- Helper for serializer errors ---
@@ -35,20 +36,35 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
                 # Nested errors (shouldn't happen for our flat models)
                 for subfield, submsgs in msgs.items():
                     for msg in (submsgs if isinstance(submsgs, list) else [submsgs]):
-                        loc = f"{section}{'['+str(index)+']' if index is not None else ''}" if subfield == 'non_field_errors' else f"{section}{'['+str(index)+']' if index is not None else ''}.{subfield}"
-                        error_msg = f"{subfield}: {msg}" if subfield != 'non_field_errors' else str(msg)
+                        loc = (
+                            f"{section}{'['+str(index)+']' if index is not None else ''}"
+                            if subfield == "non_field_errors"
+                            else f"{section}{'['+str(index)+']' if index is not None else ''}.{subfield}"
+                        )
+                        error_msg = (
+                            f"{subfield}: {msg}"
+                            if subfield != "non_field_errors"
+                            else str(msg)
+                        )
                         errors.append({"section": loc, "error": error_msg})
             else:
                 for msg in (msgs if isinstance(msgs, list) else [msgs]):
                     loc = f"{section}{'['+str(index)+']' if index is not None else ''}"
-                    error_msg = f"{field}: {msg}" if field != 'non_field_errors' else str(msg)
+                    error_msg = (
+                        f"{field}: {msg}" if field != "non_field_errors" else str(msg)
+                    )
                     errors.append({"section": loc, "error": error_msg})
 
     # --- Required sections ---
     required_sections = ["user"]
     for section in required_sections:
         if section not in template or template[section] is None:
-            errors.append({"section": section, "error": f"Section '{section}' is missing or null."})
+            errors.append(
+                {
+                    "section": section,
+                    "error": f"Section '{section}' is missing or null.",
+                }
+            )
 
     # --- User section validation ---
     if "user" in template and template["user"] is not None:
@@ -65,7 +81,12 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     # --- Identities section validation (optional) ---
     if "identities" in template and template["identities"] is not None:
         if not isinstance(template["identities"], list):
-            errors.append({"section": "identities", "error": "Section 'identities' must be a list."})
+            errors.append(
+                {
+                    "section": "identities",
+                    "error": "Section 'identities' must be a list.",
+                }
+            )
         else:
             for idx, identity in enumerate(template["identities"]):
                 serializer = TemplateIdentitySerializer(data=identity)
@@ -75,17 +96,29 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     # --- ChatMessages section validation (optional) ---
     if "chat_messages" in template and template["chat_messages"] is not None:
         if not isinstance(template["chat_messages"], list):
-            errors.append({"section": "chat_messages", "error": "Section 'chat_messages' must be a list."})
+            errors.append(
+                {
+                    "section": "chat_messages",
+                    "error": "Section 'chat_messages' must be a list.",
+                }
+            )
         else:
             for idx, msg in enumerate(template["chat_messages"]):
                 serializer = TemplateChatMessageSerializer(data=msg)
                 if not serializer.is_valid():
-                    collect_serializer_errors("chat_message", serializer.errors, index=idx)
+                    collect_serializer_errors(
+                        "chat_message", serializer.errors, index=idx
+                    )
 
     # --- UserNotes section validation (optional) ---
     if "user_notes" in template and template["user_notes"] is not None:
         if not isinstance(template["user_notes"], list):
-            errors.append({"section": "user_notes", "error": "Section 'user_notes' must be a list."})
+            errors.append(
+                {
+                    "section": "user_notes",
+                    "error": "Section 'user_notes' must be a list.",
+                }
+            )
         else:
             for idx, note in enumerate(template["user_notes"]):
                 serializer = TemplateUserNoteSerializer(data=note)
@@ -95,11 +128,13 @@ def validate_scenario_template(template: dict) -> List[Dict[str, str]]:
     # --- Actions section validation (optional) ---
     if "actions" in template and template["actions"] is not None:
         if not isinstance(template["actions"], list):
-            errors.append({"section": "actions", "error": "Section 'actions' must be a list."})
+            errors.append(
+                {"section": "actions", "error": "Section 'actions' must be a list."}
+            )
         else:
             for idx, action in enumerate(template["actions"]):
                 serializer = TemplateActionSerializer(data=action)
                 if not serializer.is_valid():
                     collect_serializer_errors("action", serializer.errors, index=idx)
 
-    return errors 
+    return errors

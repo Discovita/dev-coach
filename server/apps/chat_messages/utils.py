@@ -1,7 +1,8 @@
 import os
+
 from apps.chat_messages.models import ChatMessage
-from enums.message_role import MessageRole
 from apps.users.models import User
+from enums.message_role import MessageRole
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")

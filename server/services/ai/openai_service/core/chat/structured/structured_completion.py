@@ -5,17 +5,19 @@ This module provides functions for creating structured chat completions
 using the OpenAI API, with Pydantic model parsing support.
 """
 
-from typing import List, Optional, Dict, Union, Iterable, Type
+import logging
+from typing import Dict, Iterable, List, Optional, Type, Union
+
 from openai.types.chat import (
-    ParsedChatCompletion,
     ChatCompletionMessageParam,
     ChatCompletionToolChoiceOptionParam,
     ChatCompletionToolParam,
+    ParsedChatCompletion,
 )
-import logging
-from ....models.openai_compatibility import NotGiven, NOT_GIVEN
-from ....utils.model_utils import get_token_param_name, filter_unsupported_parameters
+
+from ....models.openai_compatibility import NOT_GIVEN, NotGiven
 from ....models.response_types import ResponseFormatT
+from ....utils.model_utils import filter_unsupported_parameters, get_token_param_name
 
 log = logging.getLogger(__name__)
 

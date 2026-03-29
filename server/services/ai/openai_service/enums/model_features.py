@@ -5,9 +5,8 @@ This module contains the collections of model features supported
 by different AI models, such as structured outputs and token parameters.
 """
 
-from typing import Dict, Set
-
 import logging
+from typing import Dict, Set
 
 log = logging.getLogger(__name__)
 

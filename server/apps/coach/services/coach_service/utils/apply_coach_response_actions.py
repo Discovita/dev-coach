@@ -4,9 +4,11 @@ Utility to apply actions from the coach's response.
 When the coach responds, it may include actions like creating an identity
 or transitioning to a new phase. This function processes those actions.
 """
-from typing import Tuple, Optional
-from apps.coach_states.models import CoachState
+
+from typing import Optional, Tuple
+
 from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from models.CoachChatResponse import CoachChatResponse
 from models.components.ComponentConfig import ComponentConfig
 from services.action_handler.handler import apply_coach_actions
@@ -36,4 +38,3 @@ def apply_coach_response_actions(
         - component_config: Optional component configuration if the coach wants to show a UI component
     """
     return apply_coach_actions(coach_state, coach_response, coach_message)
-

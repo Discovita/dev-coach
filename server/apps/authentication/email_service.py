@@ -3,14 +3,16 @@ Authentication models for email verification and token management.
 This module contains functionality for managing authentication flows.
 """
 
-from django.conf import settings
-from django.template.loader import render_to_string
+import secrets
+from datetime import datetime, timedelta
+
 import boto3
 from botocore.exceptions import ClientError
-from datetime import datetime, timedelta
-import secrets
-from apps.users.models import User
 
+from django.conf import settings
+from django.template.loader import render_to_string
+
+from apps.users.models import User
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")

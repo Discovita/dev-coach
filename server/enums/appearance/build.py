@@ -4,7 +4,7 @@ from django.db import models
 class Build(models.TextChoices):
     """
     Enum for build/body type visualization options in image generation.
-    
+
     Contains all possible build values. The frontend filters which options
     to display based on the user's selected gender:
     - Male: slim, athletic, average, muscular, stocky, large
@@ -18,15 +18,15 @@ class Build(models.TextChoices):
     AVERAGE = "average", "Average"
     STOCKY = "stocky", "Stocky"
     LARGE = "large", "Large"
-    
+
     # Male-specific
     MUSCULAR = "muscular", "Muscular"
-    
+
     # Female-specific
     PETITE = "petite", "Petite"
     CURVY = "curvy", "Curvy"
     FULL_FIGURED = "full_figured", "Full-Figured"
-    
+
     # Neutral-specific
     HEAVYSET = "heavyset", "Heavyset"
 

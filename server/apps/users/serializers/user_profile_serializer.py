@@ -54,4 +54,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "last_login",
             "email_verification_sent_at",
         )
-

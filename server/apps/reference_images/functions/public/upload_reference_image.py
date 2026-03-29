@@ -1,6 +1,8 @@
 from typing import Any
+
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+
 from apps.reference_images.models import ReferenceImage
 from services.logger import configure_logging
 
@@ -26,10 +28,12 @@ def upload_reference_image(
         ValidationError: If no image file provided
     """
     log.info(f"upload_reference_image called for ReferenceImage {reference_image.id}")
-    
+
     try:
         if not image_file:
-            log.warning(f"No image file provided for ReferenceImage {reference_image.id}")
+            log.warning(
+                f"No image file provided for ReferenceImage {reference_image.id}"
+            )
             raise ValidationError("No image file provided")
 
         # Delete old image if exists
@@ -37,7 +41,9 @@ def upload_reference_image(
             log.info(f"Deleting old image for ReferenceImage {reference_image.id}")
             try:
                 reference_image.image.delete()
-                log.info(f"Successfully deleted old image for ReferenceImage {reference_image.id}")
+                log.info(
+                    f"Successfully deleted old image for ReferenceImage {reference_image.id}"
+                )
             except Exception as e:
                 log.warning(f"Error deleting old image (continuing anyway): {e}")
 
@@ -53,4 +59,3 @@ def upload_reference_image(
     except Exception as e:
         log.error(f"Unexpected error in upload_reference_image: {e}", exc_info=True)
         raise
-

@@ -1,7 +1,9 @@
-from typing import Dict, Any, Tuple, List, Optional
-from .functions import process_message as process_message_func
-from enums.ai import AIModel
+from typing import Any, Dict, List, Optional, Tuple
+
 from apps.users.models import User
+from enums.ai import AIModel
+
+from .functions import process_message as process_message_func
 
 
 class CoachService:

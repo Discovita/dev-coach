@@ -5,11 +5,11 @@ This module contains the viewset for test scenario user-related endpoints
 where admin users can access and manage test user data.
 """
 
-from rest_framework import viewsets, decorators
+from rest_framework import decorators, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.users.functions import get_user_identities, get_user_chat_messages
+from apps.users.functions import get_user_chat_messages, get_user_identities
 from apps.users.utils import ensure_initial_message_exists
 
 
@@ -66,6 +66,7 @@ class TestUserViewSet(viewsets.GenericViewSet):
         Returns: 200 OK, updated user profile object.
         """
         from rest_framework import status
+
         from apps.users.serializers import UserProfileSerializer
 
         if not self.admin_required(request):
@@ -145,8 +146,12 @@ class TestUserViewSet(viewsets.GenericViewSet):
             return Response({"detail": "User not found."}, status=404)
         from apps.identities.serializers import IdentitySerializer
 
-        include_archived = request.query_params.get('include_archived', 'false').lower() == 'true'
-        archived_only = request.query_params.get('archived_only', 'false').lower() == 'true'
+        include_archived = (
+            request.query_params.get("include_archived", "false").lower() == "true"
+        )
+        archived_only = (
+            request.query_params.get("archived_only", "false").lower() == "true"
+        )
 
         identities = get_user_identities(
             user=user,
@@ -197,4 +202,3 @@ class TestUserViewSet(viewsets.GenericViewSet):
 
         messages = get_user_chat_messages(user)
         return Response(ChatMessageSerializer(messages, many=True).data)
-

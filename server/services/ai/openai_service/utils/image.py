@@ -6,10 +6,8 @@ in OpenAI API requests.
 """
 
 import base64
-import os
-from typing import Optional
-
 import logging
+import os
 
 log = logging.getLogger(__name__)
 

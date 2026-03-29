@@ -5,12 +5,12 @@ Admin function to start a new image generation chat session for any user.
 """
 
 import base64
-import tempfile
 import os
+import tempfile
 
-from rest_framework.response import Response
-from rest_framework import status
 from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.response import Response
 
 from apps.identities.models import Identity
 from apps.reference_images.models import ReferenceImage

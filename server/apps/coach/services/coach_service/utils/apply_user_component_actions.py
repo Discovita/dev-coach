@@ -4,9 +4,11 @@ Utility to apply component actions that the user triggered.
 When a user interacts with a component (like clicking a button), those actions
 need to be processed and applied to the user's coach state.
 """
+
 from typing import List, Optional
-from apps.coach_states.models import CoachState
+
 from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from models.components.ComponentConfig import ComponentAction
 from services.action_handler.handler import apply_component_actions
 
@@ -35,4 +37,3 @@ def apply_user_component_actions(
         for action in request_component_actions
     ]
     apply_component_actions(coach_state, component_actions, user_chat_message)
-

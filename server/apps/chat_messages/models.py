@@ -1,7 +1,9 @@
-from django.db import models
-from enums.message_role import MessageRole
-from apps.users.models import User
 import uuid
+
+from django.db import models
+
+from apps.users.models import User
+from enums.message_role import MessageRole
 
 
 # TODO: add some flag to keep track of what coach state this message belongs to and what version of
@@ -40,14 +42,14 @@ class ChatMessage(models.Model):
     component_config = models.JSONField(
         null=True,
         blank=True,
-        help_text="Optional component configuration for persistent component rendering (stored as JSON)."
+        help_text="Optional component configuration for persistent component rendering (stored as JSON).",
     )
     test_scenario = models.ForeignKey(
-        'test_scenario.TestScenario',
+        "test_scenario.TestScenario",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        help_text="Test scenario this chat message is associated with (for test data isolation)."
+        help_text="Test scenario this chat message is associated with (for test data isolation).",
     )
 
     # NOTE: This is used when formatting the messages for prompts.

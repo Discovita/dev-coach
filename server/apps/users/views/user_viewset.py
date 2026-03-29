@@ -5,17 +5,17 @@ This module contains the viewset for user-related endpoints where the authentica
 user accesses their own data (me/ endpoints).
 """
 
-from rest_framework import viewsets, decorators
-from rest_framework.request import Request
+from rest_framework import decorators, viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.users.serializers import UserSerializer, UserProfileSerializer
 from apps.users.functions import (
-    get_user_identities,
     get_user_chat_messages,
+    get_user_identities,
     reset_user_coaching_data,
 )
+from apps.users.serializers import UserProfileSerializer, UserSerializer
 from apps.users.utils import ensure_initial_message_exists
 from services.logger import configure_logging
 
@@ -36,10 +36,10 @@ class UserViewSet(viewsets.GenericViewSet):
     def me(self, request: Request):
         """
         Get or update current user data.
-        
+
         GET /api/v1/user/me/
         Returns: UserProfileSerializer data
-        
+
         PATCH /api/v1/user/me/
         Body: Partial user data (see UserProfileSerializer)
         Returns: 200 OK, updated user profile object.
@@ -108,8 +108,12 @@ class UserViewSet(viewsets.GenericViewSet):
 
         log.debug(f"Identities Request: {request.user}")
 
-        include_archived = request.query_params.get('include_archived', 'false').lower() == 'true'
-        archived_only = request.query_params.get('archived_only', 'false').lower() == 'true'
+        include_archived = (
+            request.query_params.get("include_archived", "false").lower() == "true"
+        )
+        archived_only = (
+            request.query_params.get("archived_only", "false").lower() == "true"
+        )
 
         identities = get_user_identities(
             user=request.user,

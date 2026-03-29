@@ -1,6 +1,7 @@
-from django.db import models
-from versatileimagefield.fields import VersatileImageField, PPOIField
 from uuid_upload_path import upload_to
+from versatileimagefield.fields import PPOIField, VersatileImageField
+
+from django.db import models
 
 
 class ImageMixin(models.Model):

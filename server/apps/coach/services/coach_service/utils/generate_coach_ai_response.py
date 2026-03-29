@@ -4,10 +4,12 @@ Utility to generate the coach's response using AI.
 This takes the prompt and conversation history and sends it to the AI service
 to generate a personalized response from the coach.
 """
+
+from pydantic import BaseModel
+
 from apps.chat_messages.models import ChatMessage
 from enums.ai import AIModel
 from models.CoachChatResponse import CoachChatResponse
-from pydantic import BaseModel
 from services.ai import AIServiceFactory
 
 
@@ -25,4 +27,3 @@ def generate_coach_ai_response(
     """
     ai_service = AIServiceFactory.create(model)
     return ai_service.generate(coach_prompt, chat_history, response_format, model)
-

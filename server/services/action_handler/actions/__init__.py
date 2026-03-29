@@ -1,48 +1,61 @@
-from .create_identity import create_identity
-from .create_multiple_identities import create_multiple_identities
-from .update_identity import update_identity # Deprecated in favor of specific update actions
-from .update_identity_name import update_identity_name
-from .update_i_am_statement import update_i_am_statement
-from .update_identity_visualization import update_identity_visualization
-from .accept_identity import accept_identity # Deprecated; auto update Identity state to ACCEPTED when moving to Identity Refinement
-from .accept_identity_refinement import accept_identity_refinement
-from .accept_identity_commitment import accept_identity_commitment
 from .accept_i_am_statement import accept_i_am_statement
+from .accept_identity import (
+    accept_identity,  # Deprecated; auto update Identity state to ACCEPTED when moving to Identity Refinement
+)
+from .accept_identity_commitment import accept_identity_commitment
+from .accept_identity_refinement import accept_identity_refinement
 from .accept_identity_visualization import accept_identity_visualization
-from .archive_identity import archive_identity
-from .nest_identity import nest_identity
 from .add_identity_note import add_identity_note
+from .archive_identity import archive_identity
 from .combine_identities import combine_identities
-from .transition_phase import transition_phase
-from .select_identity_focus import select_identity_focus 
-from .set_current_identity import set_current_identity
-from .skip_identity_category import skip_identity_category
-from .unskip_identity_category import unskip_identity_category
-from .update_who_you_are import update_who_you_are
-from .update_who_you_want_to_be import update_who_you_want_to_be
-from .update_asked_questions import update_asked_questions
-
-# SENTINEL ACTIONS
-from .sentinel.add_user_note import add_user_note
-from .sentinel.update_user_note import update_user_note
-from .sentinel.delete_user_note import delete_user_note
+from .components.show_accept_i_am_component import show_accept_i_am_component
+from .components.show_archive_identity import show_archive_identity
+from .components.show_combine_identities import show_combine_identities
+from .components.show_i_am_statements_summary_component import (
+    show_i_am_statements_summary_component,
+)
 
 # COMPONENT ACTIONS
-from .components.show_introduction_canned_response_component import show_introduction_canned_response_component
-from .components.show_accept_i_am_component import show_accept_i_am_component
-from .components.show_suggest_i_am_statement_component import show_suggest_i_am_statement_component
-from .components.show_i_am_statements_summary_component import show_i_am_statements_summary_component
-from .components.show_combine_identities import show_combine_identities
+from .components.show_introduction_canned_response_component import (
+    show_introduction_canned_response_component,
+)
 from .components.show_nest_identities import show_nest_identities
-from .components.show_archive_identity import show_archive_identity
+from .components.show_suggest_i_am_statement_component import (
+    show_suggest_i_am_statement_component,
+)
+from .create_identity import create_identity
+from .create_multiple_identities import create_multiple_identities
+from .nest_identity import nest_identity
+from .persistent_components.persist_archive_identity import persist_archive_identity
 
 # PERSISTENT COMPONENT ACTIONS
 from .persistent_components.persist_combine_identities import persist_combine_identities
-from .persistent_components.persist_suggest_i_am_statement_component import persist_suggest_i_am_statement_component
-from .persistent_components.persist_i_am_statements_summary_component import persist_i_am_statements_summary_component
+from .persistent_components.persist_i_am_statements_summary_component import (
+    persist_i_am_statements_summary_component,
+)
 from .persistent_components.persist_nest_identities import persist_nest_identities
-from .persistent_components.persist_archive_identity import persist_archive_identity
+from .persistent_components.persist_suggest_i_am_statement_component import (
+    persist_suggest_i_am_statement_component,
+)
+from .select_identity_focus import select_identity_focus
 
+# SENTINEL ACTIONS
+from .sentinel.add_user_note import add_user_note
+from .sentinel.delete_user_note import delete_user_note
+from .sentinel.update_user_note import update_user_note
+from .set_current_identity import set_current_identity
+from .skip_identity_category import skip_identity_category
+from .transition_phase import transition_phase
+from .unskip_identity_category import unskip_identity_category
+from .update_asked_questions import update_asked_questions
+from .update_i_am_statement import update_i_am_statement
+from .update_identity import (
+    update_identity,  # Deprecated in favor of specific update actions
+)
+from .update_identity_name import update_identity_name
+from .update_identity_visualization import update_identity_visualization
+from .update_who_you_are import update_who_you_are
+from .update_who_you_want_to_be import update_who_you_want_to_be
 
 __all__ = [
     "create_identity",

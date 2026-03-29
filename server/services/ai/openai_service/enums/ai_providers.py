@@ -5,8 +5,8 @@ This module contains the AIProvider enum for identifying
 different providers of AI models.
 """
 
-from enum import Enum, auto
 import logging
+from enum import Enum, auto
 
 log = logging.getLogger(__name__)
 

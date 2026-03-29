@@ -12,4 +12,4 @@ for backward compatibility.
 from .stream_completion import stream_structured_completion
 from .stream_with_final import stream_structured_completion_with_final
 
-__all__ = ["stream_structured_completion", "stream_structured_completion_with_final"] 
+__all__ = ["stream_structured_completion", "stream_structured_completion_with_final"]

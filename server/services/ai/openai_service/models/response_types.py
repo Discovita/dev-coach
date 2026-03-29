@@ -5,10 +5,10 @@ This module provides type definitions and helpers for handling
 various response formats from the OpenAI API.
 """
 
-from typing import TypeVar, Type, Generic, Optional, Protocol
-from openai.types.chat import ChatCompletion
-
 import logging
+from typing import Generic, Optional, Protocol, Type, TypeVar
+
+from openai.types.chat import ChatCompletion
 
 log = logging.getLogger(__name__)
 

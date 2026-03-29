@@ -7,11 +7,10 @@ It handles the communication with Anthropic's API using the AnthropicHelper.
 TODO: Need to implement this if we want to support Claude
 """
 
-from typing import Optional, Type
 import os
-from dotenv import load_dotenv
-import re
+from typing import Optional, Type
 
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 from enums.ai import AIModel, AIProvider
@@ -20,8 +19,6 @@ from enums.ai import AIModel, AIProvider
 from models.CoachChatResponse import CoachChatResponse
 from models.SentinelChatResponse import SentinelChatResponse
 from services.ai.base import AIService
-
-
 from services.logger import configure_logging
 
 log = configure_logging(__name__)

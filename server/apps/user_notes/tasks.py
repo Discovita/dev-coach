@@ -1,7 +1,8 @@
 from celery import shared_task
+
 from apps.chat_messages.models import ChatMessage
-from services.sentinel.sentinel import Sentinel
 from services.logger import configure_logging
+from services.sentinel.sentinel import Sentinel
 
 log = configure_logging(__name__, log_level="INFO")
 

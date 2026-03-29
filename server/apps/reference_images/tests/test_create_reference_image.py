@@ -2,14 +2,13 @@
 Tests for create_reference_image function.
 """
 
-from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
-from apps.users.models import User
-from apps.reference_images.models import ReferenceImage
 from apps.reference_images.functions.public import create_reference_image
 from apps.reference_images.utils import MAX_REFERENCE_IMAGES
+from apps.users.models import User
 
 
 class CreateReferenceImageTests(TestCase):
@@ -18,8 +17,7 @@ class CreateReferenceImageTests(TestCase):
     def setUp(self):
         """Set up test data."""
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="testpass123"
+            email="test@example.com", password="testpass123"
         )
 
     def test_creates_reference_image_with_default_order(self):
@@ -89,13 +87,11 @@ class CreateReferenceImageTests(TestCase):
         image_file = SimpleUploadedFile(
             name="test_image.jpg",
             content=b"\x47\x49\x46\x38\x89\x61",  # Minimal GIF header
-            content_type="image/gif"
+            content_type="image/gif",
         )
 
         ref_image = create_reference_image(
-            user=self.user,
-            name="Test Image",
-            image_file=image_file
+            user=self.user, name="Test Image", image_file=image_file
         )
 
         self.assertIsNotNone(ref_image.id)
@@ -104,8 +100,7 @@ class CreateReferenceImageTests(TestCase):
     def test_different_users_can_use_same_order(self):
         """Test that different users can have images at the same order."""
         other_user = User.objects.create_user(
-            email="other@example.com",
-            password="testpass123"
+            email="other@example.com", password="testpass123"
         )
 
         ref_image1 = create_reference_image(user=self.user, order=0)
@@ -114,4 +109,3 @@ class CreateReferenceImageTests(TestCase):
         self.assertEqual(ref_image1.order, 0)
         self.assertEqual(ref_image2.order, 0)
         self.assertNotEqual(ref_image1.id, ref_image2.id)
-

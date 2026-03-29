@@ -1,5 +1,3 @@
-from . import public
-from . import admin
+from . import admin, public
 
 __all__ = ["public", "admin"]
-

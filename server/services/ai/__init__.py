@@ -9,10 +9,10 @@ The package follows a dependency injection pattern, allowing different implement
 to be swapped without changing the core generation logic.
 """
 
-from services.ai.base import AIService
-from services.ai.anthropic_service import AnthropicService
-from services.ai.openai_service import OpenAIService
 from services.ai.ai_service_factory import AIServiceFactory
+from services.ai.anthropic_service import AnthropicService
+from services.ai.base import AIService
+from services.ai.openai_service import OpenAIService
 
 # Export these classes so they can be imported directly from services.ai
 __all__ = [

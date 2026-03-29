@@ -1,8 +1,8 @@
 """Utility functions for image generation."""
 
-import os
 import base64
 import logging
+import os
 
 log = logging.getLogger(__name__)
 

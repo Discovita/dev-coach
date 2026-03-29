@@ -1,19 +1,20 @@
-from typing import Dict, Any, Tuple, List, Optional
-from apps.users.models import User
-from enums.ai import AIModel
-from apps.coach_states.models import CoachState
+from typing import Any, Dict, List, Optional, Tuple
+
 from apps.chat_messages.utils import add_chat_message
-from enums.message_role import MessageRole
-from services.logger import configure_logging
 from apps.coach.services.coach_service.utils import (
-    ensure_initial_message_exists,
+    apply_coach_response_actions,
     apply_user_component_actions,
     build_coach_prompt,
-    get_recent_chat_messages_for_prompt,
-    generate_coach_ai_response,
-    apply_coach_response_actions,
     build_coach_response_data,
+    ensure_initial_message_exists,
+    generate_coach_ai_response,
+    get_recent_chat_messages_for_prompt,
 )
+from apps.coach_states.models import CoachState
+from apps.users.models import User
+from enums.ai import AIModel
+from enums.message_role import MessageRole
+from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 

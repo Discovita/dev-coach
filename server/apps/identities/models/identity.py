@@ -1,11 +1,12 @@
 import uuid
 
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+
+from apps.core.models import ImageMixin
+from apps.users.models import User
 from enums.identity_category import IdentityCategory
 from enums.identity_state import IdentityState
-from apps.users.models import User
-from django.contrib.postgres.fields import ArrayField
-from apps.core.models import ImageMixin
 
 
 # The Identity model stores a single identity for a user, including its state, notes, and category.

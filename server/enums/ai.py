@@ -1,5 +1,6 @@
+from typing import Dict, Set, Union
+
 from django.db import models
-from typing import Dict, Set, Union, Optional
 
 
 class AIProvider(models.TextChoices):
@@ -106,9 +107,8 @@ class AIModel(models.TextChoices):
                 "o3-mini": cls.O3_MINI,
                 "o4-mini": cls.O4_MINI,
                 "o1": cls.O1,
-                "o3": cls.O3,                
+                "o3": cls.O3,
                 "o1-mini": cls.O1_MINI,
-                "o4-mini": cls.O4_MINI,
                 "gpt-4o": cls.GPT_4O,
                 "gpt-4o-mini": cls.GPT_4O_MINI,
                 "gpt-4": cls.GPT_4,
@@ -150,10 +150,7 @@ class AIModel(models.TextChoices):
             model_str = str(model_name)
 
         # Explicit check for 'o' series models
-        if any(
-            o_model in model_str
-            for o_model in COMPLETION_TOKEN_MODELS
-        ):
+        if any(o_model in model_str for o_model in COMPLETION_TOKEN_MODELS):
             return "max_completion_tokens"
         else:
             return "max_tokens"
@@ -177,8 +174,7 @@ class AIModel(models.TextChoices):
             if not isinstance(model_str, str):
                 model_str = str(model_str)
 
-        except Exception as e:
-            # If anything goes wrong, fall back to string conversion
+        except Exception:
             model_str = str(model_name)
 
         # Use hardcoded if/elif instead of dictionary lookup to avoid any issues
@@ -226,6 +222,7 @@ class AIModel(models.TextChoices):
         if not model_name:
             return cls.GPT_4O
         return cls.from_string(model_name)
+
 
 # -----------------------------------------------------------------------------
 # Module-level constants for model capabilities and limits

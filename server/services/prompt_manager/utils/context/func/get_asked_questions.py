@@ -10,7 +10,7 @@ def get_asked_questions(coach_state: CoachState) -> str:
     asked_questions = coach_state.asked_questions
     if not asked_questions:
         return "No questions have been asked yet..."
-    
+
     # Convert enum values to human-readable labels
     question_labels = []
     for question_value in asked_questions:
@@ -20,5 +20,5 @@ def get_asked_questions(coach_state: CoachState) -> str:
         except ValueError:
             # Fallback to the raw value if it's not a valid enum
             question_labels.append(question_value)
-    
+
     return ", ".join(question_labels)

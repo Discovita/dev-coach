@@ -2,14 +2,13 @@
 Tests for ReferenceImageViewSet API endpoints.
 """
 
-from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
-from apps.users.models import User
 from apps.reference_images.models import ReferenceImage
 from apps.reference_images.utils import MAX_REFERENCE_IMAGES
+from apps.users.models import User
 
 
 class ReferenceImageViewSetTests(APITestCase):
@@ -18,12 +17,10 @@ class ReferenceImageViewSetTests(APITestCase):
     def setUp(self):
         """Set up test data."""
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="testpass123"
+            email="test@example.com", password="testpass123"
         )
         self.admin_user = User.objects.create_superuser(
-            email="admin@example.com",
-            password="adminpass123"
+            email="admin@example.com", password="adminpass123"
         )
         self.client = APIClient()
         self.base_url = "/api/v1/reference-images"
@@ -31,9 +28,7 @@ class ReferenceImageViewSetTests(APITestCase):
     def _create_test_image(self, name="test.jpg"):
         """Helper to create a test image file."""
         return SimpleUploadedFile(
-            name=name,
-            content=b"\x47\x49\x46\x38\x89\x61",
-            content_type="image/gif"
+            name=name, content=b"\x47\x49\x46\x38\x89\x61", content_type="image/gif"
         )
 
     # ========== LIST TESTS ==========
@@ -52,8 +47,7 @@ class ReferenceImageViewSetTests(APITestCase):
     def test_list_does_not_return_other_users_images(self):
         """Test that list doesn't return other users' images."""
         other_user = User.objects.create_user(
-            email="other@example.com",
-            password="testpass123"
+            email="other@example.com", password="testpass123"
         )
         self.client.force_authenticate(user=self.user)
 
@@ -83,8 +77,7 @@ class ReferenceImageViewSetTests(APITestCase):
     def test_non_admin_ignores_user_id_param(self):
         """Test that non-admin user_id param is ignored."""
         other_user = User.objects.create_user(
-            email="other@example.com",
-            password="testpass123"
+            email="other@example.com", password="testpass123"
         )
         self.client.force_authenticate(user=self.user)
         ReferenceImage.objects.create(user=other_user, order=0)
@@ -102,9 +95,7 @@ class ReferenceImageViewSetTests(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(
-            self.base_url,
-            {"name": "My Headshot"},
-            format="json"
+            self.base_url, {"name": "My Headshot"}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -116,9 +107,7 @@ class ReferenceImageViewSetTests(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(
-            self.base_url,
-            {"name": "Image 3", "order": 2},
-            format="json"
+            self.base_url, {"name": "Image 3", "order": 2}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -130,9 +119,7 @@ class ReferenceImageViewSetTests(APITestCase):
         image_file = self._create_test_image()
 
         response = self.client.post(
-            self.base_url,
-            {"name": "Photo", "image": image_file},
-            format="multipart"
+            self.base_url, {"name": "Photo", "image": image_file}, format="multipart"
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -148,9 +135,7 @@ class ReferenceImageViewSetTests(APITestCase):
             ReferenceImage.objects.create(user=self.user, order=i)
 
         response = self.client.post(
-            self.base_url,
-            {"name": "One Too Many"},
-            format="json"
+            self.base_url, {"name": "One Too Many"}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -162,7 +147,7 @@ class ReferenceImageViewSetTests(APITestCase):
         response = self.client.post(
             self.base_url,
             {"user_id": str(self.user.id), "name": "Admin Created"},
-            format="json"
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -187,8 +172,7 @@ class ReferenceImageViewSetTests(APITestCase):
     def test_cannot_retrieve_other_users_image(self):
         """Test that user cannot retrieve another user's image."""
         other_user = User.objects.create_user(
-            email="other@example.com",
-            password="testpass123"
+            email="other@example.com", password="testpass123"
         )
         self.client.force_authenticate(user=self.user)
         ref_image = ReferenceImage.objects.create(user=other_user, order=0)
@@ -202,12 +186,12 @@ class ReferenceImageViewSetTests(APITestCase):
     def test_update_reference_image_name(self):
         """Test updating a reference image's name."""
         self.client.force_authenticate(user=self.user)
-        ref_image = ReferenceImage.objects.create(user=self.user, name="Old Name", order=0)
+        ref_image = ReferenceImage.objects.create(
+            user=self.user, name="Old Name", order=0
+        )
 
         response = self.client.patch(
-            f"{self.base_url}/{ref_image.id}",
-            {"name": "New Name"},
-            format="json"
+            f"{self.base_url}/{ref_image.id}", {"name": "New Name"}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -228,8 +212,7 @@ class ReferenceImageViewSetTests(APITestCase):
     def test_cannot_delete_other_users_image(self):
         """Test that user cannot delete another user's image."""
         other_user = User.objects.create_user(
-            email="other@example.com",
-            password="testpass123"
+            email="other@example.com", password="testpass123"
         )
         self.client.force_authenticate(user=self.user)
         ref_image = ReferenceImage.objects.create(user=other_user, order=0)
@@ -250,7 +233,7 @@ class ReferenceImageViewSetTests(APITestCase):
         response = self.client.post(
             f"{self.base_url}/{ref_image.id}/upload-image",
             {"image": image_file},
-            format="multipart"
+            format="multipart",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -264,10 +247,7 @@ class ReferenceImageViewSetTests(APITestCase):
         ref_image = ReferenceImage.objects.create(user=self.user, order=0)
 
         response = self.client.post(
-            f"{self.base_url}/{ref_image.id}/upload-image",
-            {},
-            format="multipart"
+            f"{self.base_url}/{ref_image.id}/upload-image", {}, format="multipart"
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-

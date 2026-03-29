@@ -6,12 +6,12 @@ in the format expected by OpenAI's API.
 """
 
 import logging
-from typing import Any, List, Optional
+from typing import List, Optional
 
-from services.ai.openai_service.core.image.utils import encode_image
 from openai.types.chat import ChatCompletionContentPartParam, ChatCompletionMessageParam
 
 from apps.chat_messages.models import ChatMessage
+from services.ai.openai_service.core.image.utils import encode_image
 
 log = logging.getLogger(__name__)
 

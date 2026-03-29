@@ -4,6 +4,7 @@ Utility to ensure a user's chat history starts with an initial welcome message.
 This function checks if the user has any chat messages. If they don't have any,
 it adds the initial welcome message from the coach to start the conversation.
 """
+
 from apps.chat_messages.models import ChatMessage
 from apps.chat_messages.utils import add_chat_message, get_initial_message
 from apps.users.models import User
@@ -25,4 +26,3 @@ def ensure_initial_message_exists(user: User) -> None:
         initial_message = get_initial_message()
         if initial_message:
             add_chat_message(user, initial_message, MessageRole.COACH)
-

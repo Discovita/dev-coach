@@ -4,11 +4,10 @@ Get user identities with archive filtering.
 This function retrieves identities for a user with optional archive state filtering.
 """
 
-from typing import List
 from django.db.models import QuerySet
 
-from apps.users.models import User
 from apps.identities.models import Identity
+from apps.users.models import User
 from enums.identity_state import IdentityState
 
 
@@ -41,4 +40,3 @@ def get_user_identities(
         return queryset.exclude(state=IdentityState.ARCHIVED)
     else:
         return queryset
-

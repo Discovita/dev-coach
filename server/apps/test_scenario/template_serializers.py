@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from enums.get_to_know_you_questions import GetToKnowYouQuestions
 
 
@@ -148,7 +149,7 @@ class TemplateChatMessageSerializer(ForbidExtraFieldsMixin, serializers.Serializ
     component_config = serializers.JSONField(
         required=False,
         allow_null=True,
-        help_text="Optional component configuration for persistent component rendering (stored as JSON)."
+        help_text="Optional component configuration for persistent component rendering (stored as JSON).",
     )
 
 
@@ -187,7 +188,7 @@ class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     result_summary = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Natural language description of what the action accomplished."
+        help_text="Natural language description of what the action accomplished.",
     )
     timestamp = serializers.DateTimeField(
         required=False, help_text="When the action was performed."
@@ -195,11 +196,11 @@ class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
     original_coach_message_id = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="ID of the original coach message that triggered this action (for robust linking during instantiation)."
+        help_text="ID of the original coach message that triggered this action (for robust linking during instantiation).",
     )
     # Keep coach_message_content for backward compatibility with old templates
     coach_message_content = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Content of the coach message that triggered this action (for linking during instantiation). DEPRECATED: Use original_coach_message_id instead."
+        help_text="Content of the coach message that triggered this action (for linking during instantiation). DEPRECATED: Use original_coach_message_id instead.",
     )

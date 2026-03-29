@@ -6,10 +6,8 @@ from private OpenAI modules (_types and _streaming). This allows our code to wor
 without depending on private OpenAI implementation details.
 """
 
-from typing import TypeVar, Generic, Any, Iterator, ContextManager, TypeAlias
-
-
 import logging
+from typing import Any, ContextManager, Generic, Iterator, TypeAlias, TypeVar
 
 log = logging.getLogger(__name__)
 

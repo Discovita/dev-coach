@@ -1,21 +1,21 @@
-from rest_framework import viewsets, status, decorators
-from rest_framework.request import Request
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.users.models import User
+from django.db import transaction
+from rest_framework import decorators, status, viewsets
+from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
+from rest_framework.response import Response
+
 from apps.authentication.email_service import EmailVerificationService
-from apps.authentication.serializer import RegisterSerializer, LoginSerializer
-from apps.users.serializers import UserSerializer
+from apps.authentication.serializer import LoginSerializer, RegisterSerializer
+from apps.users.models import User
+from services.logger import configure_logging
+
 from .utils import (
     AuthErrorMessages,
     error_response,
     success_response,
 )
-from rest_framework.response import Response
-from django.db import transaction
-
-from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 

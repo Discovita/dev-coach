@@ -1,8 +1,8 @@
-from django.http import HttpResponse, HttpResponseServerError
-from django.db import connections
+from django.conf import settings
 from django.core.cache import caches
 from django.core.cache.backends.memcached import BaseMemcachedCache
-from django.conf import settings
+from django.db import connections
+from django.http import HttpResponse, HttpResponseServerError
 
 from services.logger import configure_logging
 

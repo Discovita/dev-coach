@@ -1,15 +1,15 @@
-from apps.coach_states.models import CoachState
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
-from services.action_handler.models import TransitionPhaseParams
+from apps.coach_states.models import CoachState
 from enums.action_type import ActionType
 from enums.coaching_phase import CoachingPhase
 from enums.identity_state import IdentityState
-from services.logger import configure_logging
+from services.action_handler.models import TransitionPhaseParams
+from services.action_handler.utils import set_current_identity_to_next_pending
 from services.action_handler.utils.update_all_user_identities_to_accepted_state import (
     update_all_user_identities_to_accepted_state,
 )
-from services.action_handler.utils import set_current_identity_to_next_pending
+from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 

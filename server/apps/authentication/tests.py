@@ -4,13 +4,13 @@ This module contains tests for the authentication endpoints.
 Tests are organized using Django's TestCase class and DRF's APITestCase.
 """
 
-from django.test import TestCase
-from rest_framework.test import APITestCase
-from rest_framework import status
-from django.urls import reverse
-from apps.users.models import User
 from unittest.mock import patch
 
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+from apps.users.models import User
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")

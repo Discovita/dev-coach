@@ -3,20 +3,22 @@ Implementation of generic chat completion functionality.
 """
 
 import json
-from typing import List, Optional, Dict, Any, Union, Iterable, Type
+import logging
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
+
 from openai.types.chat import (
     ChatCompletion,
     ChatCompletionChunk,
     ChatCompletionMessageParam,
+    ChatCompletionModality,
+    ChatCompletionStreamOptionsParam,
     ChatCompletionToolChoiceOptionParam,
     ChatCompletionToolParam,
-    ChatCompletionStreamOptionsParam,
-    ChatCompletionModality,
 )
 from pydantic import BaseModel
-import logging
-from ....models.openai_compatibility import NotGiven, NOT_GIVEN, Stream
-from ....utils.model_utils import get_token_param_name, filter_unsupported_parameters
+
+from ....models.openai_compatibility import NOT_GIVEN, NotGiven, Stream
+from ....utils.model_utils import filter_unsupported_parameters, get_token_param_name
 
 log = logging.getLogger(__name__)
 

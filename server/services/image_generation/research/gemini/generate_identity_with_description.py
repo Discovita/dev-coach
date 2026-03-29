@@ -25,10 +25,11 @@ import os
 import sys
 import time
 from pathlib import Path
+
 from dotenv import load_dotenv
-from PIL import Image
 from google import genai
 from google.genai import types
+from PIL import Image
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()
@@ -44,7 +45,9 @@ while current != current.parent:
 # ============================================================================
 
 # The generic identity image to recreate (from Step 2)
-GENERIC_IDENTITY_IMAGE = "server/services/gemini/images/generic_identity/conductor_01.png"
+GENERIC_IDENTITY_IMAGE = (
+    "server/services/gemini/images/generic_identity/conductor_01.png"
+)
 
 # The character view images (from Step 1)
 CHARACTER_VIEW_IMAGES = [
@@ -81,6 +84,7 @@ RETRY_BACKOFF_MULTIPLIER = 2
 # STEP 1: GET DESCRIPTION OF GENERIC IMAGE
 # ============================================================================
 
+
 def get_description_prompt() -> str:
     """Prompt to get a detailed description of the image for recreation."""
     return """Analyze this image and create a detailed description that could be used to recreate it with a different person.
@@ -105,27 +109,27 @@ Format your response as a single prompt that could recreate this exact image wit
 def get_image_description(client: genai.Client, image: Image.Image) -> str | None:
     """
     Get a detailed description of the image from the model.
-    
+
     Args:
         client: Gemini API client
         image: The image to describe
-    
+
     Returns:
         The description text, or None if failed
     """
     print("=" * 60)
     print("STEP 1: GETTING IMAGE DESCRIPTION")
     print("=" * 60)
-    
+
     prompt = get_description_prompt()
     contents = [image, prompt]
-    
+
     retry_delay = INITIAL_RETRY_DELAY
-    
+
     for attempt in range(MAX_RETRIES):
         try:
             print("Analyzing image...")
-            
+
             response = client.models.generate_content(
                 model="gemini-3-pro-image-preview",
                 contents=contents,
@@ -133,7 +137,7 @@ def get_image_description(client: genai.Client, image: Image.Image) -> str | Non
                     response_modalities=["TEXT"],
                 ),
             )
-            
+
             for part in response.parts:
                 if part.text:
                     print("✓ Got description")
@@ -144,13 +148,17 @@ def get_image_description(client: genai.Client, image: Image.Image) -> str | Non
                     print("-" * 40)
                     print()
                     return part.text
-            
+
             print("WARNING: No text in response, retrying...")
-            
+
         except Exception as e:
             error_str = str(e)
-            is_retryable = "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str.lower()
-            
+            is_retryable = (
+                "503" in error_str
+                or "UNAVAILABLE" in error_str
+                or "overloaded" in error_str.lower()
+            )
+
             if is_retryable and attempt < MAX_RETRIES - 1:
                 print(f"⚠ Attempt {attempt + 1}/{MAX_RETRIES} failed: {e}")
                 print(f"  Retrying in {retry_delay} seconds...")
@@ -159,7 +167,7 @@ def get_image_description(client: genai.Client, image: Image.Image) -> str | Non
             else:
                 print(f"✗ Failed: {e}")
                 return None
-    
+
     return None
 
 
@@ -167,18 +175,19 @@ def get_image_description(client: genai.Client, image: Image.Image) -> str | Non
 # STEP 2: GENERATE WITH CHARACTER CONSISTENCY
 # ============================================================================
 
+
 def build_recreation_prompt(description: str) -> str:
     """
     Build the final prompt using the description and character consistency.
-    
+
     Uses patterns from successful character consistency prompts:
     - "100% identical facial features"
     - "preserve_original: true"
     - "exactly the same as the reference image"
-    
+
     Args:
         description: The detailed description from Step 1
-    
+
     Returns:
         The full prompt for image generation
     """
@@ -197,61 +206,58 @@ The scene, lighting, pose, clothing, and environment should match the descriptio
 
 
 def generate_with_character(
-    client: genai.Client,
-    description: str,
-    character_images: list[Image.Image]
+    client: genai.Client, description: str, character_images: list[Image.Image]
 ) -> tuple[str, Image.Image | None]:
     """
     Generate the final image using description + character views.
-    
+
     Args:
         client: Gemini API client
         description: The scene description from Step 1
         character_images: List of character view PIL Images
-    
+
     Returns:
         Tuple of (output_path, PIL Image or None if failed)
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     output_path = f"{OUTPUT_DIR}/{OUTPUT_NAME}.png"
-    
+
     print("=" * 60)
     print("STEP 2: GENERATING WITH CHARACTER CONSISTENCY")
     print("=" * 60)
     print(f"Using {len(character_images)} character views")
     print(f"Output: {output_path}")
     print()
-    
+
     prompt = build_recreation_prompt(description)
     print("Recreation prompt:")
     print("-" * 40)
     print(prompt)
     print("-" * 40)
     print()
-    
+
     # Content order: prompt first, then character images (for character consistency)
     contents = [prompt] + character_images
-    
+
     retry_delay = INITIAL_RETRY_DELAY
-    
+
     for attempt in range(MAX_RETRIES):
         try:
             print("Generating final image...")
-            
+
             response = client.models.generate_content(
                 model="gemini-3-pro-image-preview",
                 contents=contents,
                 config=types.GenerateContentConfig(
                     response_modalities=["TEXT", "IMAGE"],
                     image_config=types.ImageConfig(
-                        aspect_ratio=ASPECT_RATIO,
-                        image_size=RESOLUTION
+                        aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION
                     ),
                 ),
             )
-            
+
             for part in response.parts:
-                if getattr(part, 'thought', False):
+                if getattr(part, "thought", False):
                     continue
                 if part.text:
                     print(f"[Model] {part.text}")
@@ -260,13 +266,17 @@ def generate_with_character(
                     image.save(output_path)
                     print(f"\n✓ Saved: {output_path}")
                     return output_path, image
-            
+
             print("WARNING: No image in response, retrying...")
-            
+
         except Exception as e:
             error_str = str(e)
-            is_retryable = "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str.lower()
-            
+            is_retryable = (
+                "503" in error_str
+                or "UNAVAILABLE" in error_str
+                or "overloaded" in error_str.lower()
+            )
+
             if is_retryable and attempt < MAX_RETRIES - 1:
                 print(f"⚠ Attempt {attempt + 1}/{MAX_RETRIES} failed: {e}")
                 print(f"  Retrying in {retry_delay} seconds...")
@@ -275,13 +285,14 @@ def generate_with_character(
             else:
                 print(f"✗ Failed: {e}")
                 return output_path, None
-    
+
     return output_path, None
 
 
 # ============================================================================
 # MAIN
 # ============================================================================
+
 
 def main():
     if "--help" in sys.argv or "-h" in sys.argv:
@@ -294,10 +305,10 @@ def main():
         print("  - CHARACTER_VIEW_IMAGES: The character views for face consistency")
         print("  - OUTPUT_NAME: Name for the output file")
         sys.exit(0)
-    
+
     # Initialize client
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
+
     print("=" * 60)
     print("IDENTITY IMAGE GENERATION")
     print("Description-Based Recreation Pipeline")
@@ -306,15 +317,15 @@ def main():
     print(f"Character views: {len(CHARACTER_VIEW_IMAGES)} images")
     print(f"Output: {OUTPUT_DIR}/{OUTPUT_NAME}.png")
     print()
-    
+
     # Load generic identity image
     if not os.path.exists(GENERIC_IDENTITY_IMAGE):
         print(f"ERROR: Generic image not found: {GENERIC_IDENTITY_IMAGE}")
         sys.exit(1)
-    
+
     generic_image = Image.open(GENERIC_IDENTITY_IMAGE)
     print(f"✓ Loaded generic image: {GENERIC_IDENTITY_IMAGE}")
-    
+
     # Load character views
     character_images = []
     for path in CHARACTER_VIEW_IMAGES:
@@ -323,23 +334,25 @@ def main():
             print(f"✓ Loaded character view: {path}")
         else:
             print(f"⚠ Character view not found: {path}")
-    
+
     if not character_images:
         print("ERROR: No character views found!")
         sys.exit(1)
-    
+
     print()
-    
+
     # Step 1: Get description
     description = get_image_description(client, generic_image)
-    
+
     if not description:
         print("ERROR: Failed to get image description")
         sys.exit(1)
-    
+
     # Step 2: Generate with character consistency
-    output_path, final_image = generate_with_character(client, description, character_images)
-    
+    output_path, final_image = generate_with_character(
+        client, description, character_images
+    )
+
     # Summary
     print()
     print("=" * 60)

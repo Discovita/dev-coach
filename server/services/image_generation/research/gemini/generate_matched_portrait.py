@@ -27,10 +27,11 @@ import os
 import sys
 import time
 from pathlib import Path
+
 from dotenv import load_dotenv
-from PIL import Image
 from google import genai
 from google.genai import types
+from PIL import Image
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()
@@ -47,7 +48,9 @@ while current != current.parent:
 # ============================================================================
 
 # The generic identity image to match (from Step 2)
-GENERIC_IDENTITY_IMAGE = "server/services/gemini/images/generic_identity/conductor_05.png"
+GENERIC_IDENTITY_IMAGE = (
+    "server/services/gemini/images/generic_identity/conductor_05.png"
+)
 
 # The character view images (from Step 1)
 # These provide the reference for the user's face
@@ -79,10 +82,11 @@ RETRY_BACKOFF_MULTIPLIER = 2  # exponential backoff
 # PROMPT
 # ============================================================================
 
+
 def build_prompt() -> str:
     """
     Build the prompt for generating a matched portrait.
-    
+
     The prompt instructs the model to:
     1. Study the scene image for head position, expression, lighting, and CLOTHING
     2. Use the character views as the ONLY source for the face
@@ -114,7 +118,7 @@ Use these images for EVERYTHING about the face:
 
 === CRITICAL RULES ===
 
-1. FACE IDENTITY: The output face must be 100% THE SUBJECT from images 2-4. 
+1. FACE IDENTITY: The output face must be 100% THE SUBJECT from images 2-4.
    - DO NOT blend faces
    - DO NOT average features between the scene person and the subject
    - DO NOT take any facial features from image 1
@@ -136,7 +140,7 @@ Use these images for EVERYTHING about the face:
 - Similar background style to image 1
 - NO text, words, or watermarks
 
-Remember: The face in your output should look NOTHING like the person in image 1. 
+Remember: The face in your output should look NOTHING like the person in image 1.
 It should look EXACTLY like the person in images 2-4, just posed/lit/dressed to match image 1.
 """
 
@@ -145,19 +149,20 @@ It should look EXACTLY like the person in images 2-4, just posed/lit/dressed to 
 # GENERATION
 # ============================================================================
 
+
 def generate_matched_portrait(client: genai.Client) -> tuple[str, Image.Image | None]:
     """
     Generate a matched portrait using the scene image and character views.
-    
+
     Args:
         client: Gemini API client
-    
+
     Returns:
         Tuple of (output_path, PIL Image or None if failed)
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     output_path = f"{OUTPUT_DIR}/{OUTPUT_NAME}.png"
-    
+
     print("=" * 60)
     print("GENERATING MATCHED PORTRAIT")
     print("=" * 60)
@@ -167,15 +172,15 @@ def generate_matched_portrait(client: genai.Client) -> tuple[str, Image.Image | 
         print(f"  - {img_path}")
     print(f"Output: {output_path}")
     print()
-    
+
     # Load the scene image (generic identity image)
     if not os.path.exists(GENERIC_IDENTITY_IMAGE):
         print(f"ERROR: Scene image not found: {GENERIC_IDENTITY_IMAGE}")
         return output_path, None
-    
+
     scene_image = Image.open(GENERIC_IDENTITY_IMAGE)
     print(f"✓ Loaded scene image: {GENERIC_IDENTITY_IMAGE}")
-    
+
     # Load character view images
     reference_images = []
     for ref_path in CHARACTER_VIEW_IMAGES:
@@ -184,13 +189,13 @@ def generate_matched_portrait(client: genai.Client) -> tuple[str, Image.Image | 
             print(f"✓ Loaded reference: {ref_path}")
         else:
             print(f"⚠ Reference not found: {ref_path}")
-    
+
     if not reference_images:
         print("ERROR: No character view images found!")
         return output_path, None
-    
+
     print()
-    
+
     # Build prompt
     prompt = build_prompt()
     print("Prompt:")
@@ -198,31 +203,28 @@ def generate_matched_portrait(client: genai.Client) -> tuple[str, Image.Image | 
     print(prompt)
     print("-" * 40)
     print()
-    
+
     # Build contents: scene image first, then reference images, then prompt
     contents = [scene_image] + reference_images + [prompt]
-    
+
     # Retry loop with exponential backoff
     retry_delay = INITIAL_RETRY_DELAY
-    
+
     for attempt in range(MAX_RETRIES):
         try:
-            print(f"Generating matched portrait...")
-            
+            print("Generating matched portrait...")
+
             response = client.models.generate_content(
                 model="gemini-3-pro-image-preview",
                 contents=contents,
                 config=types.GenerateContentConfig(
                     response_modalities=["TEXT", "IMAGE"],
-                    image_config=types.ImageConfig(
-                        aspect_ratio="1:1",
-                        image_size="2K"
-                    ),
+                    image_config=types.ImageConfig(aspect_ratio="1:1", image_size="2K"),
                 ),
             )
-            
+
             for part in response.parts:
-                if getattr(part, 'thought', False):
+                if getattr(part, "thought", False):
                     continue
                 if part.text:
                     print(f"[Model] {part.text}")
@@ -231,13 +233,17 @@ def generate_matched_portrait(client: genai.Client) -> tuple[str, Image.Image | 
                     image.save(output_path)
                     print(f"\n✓ Saved: {output_path}")
                     return output_path, image
-            
+
             print("WARNING: No image in response, retrying...")
-            
+
         except Exception as e:
             error_str = str(e)
-            is_retryable = "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str.lower()
-            
+            is_retryable = (
+                "503" in error_str
+                or "UNAVAILABLE" in error_str
+                or "overloaded" in error_str.lower()
+            )
+
             if is_retryable and attempt < MAX_RETRIES - 1:
                 print(f"⚠ Attempt {attempt + 1}/{MAX_RETRIES} failed: {e}")
                 print(f"  Retrying in {retry_delay} seconds...")
@@ -246,7 +252,7 @@ def generate_matched_portrait(client: genai.Client) -> tuple[str, Image.Image | 
             else:
                 print(f"✗ Failed after {attempt + 1} attempts: {e}")
                 return output_path, None
-    
+
     return output_path, None
 
 
@@ -254,11 +260,14 @@ def generate_matched_portrait(client: genai.Client) -> tuple[str, Image.Image | 
 # MAIN
 # ============================================================================
 
+
 def main():
     if "--help" in sys.argv or "-h" in sys.argv:
         print("Usage: python generate_matched_portrait.py")
         print()
-        print("Generates a portrait matching the head position, expression, and lighting")
+        print(
+            "Generates a portrait matching the head position, expression, and lighting"
+        )
         print("from a generic identity image, using character views as face reference.")
         print()
         print("Configure inputs by editing the constants at the top of the script:")
@@ -266,13 +275,13 @@ def main():
         print("  - CHARACTER_VIEW_IMAGES: The character views for face reference")
         print("  - OUTPUT_NAME: Name for the output file")
         sys.exit(0)
-    
+
     # Initialize client
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
+
     # Generate the matched portrait
     output_path, image = generate_matched_portrait(client)
-    
+
     # Summary
     print()
     print("=" * 60)

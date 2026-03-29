@@ -2,15 +2,17 @@
 Authentication utilities for error handling, validation, and response formatting.
 """
 
-from rest_framework import status
-from rest_framework.response import Response
-from django.core.exceptions import ValidationError
 import re
 from typing import TypedDict
+
+from django.core.exceptions import ValidationError
+from rest_framework import status
+from rest_framework.response import Response
 
 
 class AuthErrorMessages:
     """Standardized error messages for authentication flows."""
+
     INVALID_CREDENTIALS = "Invalid email or password"
     EMAIL_NOT_VERIFIED = "Please verify your email before logging in"
     EMAIL_EXISTS = "This email already has an account. Try signing in"
@@ -30,6 +32,7 @@ class AuthErrorMessages:
 
 class ResponseData(TypedDict, total=False):
     """Type hints for response data."""
+
     success: bool
     message: str
     error: str
@@ -38,39 +41,37 @@ class ResponseData(TypedDict, total=False):
     email_sent: bool
 
 
-def error_response(message: str, status_code: int = status.HTTP_400_BAD_REQUEST) -> Response:
+def error_response(
+    message: str, status_code: int = status.HTTP_400_BAD_REQUEST
+) -> Response:
     """
     Create a standardized error response.
-    
+
     Args:
         message: Error message to return
         status_code: HTTP status code (default: 400)
-    
+
     Returns:
         Response object with success=false and error message
     """
-    return Response(
-        {
-            "success": False,
-            "error": message
-        },
-        status=status_code
-    )
+    return Response({"success": False, "error": message}, status=status_code)
 
 
-def success_response(data: ResponseData, status_code: int = status.HTTP_200_OK) -> Response:
+def success_response(
+    data: ResponseData, status_code: int = status.HTTP_200_OK
+) -> Response:
     """
     Create a standardized success response.
-    
+
     Args:
         data: Response data to return (can include message, user, tokens, email_sent)
         status_code: HTTP status code (default: 200)
-    
+
     Returns:
         Response object with success=true and flattened data
     """
     response_data = {"success": True}
-    
+
     # Flatten any nested data and add to response
     if isinstance(data, dict):
         for key, value in data.items():
@@ -79,21 +80,21 @@ def success_response(data: ResponseData, status_code: int = status.HTTP_200_OK) 
                 response_data.update(value)
             else:
                 response_data[key] = value
-    
+
     return Response(response_data, status=status_code)
 
 
 class PasswordValidator:
     """
     Validates password strength requirements.
-    
+
     Requirements:
     - Minimum length (default: 8)
     - Uppercase letter (optional)
     - Number (optional)
     - Special character (optional)
     """
-    
+
     def __init__(
         self,
         min_length: int = 8,
@@ -109,10 +110,10 @@ class PasswordValidator:
     def validate(self, password: str) -> None:
         """
         Validate password against requirements.
-        
+
         Args:
             password: Password string to validate
-            
+
         Raises:
             ValidationError: If password doesn't meet requirements
         """
@@ -125,4 +126,4 @@ class PasswordValidator:
         if self.require_number and not any(c.isdigit() for c in password):
             raise ValidationError(AuthErrorMessages.PASSWORD_MISSING_NUMBER)
         if self.require_special and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-            raise ValidationError(AuthErrorMessages.PASSWORD_MISSING_SPECIAL) 
+            raise ValidationError(AuthErrorMessages.PASSWORD_MISSING_SPECIAL)

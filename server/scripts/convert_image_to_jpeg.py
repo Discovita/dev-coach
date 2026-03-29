@@ -8,6 +8,7 @@ VersatileImageField for thumbnail generation.
 
 import sys
 from pathlib import Path
+
 from PIL import Image
 
 

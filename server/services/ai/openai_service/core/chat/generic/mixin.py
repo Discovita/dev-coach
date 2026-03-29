@@ -5,20 +5,21 @@ This mixin provides the core chat completion functionality for the OpenAI API,
 including support for text generation, streaming, and basic parameter handling.
 """
 
-from typing import List, Optional, Dict, Any, Union, Iterable, Type
+import logging
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
+
 from openai.types.chat import (
     ChatCompletion,
     ChatCompletionChunk,
     ChatCompletionMessageParam,
+    ChatCompletionModality,
+    ChatCompletionStreamOptionsParam,
     ChatCompletionToolChoiceOptionParam,
     ChatCompletionToolParam,
-    ChatCompletionStreamOptionsParam,
-    ChatCompletionModality,
 )
 from pydantic import BaseModel
-from ....models.openai_compatibility import NotGiven, NOT_GIVEN, Stream
 
-import logging
+from ....models.openai_compatibility import NOT_GIVEN, NotGiven, Stream
 
 log = logging.getLogger(__name__)
 

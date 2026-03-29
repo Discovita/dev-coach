@@ -1,19 +1,19 @@
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.action_type import ActionType
-from services.action_handler.models.params import (
-    ShowSuggestIAMStatementComponentParams,
-)
+from enums.component_type import ComponentType
 from models.components.ComponentConfig import (
-    ComponentConfig,
-    ComponentButton,
     ComponentAction,
+    ComponentButton,
+    ComponentConfig,
     ComponentIdentity,
     ComponentText,
 )
-from enums.component_type import ComponentType
+from services.action_handler.models.params import (
+    ShowSuggestIAMStatementComponentParams,
+)
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")

@@ -5,12 +5,14 @@ The prompt includes all the context the coach needs to generate an appropriate
 response, including the user's current phase, identities, and conversation history.
 """
 
-from typing import Tuple, Union, Dict, Any
+from typing import Any, Dict, Tuple, Union
+
+from pydantic import BaseModel
+
 from apps.users.models import User
 from enums.ai import AIModel
-from pydantic import BaseModel
-from services.prompt_manager.manager import PromptManager
 from services.logger import configure_logging
+from services.prompt_manager.manager import PromptManager
 
 log = configure_logging(__name__, log_level="INFO")
 

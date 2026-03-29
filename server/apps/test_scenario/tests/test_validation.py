@@ -1,8 +1,3 @@
-import pytest
-pytestmark = pytest.mark.django_db
-# Import the validation function and template serializers
-from apps.test_scenario.validation import validate_scenario_template
-
 """
 Test Suite: Scenario Template Validation
 ---------------------------------------
@@ -18,38 +13,33 @@ Covers:
 Each test asserts that the validation function returns the expected errors (or no errors) for a given template.
 """
 
+import pytest
+
+from apps.test_scenario.validation import validate_scenario_template
+
+pytestmark = pytest.mark.django_db
+
 # Example valid template (update fields as needed to match your template serializers)
 VALID_TEMPLATE = {
     "user": {
         "email": "test@example.com",
         "password": "Coach123!",  # Required for test scenario users
         "first_name": "Test",
-        "last_name": "User"
+        "last_name": "User",
     },
     "coach_state": {
         "current_phase": "IDENTITY_BRAINSTORMING",
         "identity_focus": "PASSIONS",
         "who_you_are": ["Curious Explorer"],
-        "who_you_want_to_be": ["Visionary Leader"]
+        "who_you_want_to_be": ["Visionary Leader"],
     },
     "identities": [
-        {
-            "name": "Curious Explorer",
-            "category": "PASSIONS",
-            "state": "ACCEPTED"
-        }
+        {"name": "Curious Explorer", "category": "PASSIONS", "state": "ACCEPTED"}
     ],
     "chat_messages": [
-        {
-            "role": "USER",
-            "content": "I'm ready to brainstorm new identities."
-        }
+        {"role": "USER", "content": "I'm ready to brainstorm new identities."}
     ],
-    "user_notes": [
-        {
-            "note": "User is highly motivated at this stage."
-        }
-    ]
+    "user_notes": [{"note": "User is highly motivated at this stage."}],
 }
 
 # Minimal valid template (only user required)
@@ -58,7 +48,7 @@ MINIMAL_VALID_TEMPLATE = {
         "email": "test@example.com",
         "password": "Coach123!",
         "first_name": "Test",
-        "last_name": "User"
+        "last_name": "User",
     }
 }
 
@@ -89,7 +79,7 @@ def test_all_optional_fields_present():
             "is_superuser": False,
             "is_staff": False,
             "verification_token": "abc123",
-            "email_verification_sent_at": "2024-01-01T00:00:00Z"
+            "email_verification_sent_at": "2024-01-01T00:00:00Z",
         },
         "coach_state": {
             "current_phase": "IDENTITY_BRAINSTORMING",
@@ -99,7 +89,7 @@ def test_all_optional_fields_present():
             "skipped_identity_categories": ["PASSIONS"],
             "current_identity": None,
             "proposed_identity": None,
-            "metadata": {"foo": "bar"}
+            "metadata": {"foo": "bar"},
         },
         "identities": [
             {
@@ -108,20 +98,13 @@ def test_all_optional_fields_present():
                 "state": "ACCEPTED",
                 "i_am_statement": "I am curious.",
                 "visualization": "A vivid scene.",
-                "notes": ["note1", "note2"]
+                "notes": ["note1", "note2"],
             }
         ],
         "chat_messages": [
-            {
-                "role": "USER",
-                "content": "I'm ready to brainstorm new identities."
-            }
+            {"role": "USER", "content": "I'm ready to brainstorm new identities."}
         ],
-        "user_notes": [
-            {
-                "note": "User is highly motivated at this stage."
-            }
-        ]
+        "user_notes": [{"note": "User is highly motivated at this stage."}],
     }
     errors = validate_scenario_template(template)
     assert errors == []
@@ -146,10 +129,17 @@ def test_extra_field_in_identity():
     """
     template = VALID_TEMPLATE.copy()
     template["identities"] = [
-        {"name": "Curious Explorer", "category": "PASSIONS", "state": "ACCEPTED", "foo": "bar"}
+        {
+            "name": "Curious Explorer",
+            "category": "PASSIONS",
+            "state": "ACCEPTED",
+            "foo": "bar",
+        }
     ]
     errors = validate_scenario_template(template)
-    assert any(e["section"].startswith("identity") and "foo" in e["error"] for e in errors)
+    assert any(
+        e["section"].startswith("identity") and "foo" in e["error"] for e in errors
+    )
 
 
 def test_type_mismatch_in_coach_state():
@@ -161,7 +151,9 @@ def test_type_mismatch_in_coach_state():
     template = VALID_TEMPLATE.copy()
     template["coach_state"] = {**template["coach_state"], "who_you_are": "NotAList"}
     errors = validate_scenario_template(template)
-    assert any(e["section"] == "coach_state" and "who_you_are" in e["error"] for e in errors)
+    assert any(
+        e["section"] == "coach_state" and "who_you_are" in e["error"] for e in errors
+    )
 
 
 def test_empty_sections_are_handled():
@@ -214,4 +206,5 @@ def test_minimal_valid_template_passes():
     errors = validate_scenario_template(MINIMAL_VALID_TEMPLATE)
     assert errors == []
 
-# Add more edge case tests as needed for your business logic 
+
+# Add more edge case tests as needed for your business logic

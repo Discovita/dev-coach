@@ -1,19 +1,19 @@
+from rest_framework import decorators, viewsets
+from rest_framework.response import Response
+
+from enums.action_type import ActionType
+from enums.appearance import (
+    AgeRange,
+    EyeColor,
+    Gender,
+    HairColor,
+    Height,
+    SkinTone,
+)
+from enums.appearance.build import BUILDS_FEMALE, BUILDS_MALE, BUILDS_NEUTRAL
 from enums.coaching_phase import CoachingPhase
 from enums.context_keys import ContextKey
-from enums.action_type import ActionType
 from enums.prompt_type import PromptType
-from enums.appearance import (
-    Gender,
-    SkinTone,
-    HairColor,
-    EyeColor,
-    Height,
-    Build,
-    AgeRange,
-)
-from enums.appearance.build import BUILDS_MALE, BUILDS_FEMALE, BUILDS_NEUTRAL
-from rest_framework.response import Response
-from rest_framework import decorators, viewsets
 
 
 # CoreView: Class-based view for core utility endpoints
@@ -40,7 +40,7 @@ class CoreViewSet(viewsets.GenericViewSet):
         allowed_actions = [{"value": a.value, "label": a.label} for a in ActionType]
         context_keys = [{"value": k.value, "label": k.label} for k in ContextKey]
         prompt_types = [{"value": p.value, "label": p.label} for p in PromptType]
-        
+
         # Appearance enums
         genders = [{"value": g.value, "label": g.label} for g in Gender]
         skin_tones = [{"value": s.value, "label": s.label} for s in SkinTone]
@@ -48,12 +48,12 @@ class CoreViewSet(viewsets.GenericViewSet):
         eye_colors = [{"value": e.value, "label": e.label} for e in EyeColor]
         heights = [{"value": h.value, "label": h.label} for h in Height]
         age_ranges = [{"value": a.value, "label": a.label} for a in AgeRange]
-        
+
         # Build enums - grouped by gender for frontend filtering
         builds_male = [{"value": b.value, "label": b.label} for b in BUILDS_MALE]
         builds_female = [{"value": b.value, "label": b.label} for b in BUILDS_FEMALE]
         builds_neutral = [{"value": b.value, "label": b.label} for b in BUILDS_NEUTRAL]
-        
+
         return Response(
             {
                 "coaching_phases": coaching_phases,

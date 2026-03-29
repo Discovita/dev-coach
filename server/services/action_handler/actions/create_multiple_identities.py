@@ -1,16 +1,18 @@
-from apps.identities.models import Identity
-from apps.coach_states.models import CoachState
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
-from services.action_handler.models import CreateMultipleIdentitiesParams
+from apps.coach_states.models import CoachState
+from apps.identities.models import Identity
 from enums.action_type import ActionType
+from services.action_handler.models import CreateMultipleIdentitiesParams
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 
 
 def create_multiple_identities(
-    coach_state: CoachState, params: CreateMultipleIdentitiesParams, coach_message: ChatMessage
+    coach_state: CoachState,
+    params: CreateMultipleIdentitiesParams,
+    coach_message: ChatMessage,
 ):
     """
     Create multiple new Identities and link them to the user.
@@ -22,7 +24,7 @@ def create_multiple_identities(
     """
     created_identities = []
     skipped_identities = []
-    
+
     for identity_data in params.identities:
         # Check if identity with same name already exists (case-insensitive)
         existing_identity = Identity.objects.filter(

@@ -9,15 +9,15 @@ from typing import List
 
 from django.db import transaction
 
-from apps.users.models import User
+from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from apps.user_notes.models import UserNote
-from apps.actions.models import Action
-from apps.coach_states.models import CoachState
+from apps.users.models import User
+from apps.users.utils import ensure_initial_message_exists
 from enums.coaching_phase import CoachingPhase
 from enums.identity_category import IdentityCategory
-from apps.users.utils import ensure_initial_message_exists
 
 
 @transaction.atomic
@@ -77,4 +77,3 @@ def reset_user_coaching_data(user: User) -> List[ChatMessage]:
     # Return the new chat history
     chat_messages = ChatMessage.objects.filter(user=user).order_by("-timestamp")
     return list(chat_messages)
-

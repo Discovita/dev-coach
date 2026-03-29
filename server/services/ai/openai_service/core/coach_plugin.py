@@ -12,15 +12,15 @@ Usage:
 """
 
 from typing import Optional, Type
+
 from pydantic import BaseModel
+
 from apps.chat_messages.models import ChatMessage
+from enums.ai import AIModel, AIProvider
 from models.CoachChatResponse import CoachChatResponse
 from models.SentinelChatResponse import SentinelChatResponse
-from services.ai.openai_service.core.base import OpenAIService
-from enums.ai import AIModel
 from services.ai.base import AIService
-from enums.ai import AIProvider
-
+from services.ai.openai_service.core.base import OpenAIService
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")

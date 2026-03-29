@@ -7,14 +7,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('coach_states', '0008_alter_coachstate_current_phase'),
-        ('test_scenario', '0001_initial'),
+        ("coach_states", "0008_alter_coachstate_current_phase"),
+        ("test_scenario", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='coachstate',
-            name='test_scenario',
-            field=models.ForeignKey(blank=True, help_text='Test scenario this coach state is associated with (for test data isolation).', null=True, on_delete=django.db.models.deletion.SET_NULL, to='test_scenario.testscenario'),
+            model_name="coachstate",
+            name="test_scenario",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Test scenario this coach state is associated with (for test data isolation).",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="test_scenario.testscenario",
+            ),
         ),
     ]

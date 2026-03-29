@@ -5,26 +5,23 @@ This mixin provides methods for generating images using OpenAI's DALL-E models.
 """
 
 import logging
-from typing import List, Optional, Union, Any, Dict, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from ...models.image import (
-    ImageSize,
-    ImageQuality,
-    ImageResponseFormat,
     ImageModel,
-    ImageStyle,
+    ImageSize,
 )
 from ...utils.image import encode_image
-from .validation import validate_and_process_image_params
 from .response import process_image_response
 from .utils import save_generated_image
+from .validation import validate_and_process_image_params
 
 log = logging.getLogger(__name__)
 
 
 class ImageGenerationMixin:
     """Mixin providing image generation functionality for OpenAIService."""
-    
+
     def encode_image_for_api(self, image_path: str) -> str:
         """Encode an image for use with OpenAI's API."""
         return encode_image(image_path)
@@ -70,7 +67,7 @@ class ImageGenerationMixin:
             style=style,
             response_format=response_format,
             save_to_path=save_to_path,
-            user=user
+            user=user,
         )
 
         # Make API call
@@ -80,5 +77,5 @@ class ImageGenerationMixin:
         return process_image_response(
             response=response,
             save_to_path=save_to_path,
-            save_image_func=save_generated_image
+            save_image_func=save_generated_image,
         )

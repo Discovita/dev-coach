@@ -5,12 +5,12 @@ Admin function to continue an image chat session for any user.
 """
 
 import base64
-import tempfile
 import os
+import tempfile
 
-from rest_framework.response import Response
-from rest_framework import status
 from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.response import Response
 
 from apps.reference_images.models import ReferenceImage
 from services.image_generation.orchestration import continue_identity_image_chat
@@ -41,7 +41,7 @@ def admin_continue_image_chat(
     Raises:
         DRF exceptions for validation errors (400, 404, 500)
     """
-    from rest_framework.exceptions import NotFound, ValidationError, APIException
+    from rest_framework.exceptions import APIException, NotFound, ValidationError
 
     # Validate user exists
     try:

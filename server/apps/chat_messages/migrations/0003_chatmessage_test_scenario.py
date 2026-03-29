@@ -7,14 +7,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat_messages', '0002_initial'),
-        ('test_scenario', '0001_initial'),
+        ("chat_messages", "0002_initial"),
+        ("test_scenario", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='chatmessage',
-            name='test_scenario',
-            field=models.ForeignKey(blank=True, help_text='Test scenario this chat message is associated with (for test data isolation).', null=True, on_delete=django.db.models.deletion.SET_NULL, to='test_scenario.testscenario'),
+            model_name="chatmessage",
+            name="test_scenario",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Test scenario this chat message is associated with (for test data isolation).",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="test_scenario.testscenario",
+            ),
         ),
     ]

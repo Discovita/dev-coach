@@ -9,20 +9,22 @@ Used by:
 - AdminIdentityViewSet (admin endpoints)
 - IdentityImageChatViewSet (user endpoints)
 """
-from PIL import Image as PILImage
+
 from typing import List, Optional, Tuple
+
+from PIL import Image as PILImage
 
 from apps.identities.models import Identity, IdentityImageChat
 from apps.reference_images.models import ReferenceImage
 from apps.users.models import User
 from services.image_generation.gemini_image_service import GeminiImageService
 from services.image_generation.utils import (
+    deserialize_chat_history,
     load_pil_images_from_references,
     serialize_chat_history,
-    deserialize_chat_history,
 )
-from services.prompt_manager.manager import PromptManager
 from services.logger import configure_logging
+from services.prompt_manager.manager import PromptManager
 
 log = configure_logging(__name__)
 
@@ -37,12 +39,12 @@ def generate_identity_image(
 ) -> Optional[PILImage.Image]:
     """
     Generate an identity image using Gemini.
-    
+
     This is the main orchestration function that:
     1. Builds the prompt using PromptManager (with user appearance context)
     2. Loads PIL images from ReferenceImage models
     3. Calls GeminiImageService to generate the image
-    
+
     Args:
         identity: The Identity to generate an image for
         reference_images: List of ReferenceImage models for the user
@@ -50,16 +52,16 @@ def generate_identity_image(
         additional_prompt: Optional extra instructions from admin
         aspect_ratio: Image aspect ratio (default "16:9")
         resolution: Image resolution (default "4K")
-        
+
     Returns:
         PIL Image object, or None if generation failed
-        
+
     Note:
         This function is used by both admin endpoints and future Coach actions.
         The caller is responsible for saving the image to S3 if needed.
     """
     log.info(f"Generating image for identity: {identity.name}")
-    
+
     # 1. Build prompt using PromptManager (includes user appearance context)
     prompt_manager = PromptManager()
     prompt = prompt_manager.create_image_generation_prompt(
@@ -68,15 +70,15 @@ def generate_identity_image(
         additional_prompt=additional_prompt,
     )
     log.debug(f"Built prompt: {prompt[:100]}...")
-    
+
     # 2. Load PIL images from ReferenceImage models
     pil_images = load_pil_images_from_references(reference_images)
     log.info(f"Loaded {len(pil_images)} reference images")
-    
+
     if not pil_images:
         log.warning("No reference images could be loaded")
         return None
-    
+
     # 3. Generate image using Gemini
     service = GeminiImageService()
     image = service.generate_image(
@@ -85,12 +87,12 @@ def generate_identity_image(
         aspect_ratio=aspect_ratio,
         resolution=resolution,
     )
-    
+
     if image:
         log.info(f"Successfully generated image for identity: {identity.name}")
     else:
         log.warning(f"Image generation returned None for identity: {identity.name}")
-    
+
     return image
 
 
@@ -226,4 +228,3 @@ def continue_identity_image_chat(
     log.info(f"Updated chat session for user {user.id}")
 
     return generated_image, chat_record
-

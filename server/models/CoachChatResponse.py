@@ -1,40 +1,42 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
-from typing import List, Optional
+
 from services.action_handler.models.actions import (
-    SelectIdentityFocusAction,
-    SetCurrentIdentityAction,
+    AcceptIAmAction,
+    AcceptIdentityAction,
+    AcceptIdentityCommitmentAction,
+    AcceptIdentityRefinementAction,
+    AcceptIdentityVisualizationAction,
+    AddIdentityNoteAction,
+    ArchiveIdentityAction,
     CreateIdentityAction,
     CreateMultipleIdentitiesAction,
-    UpdateIdentityAction,
-    UpdateIdentityNameAction,
-    UpdateIAmAction,
-    UpdateIdentityVisualizationAction,
-    AcceptIdentityAction,
-    AcceptIdentityRefinementAction,
-    AcceptIdentityCommitmentAction,
-    AcceptIAmAction,
-    AcceptIdentityVisualizationAction,
-    ArchiveIdentityAction,
     NestIdentityAction,
-    TransitionPhaseAction,
-    AddIdentityNoteAction,
-    SkipIdentityCategoryAction,
-    UnskipIdentityCategoryAction,
-    UpdateWhoYouAreAction,
-    UpdateWhoYouWantToBeAction,
-    UpdateAskedQuestionsAction,
-    ShowIntroductionCannedResponseComponentAction,
-    ShowAcceptIAMComponentAction,
-    ShowSuggestIAMStatementComponentAction,
-    ShowIAmStatementsSummaryComponentAction,
-    ShowCombineIdentitiesAction,
-    ShowNestIdentitiesAction,
+    PersistArchiveIdentityAction,
     PersistCombineIdentitiesAction,
-    PersistSuggestIAMStatementComponentAction,
     PersistIAmStatementsSummaryComponentAction,
     PersistNestIdentitiesAction,
+    PersistSuggestIAMStatementComponentAction,
+    SelectIdentityFocusAction,
+    SetCurrentIdentityAction,
+    ShowAcceptIAMComponentAction,
     ShowArchiveIdentityAction,
-    PersistArchiveIdentityAction,
+    ShowCombineIdentitiesAction,
+    ShowIAmStatementsSummaryComponentAction,
+    ShowIntroductionCannedResponseComponentAction,
+    ShowNestIdentitiesAction,
+    ShowSuggestIAMStatementComponentAction,
+    SkipIdentityCategoryAction,
+    TransitionPhaseAction,
+    UnskipIdentityCategoryAction,
+    UpdateAskedQuestionsAction,
+    UpdateIAmAction,
+    UpdateIdentityAction,
+    UpdateIdentityNameAction,
+    UpdateIdentityVisualizationAction,
+    UpdateWhoYouAreAction,
+    UpdateWhoYouWantToBeAction,
 )
 
 # NOTE: The AddUserNoteAction and UpdateUserNoteAction are deliberately skipped here because these actions are used by the Sentinel
@@ -116,18 +118,20 @@ class CoachChatResponse(BaseModel):
         default=None, description="Perform the set_current_identity action."
     )
     # Components
-    show_introduction_canned_response_component: Optional[ShowIntroductionCannedResponseComponentAction] = Field(
+    show_introduction_canned_response_component: Optional[
+        ShowIntroductionCannedResponseComponentAction
+    ] = Field(
         default=None, description="Show the introduction canned response component."
     )
     show_accept_i_am_component: Optional[ShowAcceptIAMComponentAction] = Field(
         default=None, description="Show the Accept I Am component."
     )
-    show_suggest_i_am_statement_component: Optional[ShowSuggestIAMStatementComponentAction] = Field(
-        default=None, description="Show the Suggest I Am Statement component."
-    )
-    show_i_am_statements_summary_component: Optional[ShowIAmStatementsSummaryComponentAction] = Field(
-        default=None, description="Show the I Am Statements Summary component."
-    )
+    show_suggest_i_am_statement_component: Optional[
+        ShowSuggestIAMStatementComponentAction
+    ] = Field(default=None, description="Show the Suggest I Am Statement component.")
+    show_i_am_statements_summary_component: Optional[
+        ShowIAmStatementsSummaryComponentAction
+    ] = Field(default=None, description="Show the I Am Statements Summary component.")
     show_combine_identities: Optional[ShowCombineIdentitiesAction] = Field(
         default=None, description="Show the combine identities component."
     )
@@ -138,17 +142,26 @@ class CoachChatResponse(BaseModel):
         default=None, description="Show the archive identity component."
     )
     persist_combine_identities: Optional[PersistCombineIdentitiesAction] = Field(
-        default=None, description="Persist the combine identities component for historical display."
+        default=None,
+        description="Persist the combine identities component for historical display.",
     )
-    persist_suggest_i_am_statement_component: Optional[PersistSuggestIAMStatementComponentAction] = Field(
-        default=None, description="Persist the Suggest I Am Statement component for historical display."
+    persist_suggest_i_am_statement_component: Optional[
+        PersistSuggestIAMStatementComponentAction
+    ] = Field(
+        default=None,
+        description="Persist the Suggest I Am Statement component for historical display.",
     )
-    persist_i_am_statements_summary_component: Optional[PersistIAmStatementsSummaryComponentAction] = Field(
-        default=None, description="Persist the I Am Statements Summary component for historical display."
+    persist_i_am_statements_summary_component: Optional[
+        PersistIAmStatementsSummaryComponentAction
+    ] = Field(
+        default=None,
+        description="Persist the I Am Statements Summary component for historical display.",
     )
     persist_nest_identities: Optional[PersistNestIdentitiesAction] = Field(
-        default=None, description="Persist the nest identities component for historical display."
+        default=None,
+        description="Persist the nest identities component for historical display.",
     )
     persist_archive_identity: Optional[PersistArchiveIdentityAction] = Field(
-        default=None, description="Persist the archive identity component for historical display."
+        default=None,
+        description="Persist the archive identity component for historical display.",
     )

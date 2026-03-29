@@ -5,15 +5,15 @@ User-facing function to continue an image chat session.
 """
 
 import base64
-import tempfile
 import os
+import tempfile
 
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
 
 from apps.users.models import User
-from services.image_generation.orchestration import continue_identity_image_chat
 from services.image_generation import ImageGenerationError
+from services.image_generation.orchestration import continue_identity_image_chat
 from services.logger import configure_logging
 
 log = configure_logging(__name__)

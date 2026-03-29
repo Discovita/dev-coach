@@ -6,10 +6,10 @@ This serializer includes nested related data like identities, coach state, and c
 
 from rest_framework import serializers
 
-from apps.users.models import User
-from apps.identities.serializers import IdentitySerializer
-from apps.coach_states.serializers import CoachStateSerializer
 from apps.chat_messages.serializer import ChatMessageSerializer
+from apps.coach_states.serializers import CoachStateSerializer
+from apps.identities.serializers import IdentitySerializer
+from apps.users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -72,4 +72,3 @@ class UserSerializer(serializers.ModelSerializer):
             "coach_state",
             "chat_messages",
         )
-

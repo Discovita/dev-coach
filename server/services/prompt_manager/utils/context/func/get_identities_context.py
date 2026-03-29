@@ -1,4 +1,5 @@
 from typing import List
+
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.identity_state import IdentityState

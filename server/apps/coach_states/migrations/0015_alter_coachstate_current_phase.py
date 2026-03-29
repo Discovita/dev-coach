@@ -6,13 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('coach_states', '0014_alter_coachstate_current_phase_and_more'),
+        ("coach_states", "0014_alter_coachstate_current_phase_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coachstate',
-            name='current_phase',
-            field=models.CharField(choices=[('system_context', 'System Context'), ('introduction', 'Introduction'), ('get_to_know_you', 'Get to Know You'), ('identity_warm_up', 'Identity Warm-Up'), ('identity_brainstorming', 'Identity Brainstorming'), ('brainstorming_review', 'Brainstorming Review'), ('identity_refinement', 'Identity Refinement'), ('identity_commitment', 'Identity Commitment'), ('i_am_statement', 'I Am Statement'), ('identity_visualization', 'Identity Visualization')], help_text='Current state of the coaching session.', max_length=32),
+            model_name="coachstate",
+            name="current_phase",
+            field=models.CharField(
+                choices=[
+                    ("system_context", "System Context"),
+                    ("introduction", "Introduction"),
+                    ("get_to_know_you", "Get to Know You"),
+                    ("identity_warm_up", "Identity Warm-Up"),
+                    ("identity_brainstorming", "Identity Brainstorming"),
+                    ("brainstorming_review", "Brainstorming Review"),
+                    ("identity_refinement", "Identity Refinement"),
+                    ("identity_commitment", "Identity Commitment"),
+                    ("i_am_statement", "I Am Statement"),
+                    ("identity_visualization", "Identity Visualization"),
+                ],
+                help_text="Current state of the coaching session.",
+                max_length=32,
+            ),
         ),
     ]

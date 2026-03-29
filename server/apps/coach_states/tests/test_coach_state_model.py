@@ -9,8 +9,8 @@ from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from apps.users.models import User
 from enums.coaching_phase import CoachingPhase
-from enums.identity_category import IdentityCategory
 from enums.get_to_know_you_questions import GetToKnowYouQuestions
+from enums.identity_category import IdentityCategory
 
 
 class CoachStateModelTests(TestCase):
@@ -38,21 +38,22 @@ class CoachStateModelTests(TestCase):
     def test_updated_at_changes_on_update(self):
         """updated_at should change when coach state is updated."""
         original_updated_at = self.coach_state.updated_at
-        
+
         # Wait a tiny bit to ensure timestamp difference
         import time
+
         time.sleep(0.01)
-        
+
         self.coach_state.current_phase = CoachingPhase.GET_TO_KNOW_YOU
         self.coach_state.save()
-        
+
         self.assertGreater(self.coach_state.updated_at, original_updated_at)
 
     def test_one_to_one_relationship_with_user(self):
         """CoachState should have OneToOne relationship with User."""
         # Access via forward relation
         self.assertEqual(self.coach_state.user, self.user)
-        
+
         # Access via reverse relation
         self.assertEqual(self.user.coach_state, self.coach_state)
 
@@ -76,10 +77,10 @@ class CoachStateModelTests(TestCase):
             name="Test Identity",
             category=IdentityCategory.PASSIONS,
         )
-        
+
         self.coach_state.current_identity = identity
         self.coach_state.save()
-        
+
         self.assertEqual(self.coach_state.current_identity, identity)
 
     def test_current_identity_set_null_on_delete(self):
@@ -89,12 +90,12 @@ class CoachStateModelTests(TestCase):
             name="Test Identity",
             category=IdentityCategory.PASSIONS,
         )
-        
+
         self.coach_state.current_identity = identity
         self.coach_state.save()
-        
+
         identity.delete()
-        
+
         # Refresh from database
         self.coach_state.refresh_from_db()
         self.assertIsNone(self.coach_state.current_identity)
@@ -107,7 +108,7 @@ class CoachStateModelTests(TestCase):
         """identity_focus can be set to different identity categories."""
         self.coach_state.identity_focus = IdentityCategory.HEALTH
         self.coach_state.save()
-        
+
         self.assertEqual(self.coach_state.identity_focus, IdentityCategory.HEALTH)
 
     def test_skipped_identity_categories_defaults_to_empty_list(self):
@@ -121,10 +122,14 @@ class CoachStateModelTests(TestCase):
             IdentityCategory.FAMILY,
         ]
         self.coach_state.save()
-        
+
         self.assertEqual(len(self.coach_state.skipped_identity_categories), 2)
-        self.assertIn(IdentityCategory.HEALTH, self.coach_state.skipped_identity_categories)
-        self.assertIn(IdentityCategory.FAMILY, self.coach_state.skipped_identity_categories)
+        self.assertIn(
+            IdentityCategory.HEALTH, self.coach_state.skipped_identity_categories
+        )
+        self.assertIn(
+            IdentityCategory.FAMILY, self.coach_state.skipped_identity_categories
+        )
 
     def test_who_you_are_defaults_to_empty_list(self):
         """who_you_are should default to empty list."""
@@ -135,7 +140,7 @@ class CoachStateModelTests(TestCase):
         identities = ["I am creative", "I am a problem solver"]
         self.coach_state.who_you_are = identities
         self.coach_state.save()
-        
+
         self.assertEqual(self.coach_state.who_you_are, identities)
 
     def test_who_you_want_to_be_defaults_to_empty_list(self):
@@ -147,7 +152,7 @@ class CoachStateModelTests(TestCase):
         identities = ["I want to be confident", "I want to be a leader"]
         self.coach_state.who_you_want_to_be = identities
         self.coach_state.save()
-        
+
         self.assertEqual(self.coach_state.who_you_want_to_be, identities)
 
     def test_asked_questions_defaults_to_empty_list(self):
@@ -162,9 +167,11 @@ class CoachStateModelTests(TestCase):
         ]
         self.coach_state.asked_questions = questions
         self.coach_state.save()
-        
+
         self.assertEqual(len(self.coach_state.asked_questions), 2)
-        self.assertIn(GetToKnowYouQuestions.HOBBIES_INTERESTS, self.coach_state.asked_questions)
+        self.assertIn(
+            GetToKnowYouQuestions.HOBBIES_INTERESTS, self.coach_state.asked_questions
+        )
 
     def test_metadata_defaults_to_empty_dict(self):
         """metadata should default to empty dict."""
@@ -179,7 +186,7 @@ class CoachStateModelTests(TestCase):
         }
         self.coach_state.metadata = metadata
         self.coach_state.save()
-        
+
         self.coach_state.refresh_from_db()
         self.assertEqual(self.coach_state.metadata, metadata)
 
@@ -198,10 +205,10 @@ class CoachStateModelTests(TestCase):
             name="Proposed Identity",
             category=IdentityCategory.PASSIONS,
         )
-        
+
         self.coach_state.proposed_identity = identity
         self.coach_state.save()
-        
+
         self.assertEqual(self.coach_state.proposed_identity, identity)
 
     def test_proposed_identity_set_null_on_delete(self):
@@ -211,12 +218,12 @@ class CoachStateModelTests(TestCase):
             name="Proposed Identity",
             category=IdentityCategory.PASSIONS,
         )
-        
+
         self.coach_state.proposed_identity = identity
         self.coach_state.save()
-        
+
         identity.delete()
-        
+
         # Refresh from database
         self.coach_state.refresh_from_db()
         self.assertIsNone(self.coach_state.proposed_identity)

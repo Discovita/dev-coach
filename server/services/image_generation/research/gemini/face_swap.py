@@ -10,15 +10,16 @@ Usage:
   python face_swap.py path/to/image.png       # Use provided image as intermediate + face swap
 """
 
-import sys
-import re
 import glob
-from google import genai
-from pathlib import Path
-from dotenv import load_dotenv
 import os
-from PIL import Image
+import re
+import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google import genai
 from google.genai import types
+from PIL import Image
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()
@@ -62,7 +63,7 @@ HEIGHT = "average height"
 # Build options: "slim", "athletic", "average build", "stocky", "large"
 BUILD = "athletic"
 
-# Skin tone / ethnicity options: "light-skinned", "medium-skinned", "dark-skinned", 
+# Skin tone / ethnicity options: "light-skinned", "medium-skinned", "dark-skinned",
 # Or more specific: "Caucasian", "Asian", "Hispanic", "African American", "Middle Eastern", "South Asian"
 ETHNICITY = "Caucasian"
 
@@ -84,10 +85,14 @@ IDENTITY_NAME = "Conductor"
 IDENTITY_CATEGORY = "Passions & Talents"
 
 # I Am Statement: Optional - the "I Am" statement for this identity
-IDENTITY_I_AM_STATEMENT = None  # e.g., "I am someone who brings harmony and direction to creative endeavors"
+IDENTITY_I_AM_STATEMENT = (
+    None  # e.g., "I am someone who brings harmony and direction to creative endeavors"
+)
 
 # Visualization: Optional - the visualization text for this identity
-IDENTITY_VISUALIZATION = None  # e.g., "I see myself standing confidently in a modern office..."
+IDENTITY_VISUALIZATION = (
+    None  # e.g., "I see myself standing confidently in a modern office..."
+)
 
 # Notes: Optional - list of notes about this identity
 IDENTITY_NOTES = None  # e.g., ["Focus on leadership", "Emphasize creativity"]
@@ -109,11 +114,12 @@ REFERENCE_IMAGES = [
 # Based on the current image generation prompt from seed_image_generation_prompt.py
 # ============================================================================
 
+
 def get_identity_context() -> str:
     """
     Format identity context for the prompt.
     Matches the format used by get_identity_context_for_image() in the codebase.
-    
+
     Returns:
         Formatted string with identity details
     """
@@ -121,17 +127,17 @@ def get_identity_context() -> str:
         f'Identity Name: "{IDENTITY_NAME}"',
         f"Category: {IDENTITY_CATEGORY}",
     ]
-    
+
     if IDENTITY_I_AM_STATEMENT:
         parts.append(f"I Am Statement: {IDENTITY_I_AM_STATEMENT}")
-    
+
     if IDENTITY_VISUALIZATION:
         parts.append(f"Visualization: {IDENTITY_VISUALIZATION}")
-    
+
     if IDENTITY_NOTES:
         notes_str = "; ".join(IDENTITY_NOTES)
         parts.append(f"Notes: {notes_str}")
-    
+
     return "\n".join(parts)
 
 
@@ -142,12 +148,12 @@ def get_generic_identity_prompt() -> str:
     - Uses body description constants and identity context
     - Removes face preservation requirement (we'll swap it in step 2)
     - Focuses on body type, pose, scene, and aesthetic
-    
+
     The face doesn't matter - we just need the body type, pose, and scene right.
     """
     body_description = f"a {HEIGHT} {BUILD} {ETHNICITY} {GENDER} {AGE} with {HAIR}"
     identity_context = get_identity_context()
-    
+
     # Based on the current image generation prompt structure:
     # "We're creating an Identity Image for this person."
     # "{identity_context}"
@@ -156,7 +162,7 @@ def get_generic_identity_prompt() -> str:
     # "The image should be an ideal visualization of them living as this Identity."
     # "Give it a movie poster quality aesthetic."
     # "Nothing negative should be conveyed - this is an aspirational image."
-    
+
     return f"""We're creating a generic Identity Image for a {body_description}.
 
 Create a professional, confident, and inspiring image for this Identity.
@@ -197,23 +203,24 @@ Output a single edited image.
 # UTILITIES
 # ============================================================================
 
+
 def get_next_face_swap_number() -> int:
     """Find the next available number for face swap outputs."""
     pattern = f"{OUTPUT_DIR}/face_swap_final_*.png"
     existing_files = glob.glob(pattern)
-    
+
     if not existing_files:
         return 1
-    
+
     numbers = []
     for f in existing_files:
-        match = re.search(r'face_swap_final_(\d+)\.png', f)
+        match = re.search(r"face_swap_final_(\d+)\.png", f)
         if match:
             numbers.append(int(match.group(1)))
-    
+
     if not numbers:
         return 1
-    
+
     return max(numbers) + 1
 
 
@@ -221,14 +228,15 @@ def get_next_face_swap_number() -> int:
 # STEP 1: Generate Generic Identity Image
 # ============================================================================
 
+
 def generate_generic_identity(run_num: int) -> tuple[Image.Image, str]:
     """
     Generate a generic identity image based on body description constants.
     The face doesn't matter - we're going to swap it out in step 2.
-    
+
     Args:
         run_num: Number for filename
-        
+
     Returns: (PIL Image, path) of the generated image
     """
     print("=" * 60)
@@ -236,27 +244,29 @@ def generate_generic_identity(run_num: int) -> tuple[Image.Image, str]:
     print("=" * 60)
     print(f"Body description: {GENDER}, {HEIGHT}, {BUILD}, {ETHNICITY}, {AGE}, {HAIR}")
     print()
-    
+
     prompt = get_generic_identity_prompt()
     print(f"Prompt:\n{prompt}\n")
-    
+
     response = client.models.generate_content(
         model="gemini-3-pro-image-preview",
         contents=[prompt],
         config=types.GenerateContentConfig(
             response_modalities=["TEXT", "IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION),
+            image_config=types.ImageConfig(
+                aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION
+            ),
         ),
     )
-    
+
     # Process response
     thinking_count = 0
     final_image = None
     intermediate_path = f"{OUTPUT_DIR}/face_swap_intermediate_{run_num:02d}.png"
-    
+
     for part in response.parts:
-        is_thinking = getattr(part, 'thought', False)
-        
+        is_thinking = getattr(part, "thought", False)
+
         if is_thinking:
             if SHOW_THINKING:
                 if part.text is not None:
@@ -274,14 +284,14 @@ def generate_generic_identity(run_num: int) -> tuple[Image.Image, str]:
                 final_image = part.as_image()
                 final_image.save(intermediate_path)
                 print(f"Saved intermediate image: {intermediate_path}")
-    
+
     if final_image is None:
         print("ERROR: Failed to generate generic identity image")
         sys.exit(1)
-    
+
     if thinking_count > 0:
         print(f"  ({thinking_count} thinking images generated)")
-    
+
     # Reload from disk to ensure proper format for next API call
     return Image.open(intermediate_path), intermediate_path
 
@@ -290,14 +300,15 @@ def generate_generic_identity(run_num: int) -> tuple[Image.Image, str]:
 # STEP 2: Face Swap
 # ============================================================================
 
+
 def face_swap(intermediate_image: Image.Image, run_num: int) -> Image.Image:
     """
     Swap the face in the intermediate image with the user's face from reference images.
-    
+
     Args:
         intermediate_image: The generic identity image to modify
         run_num: Number for filename
-        
+
     Returns: PIL Image with face swapped
     """
     print()
@@ -306,7 +317,7 @@ def face_swap(intermediate_image: Image.Image, run_num: int) -> Image.Image:
     print("=" * 60)
     print(f"Using {len(REFERENCE_IMAGES)} reference images for face swap")
     print()
-    
+
     # Load reference images
     reference_images = []
     for ref_path in REFERENCE_IMAGES:
@@ -315,35 +326,37 @@ def face_swap(intermediate_image: Image.Image, run_num: int) -> Image.Image:
             print(f"  Loaded: {ref_path}")
         else:
             print(f"  WARNING: Reference image not found: {ref_path}")
-    
+
     if not reference_images:
         print("ERROR: No reference images found!")
         sys.exit(1)
-    
+
     print()
-    
+
     # Build content list: reference faces first to establish the person,
     # then the scene image, then the instruction
     # This tells the model "here's the person" -> "here's the scene" -> "put this person in this scene"
     contents = reference_images + [intermediate_image, FACE_SWAP_PROMPT]
-    
+
     response = client.models.generate_content(
         model="gemini-3-pro-image-preview",
         contents=contents,
         config=types.GenerateContentConfig(
             response_modalities=["TEXT", "IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION),
+            image_config=types.ImageConfig(
+                aspect_ratio=ASPECT_RATIO, image_size=RESOLUTION
+            ),
         ),
     )
-    
+
     # Process response
     thinking_count = 0
     final_image = None
     final_path = f"{OUTPUT_DIR}/face_swap_final_{run_num:02d}.png"
-    
+
     for part in response.parts:
-        is_thinking = getattr(part, 'thought', False)
-        
+        is_thinking = getattr(part, "thought", False)
+
         if is_thinking:
             if SHOW_THINKING:
                 if part.text is not None:
@@ -361,14 +374,14 @@ def face_swap(intermediate_image: Image.Image, run_num: int) -> Image.Image:
                 final_image = part.as_image()
                 final_image.save(final_path)
                 print(f"Saved final image: {final_path}")
-    
+
     if final_image is None:
         print("ERROR: Failed to perform face swap")
         sys.exit(1)
-    
+
     if thinking_count > 0:
         print(f"  ({thinking_count} thinking images generated)")
-    
+
     return final_image
 
 
@@ -381,34 +394,36 @@ if __name__ == "__main__":
     # Usage:
     #   python face_swap.py                              # Generate new intermediate + face swap
     #   python face_swap.py path/to/image.png            # Use provided image as intermediate + face swap
-    
+
     provided_intermediate_path = None
     for arg in sys.argv[1:]:
         if not arg.startswith("--") and os.path.exists(arg):
             provided_intermediate_path = arg
             break
-    
+
     # Get next available run number
     run_num = get_next_face_swap_number()
     print(f"Run number: {run_num:02d}")
     print()
-    
+
     if provided_intermediate_path:
         # Use provided intermediate image
         print(f"Using provided intermediate image: {provided_intermediate_path}")
         intermediate_image = Image.open(provided_intermediate_path)
-        
+
         # Save a copy as the intermediate for this run
-        intermediate_save_path = f"{OUTPUT_DIR}/face_swap_intermediate_{run_num:02d}.png"
+        intermediate_save_path = (
+            f"{OUTPUT_DIR}/face_swap_intermediate_{run_num:02d}.png"
+        )
         intermediate_image.save(intermediate_save_path)
         print(f"Saved copy as: {intermediate_save_path}")
     else:
         # Step 1: Generate generic identity image
         intermediate_image, _ = generate_generic_identity(run_num)
-    
+
     # Step 2: Face swap
     final_image = face_swap(intermediate_image, run_num)
-    
+
     print()
     print("=" * 60)
     print("DONE!")

@@ -1,12 +1,12 @@
-from apps.users.models import User
-from apps.coach_states.models import CoachState
-from apps.identities.models import Identity
-from apps.chat_messages.models import ChatMessage
-from apps.user_notes.models import UserNote
-from apps.actions.models import Action
 import hashlib
 import uuid
-import os
+
+from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
+from apps.identities.models import Identity
+from apps.user_notes.models import UserNote
+from apps.users.models import User
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -60,15 +60,20 @@ def instantiate_test_scenario(
         user_data.pop("updated_at", None)
         user_data.pop("last_login", None)
         user_data.pop("date_joined", None)
-        
+
         try:
             user = User(**user_data, test_scenario=scenario)
             user.set_password(password)
             user.save()
             created_user = user
-            log.info(f"Created user {created_user.id} ({unique_email}) for test scenario {scenario.id}")
+            log.info(
+                f"Created user {created_user.id} ({unique_email}) for test scenario {scenario.id}"
+            )
         except Exception as e:
-            log.error(f"Failed to create user for test scenario {scenario.id}: {str(e)}", exc_info=True)
+            log.error(
+                f"Failed to create user for test scenario {scenario.id}: {str(e)}",
+                exc_info=True,
+            )
             log.error(f"User data that was attempted: {user_data}")
             raise ValueError(f"Failed to create user: {str(e)}") from e
 
@@ -77,11 +82,17 @@ def instantiate_test_scenario(
     created_identities = {}
     if create_identities and template.get("identities"):
         if not created_user:
-            log.error("Cannot create identities: user was not created. Skipping identity creation.")
-            raise ValueError("Cannot create identities: user creation failed or was skipped")
-        
+            log.error(
+                "Cannot create identities: user was not created. Skipping identity creation."
+            )
+            raise ValueError(
+                "Cannot create identities: user creation failed or was skipped"
+            )
+
         if not created_user.id:
-            log.error("Cannot create identities: created user has no ID. Skipping identity creation.")
+            log.error(
+                "Cannot create identities: created user has no ID. Skipping identity creation."
+            )
             raise ValueError("Cannot create identities: created user has no ID")
         # Delete existing identities for this user and scenario
         Identity.objects.filter(user=created_user, test_scenario=scenario).delete()
@@ -100,6 +111,7 @@ def instantiate_test_scenario(
             image_url = identity_data.get("image")
             if image_url:
                 from .utils import copy_image_from_url
+
                 copied_key = copy_image_from_url(image_url)
                 if copied_key:
                     # Strip "media/" prefix if present - VersatileImageField adds it via location setting
@@ -109,9 +121,13 @@ def instantiate_test_scenario(
                     else:
                         image_path = copied_key
                     identity.image.name = image_path
-                    log.info(f"Copied image for identity {identity.name} from {image_url} to {copied_key} (stored as {image_path})")
+                    log.info(
+                        f"Copied image for identity {identity.name} from {image_url} to {copied_key} (stored as {image_path})"
+                    )
                 else:
-                    log.warning(f"Failed to copy image for identity {identity.name} from {image_url}, continuing without image")
+                    log.warning(
+                        f"Failed to copy image for identity {identity.name} from {image_url}, continuing without image"
+                    )
             identity.save()
             # Store reference by name for later linking
             created_identities[identity.name] = identity
@@ -177,7 +193,7 @@ def instantiate_test_scenario(
                 component_config=msg_data.get("component_config"),
             )
             created_chat_messages.append(chat_message)
-            
+
             # Create mapping key from message data for action linking
             message_key = f"{msg_data.get('role')}|{msg_data.get('content')}|{msg_data.get('timestamp', '')}"
             original_to_new_message_mapping[message_key] = chat_message
@@ -201,73 +217,97 @@ def instantiate_test_scenario(
     if create_actions and template.get("actions") and created_user:
         # Delete existing actions for this user and scenario
         Action.objects.filter(user=created_user, test_scenario=scenario).delete()
-        
+
         for action_data in template["actions"]:
             # Find the corresponding coach message using ID-based mapping (preferred) or content matching (fallback)
             coach_message = None
-            
+
             # Try ID-based mapping first (new approach)
-            if action_data.get("original_coach_message_id") and template.get("original_message_mapping"):
+            if action_data.get("original_coach_message_id") and template.get(
+                "original_message_mapping"
+            ):
                 # Get the original message data from the mapping
                 original_msg_id = action_data["original_coach_message_id"]
-                original_msg_data = template["original_message_mapping"].get(original_msg_id)
-                
+                original_msg_data = template["original_message_mapping"].get(
+                    original_msg_id
+                )
+
                 if original_msg_data:
                     # Create the same mapping key used when creating messages
                     message_key = f"{original_msg_data.get('role')}|{original_msg_data.get('content')}|{original_msg_data.get('timestamp', '')}"
                     coach_message = original_to_new_message_mapping.get(message_key)
-                    
+
                     if not coach_message:
-                        log.warning(f"Could not find new message for original ID {original_msg_id}, using fallback")
+                        log.warning(
+                            f"Could not find new message for original ID {original_msg_id}, using fallback"
+                        )
                         # Fallback to most recent coach message
-                        coach_message = ChatMessage.objects.filter(
-                            user=created_user,
-                            test_scenario=scenario,
-                            role="coach"
-                        ).order_by("-timestamp").first()
+                        coach_message = (
+                            ChatMessage.objects.filter(
+                                user=created_user, test_scenario=scenario, role="coach"
+                            )
+                            .order_by("-timestamp")
+                            .first()
+                        )
                 else:
-                    log.warning(f"Original message data not found for ID {original_msg_id}, using fallback")
+                    log.warning(
+                        f"Original message data not found for ID {original_msg_id}, using fallback"
+                    )
                     # Fallback to most recent coach message
-                    coach_message = ChatMessage.objects.filter(
-                        user=created_user,
-                        test_scenario=scenario,
-                        role="coach"
-                    ).order_by("-timestamp").first()
-            
+                    coach_message = (
+                        ChatMessage.objects.filter(
+                            user=created_user, test_scenario=scenario, role="coach"
+                        )
+                        .order_by("-timestamp")
+                        .first()
+                    )
+
             # Fallback to content-based matching for old templates
             elif action_data.get("coach_message_content"):
-                log.warning("Using deprecated coach_message_content field, consider updating template")
+                log.warning(
+                    "Using deprecated coach_message_content field, consider updating template"
+                )
                 # Use filter().first() instead of get() to handle multiple matches
                 coach_messages = ChatMessage.objects.filter(
                     user=created_user,
                     test_scenario=scenario,
                     role="coach",
-                    content=action_data["coach_message_content"]
+                    content=action_data["coach_message_content"],
                 ).order_by("-timestamp")
-                
+
                 if coach_messages.exists():
                     coach_message = coach_messages.first()
                     # Log if we found multiple matches to help with debugging
                     if coach_messages.count() > 1:
-                        log.warning(f"Found {coach_messages.count()} coach messages with same content, using most recent")
+                        log.warning(
+                            f"Found {coach_messages.count()} coach messages with same content, using most recent"
+                        )
                 else:
                     # If no exact match, try to find the most recent coach message
-                    log.warning("No exact coach message match found, using fallback chat message for action relationship")
-                    coach_message = ChatMessage.objects.filter(
-                        user=created_user,
-                        test_scenario=scenario,
-                        role="coach"
-                    ).order_by("-timestamp").first()
-            
+                    log.warning(
+                        "No exact coach message match found, using fallback chat message for action relationship"
+                    )
+                    coach_message = (
+                        ChatMessage.objects.filter(
+                            user=created_user, test_scenario=scenario, role="coach"
+                        )
+                        .order_by("-timestamp")
+                        .first()
+                    )
+
             # Final fallback
             else:
-                log.debug("No coach message linking found, using fallback chat message for action relationship")
-                coach_message = ChatMessage.objects.filter(
-                    user=created_user,
-                    test_scenario=scenario,
-                    role="coach"
-                ).order_by("-timestamp").first()
-            
+                log.debug(
+                    "No coach message linking found, using fallback chat message for action relationship"
+                )
+                coach_message = (
+                    ChatMessage.objects.filter(
+                        user=created_user, test_scenario=scenario, role="coach"
+                    )
+                    .order_by("-timestamp")
+                    .first()
+                )
+
             # Create the action
             action = Action(
                 user=created_user,
@@ -276,7 +316,9 @@ def instantiate_test_scenario(
                 parameters=action_data.get("parameters", {}),
                 result_summary=action_data.get("result_summary", ""),
                 timestamp=(
-                    action_data.get("timestamp") if action_data.get("timestamp") else None
+                    action_data.get("timestamp")
+                    if action_data.get("timestamp")
+                    else None
                 ),
                 coach_message=coach_message,
             )

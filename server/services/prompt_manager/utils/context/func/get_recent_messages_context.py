@@ -1,8 +1,8 @@
 from typing import List
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
+
 from apps.actions.models import Action
-from datetime import datetime
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 
 
 def get_recent_messages_context(coach_state: CoachState, num_messages: int = 5) -> str:

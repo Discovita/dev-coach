@@ -2,7 +2,8 @@
 Mixin for message-related functionality in OpenAIService.
 """
 
-from typing import Any, List, Optional
+from typing import List, Optional
+
 from openai.types.chat import ChatCompletionMessageParam
 
 from apps.chat_messages.models import ChatMessage

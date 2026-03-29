@@ -5,17 +5,17 @@ This module provides the abstract base class that defines the interface
 for all AI service implementations.
 """
 
-from abc import ABC, abstractmethod
-from typing import Optional, Union, Type
-
-from pydantic import BaseModel
-from enums.ai import AIModel, AIProvider
-from models.CoachChatResponse import CoachChatResponse
-from models.SentinelChatResponse import SentinelChatResponse
 import json
 import re
+from abc import ABC, abstractmethod
+from typing import Optional, Type, Union
+
+from pydantic import BaseModel
 
 from apps.chat_messages.models import ChatMessage
+from enums.ai import AIProvider
+from models.CoachChatResponse import CoachChatResponse
+from models.SentinelChatResponse import SentinelChatResponse
 from services.logger import configure_logging
 
 log = configure_logging(__name__)

@@ -1,9 +1,10 @@
-from typing import List, Tuple, Optional
-from enums.action_type import ActionType
-from apps.coach_states.models import CoachState
+from typing import List, Optional, Tuple
+
 from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
+from enums.action_type import ActionType
 from models.CoachChatResponse import CoachChatResponse
-from models.components.ComponentConfig import ComponentConfig, ComponentAction
+from models.components.ComponentConfig import ComponentAction, ComponentConfig
 from services.action_handler.actions import *
 from services.logger import configure_logging
 
@@ -173,6 +174,7 @@ def apply_component_actions(
         # Convert dictionary params to appropriate Pydantic model
         # Get the parameter model class from the action handler's signature
         import inspect
+
         sig = inspect.signature(handler_func)
         param_annotations = list(sig.parameters.values())
         if len(param_annotations) >= 2:  # coach_state, params, [user_message]
@@ -182,7 +184,9 @@ def apply_component_actions(
                 try:
                     action_params = params_param.annotation(**action_params)
                 except Exception as e:
-                    log.error(f"Failed to convert params to {params_param.annotation}: {e}")
+                    log.error(
+                        f"Failed to convert params to {params_param.annotation}: {e}"
+                    )
                     continue
 
         # Execute the action handler
@@ -192,10 +196,10 @@ def apply_component_actions(
             ActionType.DELETE_USER_NOTE.value,
         ]:
             # These Sentinel actions don't take user_message as a parameter because they are not logged in the Action table
-            result = handler_func(coach_state, action_params)
+            handler_func(coach_state, action_params)
         else:
             # All other actions take user_message as a parameter because they get logged in the Action table
-            result = handler_func(coach_state, action_params, user_message)
+            handler_func(coach_state, action_params, user_message)
 
         log.action(f"COMPONENT PARAMS:\t  {action_params}")
 

@@ -21,12 +21,12 @@ class StartImageChatRequestSerializer(serializers.Serializer):
 
     user_id = serializers.UUIDField(
         required=False,
-        help_text="UUID of the user (admin only - omit for user endpoints)"
+        help_text="UUID of the user (admin only - omit for user endpoints)",
     )
 
     additional_prompt = serializers.CharField(
         required=False,
         allow_blank=True,
         default="",
-        help_text="Optional additional instructions for image generation"
+        help_text="Optional additional instructions for image generation",
     )

@@ -1,17 +1,14 @@
-from django.shortcuts import render
-from rest_framework import mixins, viewsets, status
-from rest_framework.response import Response
-from .models import Prompt
-from .serializers import PromptSerializer
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework import status
+
 from enums.coaching_phase import CoachingPhase
 from enums.prompt_type import PromptType
-from apps.prompts.serializers import PromptSerializer
-
 from services.logger import configure_logging
+
+from .models import Prompt
+from .serializers import PromptSerializer
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -74,13 +71,12 @@ class PromptViewSet(
         data = request.data.copy()
         coaching_phase = data.get("coaching_phase")
         prompt_type = data.get("prompt_type", PromptType.COACH)
-        
+
         if coaching_phase:
             # Find the latest version for this coaching_phase and prompt_type
             latest = (
                 Prompt.objects.filter(
-                    coaching_phase=coaching_phase,
-                    prompt_type=prompt_type
+                    coaching_phase=coaching_phase, prompt_type=prompt_type
                 )
                 .order_by("-version")
                 .first()
@@ -91,14 +87,13 @@ class PromptViewSet(
             # find latest version by prompt_type
             latest = (
                 Prompt.objects.filter(
-                    coaching_phase__isnull=True,
-                    prompt_type=prompt_type
+                    coaching_phase__isnull=True, prompt_type=prompt_type
                 )
                 .order_by("-version")
                 .first()
             )
             data["version"] = (latest.version + 1) if latest else 1
-        
+
         serializer = PromptSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -171,59 +166,62 @@ class PromptViewSet(
         GET /api/prompts/latest?coaching_phase=introduction
         Returns: 200 OK, the most recent active prompt for the specified phase.
         """
-        coaching_phase = request.query_params.get('coaching_phase')
-        
+        coaching_phase = request.query_params.get("coaching_phase")
+
         if not coaching_phase:
             return Response(
                 {
                     "success": False,
                     "error": "Missing required parameter",
-                    "detail": "coaching_phase query parameter is required"
+                    "detail": "coaching_phase query parameter is required",
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         # Validate coaching_phase against enum
         try:
             CoachingPhase.from_string(coaching_phase)
-        except ValueError as e:
+        except ValueError:
             valid_phases = [phase.value for phase in CoachingPhase]
             return Response(
                 {
                     "success": False,
                     "error": "Invalid coaching phase",
-                    "detail": f"Invalid coaching_phase: {coaching_phase}. Valid phases: {valid_phases}"
+                    "detail": f"Invalid coaching_phase: {coaching_phase}. Valid phases: {valid_phases}",
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         # Get the latest active prompt for the specified phase
         try:
-            latest_prompt = Prompt.objects.filter(
-                coaching_phase=coaching_phase,
-                is_active=True
-            ).order_by('-version').first()
-            
+            latest_prompt = (
+                Prompt.objects.filter(coaching_phase=coaching_phase, is_active=True)
+                .order_by("-version")
+                .first()
+            )
+
             if not latest_prompt:
                 return Response(
                     {
                         "success": False,
                         "error": "No prompt found",
-                        "detail": f"No active prompt found for coaching phase: {coaching_phase}"
+                        "detail": f"No active prompt found for coaching phase: {coaching_phase}",
                     },
-                    status=status.HTTP_404_NOT_FOUND
+                    status=status.HTTP_404_NOT_FOUND,
                 )
-            
+
             serializer = PromptSerializer(latest_prompt)
             return Response(serializer.data, status=status.HTTP_200_OK)
-            
+
         except Exception as exc:
-            log.error(f"Error retrieving latest prompt for phase {coaching_phase}: {str(exc)}")
+            log.error(
+                f"Error retrieving latest prompt for phase {coaching_phase}: {str(exc)}"
+            )
             return Response(
                 {
                     "success": False,
                     "error": "Server error",
-                    "detail": "An error occurred while retrieving the latest prompt"
+                    "detail": "An error occurred while retrieving the latest prompt",
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

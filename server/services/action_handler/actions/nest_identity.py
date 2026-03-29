@@ -1,10 +1,10 @@
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.action_type import ActionType
-from enums.identity_state import IdentityState
 from enums.coaching_phase import CoachingPhase
+from enums.identity_state import IdentityState
 from services.action_handler.models import NestIdentityParams
 from services.action_handler.utils import set_current_identity_to_next_pending
 from services.logger import configure_logging
@@ -17,7 +17,7 @@ def nest_identity(
 ):
     """
     Nest an identity under a parent identity.
-    
+
     Step-by-step:
     1. Validates both identities exist and belong to the user
     2. Adds a note to the parent identity indicating the nested identity was nested under it
@@ -38,9 +38,11 @@ def nest_identity(
             user=coach_state.user, id__in=[nested_identity_id, parent_identity_id]
         )
     )
-    
+
     if len(identities) != 2:
-        raise ValueError("nest_identity requires exactly two valid identities for the user")
+        raise ValueError(
+            "nest_identity requires exactly two valid identities for the user"
+        )
 
     # Map identities
     identity_map = {str(i.id): i for i in identities}
@@ -52,7 +54,7 @@ def nest_identity(
 
     nested_identity_name = nested_identity.name or "Unnamed Identity"
     parent_identity_name = parent_identity.name or "Unnamed Identity"
-    
+
     log.debug(
         f"Nesting identity '{nested_identity_name}' ({nested_identity_id}) under '{parent_identity_name}' ({parent_identity_id})"
     )
@@ -60,25 +62,33 @@ def nest_identity(
     # Copy all notes from nested identity to parent identity
     parent_notes = list(parent_identity.notes or [])
     nested_notes = list(nested_identity.notes or [])
-    
+
     # Add a note indicating that we nested the nested identity under this parent
-    parent_notes.append(f"Nested '{nested_identity_name}' identity under this identity.")
-    
+    parent_notes.append(
+        f"Nested '{nested_identity_name}' identity under this identity."
+    )
+
     # Append nested notes with prefix indicating they came from the nested identity
-    prefixed_nested_notes = [f"[from {nested_identity_name}]: {note}" for note in nested_notes]
+    prefixed_nested_notes = [
+        f"[from {nested_identity_name}]: {note}" for note in nested_notes
+    ]
     parent_notes.extend(prefixed_nested_notes)
-    
+
     parent_identity.notes = parent_notes
     parent_identity.save(update_fields=["notes", "updated_at"])
 
     # Archive the nested identity and add note about nesting
     archive_notes = list(nested_identity.notes or [])
-    archive_notes.append(f"[Nested under {parent_identity_name}]: This identity was nested under '{parent_identity_name}'.")
+    archive_notes.append(
+        f"[Nested under {parent_identity_name}]: This identity was nested under '{parent_identity_name}'."
+    )
     nested_identity.notes = archive_notes
     nested_identity.state = IdentityState.ARCHIVED
     nested_identity.save(update_fields=["state", "notes", "updated_at"])
 
-    log.debug(f"Nested identity '{nested_identity_name}' under '{parent_identity_name}'")
+    log.debug(
+        f"Nested identity '{nested_identity_name}' under '{parent_identity_name}'"
+    )
     log.debug(f"Parent identity notes count: {len(parent_identity.notes)}")
 
     # Log the action
@@ -100,7 +110,8 @@ def nest_identity(
 
     # Set current_identity to the next pending identity based on current phase
     if coach_state.current_phase == CoachingPhase.IDENTITY_COMMITMENT.value:
-        set_current_identity_to_next_pending(coach_state, IdentityState.COMMITMENT_COMPLETE)
+        set_current_identity_to_next_pending(
+            coach_state, IdentityState.COMMITMENT_COMPLETE
+        )
 
     return None
-

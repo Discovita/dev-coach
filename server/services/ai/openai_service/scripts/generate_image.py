@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import base64
+import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 from openai import OpenAI
 

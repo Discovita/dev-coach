@@ -5,8 +5,8 @@ This module contains functions that handle various errors that can occur
 during chat completion API calls.
 """
 
-from typing import Dict, Any
 import logging
+from typing import Any, Dict
 
 log = logging.getLogger(__name__)
 

@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name='prompt',
-            old_name='coach_state',
-            new_name='coaching_phase',
+            model_name="prompt",
+            old_name="coach_state",
+            new_name="coaching_phase",
         ),
         migrations.AlterUniqueTogether(
-            name='prompt',
-            unique_together={('coaching_phase', 'version')},
+            name="prompt",
+            unique_together={("coaching_phase", "version")},
         ),
     ]

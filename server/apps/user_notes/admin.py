@@ -1,7 +1,9 @@
 from django.contrib import admin
+
 from .models import UserNote
 
 # Register your models here.
+
 
 @admin.register(UserNote)
 class UserNoteAdmin(admin.ModelAdmin):
@@ -13,5 +15,6 @@ class UserNoteAdmin(admin.ModelAdmin):
     def test_scenario_display(self, obj):
         """Display the name of the associated test scenario, if any."""
         return obj.test_scenario.name if obj.test_scenario else None
+
     test_scenario_display.short_description = "Test Scenario"
     test_scenario_display.admin_order_field = "test_scenario__name"

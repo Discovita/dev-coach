@@ -1,9 +1,10 @@
-from google import genai
-from pathlib import Path
-from dotenv import load_dotenv
 import os
-from PIL import Image
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google import genai
 from google.genai import types
+from PIL import Image
 
 # Load environment variables from server/.env
 script_path = Path(__file__).resolve()

@@ -4,7 +4,9 @@ Utility to build the response data structure returned to the client.
 This packages up the coach's message, the prompt that was used, and any
 component configuration into the format expected by the frontend.
 """
-from typing import Dict, Any
+
+from typing import Any, Dict
+
 from models.components.ComponentConfig import ComponentConfig
 
 
@@ -38,4 +40,3 @@ def build_coach_response_data(
         response_data["component"] = component_config.model_dump()
 
     return response_data
-

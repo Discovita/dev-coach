@@ -5,6 +5,7 @@ Provides inline admin for viewing reference images when editing a User.
 
 from django.contrib import admin
 from django.utils.html import format_html
+
 from apps.reference_images.models import ReferenceImage
 
 
@@ -13,6 +14,7 @@ class ReferenceImageInline(admin.TabularInline):
     Inline admin for ReferenceImage model.
     Shows reference images when viewing/editing a User in the admin panel.
     """
+
     model = ReferenceImage
     extra = 0
     readonly_fields = ("id", "order", "image_preview", "created_at", "updated_at")
@@ -30,7 +32,7 @@ class ReferenceImageInline(admin.TabularInline):
                 thumbnail_url = obj.image.thumbnail["100x100"].url
                 return format_html(
                     '<img src="{}" style="max-width: 100px; max-height: 100px; object-fit: contain;" />',
-                    thumbnail_url
+                    thumbnail_url,
                 )
             except Exception:
                 # Fallback to original URL if thumbnail generation fails
@@ -38,12 +40,12 @@ class ReferenceImageInline(admin.TabularInline):
                     original_url = obj.image.url
                     return format_html(
                         '<img src="{}" style="max-width: 100px; max-height: 100px; object-fit: contain;" />',
-                        original_url
+                        original_url,
                     )
                 except Exception:
                     return "Image unavailable"
         return "No image"
-    
+
     image_preview.short_description = "Preview"
 
 
@@ -53,11 +55,29 @@ class ReferenceImageAdmin(admin.ModelAdmin):
     Standalone admin for ReferenceImage model.
     Allows direct management of reference images.
     """
-    list_display = ("id", "user", "name", "order", "image_preview", "created_at", "updated_at")
+
+    list_display = (
+        "id",
+        "user",
+        "name",
+        "order",
+        "image_preview",
+        "created_at",
+        "updated_at",
+    )
     list_filter = ("created_at", "updated_at", "order")
     search_fields = ("user__email", "user__first_name", "user__last_name", "name")
     readonly_fields = ("id", "image_preview", "created_at", "updated_at")
-    fields = ("id", "user", "name", "order", "image", "image_preview", "created_at", "updated_at")
+    fields = (
+        "id",
+        "user",
+        "name",
+        "order",
+        "image",
+        "image_preview",
+        "created_at",
+        "updated_at",
+    )
     raw_id_fields = ("user",)
 
     def image_preview(self, obj):
@@ -68,7 +88,7 @@ class ReferenceImageAdmin(admin.ModelAdmin):
                 thumbnail_url = obj.image.thumbnail["100x100"].url
                 return format_html(
                     '<img src="{}" style="max-width: 200px; max-height: 200px; object-fit: contain;" />',
-                    thumbnail_url
+                    thumbnail_url,
                 )
             except Exception:
                 # Fallback to original URL if thumbnail generation fails
@@ -76,10 +96,10 @@ class ReferenceImageAdmin(admin.ModelAdmin):
                     original_url = obj.image.url
                     return format_html(
                         '<img src="{}" style="max-width: 200px; max-height: 200px; object-fit: contain;" />',
-                        original_url
+                        original_url,
                     )
                 except Exception:
                     return "Image unavailable"
         return "No image"
-    
+
     image_preview.short_description = "Preview"
