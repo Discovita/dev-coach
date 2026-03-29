@@ -1,12 +1,11 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from apps.chat_messages.utils import add_chat_message
+from apps.chat_messages.utils import add_chat_message, ensure_initial_message_exists
 from apps.coach.services.coach_service.utils import (
     apply_coach_response_actions,
     apply_user_component_actions,
     build_coach_prompt,
     build_coach_response_data,
-    ensure_initial_message_exists,
     generate_coach_ai_response,
     get_recent_chat_messages_for_prompt,
 )

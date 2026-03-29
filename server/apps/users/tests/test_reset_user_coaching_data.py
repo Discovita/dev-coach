@@ -135,11 +135,12 @@ class ResetUserCoachingDataFunctionTests(TestCase):
 
         self.assertIsNotNone(result)
 
-    @patch("apps.users.utils.ensure_initial_message_exists.get_initial_message")
-    def test_adds_initial_message(self, mock_get_initial):
+    @patch(
+        "apps.chat_messages.utils.ensure_initial_message_exists.INITIAL_MESSAGE",
+        "Welcome back!",
+    )
+    def test_adds_initial_message(self):
         """Test that initial message is added after reset."""
-        mock_get_initial.return_value = "Welcome back!"
-
         messages = reset_user_coaching_data(self.user)
 
         self.assertEqual(len(messages), 1)
