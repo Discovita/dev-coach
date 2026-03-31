@@ -1,3 +1,9 @@
+"""
+Delete a reference image and its associated file.
+
+See: apps/reference_images/functions/public/__init__.py
+"""
+
 from django.db import transaction
 
 from apps.reference_images.models import ReferenceImage

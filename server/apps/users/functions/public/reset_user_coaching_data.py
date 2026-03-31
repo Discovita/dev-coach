@@ -11,11 +11,11 @@ from django.db import transaction
 
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
+from apps.chat_messages.utils import ensure_initial_message_exists
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from apps.user_notes.models import UserNote
 from apps.users.models import User
-from apps.users.utils import ensure_initial_message_exists
 from enums.coaching_phase import CoachingPhase
 from enums.identity_category import IdentityCategory
 

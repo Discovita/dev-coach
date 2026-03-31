@@ -1,9 +1,6 @@
 from rest_framework import serializers
 
 from enums.ai import AIModel
-from services.logger import configure_logging
-
-log = configure_logging(__name__, log_level="DEBUG")
 
 
 class CoachRequestSerializer(serializers.Serializer):

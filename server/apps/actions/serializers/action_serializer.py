@@ -5,7 +5,7 @@ Read-only serializer for Action API responses.
 from rest_framework import serializers
 
 from apps.actions.models import Action
-from apps.chat_messages.serializer import ChatMessageSerializer
+from apps.chat_messages.serializers import ChatMessageSerializer
 
 
 class ActionSerializer(serializers.ModelSerializer):

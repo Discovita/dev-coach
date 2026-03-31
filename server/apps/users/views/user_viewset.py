@@ -1,30 +1,32 @@
 """
 UserViewSet for authenticated user endpoints.
 
-This module contains the viewset for user-related endpoints where the authenticated
-user accesses their own data (me/ endpoints).
+Provides ``me/`` endpoints where the authenticated user accesses their own
+data (profile, coach state, identities, chat messages, etc.).
+
+See: apps/users/views/__init__.py
 """
 
-from rest_framework import decorators, viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework import decorators, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.chat_messages.utils import ensure_initial_message_exists
 from apps.users.functions import (
     get_user_chat_messages,
     get_user_identities,
     reset_user_coaching_data,
 )
 from apps.users.serializers import UserProfileSerializer, UserSerializer
-from apps.users.utils import ensure_initial_message_exists
-from services.logger import configure_logging
-
-log = configure_logging(__name__, log_level="DEBUG")
 
 
 class UserViewSet(viewsets.GenericViewSet):
     """
-    ViewSet for user related endpoints.
+    Authenticated-user ViewSet for ``me/`` endpoints.
+
+    All actions operate on ``request.user`` — no PK is needed.
     """
 
     @decorators.action(
@@ -35,17 +37,9 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     def me(self, request: Request):
         """
-        Get or update current user data.
-
-        GET /api/v1/user/me/
-        Returns: UserProfileSerializer data
-
-        PATCH /api/v1/user/me/
-        Body: Partial user data (see UserProfileSerializer)
-        Returns: 200 OK, updated user profile object.
+        GET  /api/v1/user/me/ — current user profile.
+        PATCH /api/v1/user/me/ — partial profile update.
         """
-        from rest_framework import status
-
         if request.method == "PATCH":
             serializer = UserProfileSerializer(
                 request.user, data=request.data, partial=True
@@ -54,9 +48,8 @@ class UserViewSet(viewsets.GenericViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            # GET request
-            return Response(UserProfileSerializer(request.user).data)
+
+        return Response(UserProfileSerializer(request.user).data)
 
     @decorators.action(
         detail=False,
@@ -65,9 +58,7 @@ class UserViewSet(viewsets.GenericViewSet):
         url_path="me/complete",
     )
     def complete(self, request: Request):
-        """
-        Get current user data, ensuring the chat history contains the initial bot message if empty.
-        """
+        """GET /api/v1/user/me/complete — full user data with initial message guarantee."""
         ensure_initial_message_exists(request.user)
         return Response(UserSerializer(request.user).data)
 
@@ -78,16 +69,11 @@ class UserViewSet(viewsets.GenericViewSet):
         url_path="me/coach-state",
     )
     def coach_state(self, request: Request):
-        """
-        Get the authenticated user's coach state.
-        """
+        """GET /api/v1/user/me/coach-state."""
         from apps.coach_states.models import CoachState
         from apps.coach_states.serializers import CoachStateSerializer
 
-        try:
-            coach_state = CoachState.objects.get(user=request.user)
-        except CoachState.DoesNotExist:
-            return Response({"detail": "Coach state not found."}, status=404)
+        coach_state = get_object_or_404(CoachState, user=request.user)
         return Response(CoachStateSerializer(coach_state).data)
 
     @decorators.action(
@@ -98,15 +84,11 @@ class UserViewSet(viewsets.GenericViewSet):
     )
     def identities(self, request: Request):
         """
-        Get the authenticated user's identities.
-        Query parameters:
-        - include_archived=true: Include archived identities
-        - archived_only=true: Return only archived identities
-        By default, excludes archived identities.
+        GET /api/v1/user/me/identities — with archive filtering.
+
+        Query params: ``include_archived``, ``archived_only`` (default ``false``).
         """
         from apps.identities.serializers import IdentitySerializer
-
-        log.debug(f"Identities Request: {request.user}")
 
         include_archived = (
             request.query_params.get("include_archived", "false").lower() == "true"
@@ -114,16 +96,12 @@ class UserViewSet(viewsets.GenericViewSet):
         archived_only = (
             request.query_params.get("archived_only", "false").lower() == "true"
         )
-
         identities = get_user_identities(
             user=request.user,
             include_archived=include_archived,
             archived_only=archived_only,
         )
-
-        response = IdentitySerializer(identities, many=True).data
-        log.debug(f"Identities Response: {response}")
-        return Response(response)
+        return Response(IdentitySerializer(identities, many=True).data)
 
     @decorators.action(
         detail=False,
@@ -132,9 +110,7 @@ class UserViewSet(viewsets.GenericViewSet):
         url_path="me/actions",
     )
     def actions(self, request: Request):
-        """
-        Get the authenticated user's actions.
-        """
+        """GET /api/v1/user/me/actions."""
         from apps.actions.models import Action
         from apps.actions.serializers import ActionSerializer
 
@@ -148,11 +124,8 @@ class UserViewSet(viewsets.GenericViewSet):
         url_path="me/chat-messages",
     )
     def chat_messages(self, request: Request):
-        """
-        Get the authenticated user's chat messages.
-        If the chat history is empty, add the initial bot message and return it.
-        """
-        from apps.chat_messages.serializer import ChatMessageSerializer
+        """GET /api/v1/user/me/chat-messages — with initial message guarantee."""
+        from apps.chat_messages.serializers import ChatMessageSerializer
 
         messages = get_user_chat_messages(request.user)
         return Response(ChatMessageSerializer(messages, many=True).data)
@@ -164,10 +137,8 @@ class UserViewSet(viewsets.GenericViewSet):
         url_path="me/reset-chat-messages",
     )
     def reset_chat_messages(self, request: Request):
-        """
-        Reset (delete) all chat messages, identities, and user notes for the authenticated user, and reset their CoachState.
-        """
-        from apps.chat_messages.serializer import ChatMessageSerializer
+        """POST /api/v1/user/me/reset-chat-messages — reset all coaching data."""
+        from apps.chat_messages.serializers import ChatMessageSerializer
 
         messages = reset_user_coaching_data(request.user)
         return Response(ChatMessageSerializer(messages, many=True).data)

@@ -8,8 +8,8 @@ bot message exists if the chat history is empty.
 from typing import List
 
 from apps.chat_messages.models import ChatMessage
+from apps.chat_messages.utils import ensure_initial_message_exists
 from apps.users.models import User
-from apps.users.utils import ensure_initial_message_exists
 
 
 def get_user_chat_messages(user: User) -> List[ChatMessage]:

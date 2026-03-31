@@ -13,12 +13,12 @@ from django.http import FileResponse
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from apps.identities.models import Identity
 from apps.identities.serializers import IdentitySerializer
 from apps.reference_images.models import ReferenceImage
+from permissions import IsAdminUser
 from services.image_generation.orchestration import generate_identity_image
 from services.logger import configure_logging
 from services.pdf import PDFService

@@ -1,12 +1,12 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.coach.serializers import AdminCoachRequestSerializer, CoachResponseSerializer
 from apps.coach.services.coach_service import CoachService
+from permissions import IsAdminUser
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
