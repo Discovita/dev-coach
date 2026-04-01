@@ -128,7 +128,7 @@ There are entire directories of experimental code sitting in the services tree t
 
 **Goal:** All admin-only endpoints live under the `/api/v1/admin/` prefix with consistent naming.
 
-**Status:** Not started
+**Status:** Complete
 
 **Problem:**
 `TestUserViewSet` and `TestScenarioViewSet` are registered on the default router but are admin-only operations. This breaks the convention established by `AdminCoachViewSet`, `AdminIdentityViewSet`, and `AdminIdentityImageChatViewSet`, which correctly live under `/api/v1/admin/`.
@@ -154,17 +154,19 @@ There are entire directories of experimental code sitting in the services tree t
 | `/api/v1/test-scenarios/freeze-session` | **Default** | Move to admin |
 
 **Naming decision needed:** The `test-user` prefix conflates "admin impersonation" with "test scenarios." Consider renaming:
-- Option A: `/api/v1/admin/user/{id}/...` — treats it as generic admin user viewing (more flexible)
+- ~~Option A: `/api/v1/admin/user/{id}/...` — treats it as generic admin user viewing (more flexible)~~
 - Option B: `/api/v1/admin/test-user/{id}/...` — keeps the test-specific naming but at least puts it under admin
 
 **Tasks:**
-- [ ] Decide on naming convention (Option A vs B)
-- [ ] Move `TestUserViewSet` to admin router in `api_urls.py`
-- [ ] Move `TestScenarioViewSet` to admin router in `api_urls.py`
-- [ ] Update all frontend API calls in **both** frontends (gold `client/src/api/testScenarioUser.ts` and purple `client/src/api/testScenarioUser.ts`)
-- [ ] Update frontend constants in `constants/api.ts`
-- [ ] Update any backend tests referencing old URLs
-- [ ] Update API documentation
+- [x] Decide on naming convention (Option B)
+- [x] Rename `TestUserViewSet` to `AdminTestUserViewSet`
+- [x] Move `AdminTestUserViewSet` to admin router in `api_urls.py`
+- [x] Rename `TestScenarioViewSet` to `AdminTestScenarioViewSet`
+- [x] Move `AdminTestScenarioViewSet` to admin router in `api_urls.py`
+- [x] Update all frontend API calls in **both** frontends (gold `client/src/api/testScenarioUser.ts` and purple `client/src/api/testScenarioUser.ts`)
+- [x] Update frontend constants in `constants/api.ts`
+- [x] Update any backend tests referencing old URLs
+- [x] Update API documentation
 
 **Touches:** Backend (`server/apps/api_urls.py`, viewsets, tests), both frontends (API modules)
 

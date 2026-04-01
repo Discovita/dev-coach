@@ -1,5 +1,5 @@
 """
-Admin-only ViewSet for test scenario management.
+AdminTestScenarioViewSet — admin-only ViewSet for test scenario management.
 
 Thin view layer — business logic lives in ``functions/`` and ``utils/``.
 
@@ -12,11 +12,9 @@ from rest_framework import decorators, mixins, serializers, status, viewsets
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from apps.test_scenario.functions.freeze_user_session import (
+from apps.test_scenario.functions import (
     FreezeSessionError,
     freeze_user_session,
-)
-from apps.test_scenario.functions.instantiate_test_scenario import (
     instantiate_test_scenario,
 )
 from apps.test_scenario.models import TestScenario
@@ -28,7 +26,7 @@ from apps.test_scenario.utils.validate_scenario_template import (
 from permissions import IsAdminUser
 
 
-class TestScenarioViewSet(
+class AdminTestScenarioViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
