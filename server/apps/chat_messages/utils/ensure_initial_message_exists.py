@@ -6,7 +6,7 @@ Used by:
     - apps.users.views.test_user_viewset.TestUserViewSet (detail endpoint)
     - apps.users.functions.public.get_user_chat_messages
     - apps.users.functions.public.reset_user_coaching_data
-    - apps.coach.services.coach_service.functions.process_message
+    - apps.coach.functions.public.process_message
 """
 
 from apps.chat_messages.constants import INITIAL_MESSAGE
