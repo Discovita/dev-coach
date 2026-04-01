@@ -2,8 +2,7 @@
 Create a chat message record.
 
 Used by:
-    - apps.coach.services.coach_service.functions.process_message
-    - apps.coach.services.coach_service.utils.add_coach_message_to_history
+    - apps.coach.functions.public.process_message
     - apps.chat_messages.utils.ensure_initial_message_exists
 """
 

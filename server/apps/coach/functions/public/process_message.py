@@ -1,7 +1,17 @@
+"""
+process_message
+
+Orchestrates the full flow of processing a user's chat message and generating
+a coach response.
+
+POST /api/v1/coach/process-message/
+POST /api/v1/admin/coach/process-message-for-user/
+"""
+
 from typing import Any, Dict, List, Optional, Tuple
 
 from apps.chat_messages.utils import add_chat_message, ensure_initial_message_exists
-from apps.coach.services.coach_service.utils import (
+from apps.coach.utils import (
     apply_coach_response_actions,
     apply_user_component_actions,
     build_coach_prompt,
@@ -25,17 +35,30 @@ def process_message(
     model: AIModel,
 ) -> Tuple[bool, Dict[str, Any], str]:
     """
-    Process a message for a user and generate a coach response.
+    Process a user's message and generate a coach response.
 
-    This function orchestrates the entire flow of processing a user's message
-    and generating an appropriate response from the coach.
+    Orchestration steps:
+    1. Ensure the conversation has an initial message seeded.
+    2. Save the user's message to chat history.
+    3. Apply any component actions the user triggered (e.g. accepting an identity).
+    4. Build the coach prompt for the current coaching phase.
+    5. Call the AI service to generate a structured response.
+    6. Save the coach's reply to chat history.
+    7. Apply any actions embedded in the coach response (e.g. create identity, transition phase).
+    8. Return the response data for the client.
+
+    Args:
+        user: The user sending the message.
+        message: The user's message text.
+        request_component_actions: Optional list of component actions from the request.
+        model: The AI model to use for generation.
 
     Returns:
         Tuple of (success: bool, response_data: Dict, error_message: str)
         On success, response_data contains:
-            - message: str - The coach's response message
-            - final_prompt: str - The final prompt used
-            - component: dict (optional) - Component configuration if present
+            - message: str — the coach's response text
+            - final_prompt: str — the prompt used (for debugging)
+            - component: dict (optional) — UI component config if present
     """
     try:
         ensure_initial_message_exists(user)
@@ -50,15 +73,15 @@ def process_message(
 
         coach_prompt, response_format = build_coach_prompt(user, model)
 
-        # NOTE: The chat history is not part of the prompt; the messages are added as a separate parameter.
+        # NOTE: Chat history is not passed separately — it is embedded directly
+        # in the prompt by the PromptManager to include action context between messages.
         chat_history_for_prompt = get_recent_chat_messages_for_prompt(user)
 
         coach_response = generate_coach_ai_response(
             coach_prompt, chat_history_for_prompt, response_format, model
         )
-        coach_message = add_chat_message(
-            user, coach_response.message, MessageRole.COACH
-        )
+
+        coach_message = add_chat_message(user, coach_response.message, MessageRole.COACH)
 
         updated_coach_state, component_config = apply_coach_response_actions(
             coach_state, coach_response, coach_message
@@ -70,13 +93,9 @@ def process_message(
         response_data = build_coach_response_data(
             coach_response.message, coach_prompt, component_config
         )
-        success = True
-        error_message = None
-        return success, response_data, error_message
+        return True, response_data, None
 
     except Exception as e:
-        success = False
-        response_data = {}
         error_message = f"Error processing message for user {user.id}: {str(e)}"
         log.error(error_message, exc_info=True)
-        return success, response_data, error_message
+        return False, {}, error_message

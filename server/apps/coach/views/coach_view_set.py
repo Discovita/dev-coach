@@ -4,15 +4,20 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.coach.functions.public import process_message
 from apps.coach.serializers import CoachRequestSerializer, CoachResponseSerializer
-from apps.coach.services.coach_service import CoachService
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
 
 
 class CoachViewSet(viewsets.GenericViewSet):
-    """Endpoints for processing coach messages for authenticated users."""
+    """
+    ViewSet for coach message processing.
+
+    Endpoints:
+    - POST /api/v1/coach/process-message/  → process_message()
+    """
 
     @action(
         detail=False,
@@ -20,8 +25,22 @@ class CoachViewSet(viewsets.GenericViewSet):
         url_path="process-message",
         permission_classes=[IsAuthenticated],
     )
-    def process_message(self, request: Request):
-        """Process a message for the authenticated user."""
+    def process_message(self, request: Request) -> Response:
+        """
+        POST /api/v1/coach/process-message/
+
+        Process a message from the authenticated user and return a coach response.
+
+        Request Body:
+            {
+                "message": str,
+                "actions": list (optional)
+            }
+
+        Response:
+            200: { "message": str, "final_prompt": str, "component": dict (optional) }
+            500: { "detail": str }
+        """
         serializer = CoachRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -29,7 +48,7 @@ class CoachViewSet(viewsets.GenericViewSet):
         actions = serializer.validated_data.get("actions", [])
         model = serializer.get_model()
 
-        success, response_data, error_message = CoachService.process_message(
+        success, response_data, error_message = process_message(
             user=request.user,
             message=message,
             request_component_actions=actions,
@@ -44,5 +63,4 @@ class CoachViewSet(viewsets.GenericViewSet):
 
         response_serializer = CoachResponseSerializer(data=response_data)
         response_serializer.is_valid(raise_exception=True)
-
         return Response(response_serializer.data, status=status.HTTP_200_OK)
