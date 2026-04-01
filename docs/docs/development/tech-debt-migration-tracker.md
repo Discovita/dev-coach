@@ -174,23 +174,25 @@ There are entire directories of experimental code sitting in the services tree t
 
 **Goal:** Fix structural issues in the backend that create confusion or risk.
 
-**Status:** Not started
+**Status:** Partially complete
 
 **Problem 1: Dual `AIModel` enum**
 
-Two completely separate `AIModel` enums exist:
-- `server/enums/ai.py` — `AIModel(models.TextChoices)` — the one used by the app (`generate_coach_ai_response.py`, `sentinel.py`, `coach_plugin.py`)
-- `server/services/ai/openai_service/enums/ai_models.py` — `AIModel(Enum)` — used only internally by the OpenAI service code
+~~Two completely separate `AIModel` enums exist~~
 
-These have overlapping but not identical model lists, different base classes, and different method signatures. If B1 (gutting the AI service) is done first, the duplicate in the openai_service will be deleted as part of that work. If not, consolidate to the one in `server/enums/ai.py`.
+**Resolved as part of B1.** The `server/services/ai/openai_service/enums/ai_models.py` file was deleted when the AI service was refactored. `openai_service.py` now imports from `enums.ai` exclusively.
 
 **Problem 2: `DEFAULT_TOKEN_LIMITS` dict is defined but never used**
 
 In `server/enums/ai.py`, a `DEFAULT_TOKEN_LIMITS` dict is defined at module level but `AIModel.get_default_token_limit()` uses a hardcoded if/elif chain instead of looking up the dict. Either use the dict or remove it.
 
+**Resolved.** `get_default_token_limit()` now uses `DEFAULT_TOKEN_LIMITS.get(model_str, 1024)`. The if/elif chain was also incomplete — it was missing `gpt-4.1`, `o3`, and `o4-mini`.
+
 **Problem 3: `apps.core` not in `INSTALLED_APPS`**
 
 `apps.core` has models (`ImageMixin`), serializers, middleware, and a viewset — but it is **not listed** in `INSTALLED_APPS` in `settings/common.py`. The viewset works because DRF doesn't require app registration for viewsets, but if `ImageMixin` is ever used as a concrete model or if signals are added, this will break silently.
+
+**Resolved.** `apps.core` added to `INSTALLED_APPS` in `settings/common.py`. No migrations needed — `ImageMixin` is abstract.
 
 **Problem 4: Test coverage gaps**
 
@@ -205,9 +207,9 @@ In `server/enums/ai.py`, a `DEFAULT_TOKEN_LIMITS` dict is defined at module leve
 | `apps.core` | Empty `tests/__init__.py` only |
 
 **Tasks:**
-- [ ] Remove or use `DEFAULT_TOKEN_LIMITS` dict in `enums/ai.py`
-- [ ] Add `apps.core` to `INSTALLED_APPS` (or verify it's intentionally excluded and document why)
-- [ ] Consolidate to a single `AIModel` enum (may be handled by B1)
+- [x] Remove or use `DEFAULT_TOKEN_LIMITS` dict in `enums/ai.py`
+- [x] Add `apps.core` to `INSTALLED_APPS`
+- [x] Consolidate to a single `AIModel` enum (resolved by B1)
 - [ ] (Lower priority) Add test coverage for `apps.coach` and core services
 
 **Touches:** `server/enums/ai.py`, `server/settings/common.py`, various test directories
