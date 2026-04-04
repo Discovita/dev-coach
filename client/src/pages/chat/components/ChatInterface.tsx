@@ -2,21 +2,32 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { ChatControls } from "@/pages/chat/components/ChatControls";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
+import { useUserTarget } from "@/context/UserTargetContext";
+import { useQueryClient } from "@tanstack/react-query";
 import { CoachRequest } from "@/types/coachRequest";
+
+interface ChatInterfaceProps {
+  onResetSuccess?: () => void;
+}
 
 /**
  * ChatInterface component
  * Handles the chat UI, message sending, and scrolling.
- * - Uses useChatMessages for chat history and sending messages.
- * - Optimistically updates the UI when sending messages.
- * - Always fetches fresh chat history on mount.
- * - Keeps 100% comment coverage for clarity.
+ *
+ * Context-aware: reads from UserTargetContext to determine behavior.
+ * - useChatMessages auto-switches endpoints and query keys via context.
+ * - In impersonating mode, onResetSuccess triggers query invalidation
+ *   and calls the parent callback.
+ *
+ * Used in: Chat page (regular) and TestChat (via UserTargetProvider).
  */
-export const ChatInterface: React.FC = () => {
-  // Reference to the end of the messages list for auto-scrolling
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  onResetSuccess,
+}) => {
+  const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
+  const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Get chat messages and updateChatMessages mutation from the custom hook
   const {
     chatMessages,
     componentConfig,
@@ -24,12 +35,10 @@ export const ChatInterface: React.FC = () => {
     isError,
     updateChatMessages,
     updateStatus,
-    pendingMessage, // The message being sent (if any)
-    isPending, // Whether a message is being sent
+    pendingMessage,
+    isPending,
   } = useChatMessages();
 
-  // Compose the messages to display, including the pending message if any
-  // Always sort by timestamp to ensure correct order, as backend/hook may not guarantee order
   const displayedMessages = React.useMemo(() => {
     let messages: { role: string; content: string; timestamp: string }[] =
       chatMessages || [];
@@ -39,11 +48,10 @@ export const ChatInterface: React.FC = () => {
         {
           role: "user",
           content: pendingMessage.message,
-          timestamp: new Date().toISOString(), // Temporary timestamp
+          timestamp: new Date().toISOString(),
         },
       ];
     }
-    // Sort by timestamp ascending (oldest first)
     return messages
       .slice()
       .sort(
@@ -52,7 +60,6 @@ export const ChatInterface: React.FC = () => {
       );
   }, [chatMessages, isPending, pendingMessage]);
 
-  // Scroll to bottom when messages change
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -64,13 +71,10 @@ export const ChatInterface: React.FC = () => {
     scrollToBottom();
   }, [chatMessages, scrollToBottom]);
 
-  // Scroll to bottom when optimistic user message is added
-  // This ensures the UI scrolls for both server and optimistic updates
   useEffect(() => {
     scrollToBottom();
   }, [displayedMessages, scrollToBottom]);
 
-  // Handler for sending a message
   const handleSendMessage = useCallback(
     async (request: CoachRequest) => {
       if (!request.message.trim() || updateStatus === "pending") return;
@@ -79,7 +83,19 @@ export const ChatInterface: React.FC = () => {
     [updateChatMessages, updateStatus]
   );
 
-  // If loading, show a loading state (optional)
+  // When a test scenario is reset, invalidate the relevant caches then call parent callback
+  const handleResetSuccess = useCallback(() => {
+    if (isImpersonating) {
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeyPrefix, "chatMessages"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeyPrefix, "coachState"],
+      });
+    }
+    if (onResetSuccess) onResetSuccess();
+  }, [queryClient, queryKeyPrefix, isImpersonating, onResetSuccess]);
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -103,10 +119,12 @@ export const ChatInterface: React.FC = () => {
         messagesEndRef={messagesEndRef}
         componentConfig={componentConfig}
         onSendUserMessageToCoach={handleSendMessage}
+        testUserId={isImpersonating ? targetUserId! : undefined}
       />
       <ChatControls
         isProcessingMessage={updateStatus === "pending"}
         onSendMessage={handleSendMessage}
+        onResetSuccess={handleResetSuccess}
       />
     </div>
   );

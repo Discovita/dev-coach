@@ -1,17 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
+import { useUserTarget } from "@/context/UserTargetContext";
 
 /**
  * useFinalPrompt hook
  * Retrieves the latest final_prompt from the TanStack Query cache.
  * Updates reactively when the value changes.
+ *
+ * Context-aware: reads from UserTargetContext to determine query key prefix.
+ * When inside a UserTargetProvider, uses scoped keys for the impersonated user.
+ *
  * Used in: Any component that needs to display the latest final prompt from the coach.
  */
 export function useFinalPrompt(): string | undefined {
-  // Use useQuery to subscribe to changes in the finalPrompt cache
+  const { queryKeyPrefix } = useUserTarget();
+
   const { data } = useQuery<string | undefined>({
-    queryKey: ["user", "finalPrompt"],
-    // TanStack Query does not allow undefined as a return value from queryFn.
-    // Return an empty string if not present to avoid errors.
+    queryKey: [...queryKeyPrefix, "finalPrompt"],
+    // Cache subscription only — real value is set by useChatMessages on coach response.
     queryFn: () => "",
   });
   return data;

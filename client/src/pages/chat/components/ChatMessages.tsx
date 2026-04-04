@@ -23,7 +23,7 @@ import { ComponentConfig } from "@/types/componentConfig";
  * - messagesEndRef: Ref to scroll to the bottom of the messages
  * - testUserId: Optional user ID for test scenarios (admin impersonation)
  *
- * Used by: ChatInterface.tsx, TestScenarioChatInterface.tsx
+ * Used by: ChatInterface.tsx (both regular and impersonating contexts via UserTargetProvider)
  */
 interface ChatMessagesProps {
   messages: Message[];
