@@ -18,7 +18,7 @@ BACKEND (can be done in parallel with frontend workstreams 2-3):
 FRONTEND:
   F1. Refactor test scenario components to eliminate duplication (standalone, benefits from B3) ✓ DONE
   F2. Reconcile shared code drift between the two frontends (standalone) ✓ DONE
-  F3. Port gold-only features into the purple frontend (depends on B3, F1, F2)
+  F3. Port gold-only features into the purple frontend (depends on B3, F1 ✓, F2 ✓)
   F4. Move unified frontend into the dev-coach monorepo (depends on F3)
   F5. Cleanup & retire the standalone frontend repo (depends on F4)
 ```
@@ -433,17 +433,9 @@ The two frontends have **intentionally different** design systems. Purple is the
 - [x] Fix `process.env.NEXT_PUBLIC_ENV` → `import.meta.env` in Purple's `authFetch.ts`
 - [x] Cookie naming: `neovita-*` (already correct in Purple, no change needed)
 
-**Deferred to F3 (require admin infrastructure first):**
-- [ ] Port `UserTargetContext` + `UserTargetProvider` to Purple
-- [ ] Port context-aware hooks (chat-messages, coach-state, identities, final-prompt)
-- [ ] Port admin API functions (adminUpdateIdentity, admin image endpoints, test-user appearance)
-- [ ] Port `fetchActions` + `use-actions` hook
-- [ ] Port admin reference image support (userId param)
-- [ ] Port FormData support for test scenario create/update
-- [ ] Install needed shadcn components as features are ported
-- [ ] Port `xmlExport.ts` with ConversationExporter
+**Remaining items moved to F3** — all deferred work (admin hooks, context-aware hooks, admin API functions, shadcn components, etc.) is now tracked in F3's task list.
 
-**Touches:** Primarily Purple frontend for quick wins. Both frontends + backend CORS for cookie decision.
+**Touches:** Purple frontend.
 
 ---
 
@@ -451,32 +443,67 @@ The two frontends have **intentionally different** design systems. Purple is the
 
 **Goal:** The purple frontend has every feature that currently only exists in gold.
 
-**Status:** Not started — depends on B3, F1, F2
+**Status:** Phase 1 complete ✓. Phase 2+ not started.
 
-**Features to port:**
+---
 
-- [ ] **Admin routing** — Add admin route gating to TanStack Router (pathless `_admin` layout that checks `is_staff`)
-- [ ] **Admin layout + navbar** — Port or adapt for purple's sidebar-based layout
-- [ ] **`use-is-admin` hook** — Copy (small)
-- [ ] **`use-actions` hook** — Copy (small)
-- [ ] **Test Scenarios page** (`/test`) — Port page, table (ag-grid), editor, all form components, all unique hooks. Add `ag-grid` dependency.
-- [ ] **Coach State Visualizer** — Port (already deduplicated in workstream 2)
-- [ ] **Prompts management page** (`/prompts`) — Port page + DeletePromptDialog + NewPromptForm
-- [ ] **Demo page** (`/demo`) — Port if desired, or skip
-- [ ] **SessionRestorer** — Compare with purple's session handling; port if missing
-- [ ] **ConversationExporter** — Port component + `xmlExport.ts` utility, add `xmldom` dependency
-- [ ] **ConversationResetter** — Verify purple has this; port if missing
-- [ ] **Admin image generation API calls** — Add admin-specific endpoints to purple's `api/imageGeneration.ts`
-- [ ] **Storybook + MSW** — Optional; port if desired. Lower priority.
+### Phase 1: Foundation (must be done first) ✓
 
-**Tasks:**
-- [ ] Add admin route infrastructure to TanStack Router
-- [ ] Port each feature (see checklist above)
-- [ ] Verify all regular user flows still work
-- [ ] Verify all admin flows work
-- [ ] Verify image generation flows work for both regular and admin paths
+These are prerequisites for everything else — admin routing and the context system that makes hooks work for both regular users and admin impersonation.
 
-**Touches:** Purple frontend, possibly backend if any missed API adjustments
+- [x] **Frontend permissions module** — Created `permissions/isAdminUser.ts` that mirrors the backend's `IsAdminUser` permission class (`server/permissions/is_admin_user.py`). Checks `is_staff OR is_superuser`. Updated `useProfile` to use it for its `isAdmin` return value. Updated `useAuth` to use it for cache hydration. Fixes the bug where a superuser who isn't staff passed backend checks but was blocked on the frontend.
+- [x] **Admin routing** — Added an `admin` layout route under `_authenticated` at `/admin` (not pathless — TanStack Router's generator conflicts when nesting pathless layouts under `_public`). Admin pages nest under this layout at `/admin/test`, `/admin/prompts`, `/admin/demo`. The layout guard checks `isAdmin` via `useProfile` and redirects non-admins to `/chat`.
+- [x] **Admin layout + navbar** — Extended Purple's `AuthLayout` sidebar with a conditional admin nav section (Shield icon + "Admin" divider, lucide icons for Test/Prompts/Demo). Admin items only render when `isAdminUser(profile)` is true. Uses the same pill-button style as the main nav.
+- [x] **`UserTargetContext` + `UserTargetProvider`** — Ported from Gold (`context/UserTargetContext.ts`, `providers/UserTargetProvider.tsx`). Hooks are not yet wired up to use `useUserTarget()` — that happens when admin pages are ported in Phase 2+.
+- [x] **Install shadcn components** — Installed via `npx shadcn@latest add`: `badge`, `card`, `command`, `dialog`, `dropdown-menu`, `popover`, `tabs`. Ported Gold's custom `multi-select` component with styling adapted from gold theme to shadcn semantic CSS variables.
+
+### Phase 2: Admin-Aware Hooks & API (builds on Phase 1)
+
+Port the context-aware hooks and admin API functions so that ported pages have data to work with.
+
+**Hooks to port/update:**
+- [ ] **`use-chat-messages`** — Port Gold's context-aware version (dynamic query keys/functions via `UserTargetContext`, conditional `sendTestScenarioMessage`, conditional reset mutation)
+- [ ] **`use-coach-state`** — Port context-aware version (conditional `fetchTestScenarioUserCoachState`)
+- [ ] **`use-identities`** — Port context-aware version (conditional `fetchTestScenarioUserIdentities`)
+- [ ] **`use-final-prompt`** — Port context-aware version (dynamic `queryKeyPrefix`)
+- [ ] **`use-actions`** — Port from Gold (Purple doesn't have this hook at all). Includes `fetchActions` in `api/user.ts`.
+- [ ] **`use-image-generation`** — Add legacy `generateIdentityImage` path, `UseImageGenerationOptions`, and admin invalidation of `["testScenarioUser"]` cache
+- [ ] **`use-reference-images`** — Add optional `userId` param for admin usage
+- [ ] **`use-user-appearance`** — Add `userId` param, branch between user/test-user API calls
+
+**API modules to update:**
+- [ ] **`user.ts`** — Add `fetchActions()` function
+- [ ] **`identities.ts`** — Add `adminUpdateIdentity` function + richer error parsing
+- [ ] **`imageGeneration.ts`** — Add `generateIdentityImage` (admin), admin-branching on `startImageChat`/`continueImageChat` (optional `user_id`). Investigate `saveGeneratedImage` discrepancy (Gold uses JSON POST, Purple uses FormData PATCH).
+- [ ] **`referenceImages.ts`** — Add optional `userId` param on `listReferenceImages` and `createReferenceImage`
+- [ ] **`testScenarios.ts`** — Add `FormData` support for `createTestScenario`/`updateTestScenario` (file uploads)
+- [ ] **`userAppearance.ts`** — Add `getTestUserAppearance` and `updateTestUserAppearance`
+
+**Types to update:**
+- [ ] **`imageGeneration.ts`** — Add `GenerateImageRequest`, `GenerateImageResponse`, optional `user_id` on chat request types
+- [ ] **`referenceImage.ts`** — Add optional `user_id` on `CreateReferenceImageRequest`
+
+### Phase 3: Port Pages & Features
+
+Each page/feature can be ported independently once Phase 1 and Phase 2 are done.
+
+- [ ] **Test Scenarios page** (`/test`) — Port `Test.tsx`, `TestScenarioTable` (requires `ag-grid` dependency), `TestScenarioEditor`, all form components (`GeneralForm`, `CoachStateForm`, `ActionsForm`, `IdentitiesForm`, `ChatMessagesForm`, `UserForm`, `UserNotesForm`), `TestScenarioPageHeader`, `TestScenarioSessionFreezer`, `TestScenarioConversationResetterDialog`, `DeleteTestScenarioDialog`. Port unique hooks: `use-test-scenarios`, `use-freeze-test-scenario-session`, `use-test-scenario-user-identities`.
+- [ ] **Coach State Visualizer** — Port `CoachStateVisualizer` + all utils (`tabConfiguration`, `tabContentFactory`, `dataUtils`, `renderUtils`, `ActionItem`, `IdentityItem`). Already deduplicated in F1 — uses context-aware hooks.
+- [ ] **Prompts management page** (`/prompts`) — Port `Prompts.tsx`, `DeletePromptDialog`, `NewPromptForm`
+- [ ] **ConversationExporter** — Port component + `xmlExport.ts` utility. Add `xmldom` dependency.
+- [ ] **ConversationResetter** — Port the unified version from Gold (branches between regular reset and test scenario reset based on `UserTargetContext`). Port `ConversationResetterDialog` and `TestScenarioConversationResetterDialog`.
+- [ ] **SessionRestorer** — Compare with Purple's session handling and port if missing
+- [ ] **Demo page** (`/demo`) — Port if desired, or skip (low priority)
+- [ ] **Storybook + MSW** — Optional, low priority. Port if desired.
+
+### Phase 4: Verification
+
+- [ ] Verify all regular user flows still work (chat, identities, images)
+- [ ] Verify all admin flows work (test scenarios, prompts, admin image generation)
+- [ ] Verify image generation works for both regular and admin paths
+- [ ] Strip any remaining gold-specific styling from ported components (adapt to Purple's design tokens)
+
+**Touches:** Purple frontend, possibly backend if any missed API adjustments. Dependencies to add: `ag-grid-community`, `ag-grid-react`, `xmldom`.
 
 ---
 
@@ -521,9 +548,11 @@ The two frontends have **intentionally different** design systems. Purple is the
 
 These need answers before or during the work above:
 
-1. **Cookie naming:** `discovita-*` or `neovita-*`? Affects backend CORS + both frontends.
-2. **Linter:** Keep ESLint (gold) or Biome (purple)?
-3. **Admin user URL naming:** `/admin/user/{id}/...` (generic) or `/admin/test-user/{id}/...` (test-specific)?
+1. ~~**Cookie naming:** `discovita-*` or `neovita-*`?~~ **Resolved: `neovita-*`.** Purple conventions take precedence.
+2. ~~**Linter:** Keep ESLint (gold) or Biome (purple)?~~ **Resolved: Biome.** Keep Purple's tooling.
+3. **Admin user URL naming:** `/admin/user/{id}/...` (generic) or `/admin/test-user/{id}/...` (test-specific)? _(Needed for B3)_
 4. **Demo page:** Worth porting or can it be dropped?
 5. **Storybook:** Priority to port, or defer?
 6. **Branding in landing page:** Purple landing says "NeoVita" — does that stay or change to Discovita?
+7. **`saveGeneratedImage` discrepancy:** Gold uses JSON POST to `/admin/identities/save-generated-image`. Purple uses FormData PATCH to `/identities/{id}/upload-image`. Which endpoint is correct? _(Needed for F3 Phase 2)_
+8. **Cookie utility deduplication:** Both `auth.ts` and `authFetch.ts` define their own `getCookie`/`setCookie`. Should these be consolidated into a shared utility? _(Low priority, can do during F3 or F5)_
