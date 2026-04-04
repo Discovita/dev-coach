@@ -75,8 +75,7 @@ export const TestScenarioSessionFreezer: React.FC<{
       setDescription("");
       setFirstName("");
       setLastName("");
-      // Invalidate test scenarios query so the table updates
-      queryClient.invalidateQueries({ queryKey: ["testScenarios"] });
+      queryClient.invalidateQueries({ queryKey: ["test-scenarios", "all"] });
       if (onSuccess) onSuccess(scenario);
     } catch (err) {
       toast.error(getErrorMessage(err));
