@@ -457,44 +457,52 @@ These are prerequisites for everything else — admin routing and the context sy
 - [x] **`UserTargetContext` + `UserTargetProvider`** — Ported from Gold (`context/UserTargetContext.ts`, `providers/UserTargetProvider.tsx`). Hooks are not yet wired up to use `useUserTarget()` — that happens when admin pages are ported in Phase 2+.
 - [x] **Install shadcn components** — Installed via `npx shadcn@latest add`: `badge`, `card`, `command`, `dialog`, `dropdown-menu`, `popover`, `tabs`. Ported Gold's custom `multi-select` component with styling adapted from gold theme to shadcn semantic CSS variables.
 
-### Phase 2: Admin-Aware Hooks & API (builds on Phase 1)
+### Phase 2: Admin-Aware Hooks & API (builds on Phase 1) — Phase 2 complete ✓
 
 Port the context-aware hooks and admin API functions so that ported pages have data to work with.
 
-**Hooks to port/update:**
-- [ ] **`use-chat-messages`** — Port Gold's context-aware version (dynamic query keys/functions via `UserTargetContext`, conditional `sendTestScenarioMessage`, conditional reset mutation)
-- [ ] **`use-coach-state`** — Port context-aware version (conditional `fetchTestScenarioUserCoachState`)
-- [ ] **`use-identities`** — Port context-aware version (conditional `fetchTestScenarioUserIdentities`)
-- [ ] **`use-final-prompt`** — Port context-aware version (dynamic `queryKeyPrefix`)
-- [ ] **`use-actions`** — Port from Gold (Purple doesn't have this hook at all). Includes `fetchActions` in `api/user.ts`.
-- [ ] **`use-image-generation`** — Add legacy `generateIdentityImage` path, `UseImageGenerationOptions`, and admin invalidation of `["testScenarioUser"]` cache
-- [ ] **`use-reference-images`** — Add optional `userId` param for admin usage
-- [ ] **`use-user-appearance`** — Add `userId` param, branch between user/test-user API calls
+**Hooks ported/updated:**
+- [x] **`use-chat-messages`** — Now context-aware via `useUserTarget()`. Dynamic query keys, conditional fetch (test-user vs user), conditional send (`sendTestScenarioMessage` when impersonating), scoped cache invalidation.
+- [x] **`use-coach-state`** — Context-aware, branches between `fetchCoachState` and `fetchTestScenarioUserCoachState`.
+- [x] **`use-identities`** — Context-aware, branches between `fetchIdentities` and `fetchTestScenarioUserIdentities`.
+- [x] **`use-final-prompt`** — Context-aware via dynamic `queryKeyPrefix`.
+- [x] **`use-actions`** — Created from scratch (ported from Gold). Context-aware with `fetchActions`/`fetchTestScenarioUserActions`. Also added `fetchActions()` to `api/user.ts`.
+- [x] **`use-image-generation`** — Added legacy `generateIdentityImage` mutation (admin endpoint), `UseImageGenerationOptions` callback support, `getErrorMessage`/`getToastDuration` helpers, admin cache invalidation of `["testScenarioUser"]`.
+- [x] **`use-reference-images`** — Added optional `userId` param. Query key now includes userId for cache isolation.
+- [x] **`use-user-appearance`** — Now takes `userId: string | null`. Branches between current-user and test-user API calls. Updated `Account.tsx` call site to pass `profile?.id ?? null`.
 
-**API modules to update:**
-- [ ] **`user.ts`** — Add `fetchActions()` function
-- [ ] **`identities.ts`** — Add `adminUpdateIdentity` function + richer error parsing
-- [ ] **`imageGeneration.ts`** — Add `generateIdentityImage` (admin), admin-branching on `startImageChat`/`continueImageChat` (optional `user_id`). Investigate `saveGeneratedImage` discrepancy (Gold uses JSON POST, Purple uses FormData PATCH).
-- [ ] **`referenceImages.ts`** — Add optional `userId` param on `listReferenceImages` and `createReferenceImage`
-- [ ] **`testScenarios.ts`** — Add `FormData` support for `createTestScenario`/`updateTestScenario` (file uploads)
-- [ ] **`userAppearance.ts`** — Add `getTestUserAppearance` and `updateTestUserAppearance`
+**API modules updated:**
+- [x] **`testScenarioUser.ts`** — Created (new file). All admin test-user API functions: profile, complete, coach-state, identities, actions, chat-messages.
+- [x] **`user.ts`** — Added `fetchActions()` function.
+- [x] **`identities.ts`** — Added `adminUpdateIdentity()` function with admin endpoint.
+- [x] **`imageGeneration.ts`** — Added `generateIdentityImage()` (admin legacy), admin-branching on `startImageChat`/`continueImageChat` (uses admin endpoint when `user_id` provided). Kept Purple's `saveGeneratedImage` (FormData PATCH to identity upload-image endpoint) — Gold's JSON POST approach targets a different admin endpoint; both are available.
+- [x] **`referenceImages.ts`** — Added optional `userId` param on `listReferenceImages` (query string) and `createReferenceImage` (form data field).
+- [x] **`testScenarios.ts`** — Added `FormData` support for `createTestScenario`/`updateTestScenario`. Cleaned up `any` casts in JSON path.
+- [x] **`userAppearance.ts`** — Added `getTestUserAppearance()` and `updateTestUserAppearance()`. Refactored with shared `extractAppearance()` helper to reduce duplication.
 
-**Types to update:**
-- [ ] **`imageGeneration.ts`** — Add `GenerateImageRequest`, `GenerateImageResponse`, optional `user_id` on chat request types
-- [ ] **`referenceImage.ts`** — Add optional `user_id` on `CreateReferenceImageRequest`
+**Types updated:**
+- [x] **`imageGeneration.ts`** — Added `GenerateImageRequest`, `GenerateImageResponse`. Added optional `user_id` on `StartImageChatRequest` and `ContinueImageChatRequest`. Fixed missing space in import.
+- [x] **`referenceImage.ts`** — Added optional `user_id` on `CreateReferenceImageRequest`.
 
-### Phase 3: Port Pages & Features
+### Phase 3: Port Pages & Features — Phase 3 complete ✓
 
 Each page/feature can be ported independently once Phase 1 and Phase 2 are done.
 
-- [ ] **Test Scenarios page** (`/test`) — Port `Test.tsx`, `TestScenarioTable` (requires `ag-grid` dependency), `TestScenarioEditor`, all form components (`GeneralForm`, `CoachStateForm`, `ActionsForm`, `IdentitiesForm`, `ChatMessagesForm`, `UserForm`, `UserNotesForm`), `TestScenarioPageHeader`, `TestScenarioSessionFreezer`, `TestScenarioConversationResetterDialog`, `DeleteTestScenarioDialog`. Port unique hooks: `use-test-scenarios`, `use-freeze-test-scenario-session`, `use-test-scenario-user-identities`.
-- [ ] **Coach State Visualizer** — Port `CoachStateVisualizer` + all utils (`tabConfiguration`, `tabContentFactory`, `dataUtils`, `renderUtils`, `ActionItem`, `IdentityItem`). Already deduplicated in F1 — uses context-aware hooks.
-- [ ] **Prompts management page** (`/prompts`) — Port `Prompts.tsx`, `DeletePromptDialog`, `NewPromptForm`
-- [ ] **ConversationExporter** — Port component + `xmlExport.ts` utility. Add `xmldom` dependency.
-- [ ] **ConversationResetter** — Port the unified version from Gold (branches between regular reset and test scenario reset based on `UserTargetContext`). Port `ConversationResetterDialog` and `TestScenarioConversationResetterDialog`.
-- [ ] **SessionRestorer** — Compare with Purple's session handling and port if missing
-- [ ] **Demo page** (`/demo`) — Port if desired, or skip (low priority)
-- [ ] **Storybook + MSW** — Optional, low priority. Port if desired.
+- [x] **Test Scenarios page** (`/admin/test`) — Ported `Test.tsx`, `TestScenarioTable` (installed `ag-grid-community` + `ag-grid-react`), `TestScenarioEditor`, all 7 form components (`GeneralForm`, `CoachStateForm`, `ActionsForm`, `IdentitiesForm`, `ChatMessagesForm`, `UserForm`, `UserNotesForm`), `TestScenarioPageHeader`, `TestScenarioSessionFreezer`, `TestScenarioConversationResetterDialog`, `DeleteTestScenarioDialog`, `TestChat`. Ported hooks: `use-test-scenarios`, `use-freeze-test-scenario-session`, `use-test-scenario-user-identities`, `use-previous`. Created TanStack Router route at `routes/_authenticated/admin/test.tsx`.
+- [x] **Coach State Visualizer** — Ported `CoachStateVisualizer.tsx` + all utils (`tabConfiguration.ts`, `tabContentFactory.tsx`, `dataUtils.ts`, `renderUtils.tsx`, `ActionItem.tsx`, `IdentityItem.tsx`) + `types.ts` + `index.ts`. All gold-specific styling converted to shadcn semantic CSS variables.
+- [x] **Prompts management page** (`/admin/prompts`) — Ported `Prompts.tsx` (refactored to use shared `renderPromptEditor()` instead of duplicating form 3 times), `DeletePromptDialog`, `NewPromptForm`. Created TanStack Router route at `routes/_authenticated/admin/prompts.tsx`.
+- [x] **ConversationExporter** — Ported component + `xmlExport.ts` utility. Installed `@xmldom/xmldom` dependency.
+- [x] **ConversationResetter** — Ported unified version from Gold that branches between regular reset and test scenario reset based on `UserTargetContext`. Ported `ConversationResetterDialog` and `TestScenarioConversationResetterDialog`. Integrated into `ChatInterface` via new `onResetSuccess` prop.
+- [x] **SessionRestorer** — Ported `SessionRestorer.tsx` component.
+- [x] **Button `xs` size variant** — Added to shadcn Button component for use by test scenario forms.
+- [ ] **Demo page** (`/demo`) — Skipped (low priority)
+- [ ] **Storybook + MSW** — Skipped (low priority)
+
+**Implementation notes:**
+- Installed 3 new dependencies: `ag-grid-community`, `ag-grid-react`, `@xmldom/xmldom`
+- All gold-specific Tailwind classes (`gold-50/100/200/500/600/700/800/900`) converted to shadcn semantic variables (`bg-muted`, `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`, etc.)
+- All type-only imports updated with `import type` for `verbatimModuleSyntax` compliance
+- TypeScript check and full Vite build pass cleanly
 
 ### Phase 4: Verification
 
