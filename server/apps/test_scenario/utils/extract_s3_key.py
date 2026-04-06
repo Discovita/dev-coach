@@ -32,8 +32,9 @@ def extract_s3_key_from_url(url: str) -> str | None:
     bucket_name = None
     custom_domain = None
     if hasattr(settings, "STORAGES") and "default" in settings.STORAGES:
-        bucket_name = settings.STORAGES["default"]["OPTIONS"].get("bucket_name")
-        custom_domain = settings.STORAGES["default"]["OPTIONS"].get("custom_domain")
+        options = settings.STORAGES["default"].get("OPTIONS", {})
+        bucket_name = options.get("bucket_name")
+        custom_domain = options.get("custom_domain")
 
     key = None
     if "/media/" in url:
