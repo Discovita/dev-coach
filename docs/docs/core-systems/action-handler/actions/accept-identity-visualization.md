@@ -19,9 +19,9 @@ Sets the state of the specified identity to 'visualization_complete', indicating
 
 ## Parameters
 
-| Parameter | Type    | Required | Description                                              |
-| --------- | ------- | -------- | -------------------------------------------------------- |
-| `id`      | integer | Yes      | The ID of the identity to mark as visualization complete |
+| Parameter | Type          | Required | Description                                               |
+| --------- | ------------- | -------- | --------------------------------------------------------- |
+| `id`      | string (UUID) | Yes      | The UUID of the identity to mark as visualization complete |
 
 ## Implementation Steps
 
@@ -35,7 +35,7 @@ Sets the state of the specified identity to 'visualization_complete', indicating
 {
   "action": "accept_identity_visualization",
   "params": {
-    "id": 123
+    "id": "550e8400-e29b-41d4-a716-446655440000"
   }
 }
 ```

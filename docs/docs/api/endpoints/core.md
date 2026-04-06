@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/core/`
+`/api/v1/core`
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1. Get Enums
 
-- **URL:** `/core/enums/`
+- **URL:** `/api/v1/core/enums`
 - **Method:** `GET`
 - **Description:** Returns all enum values used throughout the application for populating dropdowns and select components in the frontend. This endpoint is primarily used by the Prompts management interface to populate form dropdowns, and by the Images page for appearance customization options.
 - **Authentication:** Required
@@ -22,257 +22,133 @@
 ```json
 {
   "coaching_phases": [
-    {
-      "value": "INTRODUCTION",
-      "label": "Introduction"
-    },
-    {
-      "value": "GET_TO_KNOW_YOU",
-      "label": "Get To Know You"
-    },
-    {
-      "value": "IDENTITY_CREATION",
-      "label": "Identity Creation"
-    },
-    {
-      "value": "IDENTITY_REFINEMENT",
-      "label": "Identity Refinement"
-    },
-    {
-      "value": "INTEGRATION",
-      "label": "Integration"
-    }
+    { "value": "system_context", "label": "System Context" },
+    { "value": "introduction", "label": "Introduction" },
+    { "value": "get_to_know_you", "label": "Get to Know You" },
+    { "value": "identity_warm_up", "label": "Identity Warm-Up" },
+    { "value": "identity_brainstorming", "label": "Identity Brainstorming" },
+    { "value": "brainstorming_review", "label": "Brainstorming Review" },
+    { "value": "identity_refinement", "label": "Identity Refinement" },
+    { "value": "anything_missing", "label": "Anything Missing" },
+    { "value": "identity_commitment", "label": "Identity Commitment" },
+    { "value": "i_am_statement", "label": "I Am Statement" },
+    { "value": "identity_visualization", "label": "Identity Visualization" }
   ],
   "allowed_actions": [
-    {
-      "value": "CREATE_IDENTITY",
-      "label": "Create Identity"
-    },
-    {
-      "value": "UPDATE_IDENTITY",
-      "label": "Update Identity"
-    },
-    {
-      "value": "TRANSITION_PHASE",
-      "label": "Transition Phase"
-    },
-    {
-      "value": "SELECT_IDENTITY_FOCUS",
-      "label": "Select Identity Focus"
-    },
-    {
-      "value": "UPDATE_WHO_YOU_ARE",
-      "label": "Update Who You Are"
-    },
-    {
-      "value": "UPDATE_WHO_YOU_WANT_TO_BE",
-      "label": "Update Who You Want To Be"
-    },
-    {
-      "value": "ADD_USER_NOTE",
-      "label": "Add User Note"
-    }
+    { "value": "create_identity", "label": "Create Identity" },
+    { "value": "create_multiple_identities", "label": "Create Multiple Identities" },
+    { "value": "update_identity", "label": "Update Identity" },
+    { "value": "update_identity_name", "label": "Update Identity Name" },
+    { "value": "update_i_am_statement", "label": "Update I Am Statement" },
+    { "value": "update_identity_visualization", "label": "Update Identity Visualization" },
+    { "value": "accept_identity", "label": "Accept Identity" },
+    { "value": "accept_identity_refinement", "label": "Accept Identity Refinement" },
+    { "value": "accept_identity_commitment", "label": "Accept Identity Commitment" },
+    { "value": "accept_i_am_statement", "label": "Accept I Am Statement" },
+    { "value": "accept_identity_visualization", "label": "Accept Identity Visualization" },
+    { "value": "archive_identity", "label": "Archive Identity" },
+    { "value": "nest_identity", "label": "Nest Identity" },
+    { "value": "add_identity_note", "label": "Add Identity Note" },
+    { "value": "transition_phase", "label": "Transition Phase" },
+    { "value": "select_identity_focus", "label": "Select Identity Focus" },
+    { "value": "skip_identity_category", "label": "Skip Identity Category" },
+    { "value": "unskip_identity_category", "label": "Unskip Identity Category" },
+    { "value": "update_who_you_are", "label": "Update Who You Are" },
+    { "value": "update_who_you_want_to_be", "label": "Update Who You Want to Be" },
+    { "value": "update_asked_questions", "label": "Update Asked Questions" },
+    { "value": "set_current_identity", "label": "Set Current Identity" },
+    { "value": "combine_identities", "label": "Combine Identities" },
+    { "value": "add_user_note", "label": "Add User Note" },
+    { "value": "update_user_note", "label": "Update User Note" },
+    { "value": "delete_user_note", "label": "Delete User Note" }
   ],
   "context_keys": [
-    {
-      "value": "user_name",
-      "label": "User Name"
-    },
-    {
-      "value": "coaching_phase",
-      "label": "Coaching Phase"
-    },
-    {
-      "value": "current_identity",
-      "label": "Current Identity"
-    },
-    {
-      "value": "proposed_identity",
-      "label": "Proposed Identity"
-    },
-    {
-      "value": "who_you_are",
-      "label": "Who You Are"
-    },
-    {
-      "value": "who_you_want_to_be",
-      "label": "Who You Want To Be"
-    },
-    {
-      "value": "asked_questions",
-      "label": "Asked Questions"
-    },
-    {
-      "value": "user_goals",
-      "label": "User Goals"
-    }
+    { "value": "user_name", "label": "User Name" },
+    { "value": "identities", "label": "Identities" },
+    { "value": "number_of_identities", "label": "Number of Identities" },
+    { "value": "identity_focus", "label": "Identity Focus" },
+    { "value": "who_you_are", "label": "Who You Are" },
+    { "value": "who_you_want_to_be", "label": "Who You Want to Be" },
+    { "value": "focused_identities", "label": "Focused Identities" },
+    { "value": "user_notes", "label": "User Notes" },
+    { "value": "current_message", "label": "Current Message" },
+    { "value": "previous_message", "label": "Previous Message" },
+    { "value": "current_phase", "label": "Current Phase" },
+    { "value": "brainstorming_category_context", "label": "Brainstorming Category Context" },
+    { "value": "current_identity", "label": "Current Identity" },
+    { "value": "asked_questions", "label": "Asked Questions" },
+    { "value": "refinement_identities", "label": "Refinement Identities" },
+    { "value": "commitment_identities", "label": "Commitment Identities" },
+    { "value": "i_am_identities", "label": "I Am Identities" },
+    { "value": "visualization_identities", "label": "Visualization Identities" },
+    { "value": "identity_ids", "label": "Identity IDs" },
+    { "value": "identity_for_image", "label": "Identity for Image" }
+  ],
+  "prompt_types": [
+    { "value": "coach", "label": "Coach" },
+    { "value": "sentinel", "label": "Sentinel" },
+    { "value": "system", "label": "System" },
+    { "value": "image_generation", "label": "Image Generation" }
   ],
   "appearance": {
     "genders": [
-      {
-        "value": "man",
-        "label": "Man"
-      },
-      {
-        "value": "woman",
-        "label": "Woman"
-      },
-      {
-        "value": "person",
-        "label": "Person"
-      }
+      { "value": "man", "label": "Man" },
+      { "value": "woman", "label": "Woman" },
+      { "value": "person", "label": "Person" }
     ],
     "skin_tones": [
-      {
-        "value": "light",
-        "label": "Light"
-      },
-      {
-        "value": "medium_light",
-        "label": "Medium-Light"
-      },
-      {
-        "value": "medium",
-        "label": "Medium"
-      },
-      {
-        "value": "medium_dark",
-        "label": "Medium-Dark"
-      },
-      {
-        "value": "dark",
-        "label": "Dark"
-      }
+      { "value": "light", "label": "Light" },
+      { "value": "medium_light", "label": "Medium-Light" },
+      { "value": "medium", "label": "Medium" },
+      { "value": "medium_dark", "label": "Medium-Dark" },
+      { "value": "dark", "label": "Dark" }
     ],
     "hair_colors": [
-      {
-        "value": "black",
-        "label": "Black"
-      },
-      {
-        "value": "brown",
-        "label": "Brown"
-      },
-      {
-        "value": "blonde",
-        "label": "Blonde"
-      },
-      {
-        "value": "red",
-        "label": "Red"
-      },
-      {
-        "value": "auburn",
-        "label": "Auburn"
-      },
-      {
-        "value": "gray",
-        "label": "Gray"
-      },
-      {
-        "value": "white",
-        "label": "White"
-      },
-      {
-        "value": "bald",
-        "label": "Bald"
-      }
+      { "value": "black", "label": "Black" },
+      { "value": "brown", "label": "Brown" },
+      { "value": "blonde", "label": "Blonde" },
+      { "value": "red", "label": "Red" },
+      { "value": "auburn", "label": "Auburn" },
+      { "value": "gray", "label": "Gray" },
+      { "value": "white", "label": "White" },
+      { "value": "bald", "label": "Bald" }
     ],
     "eye_colors": [
-      {
-        "value": "brown",
-        "label": "Brown"
-      },
-      {
-        "value": "blue",
-        "label": "Blue"
-      },
-      {
-        "value": "green",
-        "label": "Green"
-      },
-      {
-        "value": "hazel",
-        "label": "Hazel"
-      },
-      {
-        "value": "gray",
-        "label": "Gray"
-      },
-      {
-        "value": "amber",
-        "label": "Amber"
-      }
+      { "value": "brown", "label": "Brown" },
+      { "value": "blue", "label": "Blue" },
+      { "value": "green", "label": "Green" },
+      { "value": "hazel", "label": "Hazel" },
+      { "value": "gray", "label": "Gray" },
+      { "value": "amber", "label": "Amber" }
     ],
     "heights": [
-      {
-        "value": "short",
-        "label": "Short"
-      },
-      {
-        "value": "below_average",
-        "label": "Below Average"
-      },
-      {
-        "value": "average",
-        "label": "Average"
-      },
-      {
-        "value": "above_average",
-        "label": "Above Average"
-      },
-      {
-        "value": "tall",
-        "label": "Tall"
-      }
+      { "value": "short", "label": "Short" },
+      { "value": "below_average", "label": "Below Average" },
+      { "value": "average", "label": "Average" },
+      { "value": "above_average", "label": "Above Average" },
+      { "value": "tall", "label": "Tall" }
     ],
-    "builds": [
-      {
-        "value": "slim",
-        "label": "Slim"
-      },
-      {
-        "value": "athletic",
-        "label": "Athletic"
-      },
-      {
-        "value": "average",
-        "label": "Average"
-      },
-      {
-        "value": "stocky",
-        "label": "Stocky"
-      },
-      {
-        "value": "large",
-        "label": "Large"
-      }
+    "builds_male": [
+      { "value": "...", "label": "..." }
+    ],
+    "builds_female": [
+      { "value": "...", "label": "..." }
+    ],
+    "builds_neutral": [
+      { "value": "...", "label": "..." }
     ],
     "age_ranges": [
-      {
-        "value": "twenties",
-        "label": "Young Adult (20s)"
-      },
-      {
-        "value": "thirties",
-        "label": "In Their 30s"
-      },
-      {
-        "value": "forties",
-        "label": "In Their 40s"
-      },
-      {
-        "value": "fifties",
-        "label": "Middle-Aged (50s)"
-      },
-      {
-        "value": "sixty_plus",
-        "label": "Mature (60+)"
-      }
+      { "value": "twenties", "label": "Young Adult (20s)" },
+      { "value": "thirties", "label": "In Their 30s" },
+      { "value": "forties", "label": "In Their 40s" },
+      { "value": "fifties", "label": "Middle-Aged (50s)" },
+      { "value": "sixty_plus", "label": "Mature (60+)" }
     ]
   }
 }
 ```
+
+**Note:** The `builds` field is split into three gender-specific arrays: `builds_male`, `builds_female`, and `builds_neutral`. Each contains build options appropriate for that gender selection. The `prompt_types` key is also included in the response.
 
 ---
 
@@ -346,7 +222,7 @@ function PromptsPage() {
 ### Data Flow
 
 1. **Frontend loads Prompts page** → Calls `useCoreEnums()` hook
-2. **Hook makes API call** → `GET /core/enums/`
+2. **Hook makes API call** → `GET /api/v1/core/enums`
 3. **Backend returns enum data** → All available values with labels
 4. **Frontend caches data** → Stores in React Query cache for performance
 5. **Components render** → Dropdowns populated with cached enum data

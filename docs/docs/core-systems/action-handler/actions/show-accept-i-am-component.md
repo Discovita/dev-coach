@@ -21,7 +21,7 @@ Creates and returns a component configuration that renders two choice buttons fo
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | integer | Yes | The ID of the identity being "I Am" Statements |
+| `id` | string (UUID) | Yes | The UUID of the identity for "I Am" Statement acceptance |
 | `i_am_statement` | string | Yes | The "I Am" Statement text to be accepted |
 
 ## Implementation Steps
@@ -39,7 +39,7 @@ Creates and returns a component configuration that renders two choice buttons fo
 {
   "action": "show_accept_i_am_component",
   "params": {
-    "id": 123,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "i_am_statement": "I am a creative visionary who brings innovative ideas to life"
   }
 }

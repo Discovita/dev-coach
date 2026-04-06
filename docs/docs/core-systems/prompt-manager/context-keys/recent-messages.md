@@ -4,14 +4,11 @@ sidebar_position: 18
 
 # Recent Messages
 
-The `recent_messages` context key provides a timeline of recent conversation messages and actions.
+Recent messages are **not** a `ContextKey` enum value. Unlike other context documented in this section, recent messages are appended to the prompt **after** template formatting via `get_recent_messages_context()` and `append_recent_messages()`. They are not listed in a prompt's `required_context_keys` and are not injected via placeholder substitution.
 
-## Context Key Details
+## How It Works
 
-**Key Name**: `recent_messages`  
-**Enum Value**: `ContextKey.RECENT_MESSAGES`  
-**Data Source**: ChatMessage model  
-**Return Type**: `str`
+The `append_recent_messages()` utility is called as the final step of prompt assembly (after `append_action_instructions`). It calls `get_recent_messages_context()` to retrieve recent chat history and appends it to the end of the fully assembled prompt.
 
 ## What Data It Provides
 

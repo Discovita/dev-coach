@@ -17,6 +17,7 @@ The ChatMessage model maintains conversation history with role-based message tra
 - `role` (CharField): Message sender role, max 32 characters
 - `content` (TextField): Message content
 - `timestamp` (DateTimeField): Message timestamp, auto-set, indexed
+- `component_config` (JSONField): Optional component configuration for persistent component rendering, stored as JSON. Optional
 - `test_scenario` (ForeignKey): Link to [TestScenario](./test-scenario.md) for test data isolation, optional
 
 ## Methods
@@ -32,8 +33,10 @@ The ChatMessage model maintains conversation history with role-based message tra
 
 ## Message Role Choices
 
-- `USER`: Message sent by the user
-- `COACH`: Message sent by the coach
+- `USER` (stored: `user`): Message sent by the user
+- `COACH` (stored: `coach`): Message sent by the coach
+
+Note: Role values are stored as lowercase strings in the database.
 
 ## Database Indexes
 

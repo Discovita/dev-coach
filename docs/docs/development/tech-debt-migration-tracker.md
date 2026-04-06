@@ -36,7 +36,7 @@ FRONTEND:
 **Status:** Not started
 
 **Problem:**
-The AI service at `server/services/ai/` has **40 Python files** organized into a deeply nested hierarchy of mixins, factories, adapters, and plugins. The app uses exactly **two methods** from it: `create_messages()` and `create_structured_chat_completion()`. Everything else is dead weight.
+The AI service at `server/services/ai/` was originally **40 Python files** organized into a deeply nested hierarchy of mixins, factories, adapters, and plugins. It has since been significantly reduced to **~14 files** (including tests), but further simplification may still be warranted. The app uses exactly **two methods** from it: `create_messages()` and `create_structured_chat_completion()`. Everything else is dead weight.
 
 **The entire call chain in production:**
 
@@ -200,8 +200,8 @@ In `server/enums/ai.py`, a `DEFAULT_TOKEN_LIMITS` dict is defined at module leve
 
 | Area | Status |
 |------|--------|
-| `apps.coach` (CoachService, process_message) | **No tests** — highest-risk gap, this is the core of the app |
-| `services/ai/` | **No tests** |
+| `apps.coach` (CoachService, process_message) | **Tests exist** — multiple test files covering process_message, admin endpoint, serializer, prompt building, action application, etc. |
+| `services/ai/` | **Tests exist** — test files for openai_service, structured_completion, build_messages, parse responses |
 | `services/prompt_manager/` | **No direct tests** (only covered indirectly via app tests that mock it) |
 | `services/action_handler/` | **No direct tests** |
 | `services/sentinel/` | **No tests** |

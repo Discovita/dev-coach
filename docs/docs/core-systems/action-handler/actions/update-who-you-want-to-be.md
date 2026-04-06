@@ -21,7 +21,7 @@ Updates the `who_you_want_to_be` field in the user's coach state with a complete
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `identities` | array | Yes | Complete list of aspirational identities |
+| `who_you_want_to_be` | array (string) | Yes | Complete list of aspirational identities |
 
 ## Implementation Steps
 
@@ -35,7 +35,7 @@ Updates the `who_you_want_to_be` field in the user's coach state with a complete
 {
   "action": "update_who_you_want_to_be",
   "params": {
-    "identities": ["Confident Leader", "Inspiring Mentor", "Successful Entrepreneur"]
+    "who_you_want_to_be": ["Confident Leader", "Inspiring Mentor", "Successful Entrepreneur"]
   }
 }
 ```

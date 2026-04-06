@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/coach/`
+`/api/v1/coach`
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1. Process Message
 
-- **URL:** `/coach/process-message/`
+- **URL:** `/api/v1/coach/process-message`
 - **Method:** `POST`
 - **Description:** Process a user message and return a coach response. This is the main endpoint for the coaching chatbot functionality. It handles the complete flow from user input to coach response, including state management and action execution.
 - **Authentication:** Required
@@ -18,101 +18,70 @@
   ```json
   {
     "message": "Hi, I'd like to start my coaching journey",
-    "model_name": "gpt-4o"
+    "model_name": "gpt-4o",
+    "actions": [
+      {
+        "action": "transition_phase",
+        "params": { "to_phase": "get_to_know_you" }
+      }
+    ]
   }
   ```
+
+  | Field | Type | Required | Description |
+  |-------|------|----------|-------------|
+  | `message` | string | Conditional | User's message to the coach. May be omitted if `actions` is non-empty. |
+  | `model_name` | string | Optional | AI model to use (defaults to GPT-4o). |
+  | `actions` | array | Optional | List of actions to execute. Each item has `action` (str) and `params` (object). At least one of `message` or `actions` must be provided. |
+
 - **Response:**
-  - `200 OK`: Coach response with updated state and actions.
+  - `200 OK`: Coach response (see `CoachResponseSerializer`).
   - `400 Bad Request`: Validation errors.
-  - `404 Not Found`: Coach state not found.
+  - `500 Internal Server Error`: Processing error.
 
 #### Example Response
 
 ```json
 {
   "message": "Welcome to your coaching journey! I'm excited to help you discover and develop your identities. Let's start by understanding who you are and who you want to become. What brings you here today?",
-  "coach_state": {
-    "id": "uuid-string",
-    "user": "user-uuid",
-    "current_phase": "INTRODUCTION",
-    "current_identity": null,
-    "proposed_identity": null,
-    "identity_focus": "PASSIONS",
-    "skipped_identity_categories": [],
-    "who_you_are": [],
-    "who_you_want_to_be": [],
-    "asked_questions": [],
-    "updated_at": "2024-06-01T12:00:00Z"
-  },
   "final_prompt": "You are a life coach helping users develop their identities...",
-  "actions": [
-    {
-      "action_type": "TRANSITION_PHASE",
-      "parameters": {
-        "from_phase": "INTRODUCTION",
-        "to_phase": "GET_TO_KNOW_YOU"
-      },
-      "result_summary": "Successfully transitioned from Introduction to Get To Know You phase"
-    }
-  ],
-  "chat_history": [
-    {
-      "id": "uuid-string",
-      "role": "COACH",
-      "content": "Welcome to Dev Coach! I'm here to help you...",
-      "timestamp": "2024-06-01T12:00:00Z"
-    },
-    {
-      "id": "uuid-string",
-      "role": "USER",
-      "content": "Hi, I'd like to start my coaching journey",
-      "timestamp": "2024-06-01T12:01:00Z"
-    },
-    {
-      "id": "uuid-string",
-      "role": "COACH",
-      "content": "Welcome to your coaching journey! I'm excited to help you discover and develop your identities...",
-      "timestamp": "2024-06-01T12:01:30Z"
-    }
-  ],
-  "identities": [
-    {
-      "id": "uuid-string",
-      "user": "user-uuid",
-      "name": "Creative Visionary",
-      "i_am_statement": "I am a bold creator, transforming ideas into reality.",
-      "visualization": "I see myself confidently presenting innovative solutions...",
-      "state": "ACCEPTED",
-      "notes": ["Note 1", "Note 2"],
-      "category": "PASSIONS",
-      "created_at": "2024-01-01T12:00:00Z",
-      "updated_at": "2024-06-01T12:00:00Z"
-    }
-  ]
+  "component": {
+    "type": "canned_response",
+    "options": ["Tell me more", "Let's begin"]
+  }
 }
 ```
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `message` | string | Coach's response message. |
+| `final_prompt` | string | The final prompt used to generate the coach's response. |
+| `component` | object (optional) | Optional component configuration for frontend rendering. Only present when the coach response triggers a UI component. |
 
 ---
 
 ### 2. Process Message for User (Admin Only)
 
-- **URL:** `/coach/process-message-for-user/`
+- **URL:** `/api/v1/admin/coach/process-message-for-user`
 - **Method:** `POST`
 - **Description:** Process a message as if sent by a specific user. This endpoint allows admin users to simulate coaching conversations for specific users, primarily used for testing and debugging purposes.
-- **Authentication:** Required (Admin/Superuser only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Request Body:**
   ```json
   {
+    "user_id": "specific-user-uuid",
     "message": "Hi, I'd like to start my coaching journey",
     "model_name": "gpt-4o",
-    "user_id": "specific-user-uuid"
+    "actions": []
   }
   ```
 - **Response:**
-  - `200 OK`: Coach response with updated state and actions.
+  - `200 OK`: Same response format as the main process-message endpoint (`message`, `final_prompt`, `component`).
   - `400 Bad Request`: Validation errors or missing user_id.
-  - `403 Forbidden`: Not authorized (not admin/superuser).
-  - `404 Not Found`: User or coach state not found.
+  - `404 Not Found`: User not found.
+  - `500 Internal Server Error`: Processing error.
 
 #### Example Response
 
@@ -127,6 +96,7 @@ Same format as the main process-message endpoint.
 1. **Authentication & Validation**
    - Validates user authentication
    - Parses and validates the incoming request using `CoachRequestSerializer`
+   - At least one of `message` or `actions` must be provided
 
 2. **Chat History Management**
    - Ensures chat history starts with initial bot message if empty
@@ -134,26 +104,23 @@ Same format as the main process-message endpoint.
 
 3. **State Retrieval**
    - Retrieves the user's current `CoachState` from the database
-   - Returns 404 if no coach state exists
 
 4. **Prompt Generation**
    - Uses `PromptManager` to build the appropriate prompt based on current coaching phase
-   - Includes recent chat history (last 5 messages) for context
+   - Includes recent chat history for context
 
 5. **AI Processing**
    - Calls the AI service (default: GPT-4o) with the generated prompt
-   - Processes the AI response using `CoachChatResponse` model
+   - Processes the AI response
 
 6. **Action Execution**
-   - Extracts actions from the AI response
+   - Extracts actions from the AI response (and any request-provided actions)
    - Applies actions to update the coach state and related models
    - Records actions in the database
 
 7. **Response Assembly**
-   - Serializes the updated coach state
-   - Includes the latest chat history (last 20 messages)
-   - Returns all user identities
-   - Formats the complete response
+   - Returns the coach's message, the final prompt used, and an optional component configuration
+   - The frontend fetches updated state separately via `/api/v1/user/me/complete`
 
 ### Key Components
 
@@ -178,9 +145,8 @@ For detailed field information on models used in these endpoints, see:
 ## Notes
 
 - The main endpoint uses the authenticated user by default.
-- The admin endpoint allows processing messages for specific users (useful for testing).
-- Chat history is automatically managed and includes the last 20 messages.
+- The admin endpoint (`/api/v1/admin/coach/process-message-for-user`) allows processing messages for specific users (useful for testing). It requires IsAdminUser permission (is_staff OR is_superuser).
+- The response does NOT include coach_state, actions, chat_history, or identities. The frontend fetches updated state separately.
 - Actions are automatically executed and recorded for audit purposes.
 - The system supports multiple AI models, with GPT-4o as the default.
-- All responses include the complete updated state for frontend synchronization.
 - Update this document whenever the API changes.

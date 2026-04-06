@@ -8,7 +8,7 @@ The Component Renderer System allows the Coach to dynamically show interactive U
 
 ### Backend Flow
 
-1. **Action Registration**: Component actions are registered in the `ACTION_REGISTRY` in `server/services/action_handler/handler.py` as regualr actions.
+1. **Action Registration**: Component actions are registered in the `ACTION_REGISTRY` in `server/services/action_handler/handler.py` as regular actions.
 2. **Prompt Integration**: The action is added to the prompt's Allowed Actions list with instructions on when to use it
 3. **Component Creation**: When the Coach decides to show a component, it performs the action that will send the required information to the frontend to render the component (e.g., `SHOW_COMBINE_IDENTITIES`)
 4. **Handler Execution**: The action handler function constructs a `ComponentConfig` object and returns it
@@ -46,10 +46,13 @@ The frontend uses a "latest-only" approach for component rendering:
 
 1. **Type Definitions**: `CoachResponse` includes an optional `component: ComponentConfig` field
 2. **State Management**: Component configs are stored in TanStack Query cache with key `["user", "componentConfig"]`
-3. **Component Type Mapping**: Each `component_type` maps to a specific React component:
-   - `COMBINE_IDENTITIES` → `CombineIdentitiesConfirmation`
+3. **Component Type Mapping**: Each `component_type` maps to a specific React component via a switch statement in `CoachMessageWithComponent.tsx`:
    - `INTRO_CANNED_RESPONSE` → `IntroCannedResponseComponent`
-   - Additional component types can be added by extending the switch statement
+   - `COMBINE_IDENTITIES` → `CombineIdentitiesConfirmation`
+   - `NEST_IDENTITIES` → `NestIdentitiesConfirmation`
+   - `ARCHIVE_IDENTITY` → `ArchiveIdentityConfirmation`
+   - `SUGGEST_I_AM_STATEMENT` → `SuggestIAmStatementComponent`
+   - `I_AM_STATEMENTS_SUMMARY` → `IAmStatementsSummaryComponent`
 4. **Rendering Logic**: Components are only rendered on the last coach message when not processing
 5. **Button Handling**: The `CoachMessageWithComponent` component automatically handles button clicks
 
@@ -61,9 +64,9 @@ The frontend uses a "latest-only" approach for component rendering:
 - **Consistent Architecture**: Leverages existing action handler system
 - **Type Safety**: Component actions are typed and validated like other actions
 - **Minimal Frontend Complexity**: Single component and API endpoint for all interactions
-- **Scalable Design**: Adding new component types requires no frontend changes
+- **Scalable Design**: Adding new component types requires only a new React component and a new switch case in `CoachMessageWithComponent.tsx`
 - **Universal Interface**: All components use the same interaction pattern
-- **Clean State Management**: `componentConfig` is always explicit (component or null), no stale configs
+- **Clean State Management**: The API omits the `component` key entirely when no component is present, keeping responses minimal
 - **Latest-Only Rendering**: Components only appear on the most recent coach message, keeping history clean
 
 ## Component Config Storage & Detection
@@ -103,10 +106,18 @@ if (isLastCoachMessage && hasComponent) {
 
 // In CoachMessageWithComponent - component type mapping:
 switch (componentConfig.component_type) {
-  case ComponentType.COMBINE_IDENTITIES:
-    return <CombineIdentitiesConfirmation {...props} />;
   case ComponentType.INTRO_CANNED_RESPONSE:
     return <IntroCannedResponseComponent {...props} />;
+  case ComponentType.COMBINE_IDENTITIES:
+    return <CombineIdentitiesConfirmation {...props} />;
+  case ComponentType.NEST_IDENTITIES:
+    return <NestIdentitiesConfirmation {...props} />;
+  case ComponentType.ARCHIVE_IDENTITY:
+    return <ArchiveIdentityConfirmation {...props} />;
+  case ComponentType.SUGGEST_I_AM_STATEMENT:
+    return <SuggestIAmStatementComponent {...props} />;
+  case ComponentType.I_AM_STATEMENTS_SUMMARY:
+    return <IAmStatementsSummaryComponent {...props} />;
   default:
     return null;
 }

@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/prompts/`
+`/api/v1/prompts`
 
 ---
 
@@ -10,10 +10,10 @@
 
 ### 1. List Prompts
 
-- **URL:** `/prompts/`
+- **URL:** `/api/v1/prompts`
 - **Method:** `GET`
 - **Description:** List all active prompts (only those with `is_active=True`).
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `200 OK`: Array of active prompt objects.
 
@@ -23,28 +23,28 @@
 [
   {
     "id": "uuid-string",
-    "coaching_phase": "INTRODUCTION",
+    "coaching_phase": "introduction",
     "version": 1,
     "name": "Welcome Message",
     "description": "Initial greeting for new users",
     "body": "Welcome to Dev Coach! I'm here to help you...",
-    "required_context_keys": ["user_name", "coaching_phase"],
-    "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
-    "prompt_type": "COACH",
+    "required_context_keys": ["user_name", "current_phase"],
+    "allowed_actions": ["transition_phase", "create_identity"],
+    "prompt_type": "coach",
     "is_active": true,
     "created_at": "2024-01-01T12:00:00Z",
     "updated_at": "2024-06-01T12:00:00Z"
   },
   {
     "id": "uuid-string",
-    "coaching_phase": "GET_TO_KNOW_YOU",
+    "coaching_phase": "get_to_know_you",
     "version": 2,
     "name": "Question Flow",
     "description": "Asking questions to understand the user",
     "body": "Let me ask you a few questions to better understand...",
     "required_context_keys": ["user_name", "asked_questions"],
-    "allowed_actions": ["UPDATE_WHO_YOU_ARE", "TRANSITION_PHASE"],
-    "prompt_type": "COACH",
+    "allowed_actions": ["update_who_you_are", "transition_phase"],
+    "prompt_type": "coach",
     "is_active": true,
     "created_at": "2024-01-01T12:00:00Z",
     "updated_at": "2024-06-01T12:00:00Z"
@@ -56,10 +56,10 @@
 
 ### 2. Retrieve Prompt
 
-- **URL:** `/prompts/{id}/`
+- **URL:** `/api/v1/prompts/{id}`
 - **Method:** `GET`
 - **Description:** Retrieve a single prompt by ID.
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `200 OK`: Prompt object.
   - `404 Not Found`: If prompt doesn't exist.
@@ -69,17 +69,17 @@
 ```json
 {
   "id": "uuid-string",
-  "coaching_phase": "INTRODUCTION",
-  "version": 1,
-  "name": "Welcome Message",
-  "description": "Initial greeting for new users",
-  "body": "Welcome to Dev Coach! I'm here to help you...",
-  "required_context_keys": ["user_name", "coaching_phase"],
-  "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
-  "prompt_type": "COACH",
-  "is_active": true,
-  "created_at": "2024-01-01T12:00:00Z",
-  "updated_at": "2024-06-01T12:00:00Z"
+  "coaching_phase": "introduction",
+    "version": 1,
+    "name": "Welcome Message",
+    "description": "Initial greeting for new users",
+    "body": "Welcome to Dev Coach! I'm here to help you...",
+    "required_context_keys": ["user_name", "current_phase"],
+    "allowed_actions": ["transition_phase", "create_identity"],
+    "prompt_type": "coach",
+    "is_active": true,
+    "created_at": "2024-01-01T12:00:00Z",
+    "updated_at": "2024-06-01T12:00:00Z"
 }
 ```
 
@@ -87,22 +87,22 @@
 
 ### 3. Create Prompt
 
-- **URL:** `/prompts/`
+- **URL:** `/api/v1/prompts`
 - **Method:** `POST`
 - **Description:** Create a new prompt. Automatically assigns the next version number based on `prompt_type` and `coaching_phase`.
   - For prompts with `coaching_phase`: versions are unique per (`prompt_type`, `coaching_phase`)
   - For prompts without `coaching_phase` (e.g., `image_generation`, `sentinel`): versions are unique per `prompt_type`
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Request Body:**
   ```json
   {
-    "coaching_phase": "INTRODUCTION",
+    "coaching_phase": "introduction",
     "name": "Welcome Message",
     "description": "Initial greeting for new users",
     "body": "Welcome to Dev Coach! I'm here to help you...",
-    "required_context_keys": ["user_name", "coaching_phase"],
-    "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
-    "prompt_type": "COACH",
+    "required_context_keys": ["user_name", "current_phase"],
+    "allowed_actions": ["transition_phase", "create_identity"],
+    "prompt_type": "coach",
     "is_active": true
   }
   ```
@@ -116,7 +116,7 @@
     "body": "Create an image for this identity...",
     "required_context_keys": ["identity_for_image"],
     "allowed_actions": [],
-    "prompt_type": "IMAGE_GENERATION",
+    "prompt_type": "image_generation",
     "is_active": true
   }
   ```
@@ -129,14 +129,14 @@
 ```json
 {
   "id": "uuid-string",
-  "coaching_phase": "INTRODUCTION",
+  "coaching_phase": "introduction",
   "version": 3,
   "name": "Welcome Message",
   "description": "Initial greeting for new users",
   "body": "Welcome to Dev Coach! I'm here to help you...",
-  "required_context_keys": ["user_name", "coaching_phase"],
-  "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
-  "prompt_type": "COACH",
+  "required_context_keys": ["user_name", "current_phase"],
+  "allowed_actions": ["transition_phase", "create_identity"],
+  "prompt_type": "coach",
   "is_active": true,
   "created_at": "2024-06-01T12:00:00Z",
   "updated_at": "2024-06-01T12:00:00Z"
@@ -149,25 +149,25 @@
 
 ### 4. Update Prompt (Full Update)
 
-- **URL:** `/prompts/{id}/`
+- **URL:** `/api/v1/prompts/{id}`
 - **Method:** `PUT`
 - **Description:** Update a prompt with all fields (full update).
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Request Body:**
   ```json
   {
-    "coaching_phase": "INTRODUCTION",
+    "coaching_phase": "introduction",
     "version": 1,
     "name": "Updated Welcome Message",
     "description": "Updated initial greeting for new users",
     "body": "Welcome to Dev Coach! I'm here to help you on your journey...",
-    "required_context_keys": ["user_name", "coaching_phase", "user_goals"],
+    "required_context_keys": ["user_name", "current_phase"],
     "allowed_actions": [
-      "TRANSITION_PHASE",
-      "CREATE_IDENTITY",
-      "UPDATE_WHO_YOU_ARE"
+      "transition_phase",
+      "create_identity",
+      "update_who_you_are"
     ],
-    "prompt_type": "COACH",
+    "prompt_type": "coach",
     "is_active": true
   }
   ```
@@ -181,18 +181,18 @@
 ```json
 {
   "id": "uuid-string",
-  "coaching_phase": "INTRODUCTION",
+  "coaching_phase": "introduction",
   "version": 1,
   "name": "Updated Welcome Message",
   "description": "Updated initial greeting for new users",
   "body": "Welcome to Dev Coach! I'm here to help you on your journey...",
-  "required_context_keys": ["user_name", "coaching_phase", "user_goals"],
+  "required_context_keys": ["user_name", "current_phase"],
   "allowed_actions": [
-    "TRANSITION_PHASE",
-    "CREATE_IDENTITY",
-    "UPDATE_WHO_YOU_ARE"
+    "transition_phase",
+    "create_identity",
+    "update_who_you_are"
   ],
-  "prompt_type": "COACH",
+  "prompt_type": "coach",
   "is_active": true,
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T12:00:00Z"
@@ -203,10 +203,10 @@
 
 ### 5. Update Prompt (Partial Update)
 
-- **URL:** `/prompts/{id}/`
+- **URL:** `/api/v1/prompts/{id}`
 - **Method:** `PATCH`
 - **Description:** Partially update a prompt with only the provided fields.
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Request Body:**
   ```json
   {
@@ -236,10 +236,10 @@
 
 ### 6. Delete Prompt
 
-- **URL:** `/prompts/{id}/`
+- **URL:** `/api/v1/prompts/{id}`
 - **Method:** `DELETE`
 - **Description:** Permanently delete a prompt.
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `204 No Content`: Prompt deleted successfully.
   - `404 Not Found`: If prompt doesn't exist.
@@ -248,10 +248,10 @@
 
 ### 7. Get Latest Prompt
 
-- **URL:** `/prompts/latest/`
+- **URL:** `/api/v1/prompts/latest`
 - **Method:** `GET`
 - **Description:** Get the most recent active prompt for a specific coaching phase.
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Query Parameters:**
   - `coaching_phase` (required): The coaching phase to get the latest prompt for
 - **Response:**
@@ -263,7 +263,7 @@
 #### Example Request
 
 ```
-GET /prompts/latest/?coaching_phase=introduction
+GET /api/v1/prompts/latest?coaching_phase=introduction
 ```
 
 #### Example Response (Success)
@@ -276,9 +276,9 @@ GET /prompts/latest/?coaching_phase=introduction
   "name": "Latest Welcome Message",
   "description": "Most recent greeting for new users",
   "body": "Welcome to Dev Coach! I'm here to help you on your journey...",
-  "required_context_keys": ["user_name", "coaching_phase"],
-  "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
-  "prompt_type": "COACH",
+  "required_context_keys": ["user_name", "current_phase"],
+  "allowed_actions": ["transition_phase", "create_identity"],
+  "prompt_type": "coach",
   "is_active": true,
   "created_at": "2024-06-01T12:00:00Z",
   "updated_at": "2024-06-01T12:00:00Z"
@@ -301,7 +301,7 @@ GET /prompts/latest/?coaching_phase=introduction
 {
   "success": false,
   "error": "Invalid coaching phase",
-  "detail": "Invalid coaching_phase: invalid_phase. Valid phases: ['system_context', 'introduction', 'get_to_know_you', 'identity_warm_up', 'identity_brainstorming', 'identity_refinement', 'i_am_statement', 'identity_visualization']"
+  "detail": "Invalid coaching_phase: invalid_phase. Valid phases: ['system_context', 'introduction', 'get_to_know_you', 'identity_warm_up', 'identity_brainstorming', 'brainstorming_review', 'identity_refinement', 'anything_missing', 'identity_commitment', 'i_am_statement', 'identity_visualization']"
 }
 ```
 
@@ -329,10 +329,10 @@ GET /prompts/latest/?coaching_phase=introduction
 
 ### 8. Soft Delete Prompt
 
-- **URL:** `/prompts/{id}/soft_delete/`
+- **URL:** `/api/v1/prompts/{id}/soft_delete`
 - **Method:** `POST`
 - **Description:** Soft delete a prompt by setting `is_active` to `False` instead of permanently deleting it.
-- **Authentication:** Required
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `200 OK`: Updated prompt object with `is_active=False`.
 
@@ -341,14 +341,14 @@ GET /prompts/latest/?coaching_phase=introduction
 ```json
 {
   "id": "uuid-string",
-  "coaching_phase": "INTRODUCTION",
+  "coaching_phase": "introduction",
   "version": 1,
   "name": "Welcome Message",
   "description": "Initial greeting for new users",
   "body": "Welcome to Dev Coach! I'm here to help you...",
-  "required_context_keys": ["user_name", "coaching_phase"],
-  "allowed_actions": ["TRANSITION_PHASE", "CREATE_IDENTITY"],
-  "prompt_type": "COACH",
+  "required_context_keys": ["user_name", "current_phase"],
+  "allowed_actions": ["transition_phase", "create_identity"],
+  "prompt_type": "coach",
   "is_active": false,
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T12:00:00Z"
@@ -373,4 +373,4 @@ For detailed field information on the Prompt model, see:
   - For prompts without `coaching_phase` (e.g., `image_generation`, `sentinel`): versions are unique per `prompt_type`
 - The combination of `prompt_type`, `coaching_phase`, and `version` must be unique.
 - Soft delete is preferred over hard delete to maintain data integrity. The front end only uses the Soft Delete.
-- All endpoints require authentication.
+- All endpoints require IsAdminUser permission (is_staff OR is_superuser).

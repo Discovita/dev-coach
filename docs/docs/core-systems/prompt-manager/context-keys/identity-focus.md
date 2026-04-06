@@ -28,7 +28,7 @@ The function retrieves the `identity_focus` value from the coach state and conve
 "Passions & Talents"  # Current focus category
 "Maker of Money"      # Current focus category
 ""                    # No focus set
-"Invalid Category"    # Fallback for invalid values
+"some_invalid_value"  # Fallback: returns the raw value if not a valid IdentityCategory
 ```
 
 ## Implementation

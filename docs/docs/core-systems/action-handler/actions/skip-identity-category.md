@@ -44,7 +44,7 @@ Adds an identity category to the `skipped_identity_categories` list in the user'
 ## Result
 
 - **Success**: Adds the category to skipped list and saves the coach state
-- **Duplicate**: No action if category is already skipped
+- **Duplicate**: Returns without any changes if category is already skipped. No Action row is created in this case (the handler returns before logging).
 - **Logging**: Records the action with result summary: "Skipped identity category 'physical_expression'"
 
 ## Related Actions

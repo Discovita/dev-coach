@@ -19,10 +19,10 @@ Updates only the visualization field of an existing identity. This is used durin
 
 ## Parameters
 
-| Parameter       | Type    | Required | Description                        |
-| --------------- | ------- | -------- | ---------------------------------- |
-| `id`            | integer | Yes      | The ID of the identity to update   |
-| `visualization` | string  | Yes      | New visualization for the identity |
+| Parameter       | Type          | Required | Description                         |
+| --------------- | ------------- | -------- | ----------------------------------- |
+| `id`            | string (UUID) | Yes      | The UUID of the identity to update  |
+| `visualization` | string        | Yes      | New visualization for the identity  |
 
 ## Implementation Steps
 
@@ -37,7 +37,7 @@ Updates only the visualization field of an existing identity. This is used durin
 {
   "action": "update_identity_visualization",
   "params": {
-    "id": 123,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "visualization": "I see myself standing confidently in a modern office, surrounded by a team of inspired professionals. I'm presenting innovative ideas on a large screen, and the energy in the room is electric with possibility."
   }
 }

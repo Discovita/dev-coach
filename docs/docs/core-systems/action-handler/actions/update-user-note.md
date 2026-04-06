@@ -13,7 +13,7 @@ The `update_user_note` action updates existing [UserNote](/docs/database/models/
 **Action Type**: `update_user_note`  
 **Enum Value**: `ActionType.UPDATE_USER_NOTE`  
 **Handler Function**: `update_user_note()`  
-**Models Used**: [UserNote](/docs/database/models/user-note), [Action](/docs/database/models/action)
+**Models Used**: [UserNote](/docs/database/models/user-note)
 
 ## What It Does
 
@@ -38,11 +38,11 @@ Updates one or more existing [UserNote](/docs/database/models/user-note) entries
   "params": {
     "notes": [
       {
-        "id": 123,
+        "id": "550e8400-e29b-41d4-a716-446655440000",
         "note": "Updated preference for morning coaching sessions"
       },
       {
-        "id": 124,
+        "id": "660e8400-e29b-41d4-a716-446655440001",
         "note": "Updated communication skills progress"
       }
     ]

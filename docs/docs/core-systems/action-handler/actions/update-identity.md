@@ -21,15 +21,17 @@ Updates specified fields of an existing identity. Only fields provided (not None
 
 ## Parameters
 
-| Parameter       | Type    | Required | Description                                       |
-| --------------- | ------- | -------- | ------------------------------------------------- |
-| `id`            | integer | Yes      | The ID of the identity to update                  |
-| `name`          | string  | No       | New name for the identity                         |
-| `i_am_statement`   | string  | No       | New "I Am" Statement for the identity                  |
-| `visualization` | string  | No       | New visualization for the identity                |
-| `state`         | string  | No       | New state for the identity                        |
-| `category`      | string  | No       | New category for the identity                     |
-| `notes`         | array   | No       | Additional notes to append (not replace existing) |
+| Parameter       | Type           | Required | Description                                       |
+| --------------- | -------------- | -------- | ------------------------------------------------- |
+| `id`            | string (UUID)  | Yes      | The UUID of the identity to update                |
+| `name`          | string         | Yes      | New name for the identity                         |
+| `i_am_statement`| string         | Yes      | New "I Am" Statement for the identity             |
+| `visualization` | string         | Yes      | New visualization for the identity                |
+| `state`         | IdentityState  | Yes      | New state for the identity                        |
+| `notes`         | array          | Yes      | Additional notes to append (not replace existing) |
+| `category`      | IdentityCategory | Yes    | New category for the identity                     |
+
+> **Note**: The Pydantic model (`UpdateIdentityParams`) marks all fields as required. However, the handler checks each field for `is not None` before applying updates, so the LLM must provide all fields even if only some need changing.
 
 ## Implementation Steps
 
@@ -44,12 +46,15 @@ Updates specified fields of an existing identity. Only fields provided (not None
 {
   "action": "update_identity",
   "params": {
-    "id": 123,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "name": "Visionary Entrepreneur",
+    "i_am_statement": "I am a visionary entrepreneur who leads with innovation",
+    "visualization": "Standing confidently at a whiteboard mapping out big ideas",
+    "state": "refinement_complete",
     "notes": [
       "The name 'Visionary Entrepreneur' reflects their desire to lead with vision and impact."
     ],
-    "state": "refinement_complete"
+    "category": "work_and_professional"
   }
 }
 ```

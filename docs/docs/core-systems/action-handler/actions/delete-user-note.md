@@ -13,7 +13,7 @@ The `delete_user_note` action removes [UserNote](/docs/database/models/user-note
 **Action Type**: `delete_user_note`  
 **Enum Value**: `ActionType.DELETE_USER_NOTE`  
 **Handler Function**: `delete_user_note()`  
-**Models Used**: [UserNote](/docs/database/models/user-note), [Action](/docs/database/models/action)
+**Models Used**: [UserNote](/docs/database/models/user-note)
 
 ## What It Does
 
@@ -21,9 +21,9 @@ Deletes one or more [UserNote](/docs/database/models/user-note) entries by ID.
 
 ## Parameters
 
-| Parameter  | Type  | Required | Description                 |
-| ---------- | ----- | -------- | --------------------------- |
-| `note_ids` | array | Yes      | Array of note IDs to delete |
+| Parameter | Type                 | Required | Description                          |
+| --------- | -------------------- | -------- | ------------------------------------ |
+| `ids`     | array (string/UUID)  | Yes      | Array of user note UUIDs to delete   |
 
 ## Implementation Steps
 
@@ -36,7 +36,7 @@ Deletes one or more [UserNote](/docs/database/models/user-note) entries by ID.
 {
   "action": "delete_user_note",
   "params": {
-    "note_ids": [123, 124]
+    "ids": ["550e8400-e29b-41d4-a716-446655440000", "660e8400-e29b-41d4-a716-446655440001"]
   }
 }
 ```

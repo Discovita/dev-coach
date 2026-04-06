@@ -19,9 +19,9 @@ Updates the `who_you_are` field in the user's coach state with a complete list o
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `identities` | array | Yes | Complete list of current self-description identities |
+| Parameter     | Type           | Required | Description                                          |
+|---------------|----------------|----------|------------------------------------------------------|
+| `who_you_are` | array (string) | Yes      | Complete list of current self-description identities |
 
 ## Implementation Steps
 
@@ -35,7 +35,7 @@ Updates the `who_you_are` field in the user's coach state with a complete list o
 {
   "action": "update_who_you_are",
   "params": {
-    "identities": ["Creative", "Caring", "Determined", "Problem Solver"]
+    "who_you_are": ["Creative", "Caring", "Determined", "Problem Solver"]
   }
 }
 ```

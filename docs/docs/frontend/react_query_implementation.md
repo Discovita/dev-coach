@@ -62,9 +62,9 @@ We use a three-layer architecture:
 ## Cache Management
 
 - We rely on React Query's built-in caching.
-- After mutations, we call `refetch` on the relevant query to update the cache.
-- No optimistic updates or manual cache manipulation.
-- No use of `useMutation` for mutations; all mutations are handled via direct API calls.
+- Simple hooks (e.g., prompts) call `refetch` after mutations to update the cache.
+- More complex hooks (e.g., `useChatMessages`) use `useMutation` with `onMutate` for optimistic updates and `onSuccess` for manual cache manipulation via `queryClient.setQueryData`.
+- The approach is chosen per-hook based on complexity — simpler CRUD uses direct API calls + refetch, while real-time features like chat use `useMutation` with fine-grained cache control.
 
 ## Error and Loading States
 

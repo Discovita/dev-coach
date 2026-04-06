@@ -28,6 +28,7 @@ Sets the state of the specified identity to 'archived'. Archived identities are 
 1. **State Update**: Updates the identity's state to `IdentityState.ARCHIVED`
 2. **Identity Retrieval**: Gets the updated identity for logging
 3. **Action Logging**: Records the action with details
+4. **Current Identity Advance**: If the current phase is `IDENTITY_COMMITMENT`, calls `set_current_identity_to_next_pending(coach_state, IdentityState.COMMITMENT_COMPLETE)` to advance to the next identity awaiting commitment
 
 ## Example Usage
 

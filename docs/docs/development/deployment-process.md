@@ -136,134 +136,62 @@ python manage.py copy_prompts_to_production --force
 
 ### Staging Build Script (`server/scripts/render/render_build_staging.sh`)
 
+> **Note:** The actual build scripts compute `SERVER_DIR` dynamically from the script's location (`SCRIPT_DIR`), not from hardcoded paths. All `manage.py` commands run from the `server/` directory via `cd $SERVER_DIR && python manage.py ...`.
+
 ```bash
 #!/bin/bash
 # Render Build Script for Dev Coach - STAGING
-# This script handles staging deployment and prompt synchronization
 
-set -e  # Exit on any error
+set -e
 
-echo "🚀 Starting Render build process for Dev Coach - STAGING..."
+# Compute SERVER_DIR from script location
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SERVER_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Function to log with timestamp
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-}
-
-# Function to run command with error handling
-run_command() {
-    local description="$1"
-    local command="$2"
-    
-    log "🔄 $description..."
-    if eval "$command"; then
-        log "✅ $description completed successfully"
-        return 0
-    else
-        log "❌ $description failed"
-        return 1
-    fi
-}
-
-# Main build process for staging
 main() {
-    log "🏗️  Starting Dev Coach STAGING build process..."
-    
     # Step 1: Install dependencies
-    if ! run_command "Installing Python dependencies" "pip install -r server/requirements.txt"; then
-        log "❌ Failed to install dependencies - stopping build"
-        exit 1
-    fi
+    pip install -r $SERVER_DIR/requirements.txt
     
     # Step 2: Run database migrations
-    if ! run_command "Running database migrations" "cd server && python manage.py migrate"; then
-        log "❌ Failed to run migrations - stopping build"
-        exit 1
-    fi
+    cd $SERVER_DIR && python manage.py migrate
     
     # Step 3: Collect static files
-    if ! run_command "Collecting static files" "cd server && python manage.py collectstatic --noinput"; then
-        log "❌ Failed to collect static files - stopping build"
-        exit 1
-    fi
+    cd $SERVER_DIR && python manage.py collectstatic --noinput
     
-    # Step 4: Staging deployment complete    
-    log "🎉 STAGING build process completed successfully!"
-    log "🚀 Dev Coach STAGING is ready to deploy!"
-    log "🔄 Note: Prompts are not copied to staging during this build process. You'll need to transfer them manually by running the following command:"
-    log "🔄 python manage.py copy_prompts_to_staging --force"
+    # Note: Prompts are NOT copied during staging builds.
+    # Run manually: python manage.py copy_prompts_to_staging --force
 }
 
-# Run main function
 main "$@"
 ```
 
 ### Production Build Script (`server/scripts/render/render_build_production.sh`)
 
+> **Note:** Same `SERVER_DIR` pattern as staging. Additionally, production automatically copies prompts from staging.
+
 ```bash
 #!/bin/bash
 # Render Build Script for Dev Coach - PRODUCTION
-# This script handles production deployment and prompt synchronization
 
-set -e  # Exit on any error
+set -e
 
-echo "🚀 Starting Render build process for Dev Coach - PRODUCTION..."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SERVER_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Function to log with timestamp
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-}
-
-# Function to run command with error handling
-run_command() {
-    local description="$1"
-    local command="$2"
-    
-    log "🔄 $description..."
-    if eval "$command"; then
-        log "✅ $description completed successfully"
-        return 0
-    else
-        log "❌ $description failed"
-        return 1
-    fi
-}
-
-# Main build process for production
 main() {
-    log "🏗️  Starting Dev Coach PRODUCTION build process..."
-    
     # Step 1: Install dependencies
-    if ! run_command "Installing Python dependencies" "pip install -r server/requirements.txt"; then
-        log "❌ Failed to install dependencies - stopping build"
-        exit 1
-    fi
+    pip install -r $SERVER_DIR/requirements.txt
     
     # Step 2: Run database migrations
-    if ! run_command "Running database migrations" "cd server && python manage.py migrate"; then
-        log "❌ Failed to run migrations - stopping build"
-        exit 1
-    fi
+    cd $SERVER_DIR && python manage.py migrate
     
     # Step 3: Collect static files
-    if ! run_command "Collecting static files" "cd server && python manage.py collectstatic --noinput"; then
-        log "❌ Failed to collect static files - stopping build"
-        exit 1
-    fi
+    cd $SERVER_DIR && python manage.py collectstatic --noinput
     
-    # Step 4: Copy prompts from staging to production
-    log "📋 Starting prompt synchronization for PRODUCTION (from STAGING)..."
-    if run_command "Copy prompts from staging to production" "cd server && python manage.py copy_prompts_to_production --force"; then
-        log "✅ Production prompts updated successfully from staging"
-    else
-        log "⚠️  Production prompt copy failed, but continuing deployment"
-    fi
-    
-    log "🎉 PRODUCTION build process completed successfully!"
-    log "🚀 Dev Coach PRODUCTION is ready to deploy!"
+    # Step 4: Copy prompts from staging to production (auto)
+    cd $SERVER_DIR && python manage.py copy_prompts_to_production --force
 }
 
-# Run main function
 main "$@"
 ```
 

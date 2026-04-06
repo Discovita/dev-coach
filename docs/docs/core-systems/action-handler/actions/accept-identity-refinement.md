@@ -19,9 +19,9 @@ Sets the state of the specified identity to 'refinement_complete', indicating th
 
 ## Parameters
 
-| Parameter | Type    | Required | Description                                           |
-| --------- | ------- | -------- | ----------------------------------------------------- |
-| `id`      | integer | Yes      | The ID of the identity to mark as refinement complete |
+| Parameter | Type          | Required | Description                                            |
+| --------- | ------------- | -------- | ------------------------------------------------------ |
+| `id`      | string (UUID) | Yes      | The UUID of the identity to mark as refinement complete |
 
 ## Implementation Steps
 
@@ -36,7 +36,7 @@ Sets the state of the specified identity to 'refinement_complete', indicating th
 {
   "action": "accept_identity_refinement",
   "params": {
-    "id": 123
+    "id": "550e8400-e29b-41d4-a716-446655440000"
   }
 }
 ```

@@ -19,10 +19,12 @@ Combines two identities into one by merging their names and notes, then archives
 
 ## Parameters
 
-| Parameter      | Type   | Required | Description                    |
-| -------------- | ------ | -------- | ------------------------------ |
-| `identity_id_a` | integer | Yes      | The ID of the first identity  |
-| `identity_id_b` | integer | Yes      | The ID of the second identity |
+| Parameter       | Type          | Required | Description                     |
+| --------------- | ------------- | -------- | ------------------------------- |
+| `identity_id_a` | string (UUID) | Yes      | The UUID of the first identity  |
+| `identity_id_b` | string (UUID) | Yes      | The UUID of the second identity |
+
+> **Note**: `combine_identities` is not directly available as a field on `CoachChatResponse`. It is invoked through the component flow: the coach triggers `show_combine_identities` → the user clicks "Yes" → the frontend executes `persist_combine_identities` then `combine_identities` via component actions.
 
 ## Implementation Steps
 
@@ -44,8 +46,8 @@ Combines two identities into one by merging their names and notes, then archives
 {
   "action": "combine_identities",
   "params": {
-    "identity_id_a": 123,
-    "identity_id_b": 456
+    "identity_id_a": "550e8400-e29b-41d4-a716-446655440000",
+    "identity_id_b": "660e8400-e29b-41d4-a716-446655440001"
   }
 }
 ```
@@ -54,7 +56,7 @@ Combines two identities into one by merging their names and notes, then archives
 
 - **Success**: Merges the identities and returns `None`
 - **Validation Error**: Raises `ValueError` if IDs are the same or identities don't exist
-- **Logging**: Records the action with result summary: "Combined identities into 'Creative Visionary/Artistic Soul'. Archived 'Artistic Soul' (456)."
+- **Logging**: Records the action with result summary: "Combined identities into 'Creative Visionary/Artistic Soul'. Archived 'Artistic Soul' (660e8400-e29b-41d4-a716-446655440001)."
 
 ## Behavior
 

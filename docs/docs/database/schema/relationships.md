@@ -80,13 +80,13 @@ class Identity(models.Model):
 identities = user.identities.all()
 
 # Get identities by category
-career_identities = user.identities.filter(category='CAREER')
+passion_identities = user.identities.filter(category='passions_and_talents')
 
 # Get accepted identities
-accepted_identities = user.identities.filter(state='ACCEPTED')
+accepted_identities = user.identities.filter(state='accepted')
 ```
 
-**Usage Context**: Stores user-created identities for different life areas (career, health, relationships, etc.).
+**Usage Context**: Stores user-created identities for different life areas (Passions and Talents, Maker of Money, Keeper of Money, Spiritual, Personal Appearance, Physical Expression, Familial Relations, Romantic Relation, Doer of Things).
 
 ---
 
@@ -118,7 +118,7 @@ messages = user.chat_messages.all()
 recent_messages = user.chat_messages.order_by('-timestamp')[:10]
 
 # Get coach messages only
-coach_messages = user.chat_messages.filter(role='COACH')
+coach_messages = user.chat_messages.filter(role='coach')
 ```
 
 **Usage Context**: Maintains complete conversation history for context building and conversation reconstruction.
@@ -153,7 +153,7 @@ actions = user.actions.all()
 recent_actions = user.actions.order_by('-timestamp')[:5]
 
 # Get actions by type
-identity_actions = user.actions.filter(action_type='CREATE_IDENTITY')
+identity_actions = user.actions.filter(action_type='create_identity')
 ```
 
 **Usage Context**: Tracks all actions performed by the coach for audit trails and debugging.
@@ -230,6 +230,59 @@ real_users = User.objects.filter(test_scenario__isnull=True)
 ```
 
 **Usage Context**: Enables test data isolation for development and comprehensive testing.
+
+---
+
+### **User → ReferenceImage (One-to-Many)**
+
+**Purpose**: Each user can have multiple reference images for AI identity image generation (up to 5).
+
+**Implementation**:
+```python
+# ReferenceImage model
+class ReferenceImage(ImageMixin, models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="reference_images"
+    )
+```
+
+**Query Patterns**:
+```python
+# Get all user reference images
+images = user.reference_images.all()
+
+# Get reference images ordered by slot
+ordered_images = user.reference_images.order_by('order')
+```
+
+**Usage Context**: Stores user's reference photos used by the Gemini image generation service for personalized identity visualizations.
+
+---
+
+### **User → IdentityImageChat (One-to-One)**
+
+**Purpose**: Each user has one identity image chat session for managing image generation conversations.
+
+**Implementation**:
+```python
+# IdentityImageChat model
+class IdentityImageChat(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="identity_image_chat"
+    )
+```
+
+**Query Patterns**:
+```python
+# Get user's identity image chat
+image_chat = user.identity_image_chat
+```
+
+**Usage Context**: Tracks the image generation chat session for a user's identities.
 
 ---
 
@@ -353,18 +406,19 @@ class UserNote(models.Model):
         ChatMessage,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
-        related_name="generated_notes"
+        on_delete=models.SET_NULL
     )
 ```
+
+Note: `source_message` has no explicit `related_name`, so Django's default reverse accessor `usernote_set` is used.
 
 **Query Patterns**:
 ```python
 # Get notes generated from this message
-notes = chat_message.generated_notes.all()
+notes = chat_message.usernote_set.all()
 
 # Get messages that generated notes
-note_messages = ChatMessage.objects.filter(generated_notes__isnull=False)
+note_messages = ChatMessage.objects.filter(usernote__isnull=False)
 ```
 
 **Usage Context**: Tracks which chat messages led to the extraction of user notes by the Sentinel agent.
@@ -458,12 +512,12 @@ scenario_data = TestScenario.objects.prefetch_related(
 ### **Cascade Deletes**
 - User deletion cascades to all related data
 - ChatMessage deletion cascades to triggered actions
-- TestScenario deletion cascades to all test data
+- User.test_scenario uses CASCADE (deleting a TestScenario deletes its associated test users)
 
 ### **SET NULL**
 - Optional relationships use SET NULL
 - Allows data preservation when parent is deleted
-- Used for test scenario isolation
+- Most models use SET_NULL for test_scenario (except User which uses CASCADE)
 
 ### **Unique Constraints**
 - One coach state per user

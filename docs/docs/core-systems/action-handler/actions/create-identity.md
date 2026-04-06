@@ -51,7 +51,7 @@ Creates a new identity and links it to the user. The action includes duplicate p
 ## Result
 
 - **Success**: Creates a new identity and returns the identity object
-- **Duplicate**: Returns `None` if an identity with the same name already exists
+- **Duplicate**: Returns `None` if an identity with the same name already exists. No Action row is created in this case (the handler returns before logging).
 - **Logging**: Records the action with result summary: "Created identity 'Creative Visionary' in category 'passions_and_talents'"
 
 ## Related Actions

@@ -15,11 +15,11 @@ The `identities` context key provides all of the user's identities formatted for
 
 ## What Data It Provides
 
-Returns all user identities formatted as markdown-compatible text, including a section listing any skipped identity categories.
+Returns all non-archived user identities formatted as markdown-compatible text, including a section listing any skipped identity categories.
 
 ## How It Gets the Data
 
-The function retrieves all identities for the user and formats them using the `format_identities` utility. It also includes any skipped identity categories from the coach state.
+The function retrieves all non-archived identities for the user and formats them using the `format_identities` utility. It also includes any skipped identity categories from the coach state.
 
 ## Example Data
 
@@ -40,7 +40,8 @@ def get_identities_context(coach_state: CoachState) -> str:
     Also includes a section listing skipped identity categories (if any).
     """
     user = coach_state.user
-    identities: List[Identity] = user.identities.all()
+    # Exclude archived identities from general identity context
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.ARCHIVED)
     skipped = coach_state.skipped_identity_categories or []
 
     identities_section = format_identities(identities)

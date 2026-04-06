@@ -15,22 +15,28 @@ The `update_asked_questions` action updates the list of questions asked during t
 
 ## What It Does
 
-Updates the `asked_questions` field in the user's coach state with a complete list of questions that have been asked during the Get To Know You phase. This action requires the complete list, not just changes.
+Appends a single question to the `asked_questions` list in the user's coach state, if it is not already present. This tracks which questions have been asked during the Get To Know You phase to prevent asking the same question twice.
 
 ## Parameters
 
-| Parameter   | Type  | Required | Description                                 |
-| ----------- | ----- | -------- | ------------------------------------------- |
-| `questions` | array | Yes      | Complete list of asked question enum values |
+| Parameter        | Type                    | Required | Description                                                     |
+| ---------------- | ----------------------- | -------- | --------------------------------------------------------------- |
+| `asked_question` | GetToKnowYouQuestions   | Yes      | A single question enum value to add to the asked questions list |
+
+**Valid `GetToKnowYouQuestions` values:**
+- `background_upbringing` - Background/upbringing
+- `family_structure` - Family structure (siblings, parents, children, etc.)
+- `work_living` - Work or what they do for a living
+- `hobbies_interests` - Hobbies or interests
+- `why_here_hopes` - Why are you here? What do you hope to get out of this coaching?
 
 ## Implementation Steps
 
-1. **Enum Conversion**: Converts enum objects to their string values for storage
-2. **Duplicate Check**: Ensures no duplicates (idempotency protection for React Strict Mode)
-3. **Change Detection**: Only updates if there are actual changes to prevent unnecessary saves
-4. **Questions List Update**: Updates the `asked_questions` field with the complete list of questions
-5. **Save**: Saves the updated coach state
-6. **Action Logging**: Records the action with details
+1. **Enum Conversion**: Converts the enum to its string value for storage
+2. **Duplicate Check**: Checks if the question is already in the existing list
+3. **Append**: If not already present, appends the question value to the existing `asked_questions` list
+4. **Save**: Saves the updated coach state
+5. **Action Logging**: Records the action with details (only when a new question was actually added)
 
 ## Example Usage
 
@@ -38,16 +44,16 @@ Updates the `asked_questions` field in the user's coach state with a complete li
 {
   "action": "update_asked_questions",
   "params": {
-    "questions": ["biggest_challenge", "success_looks_like", "core_values"]
+    "asked_question": "background_upbringing"
   }
 }
 ```
 
 ## Result
 
-- **Success**: Updates the asked_questions list and saves the coach state
-- **No Change**: Skips update if questions list is unchanged (idempotency protection)
-- **Logging**: Records the action with result summary: "Updated asked questions list with X questions"
+- **Success**: Appends the question to the asked_questions list and saves the coach state
+- **Already Present**: Skips update if the question is already in the list (idempotency protection). No Action row is created.
+- **Logging**: Records the action with result summary: "Added question 'background_upbringing' to asked questions list"
 
 ## Related Actions
 

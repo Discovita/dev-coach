@@ -12,7 +12,6 @@ The Dev Coach database schema is designed around a coaching workflow that guides
 - **ORM**: Django ORM with custom managers
 - **Migrations**: Django migrations for schema management
 - **Extensions**: PostgreSQL ArrayField for list storage
-- **Backup Strategy**: Automated daily backups with point-in-time recovery
 
 ## Core Design Principles
 
@@ -29,8 +28,8 @@ The Dev Coach database schema is designed around a coaching workflow that guides
 - Image generation with user appearance preferences and identity scene details
 
 ### 3. **Test Scenario Isolation**
-- All models support test scenario isolation
-- Optional foreign key to TestScenario model
+- Most models support test scenario isolation via optional foreign key to TestScenario model
+- Exceptions: ReferenceImage, IdentityImageChat, and Prompt do NOT have `test_scenario`
 - Enables comprehensive testing without data pollution
 
 ### 4. **Extensibility**
@@ -44,16 +43,20 @@ The Dev Coach database schema is designed around a coaching workflow that guides
 User (Core)
 ├── CoachState (One-to-One)
 │   ├── current_identity → Identity
-│   └── proposed_identity → Identity
+│   └── proposed_identity → Identity (deprecated)
 ├── Identities (One-to-Many)
+│   └── IdentityImageChats (One-to-Many via image_chats)
 ├── ChatMessages (One-to-Many)
 ├── Actions (One-to-Many)
 ├── UserNotes (One-to-Many)
+├── ReferenceImages (One-to-Many)
+├── IdentityImageChat (One-to-One)
 └── TestScenario (Many-to-One, optional)
 
 Identity (Core)
 ├── User (Many-to-One)
-└── CoachState (One-to-Many via current/proposed)
+├── CoachState (One-to-Many via current/proposed)
+└── IdentityImageChats (One-to-Many via image_chats)
 
 ChatMessage (Core)
 ├── User (Many-to-One)
@@ -62,11 +65,18 @@ ChatMessage (Core)
 
 Prompt (Standalone)
 ├── No direct relationships
-└── Version control via coaching_phase + version
+└── Version control via prompt_type + coaching_phase + version
+
+ReferenceImage
+└── User (Many-to-One)
+
+IdentityImageChat
+├── User (One-to-One)
+└── Identity (Many-to-One)
 
 TestScenario (Standalone)
 ├── User (One-to-Many via created_by)
-└── All models (One-to-Many via test_scenario)
+└── Most models (One-to-Many via test_scenario)
 ```
 
 ## Key Relationships

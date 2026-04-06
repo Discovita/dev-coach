@@ -43,6 +43,7 @@ Removes an identity category from the `skipped_identity_categories` list in the 
 ## Result
 
 - **Success**: Removes the category from skipped list and saves the coach state
+- **Not Found**: If the category is not in the skipped list, does nothing and creates no Action row (the handler only logs when the category was actually removed).
 - **Logging**: Records the action with result summary: "Unskipped identity category 'physical_expression'"
 
 ## Related Actions

@@ -36,9 +36,13 @@ The function retrieves the `who_you_want_to_be` list from the coach state and jo
 def get_who_you_want_to_be(coach_state: CoachState) -> str:
     """
     Get the user's "Who You Are" identities as a comma-separated string.
+    # NOTE: The docstring above has a typo in the source code — it says "Who You Are"
+    # but the function actually returns "Who You Want to Be" data.
     """
     who_you_want_to_be = coach_state.who_you_want_to_be
     if not who_you_want_to_be:
         return "No Who You Want To Be identities defined yet."
     return ", ".join(who_you_want_to_be)
 ```
+
+**Note**: The source code docstring contains a typo — it says `"Who You Are"` instead of `"Who You Want to Be"`. The function correctly returns the "Who You Want to Be" data despite the misleading docstring.

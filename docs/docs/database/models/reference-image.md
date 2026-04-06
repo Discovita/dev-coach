@@ -16,7 +16,7 @@ Reference images serve as the source material for generating identity images. Wh
 - `user` (ForeignKey): Link to [User](./users.md) model
 - `name` (CharField): Optional label for this image (e.g., "Headshot 1"), max 255 characters
 - `order` (PositiveSmallIntegerField): Display order slot (0-4), defaults to 0
-- `image` (VersatileImageField): The uploaded image file, stored in S3 (inherited from ImageMixin)
+- `image` (VersatileImageField): The uploaded image file, stored in S3 (inherited from ImageMixin), nullable (null=True)
 - `image_ppoi` (PPOIField): Primary Point of Interest for smart cropping (inherited from ImageMixin)
 - `created_at` (DateTimeField): Creation timestamp, auto-set
 - `updated_at` (DateTimeField): Last update timestamp, auto-updated

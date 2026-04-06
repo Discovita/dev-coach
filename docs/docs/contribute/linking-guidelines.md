@@ -59,7 +59,7 @@ For detailed field information on models used in these endpoints, see:
 
 - **[Prompt Manager](/docs/core-systems/prompt-manager/overview)** - How prompts are managed
 - **[Action Handler](/docs/core-systems/action-handler/overview)** - How actions are processed
-- **[Sentinel](/docs/core-systems/sentinel/overview)** - Content moderation system
+- **[Sentinel](/docs/core-systems/sentinel/overview)** - User note / memory extraction system
 ```
 
 ### Navigation Links

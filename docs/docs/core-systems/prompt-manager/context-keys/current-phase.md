@@ -15,11 +15,11 @@ The `current_phase` context key provides the current coaching phase for the user
 
 ## What Data It Provides
 
-Returns the current coaching phase as a string value from the coach state.
+Returns the current coaching phase as the stored enum value string from the coach state (e.g., `"identity_warm_up"`, `"identity_brainstorming"`), **not** the human-readable label (e.g., not `"Identity Warm-Up"`).
 
 ## How It Gets the Data
 
-The function directly returns the `current_phase` field from the coach state.
+The function directly returns the `current_phase` field from the coach state without any transformation.
 
 ## Example Data
 

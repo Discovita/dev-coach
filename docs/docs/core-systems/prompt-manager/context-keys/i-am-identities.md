@@ -19,7 +19,7 @@ Returns identities that are NOT i_am_complete, formatted as markdown text, or a 
 
 ## How It Gets the Data
 
-The function filters identities to exclude those with `I_AM_COMPLETE` state and formats them using the `format_identities` utility.
+The function filters identities to exclude those with `I_AM_COMPLETE` state **and** archived identities, then formats them using the `format_identities` utility.
 
 ## Example Data
 
@@ -27,7 +27,7 @@ The function filters identities to exclude those with `I_AM_COMPLETE` state and 
 # Example return values
 "## Identities\n\n### Passions & Talents\n- **Creator**: Someone who brings ideas to life through artistic expression\n- **Helper**: Someone who supports others in achieving their goals"
 
-"No more identities left to create an 'I Am' Statement - time to move to the Identity Visualization phase"
+"No more identities left to affirm - time to move to the Identity Visualization phase"
 ```
 
 ## Implementation
@@ -41,12 +41,16 @@ def get_i_am_identities_context(coach_state: CoachState) -> str:
     If no identities remain to create an "I Am" Statement, returns instructions to move to the next phase.
     """
     user = coach_state.user
-    # Filter to only show identities that are NOT i_am_complete
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.I_AM_COMPLETE)
+    # Filter to only show identities that are NOT i_am_complete and NOT archived, sorted by oldest first
+    identities: List[Identity] = (
+        user.identities.exclude(state=IdentityState.I_AM_COMPLETE)
+        .exclude(state=IdentityState.ARCHIVED)
+        .order_by("created_at")
+    )
 
-    # Check if there are any identities left to create an "I Am" Statement
+    # Check if there are any identities left to affirm
     if identities.count() == 0:
-        return "No more identities left to create an 'I Am' Statement - time to move to the Identity Visualization phase"
+        return "No more identities left to affirm - time to move to the Identity Visualization phase"
     
     return format_identities(identities)
 ```

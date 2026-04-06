@@ -21,7 +21,7 @@ Creates and returns a component configuration that renders interactive buttons o
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| None | - | - | This action currently takes no parameters |
+| `show_introduction_canned_response_component` | boolean | Yes | Whether to show the introduction canned response component |
 
 ## Implementation Steps
 
@@ -35,7 +35,9 @@ Creates and returns a component configuration that renders interactive buttons o
 ```json
 {
   "action": "show_introduction_canned_response_component",
-  "params": {}
+  "params": {
+    "show_introduction_canned_response_component": true
+  }
 }
 ```
 

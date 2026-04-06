@@ -243,7 +243,7 @@ COMPOSE_PROJECT_NAME=dev-coach-local \
 ```bash
 COMPOSE_PROJECT_NAME=dev-coach-local \
   docker compose -f docker/docker-compose.yml -f docker/docker-compose.local.yml \
-  exec -T db pg_restore -U postgres -d dev_coach_core_local < \
+  exec -T db pg_restore -U dev_coach_database_user -d local_dev_coach < \
   server/backups/your_backup_file.dump
 ```
 

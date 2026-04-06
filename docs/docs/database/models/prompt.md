@@ -35,11 +35,17 @@ The Prompt model enables version control for prompts, supports dynamic prompt se
 
 ## Coaching Phase Choices
 
-- `GET_TO_KNOW_YOU`: Initial phase to understand the user
-- `IDENTITY_CREATION`: Creating user identities
-- `IDENTITY_REFINEMENT`: Refining and improving identities
-- `INTEGRATION`: Integrating identities into daily life
-- `COMPLETED`: Coaching session completed
+- `SYSTEM_CONTEXT` (stored: `system_context`): System context initialization
+- `INTRODUCTION` (stored: `introduction`): Introduction to the coaching process
+- `GET_TO_KNOW_YOU` (stored: `get_to_know_you`): Initial phase to understand the user
+- `IDENTITY_WARM_UP` (stored: `identity_warm_up`): Warming up to identity concepts
+- `IDENTITY_BRAINSTORMING` (stored: `identity_brainstorming`): Brainstorming identities
+- `BRAINSTORMING_REVIEW` (stored: `brainstorming_review`): Reviewing brainstormed identities
+- `IDENTITY_REFINEMENT` (stored: `identity_refinement`): Refining and improving identities
+- `ANYTHING_MISSING` (stored: `anything_missing`): Check for missing identities
+- `IDENTITY_COMMITMENT` (stored: `identity_commitment`): Committing to identities
+- `I_AM_STATEMENT` (stored: `i_am_statement`): Creating "I Am" statements
+- `IDENTITY_VISUALIZATION` (stored: `identity_visualization`): Visualizing identities
 
 ## Prompt Type Choices
 

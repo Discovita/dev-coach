@@ -19,9 +19,9 @@ Sets the state of the specified identity to 'accepted', indicating that the user
 
 ## Parameters
 
-| Parameter | Type    | Required | Description                      |
-| --------- | ------- | -------- | -------------------------------- |
-| `id`      | integer | Yes      | The ID of the identity to accept |
+| Parameter | Type          | Required | Description                       |
+| --------- | ------------- | -------- | --------------------------------- |
+| `id`      | string (UUID) | Yes      | The UUID of the identity to accept |
 
 ## Implementation Steps
 
@@ -35,7 +35,7 @@ Sets the state of the specified identity to 'accepted', indicating that the user
 {
   "action": "accept_identity",
   "params": {
-    "id": 123
+    "id": "550e8400-e29b-41d4-a716-446655440000"
   }
 }
 ```
