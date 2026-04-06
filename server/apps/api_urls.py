@@ -48,6 +48,9 @@ default_router.register(
 # Register admin viewsets
 # These will be available at /api/v1/admin/{resource}/
 admin_router.register(r"coach", AdminCoachViewSet, basename="admin-coach")
+admin_router.register(
+    r"test-scenarios", TestScenarioViewSet, basename="test-scenarios"
+)
 admin_router.register(r"identities", AdminIdentityViewSet, basename="admin-identities")
 admin_router.register(
     r"identity-image-chat",

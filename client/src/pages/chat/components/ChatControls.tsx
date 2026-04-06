@@ -11,31 +11,42 @@ import { CurrentIdentityBulletin } from "@/pages/chat/components/CurrentIdentity
 import { useIdentities } from "@/hooks/use-identities";
 import { useCoachState } from "@/hooks/use-coach-state";
 import { useProfile } from "@/hooks/use-profile";
+import { useUserTarget } from "@/context/UserTargetContext";
 
 interface ChatControlsProps {
   isProcessingMessage: boolean;
   onSendMessage: (request: CoachRequest) => void;
+  onResetSuccess?: () => void;
 }
 
+/**
+ * ChatControls component
+ * Handles message input, bulletins, and action buttons (reset, freeze, export).
+ *
+ * Context-aware: reads from UserTargetContext to determine behavior.
+ * - Hooks (useCoachState, useIdentities) auto-switch via context.
+ * - ConversationResetter branches on context for reset behavior.
+ * - TestScenarioSessionFreezer receives the appropriate userId.
+ *
+ * Used in: ChatInterface (both regular and impersonating contexts).
+ */
 export const ChatControls: React.FC<ChatControlsProps> = ({
   isProcessingMessage,
   onSendMessage,
+  onResetSuccess,
 }) => {
+  const { isImpersonating, targetUserId } = useUserTarget();
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Get current user profile using hook
   const { profile } = useProfile();
-
-  // Fetch coach state with active query subscription to ensure refetch on invalidation
-  // This ensures bulletins update when coachState is invalidated after sending messages
   const { coachState } = useCoachState();
   const { identities } = useIdentities();
 
-  /**
-   * Resizes the textarea to fit content, up to a max height.
-   * Called on input change and after sending a message.
-   */
+  const freezerUserId = isImpersonating
+    ? targetUserId!
+    : (profile?.id || "");
+
   const resizeTextarea = useCallback(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -50,34 +61,24 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
     }
   }, []);
 
-  // Resize textarea on input change
   useEffect(() => {
     resizeTextarea();
   }, [inputMessage, resizeTextarea]);
 
   // Auto-focus textarea when coach finishes responding
-  // This allows users to immediately type their next message without clicking
   const prevIsProcessingRef = useRef(isProcessingMessage);
   useEffect(() => {
-    // Only focus when transitioning from processing (true) to not processing (false)
-    // This avoids focusing on initial mount or when already not processing
     if (prevIsProcessingRef.current === true && !isProcessingMessage && textareaRef.current) {
-      // Use setTimeout to ensure the DOM has updated after the response
       setTimeout(() => {
         textareaRef.current?.focus();
       }, 0);
     }
-    // Update the ref to track the previous value
     prevIsProcessingRef.current = isProcessingMessage;
   }, [isProcessingMessage]);
 
-  /**
-   * Handles input change and resizes textarea.
-   */
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setInputMessage(e.target.value);
-      // resizeTextarea will be called by useEffect
     },
     []
   );
@@ -127,9 +128,9 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
         </Button>
       </form>
       <div className="flex justify-center items-center gap-6">
-        <ConversationResetter />
+        <ConversationResetter onResetSuccess={onResetSuccess} />
         <TestScenarioSessionFreezer
-          userId={profile?.id || ""}
+          userId={freezerUserId}
           onSuccess={() => {}}
         />
         <ConversationExporter />

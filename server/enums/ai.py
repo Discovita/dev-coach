@@ -161,56 +161,12 @@ class AIModel(models.TextChoices):
         Get the default token limit for a specific model.
         See: DEFAULT_TOKEN_LIMITS (module-level constant)
         """
-        # Force conversion to string to avoid any type issues
-        try:
-            # If it's an enum or has a .value attribute, get that
-            if hasattr(model_name, "value"):
-                model_str = str(model_name.value)
-            # Otherwise treat it as a string
-            else:
-                model_str = str(model_name)
-
-            # Make absolutely sure model_str is a string
-            if not isinstance(model_str, str):
-                model_str = str(model_str)
-
-        except Exception:
+        if hasattr(model_name, "value"):
+            model_str = str(model_name.value)
+        else:
             model_str = str(model_name)
 
-        # Use hardcoded if/elif instead of dictionary lookup to avoid any issues
-        # GPT-4.5 and o series models
-        if "gpt-4.5-preview" in model_str:
-            return 16384
-        elif "o3-mini" in model_str:
-            return 100000
-        elif "o1-mini" in model_str:
-            return 65536
-        elif "o1" in model_str:  # Must come after o1-mini check
-            return 100000
-        elif "gpt-4o-mini" in model_str:
-            return 16384
-        elif "gpt-4o" in model_str:  # Must come after gpt-4o-mini check
-            return 16384
-
-        # Other GPT models
-        elif "gpt-4-turbo" in model_str:
-            return 4096
-        elif "gpt-4" in model_str:  # Must come after gpt-4-turbo check
-            return 8192
-        elif "gpt-3.5-turbo" in model_str:
-            return 4096
-
-        # Claude models
-        elif "claude-3-7-sonnet" in model_str:
-            return 8192
-        elif "claude-3-5-sonnet" in model_str:
-            return 8192
-        elif "claude-3-5-haiku" in model_str:
-            return 8192
-
-        # Fallback for unknown models
-        else:
-            return 1024
+        return DEFAULT_TOKEN_LIMITS.get(model_str, 1024)
 
     @classmethod
     def get_or_default(cls, model_name: str = None) -> "AIModel":

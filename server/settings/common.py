@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "django_filters",
     # Your apps...
     "apps.authentication",
+    "apps.core",
     "apps.coach",
     "apps.coach_states",
     "apps.chat_messages",
