@@ -49,7 +49,7 @@ default_router.register(
 # These will be available at /api/v1/admin/{resource}/
 admin_router.register(r"coach", AdminCoachViewSet, basename="admin-coach")
 admin_router.register(
-    r"test-scenarios", TestScenarioViewSet, basename="test-scenarios"
+    r"test-scenarios", AdminTestScenarioViewSet, basename="admin-test-scenarios"
 )
 admin_router.register(r"identities", AdminIdentityViewSet, basename="admin-identities")
 admin_router.register(
@@ -58,9 +58,6 @@ admin_router.register(
     basename="admin-identity-image-chat",
 )
 admin_router.register(r"test-user", AdminTestUserViewSet, basename="admin-test-user")
-admin_router.register(
-    r"test-scenarios", AdminTestScenarioViewSet, basename="admin-test-scenarios"
-)
 
 # JWT token URLs
 jwt_patterns = [
