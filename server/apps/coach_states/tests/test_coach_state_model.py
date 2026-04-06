@@ -2,6 +2,8 @@
 Tests for CoachState model.
 """
 
+from unittest.mock import patch
+
 from django.test import TestCase
 from django.utils import timezone
 
@@ -35,19 +37,19 @@ class CoachStateModelTests(TestCase):
         self.assertIsNotNone(self.coach_state.updated_at)
         self.assertLessEqual(self.coach_state.updated_at, timezone.now())
 
-    def test_updated_at_changes_on_update(self):
+    @patch("django.utils.timezone.now")
+    def test_updated_at_changes_on_update(self, mock_now):
         """updated_at should change when coach state is updated."""
-        original_updated_at = self.coach_state.updated_at
+        from datetime import timedelta
 
-        # Wait a tiny bit to ensure timestamp difference
-        import time
-
-        time.sleep(0.01)
+        original_time = self.coach_state.updated_at
+        mock_now.return_value = original_time + timedelta(seconds=10)
 
         self.coach_state.current_phase = CoachingPhase.GET_TO_KNOW_YOU
         self.coach_state.save()
+        self.coach_state.refresh_from_db()
 
-        self.assertGreater(self.coach_state.updated_at, original_updated_at)
+        self.assertGreater(self.coach_state.updated_at, original_time)
 
     def test_one_to_one_relationship_with_user(self):
         """CoachState should have OneToOne relationship with User."""
