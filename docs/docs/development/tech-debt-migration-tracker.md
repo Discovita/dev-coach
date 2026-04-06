@@ -495,23 +495,37 @@ Each page/feature can be ported independently once Phase 1 and Phase 2 are done.
 - [x] **ConversationResetter** — Ported unified version from Gold that branches between regular reset and test scenario reset based on `UserTargetContext`. Ported `ConversationResetterDialog` and `TestScenarioConversationResetterDialog`. Integrated into `ChatInterface` via new `onResetSuccess` prop.
 - [x] **SessionRestorer** — Ported `SessionRestorer.tsx` component.
 - [x] **Button `xs` size variant** — Added to shadcn Button component for use by test scenario forms.
-- [ ] **Demo page** (`/demo`) — Skipped (low priority)
-- [ ] **Storybook + MSW** — Skipped (low priority)
+- [x] **Image save impersonation support** — Made `Images.tsx` fully impersonation-aware. Added `adminSaveGeneratedImage()` to `api/imageGeneration.ts` (JSON POST to `/admin/identities/save-generated-image`). Updated `use-image-generation.ts` save mutation to accept `admin` flag. `Images.tsx` now: (1) branches `handleSceneSave` to `adminUpdateIdentity` when impersonating, (2) passes `user_id` to `startChat`/`continueChat` for admin endpoint routing, (3) passes `admin: true` to save mutation for admin save endpoint, (4) passes impersonated user ID to `useReferenceImages` for correct ref image checks, (5) invalidates correct query key prefix. Resolves Open Question 7.
+- ~~**Demo page** (`/demo`)~~ — Intentionally skipped (not needed)
+- ~~**Storybook + MSW**~~ — Intentionally skipped (deferred)
 
 **Implementation notes:**
 - Installed 3 new dependencies: `ag-grid-community`, `ag-grid-react`, `@xmldom/xmldom`
 - All gold-specific Tailwind classes (`gold-50/100/200/500/600/700/800/900`) converted to shadcn semantic variables (`bg-muted`, `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`, etc.)
 - All type-only imports updated with `import type` for `verbatimModuleSyntax` compliance
 - TypeScript check and full Vite build pass cleanly
+- Gold's `UserSelector` component is no longer needed — replaced by global admin impersonation feature
+
+### Phase 3.5: Admin Impersonation Feature (bonus, not in original plan)
+
+Added a global admin impersonation system that lets admins "view as" any user across the entire app. This replaces Gold's per-page `UserSelector` pattern with a unified approach.
+
+- [x] **Backend** — Added `list_all` action to `TestUserViewSet` returning all users with `is_test_user` and `test_scenario_name` fields
+- [x] **ImpersonationContext / ImpersonationProvider** — Global context for impersonation state (`impersonatedUser`, `startImpersonating`, `stopImpersonating`)
+- [x] **ImpersonationTargetBridge** — Bridges `ImpersonationContext` into `UserTargetProvider`, wrapping the entire authenticated app so all hooks automatically use admin endpoints when impersonating
+- [x] **Admin Users page** (`/admin/users`) — Lists all users with search, type column (real user vs test scenario name), and "View As" button
+- [x] **ImpersonationBanner** — Sticky amber banner at top of content area showing who is being impersonated, with "Exit View" button
+- [x] **Account page** — Made impersonation-aware: shows impersonated user's profile, reference images, and appearance; hides logout button
+- [x] **Images page** — Made impersonation-aware: scene save, image generation, image save, and reference image checks all route through admin endpoints when impersonating
 
 ### Phase 4: Verification
 
-- [ ] Verify all regular user flows still work (chat, identities, images)
-- [ ] Verify all admin flows work (test scenarios, prompts, admin image generation)
-- [ ] Verify image generation works for both regular and admin paths
-- [ ] Strip any remaining gold-specific styling from ported components (adapt to Purple's design tokens)
+- [ ] Verify all regular user flows still work (chat, identities, images) — testing in staging
+- [ ] Verify all admin flows work (test scenarios, prompts, admin image generation) — testing in staging
+- [ ] Verify image generation + save works for both regular and impersonated paths — testing in staging
+- [ ] Strip any remaining gold-specific styling from ported components (adapt to Purple's design tokens) — fix as encountered
 
-**Touches:** Purple frontend, possibly backend if any missed API adjustments. Dependencies to add: `ag-grid-community`, `ag-grid-react`, `xmldom`.
+**Touches:** Purple frontend, possibly backend if any missed API adjustments.
 
 ---
 
@@ -559,8 +573,8 @@ These need answers before or during the work above:
 1. ~~**Cookie naming:** `discovita-*` or `neovita-*`?~~ **Resolved: `neovita-*`.** Purple conventions take precedence.
 2. ~~**Linter:** Keep ESLint (gold) or Biome (purple)?~~ **Resolved: Biome.** Keep Purple's tooling.
 3. **Admin user URL naming:** `/admin/user/{id}/...` (generic) or `/admin/test-user/{id}/...` (test-specific)? _(Needed for B3)_
-4. **Demo page:** Worth porting or can it be dropped?
-5. **Storybook:** Priority to port, or defer?
+4. ~~**Demo page:** Worth porting or can it be dropped?~~ **Resolved: Dropped.** Not needed.
+5. ~~**Storybook:** Priority to port, or defer?~~ **Resolved: Deferred.** Not blocking migration.
 6. **Branding in landing page:** Purple landing says "NeoVita" — does that stay or change to Discovita?
-7. **`saveGeneratedImage` discrepancy:** Gold uses JSON POST to `/admin/identities/save-generated-image`. Purple uses FormData PATCH to `/identities/{id}/upload-image`. Which endpoint is correct? _(Needed for F3 Phase 2)_
-8. **Cookie utility deduplication:** Both `auth.ts` and `authFetch.ts` define their own `getCookie`/`setCookie`. Should these be consolidated into a shared utility? _(Low priority, can do during F3 or F5)_
+7. ~~**`saveGeneratedImage` discrepancy:** Gold uses JSON POST to `/admin/identities/save-generated-image`. Purple uses FormData PATCH to `/identities/{id}/upload-image`. Which endpoint is correct?~~ **Resolved: Both kept.** Purple uses FormData PATCH for regular users (own identities). Added `adminSaveGeneratedImage()` using Gold's JSON POST for admin impersonation (other users' identities). The save mutation branches based on an `admin` flag.
+8. **Cookie utility deduplication:** Both `auth.ts` and `authFetch.ts` define their own `getCookie`/`setCookie`. Should these be consolidated into a shared utility? _(Low priority, can do during F5)_
