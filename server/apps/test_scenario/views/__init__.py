@@ -2,9 +2,9 @@
 DRF views for the test_scenario app.
 
 Exports:
-    TestScenarioViewSet: Admin-only CRUD + reset/freeze-session for test scenarios.
+    AdminTestScenarioViewSet: Admin-only CRUD + reset/freeze-session for test scenarios.
 """
 
-from apps.test_scenario.views.test_scenario_view_set import TestScenarioViewSet
+from apps.test_scenario.views.admin_test_scenario_view_set import AdminTestScenarioViewSet
 
-__all__ = ["TestScenarioViewSet"]
+__all__ = ["AdminTestScenarioViewSet"]

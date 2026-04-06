@@ -12,12 +12,6 @@ log = configure_logging(__name__, log_level="INFO")
 
 
 class CoachViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet for coach message processing.
-
-    Endpoints:
-    - POST /api/v1/coach/process-message/  → process_message()
-    """
 
     @action(
         detail=False,
@@ -28,18 +22,7 @@ class CoachViewSet(viewsets.GenericViewSet):
     def process_message(self, request: Request) -> Response:
         """
         POST /api/v1/coach/process-message/
-
         Process a message from the authenticated user and return a coach response.
-
-        Request Body:
-            {
-                "message": str,
-                "actions": list (optional)
-            }
-
-        Response:
-            200: { "message": str, "final_prompt": str, "component": dict (optional) }
-            500: { "detail": str }
         """
         serializer = CoachRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

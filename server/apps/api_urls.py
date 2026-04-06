@@ -22,8 +22,8 @@ from apps.identities.views import (
 )
 from apps.prompts.views import PromptViewSet
 from apps.reference_images.views import ReferenceImageViewSet
-from apps.test_scenario.views import TestScenarioViewSet
-from apps.users.views import TestUserViewSet, UserViewSet
+from apps.test_scenario.views import AdminTestScenarioViewSet
+from apps.users.views import AdminTestUserViewSet, UserViewSet
 
 # Initialize routers
 default_router = DefaultRouter(trailing_slash=False)
@@ -37,7 +37,6 @@ default_router.register(r"prompts", PromptViewSet, basename="prompts")
 default_router.register(r"core", CoreViewSet, basename="core")
 default_router.register(r"coach", CoachViewSet, basename="coach")
 default_router.register(r"user", UserViewSet, basename="user")
-default_router.register(r"test-user", TestUserViewSet, basename="test-user")
 default_router.register(r"identities", IdentityViewSet, basename="identities")
 default_router.register(
     r"identity-image-chat", IdentityImageChatViewSet, basename="identity-image-chat"
@@ -57,6 +56,10 @@ admin_router.register(
     r"identity-image-chat",
     AdminIdentityImageChatViewSet,
     basename="admin-identity-image-chat",
+)
+admin_router.register(r"test-user", AdminTestUserViewSet, basename="admin-test-user")
+admin_router.register(
+    r"test-scenarios", AdminTestScenarioViewSet, basename="admin-test-scenarios"
 )
 
 # JWT token URLs
