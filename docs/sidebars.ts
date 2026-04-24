@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
             "coach/integration-and-application",
             "coach/identity-categories",
             "coach/phases",
+            "coach/phase-map",
           ],
         },
       ],
