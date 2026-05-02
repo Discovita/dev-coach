@@ -1,5 +1,5 @@
 import { MultiSelect } from "@/components/ui/multi-select";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useCoreEnums } from "@/hooks/use-core";
 import {
   Select,
@@ -13,7 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { PromptCreate } from "@/types/prompt";
+import type { PromptCreate } from "@/types/prompt";
 import { Input } from "@/components/ui/input";
 
 export interface NewPromptFormProps {
@@ -55,14 +55,12 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
     setPrompt("");
   }
 
-  // Prompt types that don't require a coaching_phase
   const nonCoachingPhasePromptTypes = ["image_generation", "sentinel"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // For non-coaching-phase prompts (image_generation, sentinel), coaching_phase should be null
       const promptData: PromptCreate = {
         coaching_phase: nonCoachingPhasePromptTypes.includes(
           selectedPromptType ?? ""
@@ -78,7 +76,6 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
       };
       await onSubmit(promptData);
       toast.success("Prompt submitted successfully!");
-      // Reset form after successful submit
       resetForm();
     } catch (err: unknown) {
       toast.error("Failed to submit prompt", {
@@ -89,24 +86,17 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
     }
   };
 
-  useEffect(() => {
-    console.log("Selected actions:", selectedActions);
-    console.log("Selected context keys:", selectedContextKeys);
-    console.log("Selected coach state:", selectedCoachState);
-    console.log("Selected prompt type:", selectedPromptType);
-  }, [selectedActions, selectedContextKeys, selectedCoachState, selectedPromptType]);
-
   return (
     <div className="_NewPromptForm h-full flex flex-col">
       <form
-        className="flex flex-col flex-1 min-h-0 h-full border rounded p-4 bg-gold-50 dark:bg-gold-900"
+        className="flex flex-col flex-1 min-h-0 h-full border rounded p-4 bg-background"
         onSubmit={handleSubmit}
       >
         <Input
           id="name"
           name="name"
           type="text"
-          className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
+          className="font-bold text-2xl mb-1 text-foreground bg-transparent border-b border-border focus:outline-none focus:border-primary"
           value={name ?? ""}
           onChange={(e) => setName(e.target.value)}
           placeholder="Prompt name (optional)"
@@ -116,7 +106,7 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
           name="description"
           value={description ?? ""}
           onChange={(e) => setDescription(e.target.value)}
-          className="mb-2 text-base text-neutral-700 dark:text-gold-200 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
+          className="mb-2 text-base text-foreground bg-transparent border-b border-border focus:outline-none focus:border-primary"
           placeholder="Prompt description (optional)"
         />
         {isLoading ? (
@@ -125,7 +115,6 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
           <div>Error loading enums</div>
         ) : (
           <div className="flex flex-wrap gap-4 mb-2">
-            {/* Prompt Type selector */}
             <div>
               <Select
                 value={selectedPromptType}
@@ -149,7 +138,6 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
                 </SelectContent>
               </Select>
             </div>
-            {/* Coaching Phase selector (hidden for non-coaching-phase prompt types) */}
             {!nonCoachingPhasePromptTypes.includes(selectedPromptType ?? "") && (
               <div>
                 <Select
@@ -177,7 +165,7 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
             )}
           </div>
         )}
-        <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
+        <div className="items-center flex flex-wrap gap-4 text-xs text-muted-foreground border-b border-border py-2">
           <div className="flex items-center gap-2">
             <span className="font-semibold">Allowed Actions:</span>
             <div className="gap-2 flex flex-wrap">
@@ -207,7 +195,7 @@ export function NewPromptForm({ onSubmit }: NewPromptFormProps) {
             value={prompt}
             onChange={handleInputChange}
             name="body"
-            className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000] bg-white dark:bg-gold-950 p-3 rounded text-sm border border-gold-100 dark:border-gold-800 w-full"
+            className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000] bg-background p-3 rounded text-sm border border-border w-full"
             placeholder="Prompt body"
           />
         </div>

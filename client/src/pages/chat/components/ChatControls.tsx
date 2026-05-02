@@ -1,16 +1,13 @@
 import React, { useCallback, useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
-import { ConversationResetter } from "./ConversationResetter";
-import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
-import { CoachRequest } from "@/types/coachRequest";
+import type { CoachRequest } from "@/types/coachRequest";
 import { WarmupBulletin } from "@/pages/chat/components/WarmupBulletin";
-import { IdentitiesBulletin } from "@/pages/chat/components/IdentitiesBulletin";
-import { CurrentIdentityBulletin } from "@/pages/chat/components/CurrentIdentityBulletin";
+import { BrainstormingBulletin } from "@/pages/chat/components/BrainstormingBulletin";
+import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
+import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
 import { useIdentities } from "@/hooks/use-identities";
 import { useCoachState } from "@/hooks/use-coach-state";
-import { useProfile } from "@/hooks/use-profile";
 
 interface ChatControlsProps {
   isProcessingMessage: boolean;
@@ -23,9 +20,6 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
 }) => {
   const [inputMessage, setInputMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Get current user profile using hook
-  const { profile } = useProfile();
 
   // Fetch coach state with active query subscription to ensure refetch on invalidation
   // This ensures bulletins update when coachState is invalidated after sending messages
@@ -62,12 +56,10 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
     // Only focus when transitioning from processing (true) to not processing (false)
     // This avoids focusing on initial mount or when already not processing
     if (prevIsProcessingRef.current === true && !isProcessingMessage && textareaRef.current) {
-      // Use setTimeout to ensure the DOM has updated after the response
       setTimeout(() => {
         textareaRef.current?.focus();
       }, 0);
     }
-    // Update the ref to track the previous value
     prevIsProcessingRef.current = isProcessingMessage;
   }, [isProcessingMessage]);
 
@@ -107,10 +99,11 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
   );
 
   return (
-    <div className="_ChatControls bg-gold-200 dark:bg-[#333333] p-4">
+    <div className="_ChatControls bg-gold-200 dark:bg-[#333333] sm:p-4">
       <WarmupBulletin coachState={coachState} />
-      <IdentitiesBulletin coachState={coachState} identities={identities} />
-      <CurrentIdentityBulletin coachState={coachState} />
+      <BrainstormingBulletin coachState={coachState} identities={identities} />
+      <RefinementBulletin coachState={coachState} />
+      <CommitmentBulletin coachState={coachState} />
       <form className="flex mb-3 relative items-center" onSubmit={handleSubmit}>
         <Textarea
           ref={textareaRef}
@@ -126,14 +119,6 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
           {isProcessingMessage ? "Sending..." : "Send"}
         </Button>
       </form>
-      <div className="flex justify-center items-center gap-6">
-        <ConversationResetter />
-        <TestScenarioSessionFreezer
-          userId={profile?.id || ""}
-          onSuccess={() => {}}
-        />
-        <ConversationExporter />
-      </div>
     </div>
   );
 };

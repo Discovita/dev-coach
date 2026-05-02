@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Action } from "@/types/action";
+import type { Action } from "@/types/action";
 
 const ActionItem: React.FC<{ action: Action }> = ({ action }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -30,17 +30,17 @@ const ActionItem: React.FC<{ action: Action }> = ({ action }) => {
         )}
       </div>
       {isExpanded && hasParameters && (
-        <div className="p-3 bg-[#f8f8f8] dark:bg-neutral-700">
-          <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+        <div className="p-3 bg-muted/30 dark:bg-neutral-700">
+          <div className="mb-2 text-xs text-muted-foreground">
             <strong>Action Type:</strong> {action.action_type_display}
           </div>
           <table className="w-full border-collapse text-xs">
             <thead>
               <tr>
-                <th className="bg-[#f8f8f8] dark:bg-neutral-700 font-semibold text-[#555] dark:text-gold-50 p-1 text-left">
+                <th className="bg-muted/30 dark:bg-neutral-700 font-semibold text-muted-foreground p-1 text-left">
                   Parameter
                 </th>
-                <th className="bg-[#f8f8f8] dark:bg-neutral-700 font-semibold text-[#555] dark:text-gold-50 p-1 text-left">
+                <th className="bg-muted/30 dark:bg-neutral-700 font-semibold text-muted-foreground p-1 text-left">
                   Value
                 </th>
               </tr>
@@ -49,10 +49,10 @@ const ActionItem: React.FC<{ action: Action }> = ({ action }) => {
               {Object.entries(action.parameters).map(
                 ([name, value], pIndex) => (
                   <tr key={pIndex}>
-                    <td className="font-medium text-[#555] dark:text-gold-100 w-2/5 p-1">
+                    <td className="font-medium text-muted-foreground w-2/5 p-1">
                       {name}
                     </td>
-                    <td className="font-mono bg-[#f9f9f9] dark:bg-neutral-900 p-1 rounded break-words max-w-[60%] text-[#333] dark:text-gold-50">
+                    <td className="font-mono bg-muted/20 dark:bg-neutral-900 p-1 rounded break-words max-w-[60%] text-foreground">
                       {JSON.stringify(value)}
                     </td>
                   </tr>

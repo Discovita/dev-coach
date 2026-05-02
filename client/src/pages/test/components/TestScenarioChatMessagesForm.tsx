@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { TestScenarioChatMessage } from "@/types/testScenario";
+import type { TestScenarioChatMessage } from "@/types/testScenario";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
@@ -11,14 +11,6 @@ interface Props {
 
 const roles = ["user", "coach"];
 
-/**
- * TestScenarioChatMessagesForm Visual Logic
- * -----------------------------------------
- * - Each message row has extra vertical padding and minHeight to prevent content from being cut off.
- * - Coach messages have a light gold background and a left border for emphasis.
- * - User messages have a white background and no border.
- * - Both message types use box-sizing: border-box to ensure padding is included in height calculations.
- */
 export default function TestScenarioChatMessagesForm({ value, onChange }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<TestScenarioChatMessage>({ role: "user", content: "" });
@@ -77,23 +69,23 @@ export default function TestScenarioChatMessagesForm({ value, onChange }: Props)
       </div>
       <div
         ref={parentRef}
-        className="overflow-auto border border-[#eee] rounded-lg bg-white"
+        className="overflow-auto border border-border rounded-lg bg-background"
         style={{ height: 500, width: "100%" }}
       >
         {value.map((msg, idx) => (
           <div
             key={idx}
             className={[
-              "flex items-start gap-2 border-b border-[#f3f3f3] px-4 py-3 min-h-[48px] box-border w-full",
+              "flex items-start gap-2 border-b border-border/50 px-4 py-3 min-h-[48px] box-border w-full",
               msg.role === "coach"
-                ? "bg-[#fffbe6] border-l-4 border-l-[#eab308]"
-                : "bg-white border-l-4 border-l-transparent"
+                ? "bg-amber-50 border-l-4 border-l-amber-500"
+                : "bg-background border-l-4 border-l-transparent"
             ].join(" ")}
           >
             <span
               className={[
                 "font-mono text-xs w-12 mt-1",
-                msg.role === "coach" ? "text-[#b45309] font-bold" : "text-neutral-500 font-normal"
+                msg.role === "coach" ? "text-amber-700 font-bold" : "text-muted-foreground font-normal"
               ].join(" ")}
             >
               {msg.role}
@@ -114,4 +106,4 @@ export default function TestScenarioChatMessagesForm({ value, onChange }: Props)
       </div>
     </div>
   );
-} 
+}

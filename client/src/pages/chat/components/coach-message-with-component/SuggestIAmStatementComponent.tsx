@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { ComponentConfig, ComponentAction, ComponentIdentity, ComponentText } from "@/types/componentConfig";
-import { CoachRequest } from "@/types/coachRequest";
+import type { ComponentConfig, ComponentAction, ComponentIdentity, ComponentText } from "@/types/componentConfig";
+import type { CoachRequest } from "@/types/coachRequest";
 import { ActionType } from "@/enums/actionType";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 

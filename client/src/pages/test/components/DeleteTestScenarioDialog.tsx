@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import { TestScenario } from "@/types/testScenario";
+import type { TestScenario } from "@/types/testScenario";
 
 interface DeleteTestScenarioDialogProps {
   isOpen: boolean;
@@ -36,7 +36,7 @@ export function DeleteTestScenarioDialog({
           <div className="font-semibold mb-1">
             {scenario?.name ? `${scenario.name}` : "(No name)"}
           </div>
-          <div className="text-xs text-neutral-500 mb-2">
+          <div className="text-xs text-muted-foreground mb-2">
             {scenario?.description}
           </div>
         </DialogHeader>
@@ -63,4 +63,4 @@ export function DeleteTestScenarioDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

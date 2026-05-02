@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/utils/authFetch";
-import { TestScenario } from "@/types/testScenario";
+import type { TestScenario } from "@/types/testScenario";
 import { COACH_BASE_URL, FREEZE_SESSION } from "@/constants/api";
 
 /**
@@ -32,7 +32,6 @@ export function useFreezeTestScenarioSession() {
       return (await res.json()) as TestScenario;
     },
     onSuccess: () => {
-      // Invalidate test scenarios query so the table updates everywhere
       queryClient.invalidateQueries({ queryKey: ["test-scenarios", "all"] });
     },
   });

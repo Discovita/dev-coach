@@ -25,57 +25,37 @@ import { toast } from "sonner";
 import { useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-// Prompt types that are shown as their own tabs (not tied to coaching_phase)
 const PROMPT_TYPE_TABS = ["image_generation", "sentinel"];
 
 /**
  * PromptsTabs
- * -------------
- * 1. Renders a tab for each coach state (from enums).
- * 2. When a tab is selected, fetches all prompts for that coach state.
- * 3. Shows a version dropdown for all prompt versions for that state.
- * 4. Displays the selected prompt's details (name, description, body, etc.).
- * 5. Used above the NewPromptForm in the Prompts page.
+ * Renders a tab for each coach state (from enums) plus prompt type tabs.
+ * When a tab is selected, displays all prompt versions for that state.
  */
 export function PromptsTabs() {
-  // Get query client for cache invalidation
   const queryClient = useQueryClient();
-  // Fetch enums for coach states
   const { data: enums, isLoading: enumsLoading } = useCoreEnums();
-  // Fetch all prompts (cached)
   const {
     data: allPrompts,
     isLoading: promptsLoading,
     isError: promptsError,
     refetch: refetchPrompts,
   } = usePrompts();
-  // Track the active coach state tab (default to first coach state or 'new')
   const [activeCoachState, setActiveCoachState] = useState<string | null>(null);
-  // Track the selected version
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
-  // Track previous activeCoachState to detect tab changes
   const prevActiveCoachStateRef = useRef<string | null>(null);
 
-  /**
-   * State for editing the selected prompt.
-   * These are initialized from the selected prompt when it changes.
-   * - name, description, body, allowed_actions, required_context_keys, is_active
-   * - Uses the same controls as NewPromptForm for consistency.
-   */
   const [editName, setEditName] = useState<string>("");
   const [editDescription, setEditDescription] = useState<string>("");
   const [editBody, setEditBody] = useState<string>("");
   const [editAllowedActions, setEditAllowedActions] = useState<string[]>([]);
   const [editContextKeys, setEditContextKeys] = useState<string[]>([]);
   const [editIsActive, setEditIsActive] = useState<boolean>(true);
-  // Track if we are submitting changes
   const [submittingEdit, setSubmittingEdit] = useState<boolean>(false);
 
-  // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Set default tab to first coach state (or 'new') when enums load
   useEffect(() => {
     if (enums?.coaching_phases && enums.coaching_phases.length > 0) {
       setActiveCoachState((prev) => prev ?? enums.coaching_phases[0].value);
@@ -84,8 +64,6 @@ export function PromptsTabs() {
     }
   }, [enums?.coaching_phases]);
 
-  // Filter prompts for the selected tab (in memory)
-  // For prompt_type tabs, filter by prompt_type; otherwise filter by coaching_phase
   const prompts = useMemo(() => {
     if (!allPrompts || !activeCoachState || activeCoachState === "new") {
       return [];
@@ -96,20 +74,16 @@ export function PromptsTabs() {
     return allPrompts.filter((p) => p.coaching_phase === activeCoachState);
   }, [allPrompts, activeCoachState]);
 
-  // Extract available versions for the dropdown
   const versions = Array.from(new Set(prompts.map((p) => p.version))).sort(
     (a, b) => b - a
   );
-  // Find the selected prompt
   const selectedPrompt =
     prompts.find((p) => p.version === selectedVersion) || null;
 
-  // Only reset selectedVersion to the highest version when the tab (activeCoachState) actually changes
-  // This allows the user to select other versions from the dropdown without being overridden
   useEffect(() => {
     if (prevActiveCoachStateRef.current !== activeCoachState) {
       if (versions.length > 0) {
-        setSelectedVersion(versions[0]); // versions is sorted descending
+        setSelectedVersion(versions[0]);
       } else {
         setSelectedVersion(null);
       }
@@ -117,15 +91,12 @@ export function PromptsTabs() {
     prevActiveCoachStateRef.current = activeCoachState;
   }, [activeCoachState, versions]);
 
-  // Additional effect to handle the case where prompts load after the initial tab selection
-  // or when we need to auto-select the highest version after operations like "Save as New Version"
   useEffect(() => {
     if (activeCoachState && activeCoachState !== "new" && prompts.length > 0) {
       const availableVersions = Array.from(
         new Set(prompts.map((p) => p.version))
       ).sort((a, b) => b - a);
       if (availableVersions.length > 0) {
-        // Auto-select the highest version if no version is selected or if the current version doesn't exist
         const currentVersionExists = prompts.some(
           (p) => p.version === selectedVersion
         );
@@ -136,10 +107,6 @@ export function PromptsTabs() {
     }
   }, [activeCoachState, prompts, selectedVersion]);
 
-  /**
-   * Resets all editable fields to their original values from selectedPrompt.
-   * Called on mount, when selectedPrompt changes, and when the user clicks Restore.
-   */
   function resetEditState() {
     if (selectedPrompt) {
       setEditName(selectedPrompt.name ?? "");
@@ -151,13 +118,11 @@ export function PromptsTabs() {
     }
   }
 
-  // When selectedPrompt changes, initialize edit state
   useEffect(() => {
     resetEditState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPrompt]);
 
-  // Handler to adapt createPrompt (which returns Promise<Prompt>) to Promise<void> for NewPromptForm
   const handleCreatePrompt = async (
     data: Parameters<typeof createPrompt>[0]
   ) => {
@@ -173,18 +138,11 @@ export function PromptsTabs() {
     }
   };
 
-  /**
-   * Handler for saving prompt edits.
-   * 1. Calls partialUpdatePrompt API with new values.
-   * 2. Shows success/error feedback.
-   * 3. Optionally refetches prompts.
-   */
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPrompt) return;
     setSubmittingEdit(true);
     try {
-      // Use PATCH (partialUpdatePrompt) to update only the editable fields of the prompt.
       await partialUpdatePrompt(selectedPrompt.id, {
         name: editName,
         description: editDescription,
@@ -192,9 +150,7 @@ export function PromptsTabs() {
         allowed_actions: editAllowedActions,
         required_context_keys: editContextKeys,
         is_active: editIsActive,
-        // coaching_phase is not editable here, so we do not send it unless required by backend
       });
-      // Refetch prompts after successful edit
       await refetchPrompts();
       toast.success("Prompt updated successfully!");
     } catch (err) {
@@ -206,17 +162,10 @@ export function PromptsTabs() {
     }
   };
 
-  /**
-   * Handler for saving the current edits as a new version (new prompt).
-   * 1. Calls createPrompt API with the current form state (omitting id/version).
-   * 2. Refetches prompts and auto-selects the new version in the UI.
-   */
   const handleSaveAsNewVersion = async () => {
     if (!selectedPrompt) return;
     setSubmittingEdit(true);
     try {
-      // Create a new prompt with the current form state (omit id/version)
-      // For image_generation prompts, coaching_phase is null, so we include prompt_type
       await createPrompt({
         coaching_phase: selectedPrompt.coaching_phase,
         prompt_type: selectedPrompt.prompt_type,
@@ -227,12 +176,9 @@ export function PromptsTabs() {
         required_context_keys: editContextKeys,
         is_active: editIsActive,
       });
-      // Invalidate the prompts cache and refetch to get the latest data
       await queryClient.invalidateQueries({ queryKey: ["prompts", "all"] });
       const refetchResult = await refetchPrompts();
 
-      // Force select the highest version using the refetched data
-      // For prompt_type tabs (image_generation, sentinel), filter by prompt_type; otherwise by coaching_phase
       if (refetchResult.data) {
         const isPromptTypeTab = PROMPT_TYPE_TABS.includes(
           selectedPrompt.prompt_type
@@ -262,10 +208,6 @@ export function PromptsTabs() {
     }
   };
 
-  /**
-   * Returns true if any editable field differs from the original selectedPrompt values.
-   * Used to determine if the Restore button should be shown.
-   */
   function hasUnsavedChanges() {
     if (!selectedPrompt) return false;
     return (
@@ -273,7 +215,6 @@ export function PromptsTabs() {
       editDescription !== (selectedPrompt.description ?? "") ||
       editBody !== (selectedPrompt.body ?? "") ||
       editIsActive !== selectedPrompt.is_active ||
-      // Compare arrays by stringifying (safe for small arrays of primitives)
       JSON.stringify(editAllowedActions) !==
         JSON.stringify(selectedPrompt.allowed_actions ?? []) ||
       JSON.stringify(editContextKeys) !==
@@ -281,18 +222,14 @@ export function PromptsTabs() {
     );
   }
 
-  // Handler for Delete button (opens dialog)
   const handleOpenDeleteDialog = () => setDeleteDialogOpen(true);
-  // Handler for closing dialog
   const handleCloseDeleteDialog = () => setDeleteDialogOpen(false);
-  // Handler for confirming delete in dialog (soft delete)
   const handleConfirmDelete = async () => {
     if (!selectedPrompt) return;
     setIsDeleting(true);
     try {
       await softDeletePrompt(selectedPrompt.id);
       await refetchPrompts();
-      // After deletion, select the next available version (or clear selection)
       const remainingPrompts = allPrompts
         ? allPrompts.filter((p) => !(p.id === selectedPrompt.id))
         : [];
@@ -300,7 +237,6 @@ export function PromptsTabs() {
         (p) => p.coaching_phase === selectedPrompt.coaching_phase
       );
       if (sameStatePrompts.length > 0) {
-        // Select the highest version remaining for this coaching_phase
         const nextVersion = Math.max(...sameStatePrompts.map((p) => p.version));
         setSelectedVersion(nextVersion);
       } else {
@@ -322,20 +258,167 @@ export function PromptsTabs() {
   if (!enums?.coaching_phases) return <div>No coach states found.</div>;
   if (promptsError) return <div>Error loading prompts.</div>;
 
+  const renderPromptEditor = () => {
+    if (!selectedPrompt) {
+      return (
+        <div className="text-muted-foreground">
+          No prompt found for this selection. Create one using the New Prompt tab.
+        </div>
+      );
+    }
+
+    return (
+      <form
+        onSubmit={handleEditSubmit}
+        className="border rounded p-4 bg-background flex flex-col flex-1 min-h-0 h-full"
+        style={{ height: "100%" }}
+      >
+        <input
+          type="text"
+          className="font-bold text-2xl mb-1 text-foreground bg-transparent border-b border-border focus:outline-none focus:border-primary"
+          value={editName}
+          onChange={(e) => setEditName(e.target.value)}
+          placeholder="Prompt name (optional)"
+        />
+        <Textarea
+          value={editDescription}
+          onChange={(e) => setEditDescription(e.target.value)}
+          placeholder="Prompt description (optional)"
+        />
+        <div className="items-center flex flex-wrap gap-4 text-xs text-muted-foreground border-b border-border py-2">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Allowed Actions:</span>
+            <div className="gap-2 flex flex-wrap">
+              <MultiSelect
+                options={enums?.allowed_actions || []}
+                value={editAllowedActions}
+                onValueChange={setEditAllowedActions}
+                placeholder="Choose Allowed Actions"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Required Context Keys:</span>
+            <div className="gap-2 flex flex-wrap">
+              <MultiSelect
+                options={enums?.context_keys || []}
+                value={editContextKeys}
+                onValueChange={setEditContextKeys}
+                placeholder="Choose Context Keys"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="items-center flex flex-wrap gap-4 text-xs text-muted-foreground border-b border-border justify-between py-2">
+          <div className="flex items-center gap-4">
+            <div>
+              <span className="font-semibold">Status:</span>{" "}
+              <button
+                type="button"
+                className={`ml-2 px-2 py-1 rounded ${
+                  editIsActive
+                    ? "bg-green-600 text-white"
+                    : "bg-red-600 text-white"
+                }`}
+                onClick={() => setEditIsActive((v) => !v)}
+              >
+                {editIsActive ? "Active" : "Inactive"}
+              </button>
+            </div>
+            <div>
+              <span className="font-semibold">Created:</span>{" "}
+              {selectedPrompt.created_at}
+            </div>
+            <div>
+              <span className="font-semibold">Updated:</span>{" "}
+              {selectedPrompt.updated_at}
+            </div>
+          </div>
+          <div className="flex items-center justify-end">
+            <label htmlFor="version-select" className="font-bold mr-2">
+              Version:
+            </label>
+            <Select
+              value={
+                selectedVersion !== null ? String(selectedVersion) : ""
+              }
+              onValueChange={(val) =>
+                setSelectedVersion(val ? Number(val) : null)
+              }
+              name="version-select"
+            >
+              <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
+                <SelectValue placeholder="Select version" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Versions</SelectLabel>
+                  {versions.map((v) => (
+                    <SelectItem key={v} value={String(v)}>
+                      Version {v}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
+          <Textarea
+            value={editBody}
+            onChange={(e) => setEditBody(e.target.value)}
+            name="body"
+            className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
+          />
+        </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleSaveAsNewVersion}
+            disabled={submittingEdit}
+          >
+            Save as New Version
+          </Button>
+          {hasUnsavedChanges() && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetEditState}
+              disabled={submittingEdit}
+            >
+              Restore
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleOpenDeleteDialog}
+            disabled={submittingEdit}
+          >
+            Delete
+          </Button>
+          <Button type="submit" variant="default" disabled={submittingEdit}>
+            {submittingEdit ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
   return (
-    // Wrapper ensures height propagation for flex children (Textarea fill fix)
     <div className="flex-1 min-h-0 h-full flex flex-col">
       <Tabs
         value={activeCoachState ?? undefined}
         onValueChange={setActiveCoachState}
         className="flex flex-frow flex-col text-left flex-1 min-h-0 h-full"
       >
-        <div className="w-full p-2 bg-gold-200 border-b-2 border-gold-500">
+        <div className="w-full p-2 bg-muted border-b-2 border-border">
           <Select
             value={activeCoachState ?? undefined}
             onValueChange={(value) => setActiveCoachState(value)}
           >
-            <SelectTrigger className="w-full bg-white dark:bg-gold-800">
+            <SelectTrigger className="w-full bg-background">
               <SelectValue placeholder="Select prompt type..." />
             </SelectTrigger>
             <SelectContent>
@@ -359,303 +442,20 @@ export function PromptsTabs() {
             </SelectContent>
           </Select>
         </div>
-        {/* Render tab panel for Image Generation prompts */}
         <TabsContent
           key="image_generation"
           value="image_generation"
           className="flex-1 flex flex-col min-h-0 h-full"
         >
-          {selectedPrompt ? (
-            <form
-              onSubmit={handleEditSubmit}
-              className="border rounded p-4 bg-gold-50 dark:bg-gold-900 flex flex-col flex-1 min-h-0 h-full"
-              style={{ height: "100%" }}
-            >
-              <input
-                type="text"
-                className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="Prompt name (optional)"
-              />
-              <Textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="Prompt description (optional)"
-              />
-              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">Allowed Actions:</span>
-                  <div className="gap-2 flex flex-wrap">
-                    <MultiSelect
-                      options={enums?.allowed_actions || []}
-                      value={editAllowedActions}
-                      onValueChange={setEditAllowedActions}
-                      placeholder="Choose Allowed Actions"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">Required Context Keys:</span>
-                  <div className="gap-2 flex flex-wrap">
-                    <MultiSelect
-                      options={enums?.context_keys || []}
-                      value={editContextKeys}
-                      onValueChange={setEditContextKeys}
-                      placeholder="Choose Context Keys"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 justify-between py-2">
-                <div className="flex items-center gap-4">
-                  <div>
-                    <span className="font-semibold">Status:</span>{" "}
-                    <button
-                      type="button"
-                      className={`ml-2 px-2 py-1 rounded ${
-                        editIsActive
-                          ? "bg-green-600 text-white"
-                          : "bg-red-600 text-white"
-                      }`}
-                      onClick={() => setEditIsActive((v) => !v)}
-                    >
-                      {editIsActive ? "Active" : "Inactive"}
-                    </button>
-                  </div>
-                  <div>
-                    <span className="font-semibold">Created:</span>{" "}
-                    {selectedPrompt.created_at}
-                  </div>
-                  <div>
-                    <span className="font-semibold">Updated:</span>{" "}
-                    {selectedPrompt.updated_at}
-                  </div>
-                </div>
-                <div className="flex items-center justify-end">
-                  <label htmlFor="version-select" className="font-bold mr-2">
-                    Version:
-                  </label>
-                  <Select
-                    value={
-                      selectedVersion !== null ? String(selectedVersion) : ""
-                    }
-                    onValueChange={(val) =>
-                      setSelectedVersion(val ? Number(val) : null)
-                    }
-                    name="version-select"
-                  >
-                    <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
-                      <SelectValue placeholder="Select version" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Versions</SelectLabel>
-                        {versions.map((v) => (
-                          <SelectItem key={v} value={String(v)}>
-                            Version {v}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
-                <Textarea
-                  value={editBody}
-                  onChange={(e) => setEditBody(e.target.value)}
-                  name="body"
-                  className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
-                />
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleSaveAsNewVersion}
-                  disabled={submittingEdit}
-                >
-                  Save as New Version
-                </Button>
-                {hasUnsavedChanges() && (
-                  <Button
-                    type="button"
-                    variant={"outline"}
-                    onClick={resetEditState}
-                    disabled={submittingEdit}
-                  >
-                    Restore
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={handleOpenDeleteDialog}
-                  disabled={submittingEdit}
-                >
-                  Delete
-                </Button>
-                <Button type="submit" variant={"default"} disabled={submittingEdit}>
-                  {submittingEdit ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="text-neutral-500">
-              No image generation prompt found. Create one using the New Prompt tab.
-            </div>
-          )}
+          {renderPromptEditor()}
         </TabsContent>
-        {/* Render tab panel for Sentinel prompts */}
         <TabsContent
           key="sentinel"
           value="sentinel"
           className="flex-1 flex flex-col min-h-0 h-full"
         >
-          {selectedPrompt ? (
-            <form
-              onSubmit={handleEditSubmit}
-              className="border rounded p-4 bg-gold-50 dark:bg-gold-900 flex flex-col flex-1 min-h-0 h-full"
-              style={{ height: "100%" }}
-            >
-              <input
-                type="text"
-                className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="Prompt name (optional)"
-              />
-              <Textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="Prompt description (optional)"
-              />
-              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">Allowed Actions:</span>
-                  <div className="gap-2 flex flex-wrap">
-                    <MultiSelect
-                      options={enums?.allowed_actions || []}
-                      value={editAllowedActions}
-                      onValueChange={setEditAllowedActions}
-                      placeholder="Choose Allowed Actions"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">Required Context Keys:</span>
-                  <div className="gap-2 flex flex-wrap">
-                    <MultiSelect
-                      options={enums?.context_keys || []}
-                      value={editContextKeys}
-                      onValueChange={setEditContextKeys}
-                      placeholder="Choose Context Keys"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 justify-between py-2">
-                <div className="flex items-center gap-4">
-                  <div>
-                    <span className="font-semibold">Status:</span>{" "}
-                    <button
-                      type="button"
-                      className={`ml-2 px-2 py-1 rounded ${
-                        editIsActive
-                          ? "bg-green-600 text-white"
-                          : "bg-red-600 text-white"
-                      }`}
-                      onClick={() => setEditIsActive((v) => !v)}
-                    >
-                      {editIsActive ? "Active" : "Inactive"}
-                    </button>
-                  </div>
-                  <div>
-                    <span className="font-semibold">Created:</span>{" "}
-                    {selectedPrompt.created_at}
-                  </div>
-                  <div>
-                    <span className="font-semibold">Updated:</span>{" "}
-                    {selectedPrompt.updated_at}
-                  </div>
-                </div>
-                <div className="flex items-center justify-end">
-                  <label htmlFor="version-select" className="font-bold mr-2">
-                    Version:
-                  </label>
-                  <Select
-                    value={
-                      selectedVersion !== null ? String(selectedVersion) : ""
-                    }
-                    onValueChange={(val) =>
-                      setSelectedVersion(val ? Number(val) : null)
-                    }
-                    name="version-select"
-                  >
-                    <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
-                      <SelectValue placeholder="Select version" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Versions</SelectLabel>
-                        {versions.map((v) => (
-                          <SelectItem key={v} value={String(v)}>
-                            Version {v}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
-                <Textarea
-                  value={editBody}
-                  onChange={(e) => setEditBody(e.target.value)}
-                  name="body"
-                  className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
-                />
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleSaveAsNewVersion}
-                  disabled={submittingEdit}
-                >
-                  Save as New Version
-                </Button>
-                {hasUnsavedChanges() && (
-                  <Button
-                    type="button"
-                    variant={"outline"}
-                    onClick={resetEditState}
-                    disabled={submittingEdit}
-                  >
-                    Restore
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={handleOpenDeleteDialog}
-                  disabled={submittingEdit}
-                >
-                  Delete
-                </Button>
-                <Button type="submit" variant={"default"} disabled={submittingEdit}>
-                  {submittingEdit ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="text-neutral-500">
-              No sentinel prompt found. Create one using the New Prompt tab.
-            </div>
-          )}
+          {renderPromptEditor()}
         </TabsContent>
-        {/* Render a tab panel for each coach state */}
         {enums.coaching_phases.map(
           (state: { value: string; label: string }) => (
             <TabsContent
@@ -663,167 +463,7 @@ export function PromptsTabs() {
               value={state.value}
               className="flex-1 flex flex-col min-h-0 h-full"
             >
-              {" "}
-              {/* Show prompt details */}
-              {selectedPrompt ? (
-                <form
-                  onSubmit={handleEditSubmit}
-                  className="border rounded p-4 bg-gold-50 dark:bg-gold-900 flex flex-col flex-1 min-h-0 h-full"
-                  style={{ height: "100%" }}
-                >
-                  {/* Name and Description (editable) */}
-                  <input
-                    type="text"
-                    className="font-bold text-2xl mb-1 text-gold-700 bg-transparent border-b border-gold-200 focus:outline-none focus:border-gold-500"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    placeholder="Prompt name (optional)"
-                  />
-                  <Textarea
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    placeholder="Prompt description (optional)"
-                  />
-                  {/* Actions and Context Keys (editable) */}
-                  <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 py-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">Allowed Actions:</span>
-                      <div className="gap-2 flex flex-wrap">
-                        <MultiSelect
-                          options={enums?.allowed_actions || []}
-                          value={editAllowedActions}
-                          onValueChange={setEditAllowedActions}
-                          placeholder="Choose Allowed Actions"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">
-                        Required Context Keys:
-                      </span>
-                      <div className="gap-2 flex flex-wrap">
-                        <MultiSelect
-                          options={enums?.context_keys || []}
-                          value={editContextKeys}
-                          onValueChange={setEditContextKeys}
-                          placeholder="Choose Context Keys"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {/* Status toggle (optional) */}
-                  <div className="items-center flex flex-wrap gap-4 text-xs text-neutral-500 dark:text-gold-300 border-b border-gold-200 dark:border-gold-800 justify-between py-2">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <span className="font-semibold">Status:</span>{" "}
-                        <button
-                          type="button"
-                          className={`ml-2 px-2 py-1 rounded ${
-                            editIsActive
-                              ? "bg-green-600 text-white"
-                              : "bg-red-600 text-white"
-                          }`}
-                          onClick={() => setEditIsActive((v) => !v)}
-                        >
-                          {editIsActive ? "Active" : "Inactive"}
-                        </button>
-                      </div>
-                      <div>
-                        <span className="font-semibold">Created:</span>{" "}
-                        {selectedPrompt.created_at}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Updated:</span>{" "}
-                        {selectedPrompt.updated_at}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-end">
-                      <label
-                        htmlFor="version-select"
-                        className="font-bold mr-2"
-                      >
-                        Version:
-                      </label>
-                      <Select
-                        value={
-                          selectedVersion !== null
-                            ? String(selectedVersion)
-                            : ""
-                        }
-                        onValueChange={(val) =>
-                          setSelectedVersion(val ? Number(val) : null)
-                        }
-                        name="version-select"
-                      >
-                        <SelectTrigger className="min-w-[120px] border rounded px-2 py-1">
-                          <SelectValue placeholder="Select version" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Versions</SelectLabel>
-                            {versions.map((v) => (
-                              <SelectItem key={v} value={String(v)}>
-                                Version {v}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  {/* Prompt Body (editable) */}
-                  <div className="flex-1 min-h-0 h-full flex flex-col mt-2">
-                    <Textarea
-                      value={editBody}
-                      onChange={(e) => setEditBody(e.target.value)}
-                      name="body"
-                      className="h-full flex-1 min-h-0 resize-none overflow-y-auto max-h-[10000]"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 mt-4">
-                    {/* Save as New Version button: creates a new prompt with the next version */}
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={handleSaveAsNewVersion}
-                      disabled={submittingEdit}
-                    >
-                      Save as New Version
-                    </Button>
-                    {/* Show Restore button only if there are unsaved changes */}
-                    {hasUnsavedChanges() && (
-                      <Button
-                        type="button"
-                        variant={"outline"}
-                        onClick={resetEditState}
-                        disabled={submittingEdit}
-                      >
-                        Restore
-                      </Button>
-                    )}
-                    {/* Delete button: opens confirmation dialog */}
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={handleOpenDeleteDialog}
-                      disabled={submittingEdit}
-                    >
-                      Delete
-                    </Button>
-                    <Button
-                      type="submit"
-                      variant={"default"}
-                      disabled={submittingEdit}
-                    >
-                      {submittingEdit ? "Saving..." : "Save Changes"}
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <div className="text-neutral-500">
-                  No prompt found for this version.
-                </div>
-              )}
+              {renderPromptEditor()}
             </TabsContent>
           )
         )}
@@ -831,7 +471,6 @@ export function PromptsTabs() {
           <NewPromptForm onSubmit={handleCreatePrompt} />
         </TabsContent>
       </Tabs>
-      {/* Delete confirmation dialog */}
       <DeletePromptDialog
         isOpen={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
@@ -844,11 +483,8 @@ export function PromptsTabs() {
 }
 
 function Prompts() {
-  // The AdminLayout now handles all height and scrolling. This page should just fill the space.
-  // Ensure this root div allows children to grow to full height.
   return (
     <div className="flex flex-col flex-1 min-h-0 h-full">
-      {/* Tabs for viewing prompts by coach state and version, and for creating a new prompt */}
       <PromptsTabs />
     </div>
   );

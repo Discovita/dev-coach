@@ -1,0 +1,74 @@
+[
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/d569eb21-87e9-4e05-831e-e9735cbca89d/joy_seeker.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/d569eb21-87e9-4e05-831e-e9735cbca89d/joy_seeker-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/d569eb21-87e9-4e05-831e-e9735cbca89d/joy_seeker-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/d569eb21-87e9-4e05-831e-e9735cbca89d/joy_seeker-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/ab6cf393-fc4d-4579-9cf8-7aa1a67b0e40/agile_lioness.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/ab6cf393-fc4d-4579-9cf8-7aa1a67b0e40/agile_lioness-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/ab6cf393-fc4d-4579-9cf8-7aa1a67b0e40/agile_lioness-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/ab6cf393-fc4d-4579-9cf8-7aa1a67b0e40/agile_lioness-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/2e89a258-c8d9-4678-ae6f-976980c6035c/beautiful_goddess.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/2e89a258-c8d9-4678-ae6f-976980c6035c/beautiful_goddess-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/2e89a258-c8d9-4678-ae6f-976980c6035c/beautiful_goddess-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/2e89a258-c8d9-4678-ae6f-976980c6035c/beautiful_goddess-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/509e072a-7a1b-4552-bb7e-23c57c137803/grounded_mother.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/509e072a-7a1b-4552-bb7e-23c57c137803/grounded_mother-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/509e072a-7a1b-4552-bb7e-23c57c137803/grounded_mother-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/509e072a-7a1b-4552-bb7e-23c57c137803/grounded_mother-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/e67156de-dc93-4bfa-84b3-27ce1dbaced8/money_lover.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/e67156de-dc93-4bfa-84b3-27ce1dbaced8/money_lover-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/e67156de-dc93-4bfa-84b3-27ce1dbaced8/money_lover-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/e67156de-dc93-4bfa-84b3-27ce1dbaced8/money_lover-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/ee9ef920-666e-45c7-8f12-5cbfd374b724/captain_of_my_life.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/ee9ef920-666e-45c7-8f12-5cbfd374b724/captain_of_my_life-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/ee9ef920-666e-45c7-8f12-5cbfd374b724/captain_of_my_life-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/ee9ef920-666e-45c7-8f12-5cbfd374b724/captain_of_my_life-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/7030fa76-ce95-4c48-b259-3e7f4c14ed73/open_hearted_lover.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/7030fa76-ce95-4c48-b259-3e7f4c14ed73/open_hearted_lover-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/7030fa76-ce95-4c48-b259-3e7f4c14ed73/open_hearted_lover-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/7030fa76-ce95-4c48-b259-3e7f4c14ed73/open_hearted_lover-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/d11bebc8-42eb-4252-9d1d-c2986a141120/talented_innovator.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/d11bebc8-42eb-4252-9d1d-c2986a141120/talented_innovator-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/d11bebc8-42eb-4252-9d1d-c2986a141120/talented_innovator-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/d11bebc8-42eb-4252-9d1d-c2986a141120/talented_innovator-thumbnail-600x338-70.jpg"
+    }
+  },
+  {
+    "image": {
+      "original": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/73f814d6-2a68-4906-aaf2-69d91ddbc043/alchemist.jpg",
+      "thumbnail": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/73f814d6-2a68-4906-aaf2-69d91ddbc043/alchemist-thumbnail-100x100-70.jpg",
+      "medium": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/73f814d6-2a68-4906-aaf2-69d91ddbc043/alchemist-thumbnail-300x169-70.jpg",
+      "large": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/__sized__/73f814d6-2a68-4906-aaf2-69d91ddbc043/alchemist-thumbnail-600x338-70.jpg"
+    }
+  }
+]

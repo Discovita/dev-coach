@@ -2,7 +2,13 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { ChatControls } from "@/pages/chat/components/ChatControls";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
-import { CoachRequest } from "@/types/coachRequest";
+import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
+import { ConversationResetter } from "@/pages/chat/components/ConversationResetter";
+import type { CoachRequest } from "@/types/coachRequest";
+
+interface ChatInterfaceProps {
+  onResetSuccess?: () => void;
+}
 
 /**
  * ChatInterface component
@@ -12,7 +18,7 @@ import { CoachRequest } from "@/types/coachRequest";
  * - Always fetches fresh chat history on mount.
  * - Keeps 100% comment coverage for clarity.
  */
-export const ChatInterface: React.FC = () => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) => {
   // Reference to the end of the messages list for auto-scrolling
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -96,7 +102,7 @@ export const ChatInterface: React.FC = () => {
   }
 
   return (
-    <div className="_ChatInterface flex flex-col h-[100vh] rounded-md overflow-hidden shadow-gold-md bg-gold-50 transition-shadow hover:shadow-gold-lg dark:rounded-none">
+    <div className="_ChatInterface flex flex-col h-full rounded-md overflow-hidden shadow-md bg-background transition-shadow hover:shadow-lg dark:rounded-none">
       <ChatMessages
         messages={displayedMessages}
         isProcessingMessage={updateStatus === "pending"}
@@ -108,6 +114,10 @@ export const ChatInterface: React.FC = () => {
         isProcessingMessage={updateStatus === "pending"}
         onSendMessage={handleSendMessage}
       />
+      <div className="flex gap-2 p-2 border-t border-border bg-muted/50">
+        <ConversationExporter />
+        <ConversationResetter onResetSuccess={onResetSuccess} />
+      </div>
     </div>
   );
 };

@@ -1,9 +1,11 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { fetchUserProfile } from "@/api/user";
 import type { User } from "@/types/user";
+import { isAdminUser } from "@/permissions/isAdminUser";
 
 type UseProfileResult = {
   profile: User | undefined;
+  isAdmin: boolean | undefined;
   isLoading: boolean;
   isError: boolean;
   refetchProfile: UseQueryResult<User, Error>["refetch"];
@@ -30,8 +32,11 @@ export function useProfile(): UseProfileResult {
     retry: false,
   });
 
+  const isAdmin = data ? isAdminUser(data) : undefined;
+
   return {
     profile: data,
+    isAdmin,
     isLoading,
     isError,
     refetchProfile: refetch,

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { TabName } from "./types";
 import { getDefaultExpandedSections, getTabsConfig } from "./utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -11,28 +11,14 @@ import { useIdentities } from "@/hooks/use-identities";
 import { useFinalPrompt } from "@/hooks/use-final-prompt";
 import { useActions } from "@/hooks/use-actions";
 
-/**
- * CoachStateVisualizer component (self-fetching version)
- * Fetches all required data using hooks and visualizes the coach state.
- * Now uses TabContent component for tab rendering.
- *
- * Step-by-step:
- * 1. Fetch coach state using useCoachState.
- * 2. Fetch chat messages (and last response) using useChatMessages.
- * 3. Fetch identities using useIdentities (for extensibility).
- * 4. Handle loading and error states for all hooks.
- * 5. Use the fetched coachState and latest response for visualization.
- * 6. Maintain tab, section, and update state as before, but now use robust cache-driven tab update notification logic.
- */
 export const CoachStateVisualizer: React.FC = () => {
-  // Fetch data
   const {
     coachState,
     isLoading: isCoachStateLoading,
     isError: isCoachStateError,
   } = useCoachState();
   const { chatMessages } = useChatMessages();
-  useIdentities(); // Not used directly, but ensures cache is up to date
+  useIdentities();
   const finalPrompt = useFinalPrompt();
   const {
     actions,
@@ -40,20 +26,12 @@ export const CoachStateVisualizer: React.FC = () => {
     isError: isActionsError,
   } = useActions();
 
-  useEffect(() => {
-    if (actions) {
-      console.log("[CoachStateVisualizer] Actions: ", actions);
-    }
-  });
-
-  // State
   const [activeTab, setActiveTab] = useState<TabName>(TabName.STATE);
   const [expandedSections, setExpandedSections] = useState(
     getDefaultExpandedSections()
   );
   const [visitedTabs, setVisitedTabs] = useState<Set<TabName>>(new Set());
 
-  // Get previous values
   const prevCoachState = usePrevious(coachState);
   const prevFinalPrompt = usePrevious(finalPrompt);
   const prevActions = usePrevious(actions);
@@ -61,7 +39,6 @@ export const CoachStateVisualizer: React.FC = () => {
 
   const tabsConfig = getTabsConfig();
 
-  // Calculate tab updates
   const tabUpdates = useMemo(() => {
     const updates: Record<TabName, boolean> = {
       [TabName.STATE]: false,
@@ -113,7 +90,6 @@ export const CoachStateVisualizer: React.FC = () => {
     setActiveTab(tabName);
   };
 
-  // Handle loading and error states
   const isLoading = isCoachStateLoading || isActionsLoading;
   const isError = isCoachStateError || isActionsError;
 
@@ -131,7 +107,7 @@ export const CoachStateVisualizer: React.FC = () => {
 
   if (!coachState) {
     return (
-      <div className="p-4 text-neutral-500">No coach state available.</div>
+      <div className="p-4 text-muted-foreground">No coach state available.</div>
     );
   }
 
@@ -143,20 +119,20 @@ export const CoachStateVisualizer: React.FC = () => {
   };
 
   return (
-    <div className="_CoachStateVisualizer flex flex-col h-full w-full max-h-screen rounded-none dark:rounded-none shadow-gold-md overflow-hidden dark:bg-[#333333] dark:border-none">
+    <div className="_CoachStateVisualizer flex flex-col h-full w-full max-h-screen rounded-none shadow-md overflow-hidden dark:bg-neutral-800">
       <Tabs
         value={activeTab}
         onValueChange={(v) => handleTabClick(v as TabName)}
         className="flex flex-col h-full"
       >
-        <TabsList className="border-b-2 bg-gold-200 border-gold-500 flex gap-2 w-full dark:text-gold-50">
+        <TabsList className="border-b-2 bg-muted border-border flex gap-2 w-full">
           {tabsConfig.map((tab) => (
             <TabsTrigger
               key={tab.name}
               value={tab.name}
               className={
                 "relative whitespace-nowrap px-4 py-3 font-medium transition-all" +
-                (tabUpdates[tab.name] ? " font-semibold text-gold-700" : "")
+                (tabUpdates[tab.name] ? " font-semibold text-primary" : "")
               }
             >
               {tab.label}
