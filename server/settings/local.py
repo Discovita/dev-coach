@@ -34,6 +34,10 @@ bucket_name = env(
     "STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging"
 )
 custom_domain = f"{bucket_name}.s3.amazonaws.com"
+# S3 prefix under which all media is stored. Env-driven for symmetry with
+# the deployed environments (defaults to "media" so local behavior is
+# unchanged).
+s3_location = env("S3_LOCATION_PREFIX", default="media")
 
 # Media files configuration - Use S3 for local development (staging bucket)
 # Django 4.2+ STORAGES format per django-storages documentation
@@ -43,7 +47,7 @@ STORAGES = {
         "OPTIONS": {
             "bucket_name": bucket_name,
             "region_name": env("AWS_REGION", default="us-east-1"),
-            "location": "media",  # Prefix for all files stored in S3
+            "location": s3_location,
             "custom_domain": custom_domain,
             # Note: ACLs are disabled on this bucket. Public access is handled via bucket policy.
             "object_parameters": {
@@ -57,7 +61,7 @@ STORAGES = {
     },
 }
 
-MEDIA_URL = f"https://{custom_domain}/media/"
+MEDIA_URL = f"https://{custom_domain}/{s3_location}/"
 
 # Optional: Add debug logging for static files
 if DEBUG:
