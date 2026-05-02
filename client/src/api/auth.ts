@@ -6,13 +6,15 @@ import {
   RESET_PASSWORD,
 } from "@/constants/api";
 import {
-  RegisterCredentials,
-  LoginCredentials,
-  AuthResponse,
-  ResetPasswordCredentials,
+  type RegisterCredentials,
+  type LoginCredentials,
+  type AuthResponse,
+  type ResetPasswordCredentials,
 } from "@/types/auth";
 import { fetchUserComplete } from "@/api/user";
+import { createLogger, LogLevel } from "@/lib/logger";
 
+const log = createLogger("auth", LogLevel.DEBUG);
 /**
  * Helper to get a cookie value by name.
  */
@@ -56,20 +58,24 @@ export function removeCookie(name: string) {
  */
 export async function login(userData: LoginCredentials): Promise<AuthResponse> {
   const loginUrl = `${COACH_BASE_URL}${LOGIN}`;
+  log.debug("Login URL:", loginUrl);
   const response = await fetch(loginUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
   });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    try {
+      return JSON.parse(errorBody) as AuthResponse;
+    } catch {
+      throw new Error(`Login failed with status ${response.status}`);
+    }
+  }
   const data: AuthResponse = await response.json();
   if (data.tokens) {
-    setCookie("discovita-access-token", data.tokens.access, 60 * 60 * 24);
-    setCookie(
-      "discovita-refresh-token",
-      data.tokens.refresh,
-      60 * 60 * 24 * 30
-    );
-    // Fetch complete user data after setting cookies
+    setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
+    setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
     const user = await fetchUserComplete();
     return { ...data, user };
   }
@@ -89,15 +95,18 @@ export async function register(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
   });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    try {
+      return JSON.parse(errorBody) as AuthResponse;
+    } catch {
+      throw new Error(`Registration failed with status ${response.status}`);
+    }
+  }
   const data: AuthResponse = await response.json();
   if (data.tokens) {
-    setCookie("discovita-access-token", data.tokens.access, 60 * 60 * 24);
-    setCookie(
-      "discovita-refresh-token",
-      data.tokens.refresh,
-      60 * 60 * 24 * 30
-    );
-    // Fetch complete user data after setting cookies
+    setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
+    setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
     const user = await fetchUserComplete();
     return { ...data, user };
   }
@@ -136,7 +145,7 @@ export async function resetPassword(
  * Log out the user by clearing cookies.
  */
 export async function logout(): Promise<void> {
-  removeCookie("discovita-access-token");
-  removeCookie("discovita-refresh-token");
+  removeCookie("neovita-access-token");
+  removeCookie("neovita-refresh-token");
   // Optionally, you can also call a backend logout endpoint here.
 }

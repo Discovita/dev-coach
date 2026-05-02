@@ -1,73 +1,84 @@
 import { Button } from "@/components/ui/button";
 import { useChatMessages } from "@/hooks/use-chat-messages";
+import { useResetTestScenario } from "@/hooks/test-scenario/use-test-scenarios";
 import { useProfile } from "@/hooks/use-profile";
+import { useUserTarget } from "@/context/UserTargetContext";
 import { useState } from "react";
 import { ConversationResetterDialog } from "./ConversationResetterDialog";
+import { TestScenarioConversationResetterDialog } from "@/pages/test/components/TestScenarioConversationResetterDialog";
 
-/**
- * ConversationResetter component
- * Allows the user to reset (delete) their entire conversation history.
- *
- * Step-by-step:
- * 1. Get the current user profile and chat messages using hooks.
- * 2. Show a button to open the reset confirmation dialog if the user is logged in.
- * 3. When the dialog is open, user can confirm or cancel the reset.
- * 4. If confirmed, call the resetChatMessages mutation from useChatMessages.
- * 5. Disable the button if there are no messages or if the reset is in progress.
- * 6. Optionally, show feedback (e.g., loading state) while resetting.
- *
- * Used in: Any test or admin page where conversation reset is needed.
- */
-export const ConversationResetter = () => {
-  // Get user profile and chat messages using hooks
+export const ConversationResetter = ({
+  onResetSuccess,
+}: {
+  onResetSuccess?: () => void;
+}) => {
+  const { isImpersonating, scenarioId } = useUserTarget();
   const { profile } = useProfile();
   const userId = profile?.id;
-  const { chatMessages } = useChatMessages();
+
+  const { chatMessages, resetChatMessages, resetStatus } = useChatMessages();
   const messages = chatMessages || [];
 
-  // Get the reset mutation and its status
-  const { resetChatMessages, resetStatus } = useChatMessages();
+  const { mutateAsync: resetScenario, isPending: isScenarioResetting } =
+    useResetTestScenario();
 
-  // State for controlling the dialog
   const [showDialog, setShowDialog] = useState(false);
 
-  // Handler for button click: open the dialog
   const handleOpenDialog = () => {
     setShowDialog(true);
   };
 
-  // Handler for confirming reset in the dialog
   const handleConfirmReset = async () => {
-    await resetChatMessages();
-    setShowDialog(false);
+    if (isImpersonating && scenarioId) {
+      try {
+        await resetScenario(scenarioId);
+        setShowDialog(false);
+        if (onResetSuccess) onResetSuccess();
+      } catch {
+        // error handled by hook
+      }
+    } else {
+      await resetChatMessages();
+      setShowDialog(false);
+    }
   };
 
-  // Handler for closing the dialog (cancel or after reset)
   const handleCloseDialog = () => {
     setShowDialog(false);
   };
 
-  // If no userId, show nothing
   if (!userId) return null;
+
+  const isResetting = isImpersonating ? isScenarioResetting : resetStatus === "pending";
+  const isDisabled = isImpersonating
+    ? isScenarioResetting
+    : messages.length === 0 || resetStatus === "pending";
 
   return (
     <>
-      {/* Button to open the reset confirmation dialog */}
       <Button
         variant="destructive"
         onClick={handleOpenDialog}
-        disabled={messages.length === 0 || resetStatus === "pending"}
+        disabled={isDisabled}
         className="bg-red-500/90"
       >
-        Reset Conversation
+        {isImpersonating ? "Reset Test Conversation" : "Reset Conversation"}
       </Button>
-      {/* Confirmation dialog for resetting conversation */}
-      <ConversationResetterDialog
-        isOpen={showDialog}
-        onClose={handleCloseDialog}
-        onConfirm={handleConfirmReset}
-        isResetting={resetStatus === "pending"}
-      />
+      {isImpersonating ? (
+        <TestScenarioConversationResetterDialog
+          isOpen={showDialog}
+          onClose={handleCloseDialog}
+          onConfirm={handleConfirmReset}
+          isResetting={isResetting}
+        />
+      ) : (
+        <ConversationResetterDialog
+          isOpen={showDialog}
+          onClose={handleCloseDialog}
+          onConfirm={handleConfirmReset}
+          isResetting={isResetting}
+        />
+      )}
     </>
   );
 };

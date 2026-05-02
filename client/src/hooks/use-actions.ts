@@ -1,43 +1,43 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchActions } from "@/api/user";
+import { fetchTestScenarioUserActions } from "@/api/testScenarioUser";
+import { useUserTarget } from "@/context/UserTargetContext";
 
 /**
  * useActions hook
- * Handles fetching and updating the user's actions using TanStack Query.
+ * Handles fetching the user's actions using TanStack Query.
  *
- * Step-by-step:
- * 1. Fetch the user's actions from /api/actions/ using getActions.
- * 2. Expose loading, error, and data states for UI consumption.
- * 3. Provide a mutation for updating actions (to be implemented as needed).
- * 4. Invalidate the query on successful update to keep data fresh.
+ * Context-aware: reads from UserTargetContext to determine query key prefix
+ * and which API endpoint to call. When inside a UserTargetProvider, fetches
+ * from the admin test-user endpoint instead of /user/me/.
  *
- * Used in: Any component that needs to read or update the user's actions.
+ * Used in: Any component that needs to read the user's actions.
  */
 export function useActions() {
+  const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
   const queryClient = useQueryClient();
 
-  // Fetch the user's actions
   const {
     data,
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["user", "actions"],
-    queryFn: fetchActions,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    queryKey: [...queryKeyPrefix, "actions"],
+    queryFn: isImpersonating
+      ? () => fetchTestScenarioUserActions(targetUserId!)
+      : fetchActions,
+    enabled: isImpersonating ? !!targetUserId : true,
+    staleTime: 1000 * 60 * 10,
     retry: false,
   });
 
-  // Placeholder for update mutation (implement as needed)
-  // The argument will be added when the update API is implemented
   const updateMutation = useMutation({
     mutationFn: async () => {
-      // Implement update API call here
       throw new Error("Update actions not implemented");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "actions"] });
+      queryClient.invalidateQueries({ queryKey: [...queryKeyPrefix, "actions"] });
     },
   });
 

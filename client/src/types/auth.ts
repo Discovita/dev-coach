@@ -4,7 +4,7 @@
  * These types match the standardized backend responses.
  */
 
-import { User } from "@/types/user";
+import type { User } from "@/types/user";
 
 // Request Types
 export interface LoginCredentials {

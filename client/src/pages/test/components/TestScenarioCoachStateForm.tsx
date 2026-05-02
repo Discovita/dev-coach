@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import {
+import type {
   TestScenarioCoachState,
   TestScenarioIdentity,
 } from "@/types/testScenario";
@@ -54,7 +54,7 @@ function CoachStateListField({
         {items.map((item, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center bg-gold-100 text-gold-900 rounded px-2 py-1 text-xs"
+            className="inline-flex items-center bg-muted text-foreground rounded px-2 py-1 text-xs"
           >
             {item}
             <Button
@@ -100,18 +100,11 @@ function CoachStateListField({
   );
 }
 
-/**
- * Coach State form for test scenario editor
- * - Dropdowns for enums
- * - Multi-select for skipped categories
- * - List add/delete for who_you_are, who_you_want_to_be
- */
 const TestScenarioCoachStateForm = ({
   value,
   onChange,
   identities = [],
 }: CoachStateFormProps) => {
-  // Handlers for each field
   const handleField = <K extends keyof TestScenarioCoachState>(
     key: K,
     val: TestScenarioCoachState[K]
@@ -121,7 +114,6 @@ const TestScenarioCoachStateForm = ({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Current Phase Dropdown */}
       <div>
         <Label className="mb-2">Current Phase</Label>
         <Select
@@ -142,13 +134,12 @@ const TestScenarioCoachStateForm = ({
           </SelectContent>
         </Select>
       </div>
-      {/* Current Identity Dropdown */}
       <div>
         <Label className="mb-2">
           Current Identity (which Identity is currently being
           refined/affirmed/visualized)
         </Label>
-        <p className="text-sm text-neutral-500 mb-2">
+        <p className="text-sm text-muted-foreground mb-2">
           Select from identities defined in the Identities tab. This field will
           be empty if no identities are available.
         </p>
@@ -171,7 +162,6 @@ const TestScenarioCoachStateForm = ({
           </SelectContent>
         </Select>
       </div>
-      {/* Identity Focus Dropdown */}
       <div>
         <Label className="mb-2">Identity Focus</Label>
         <Select
@@ -192,7 +182,6 @@ const TestScenarioCoachStateForm = ({
           </SelectContent>
         </Select>
       </div>
-      {/* Skipped Identity Categories Multi-select */}
       <div>
         <Label className="mb-2">Skipped Identity Categories</Label>
         <MultiSelect
@@ -207,7 +196,6 @@ const TestScenarioCoachStateForm = ({
           placeholder="Select categories to skip"
         />
       </div>
-      {/* Who You Are List */}
       <CoachStateListField
         label="Who You Are"
         items={value.who_you_are || []}
@@ -222,7 +210,6 @@ const TestScenarioCoachStateForm = ({
         }
         placeholder="Add a trait or description"
       />
-      {/* Who You Want To Be List */}
       <CoachStateListField
         label="Who You Want To Be"
         items={value.who_you_want_to_be || []}
@@ -240,7 +227,6 @@ const TestScenarioCoachStateForm = ({
         }
         placeholder="Add a trait or aspiration"
       />
-      {/* Asked Questions Multi-select */}
       <div>
         <Label className="mb-2">Asked Questions</Label>
         <MultiSelect

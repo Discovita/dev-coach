@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
+import type {
   TestScenario,
   TestScenarioTemplate,
   TestScenarioUser,
@@ -40,12 +40,8 @@ const TestScenarioEditor = ({
   onCancel,
   onDelete,
 }: TestScenarioEditorProps) => {
-  console.log("[TestScenarioEditor] scenario: ", scenario);
-
-  // General section state
   const [name, setName] = useState(scenario?.name || "");
   const [description, setDescription] = useState(scenario?.description || "");
-  // User section state
   const [firstName, setFirstName] = useState(
     (() => {
       const user =
@@ -68,7 +64,6 @@ const TestScenarioEditor = ({
       return user?.last_name || "";
     })()
   );
-  // For display only
   const testUserEmail =
     scenario?.template &&
     typeof scenario.template === "object" &&
@@ -81,7 +76,6 @@ const TestScenarioEditor = ({
     scenario.template.user
       ? (scenario.template.user as TestScenarioUser).password
       : undefined;
-  // Coach State section state
   const [coachState, setCoachState] = useState<TestScenarioCoachState>(
     (() => {
       if (
@@ -94,7 +88,6 @@ const TestScenarioEditor = ({
       return {};
     })()
   );
-  // Identities section state
   const [identities, setIdentities] = useState<TestScenarioIdentity[]>(
     (() => {
       if (
@@ -107,7 +100,6 @@ const TestScenarioEditor = ({
       return [];
     })()
   );
-  // Chat Messages section state
   const [chatMessages, setChatMessages] = useState<TestScenarioChatMessage[]>(
     (() => {
       if (
@@ -120,7 +112,6 @@ const TestScenarioEditor = ({
       return [];
     })()
   );
-  // User Notes section state
   const [userNotes, setUserNotes] = useState<TestScenarioUserNote[]>(
     (() => {
       if (
@@ -133,7 +124,6 @@ const TestScenarioEditor = ({
       return [];
     })()
   );
-  // Actions section state
   const [actions, setActions] = useState<TestScenarioAction[]>(
     (() => {
       if (
@@ -151,14 +141,11 @@ const TestScenarioEditor = ({
   const [activeTab, setActiveTab] = useState("general");
   const [identityImageFiles, setIdentityImageFiles] = useState<Map<number, File>>(new Map());
 
-  // Update state when scenario prop changes
   useEffect(() => {
     if (scenario) {
-      // Update general section
       setName(scenario.name || "");
       setDescription(scenario.description || "");
 
-      // Update user section
       const user = scenario.template &&
         typeof scenario.template === "object" &&
         scenario.template.user
@@ -167,7 +154,6 @@ const TestScenarioEditor = ({
       setFirstName(user?.first_name || "");
       setLastName(user?.last_name || "");
 
-      // Update coach state section
       if (
         scenario.template &&
         typeof scenario.template === "object" &&
@@ -178,7 +164,6 @@ const TestScenarioEditor = ({
         setCoachState({});
       }
 
-      // Update identities section
       if (
         scenario.template &&
         typeof scenario.template === "object" &&
@@ -189,7 +174,6 @@ const TestScenarioEditor = ({
         setIdentities([]);
       }
 
-      // Update chat messages section
       if (
         scenario.template &&
         typeof scenario.template === "object" &&
@@ -200,7 +184,6 @@ const TestScenarioEditor = ({
         setChatMessages([]);
       }
 
-      // Update user notes section
       if (
         scenario.template &&
         typeof scenario.template === "object" &&
@@ -211,7 +194,6 @@ const TestScenarioEditor = ({
         setUserNotes([]);
       }
 
-      // Update actions section
       if (
         scenario.template &&
         typeof scenario.template === "object" &&
@@ -222,7 +204,6 @@ const TestScenarioEditor = ({
         setActions([]);
       }
     } else {
-      // Reset all state when scenario is null (creating new scenario)
       setName("");
       setDescription("");
       setFirstName("");
@@ -261,8 +242,6 @@ const TestScenarioEditor = ({
       return;
     }
     try {
-      console.log("Identities being sent:", identities);
-      // Build template with required sections and defaults
       const template: TestScenarioTemplate = {
         user: { first_name: firstName, last_name: lastName },
         coach_state: {
@@ -270,11 +249,10 @@ const TestScenarioEditor = ({
           identity_focus: coachState.identity_focus || IdentityCategory.PASSIONS_AND_TALENTS,
           who_you_are: coachState.who_you_are || [],
           who_you_want_to_be: coachState.who_you_want_to_be || [],
-          ...coachState, // Include any other coach state fields
+          ...coachState,
         },
       };
 
-      // Only include optional sections if they have meaningful data
       if (identities && identities.length > 0) {
         template.identities = identities;
       }
@@ -303,7 +281,7 @@ const TestScenarioEditor = ({
 
   return (
     <form
-      className="w-7xl p-6 bg-white rounded-lg shadow mb-8"
+      className="w-7xl p-6 bg-card rounded-lg shadow mb-8"
       onSubmit={handleSubmit}
     >
       <div className="flex justify-between items-center mb-4">
@@ -312,7 +290,7 @@ const TestScenarioEditor = ({
         </h2>
         {scenario && (
           <Badge variant="secondary" className="text-sm px-3 py-1.5">
-            <span className="text-gold-600 mr-1">Editing:</span>
+            <span className="text-primary mr-1">Editing:</span>
             <span className="font-semibold">{scenario.name}</span>
           </Badge>
         )}

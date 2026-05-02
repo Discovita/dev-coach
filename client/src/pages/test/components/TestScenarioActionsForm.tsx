@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TestScenarioAction } from "@/types/testScenario";
+import type { TestScenarioAction } from "@/types/testScenario";
 import { ActionType } from "@/enums/actionType";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,15 +21,6 @@ const emptyAction = (): TestScenarioAction => ({
   coach_message_content: ""
 });
 
-/**
- * TestScenarioActionsForm Visual Logic
- * ------------------------------------
- * - Follows the same pattern as TestScenarioIdentitiesForm
- * - Actions list displayed on top with clean, minimal design
- * - Edit form below in a bordered container
- * - Consistent styling with other form components
- * - Expandable action details for better organization
- */
 export default function TestScenarioActionsForm({ value, onChange }: Props) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [draft, setDraft] = useState<TestScenarioAction>(emptyAction());
@@ -60,7 +51,6 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
       return;
     }
     
-    // Parse parameters JSON
     let parsedParameters = {};
     try {
       parsedParameters = JSON.parse(parametersText);
@@ -111,9 +101,9 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
       <div>
         <h3 className="font-semibold mb-2">Actions</h3>
         {value.length === 0 && (
-          <div className="text-neutral-400 mb-2">No actions added yet.</div>
+          <div className="text-muted-foreground mb-2">No actions added yet.</div>
         )}
-        <ul className="divide-y divide-neutral-200 mb-4">
+        <ul className="divide-y divide-border mb-4">
           {value.map((action, idx) => (
             <li
               key={idx}
@@ -126,15 +116,15 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
                       {action.result_summary}
                     </span>
                   ) : (
-                    <span className="font-medium text-neutral-500">
+                    <span className="font-medium text-muted-foreground">
                       No result summary
                     </span>
                   )}
-                  <span className="text-xs text-neutral-500 font-mono">
+                  <span className="text-xs text-muted-foreground font-mono">
                     [{action.action_type}]
                   </span>
                   <span
-                    className={`text-xs text-neutral-400 cursor-pointer transition-transform ${
+                    className={`text-xs text-muted-foreground cursor-pointer transition-transform ${
                       expandedActions.has(idx) ? "" : "rotate-[-90deg]"
                     }`}
                     onClick={() => toggleExpanded(idx)}
@@ -143,20 +133,19 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
                   </span>
                 </div>
                 
-                {/* Expandable details */}
                 {expandedActions.has(idx) && (
                   <div className="mt-2 space-y-2 text-xs">
                     <div>
-                      <span className="font-semibold text-neutral-700">Parameters:</span>
-                      <pre className="bg-gray-100 p-2 rounded mt-1 overflow-x-auto font-mono text-xs">
+                      <span className="font-semibold text-foreground">Parameters:</span>
+                      <pre className="bg-muted/50 p-2 rounded mt-1 overflow-x-auto font-mono text-xs">
                         {JSON.stringify(action.parameters, null, 2)}
                       </pre>
                     </div>
                     
                     {action.coach_message_content && (
                       <div>
-                        <span className="font-semibold text-neutral-700">Coach Message:</span>
-                        <div className="bg-yellow-50 p-2 rounded mt-1 italic">
+                        <span className="font-semibold text-foreground">Coach Message:</span>
+                        <div className="bg-amber-50 p-2 rounded mt-1 italic">
                           {action.coach_message_content}
                         </div>
                       </div>
@@ -164,8 +153,8 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
                     
                     {action.timestamp && (
                       <div>
-                        <span className="font-semibold text-neutral-700">Timestamp:</span>
-                        <span className="text-neutral-600 ml-1">
+                        <span className="font-semibold text-foreground">Timestamp:</span>
+                        <span className="text-muted-foreground ml-1">
                           {new Date(action.timestamp).toLocaleString()}
                         </span>
                       </div>
@@ -196,7 +185,7 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
         </ul>
       </div>
       
-      <div className="border rounded p-4 bg-neutral-50">
+      <div className="border rounded p-4 bg-muted/30">
         <h4 className="font-semibold mb-2">
           {editingIndex !== null ? "Edit Action" : "Add Action"}
         </h4>
@@ -260,4 +249,4 @@ export default function TestScenarioActionsForm({ value, onChange }: Props) {
       </div>
     </div>
   );
-} 
+}

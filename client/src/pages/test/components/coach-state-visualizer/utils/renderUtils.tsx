@@ -2,11 +2,11 @@ import React from "react";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { copyToClipboard } from "./dataUtils";
 import { Button } from "@/components/ui/button";
-import { Action } from "@/types/action";
+import type { Action } from "@/types/action";
 import ActionItem from "@/pages/test/components/coach-state-visualizer/utils/ActionItem";
 import IdentityItem from "@/pages/test/components/coach-state-visualizer/utils/IdentityItem";
-import { CoachState } from "@/types/coachState";
-import { Identity } from "@/types/identity";
+import type { CoachState } from "@/types/coachState";
+import type { Identity } from "@/types/identity";
 import {
   getIdentityCategoryDisplayName,
   getIdentityCategoryColor,
@@ -41,17 +41,17 @@ export const renderActionsSection = (
   if (!actions || actions.length === 0) return null;
 
   return (
-    <div className="_ActionsSection mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_ActionsSection mb-4 border rounded-md overflow-hidden border-border">
       <div
-        className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
+        className="flex justify-between items-center px-4 py-2 bg-muted dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
       >
-        <h3 className="m-0 text-base font-semibold text-gold-700 dark:text-gold-200">
+        <h3 className="m-0 text-base font-semibold text-foreground">
           {title}
         </h3>
         <div className="flex items-center gap-2">
           <Button
-            className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-600"
+            className="rounded-md px-2 py-1 text-xs font-medium transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(actions);
@@ -69,7 +69,7 @@ export const renderActionsSection = (
         </div>
       </div>
       {isExpanded && (
-        <div className="flex flex-col gap-2 p-4 max-h-full overflow-y-auto bg-gold-50 dark:bg-neutral-700">
+        <div className="flex flex-col gap-2 p-4 max-h-full overflow-y-auto bg-background dark:bg-neutral-700">
           {actions.map((action: Action, index: number) => (
             <ActionItem key={index} action={action} />
           ))}
@@ -79,10 +79,6 @@ export const renderActionsSection = (
   );
 };
 
-/**
- * Renders the Identities section in a beautiful, organized layout
- * Displays all identities in a structured, visually appealing way with expandable details
- */
 export const renderIdentitiesSection = (
   title: string,
   identities: Identity[],
@@ -93,17 +89,17 @@ export const renderIdentitiesSection = (
   if (!identities || identities.length === 0) return null;
 
   return (
-    <div className="_IdentitiesSection mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_IdentitiesSection mb-4 border rounded-md overflow-hidden border-border">
       <div
-        className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
+        className="flex justify-between items-center px-4 py-2 bg-muted dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
       >
-        <h3 className="m-0 text-base font-semibold text-gold-700 dark:text-gold-200">
+        <h3 className="m-0 text-base font-semibold text-foreground">
           {title} ({identities.length})
         </h3>
         <div className="flex items-center gap-2">
           <Button
-            className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-600"
+            className="rounded-md px-2 py-1 text-xs font-medium transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(identities);
@@ -121,7 +117,7 @@ export const renderIdentitiesSection = (
         </div>
       </div>
       {isExpanded && (
-        <div className="flex flex-col gap-3 p-4 max-h-full overflow-y-auto bg-gold-50 dark:bg-neutral-700">
+        <div className="flex flex-col gap-3 p-4 max-h-full overflow-y-auto bg-background dark:bg-neutral-700">
           {identities.map((identity: Identity, index: number) => (
             <IdentityItem key={index} identity={identity} />
           ))}
@@ -137,17 +133,17 @@ export const renderFinalPrompt = (
   toggleSection: (section: string) => void
 ): React.ReactElement | null => {
   return (
-    <div className="_FinalPrompt mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_FinalPrompt mb-4 border rounded-md overflow-hidden border-border">
       <div
-        className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
+        className="flex justify-between items-center px-4 py-2 bg-muted dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection("prompt")}
       >
-        <h3 className="m-0 text-base font-semibold text-gold-900 dark:text-gold-200">
+        <h3 className="m-0 text-base font-semibold text-foreground">
           Final Prompt
         </h3>
         <div className="flex items-center gap-2">
           <Button
-            className="bg-gold-500 dark:bg-gold-600 rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-700 dark:hover:bg-gold-700"
+            className="rounded-md px-2 py-1 text-xs font-medium transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(prompt);
@@ -168,7 +164,7 @@ export const renderFinalPrompt = (
         <div className="flex flex-col flex-1 min-h-0">
           <MarkdownRenderer
             content={prompt}
-            className="flex-1 min-h-0 p-4 bg-gold-50 dark:bg-neutral-700 overflow-y-auto text-sm leading-[1.5] text-[#333] dark:text-gold-50 scrollbar w-full max-w-full break-words whitespace-pre-wrap box-border"
+            className="flex-1 min-h-0 p-4 bg-background dark:bg-neutral-700 overflow-y-auto text-sm leading-[1.5] text-foreground scrollbar w-full max-w-full break-words whitespace-pre-wrap box-border"
           />
         </div>
       )}
@@ -181,7 +177,7 @@ export const renderEmptyState = (
   secondaryText?: string
 ): React.ReactElement => {
   return (
-    <div className="_EmptyState p-6 text-center bg-gold-50 dark:bg-neutral-800 border border-dashed rounded-md text-neutral-400 dark:border-gold-500">
+    <div className="_EmptyState p-6 text-center bg-background dark:bg-neutral-800 border border-dashed rounded-md text-muted-foreground dark:border-border">
       <p className="font-medium mb-2">{primaryText}</p>
       {secondaryText && <p className="mt-1">{secondaryText}</p>}
     </div>
@@ -198,17 +194,17 @@ export const renderJsonSection = (
   if (!data || (Array.isArray(data) && data.length === 0)) return null;
 
   return (
-    <div className="_JSONSection mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_JSONSection mb-4 border rounded-md overflow-hidden border-border">
       <div
-        className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
+        className="flex justify-between items-center px-4 py-2 bg-muted dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
       >
-        <h3 className="m-0 text-base font-semibold text-gold-900 dark:text-gold-200">
+        <h3 className="m-0 text-base font-semibold text-foreground">
           {title}
         </h3>
         <div className="flex items-center gap-2">
           <Button
-            className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-600"
+            className="rounded-md px-2 py-1 text-xs font-medium transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(data);
@@ -226,7 +222,7 @@ export const renderJsonSection = (
         </div>
       </div>
       {isExpanded && (
-        <pre className="m-0 p-3 bg-[#f8f8f8] dark:bg-neutral-700 overflow-x-auto font-mono text-xs text-[#333] dark:text-gold-50 whitespace-pre-wrap break-words w-full box-border">
+        <pre className="m-0 p-3 bg-[#f8f8f8] dark:bg-neutral-700 overflow-x-auto font-mono text-xs text-foreground whitespace-pre-wrap break-words w-full box-border">
           {JSON.stringify(data, null, 2)}
         </pre>
       )}
@@ -234,10 +230,6 @@ export const renderJsonSection = (
   );
 };
 
-/**
- * Renders the Coach State in a beautiful, organized layout
- * Displays all coach state information in a structured, visually appealing way
- */
 export const renderCoachStateSection = (
   coachState: CoachState | null | undefined,
   sectionKey: string,
@@ -246,12 +238,12 @@ export const renderCoachStateSection = (
 ): React.ReactElement | null => {
   if (!coachState) {
     return (
-      <div className="_CoachStateSection mb-4 border rounded-md overflow-hidden border-gold-600">
+      <div className="_CoachStateSection mb-4 border rounded-md overflow-hidden border-border">
         <div
-          className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
+          className="flex justify-between items-center px-4 py-2 bg-muted dark:bg-neutral-800 cursor-pointer transition-colors"
           onClick={() => toggleSection(sectionKey)}
         >
-          <h3 className="m-0 text-base font-semibold text-gold-700 dark:text-gold-200">
+          <h3 className="m-0 text-base font-semibold text-foreground">
             Coach State
           </h3>
           <span
@@ -263,8 +255,8 @@ export const renderCoachStateSection = (
           </span>
         </div>
         {isExpanded && (
-          <div className="p-4 bg-gold-50 dark:bg-neutral-700">
-            <div className="text-center text-neutral-500 dark:text-neutral-400">
+          <div className="p-4 bg-background dark:bg-neutral-700">
+            <div className="text-center text-muted-foreground">
               <UserIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>No coach state available</p>
             </div>
@@ -274,23 +266,22 @@ export const renderCoachStateSection = (
     );
   }
 
-  // Helper function to format date
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleString();
   };
 
   return (
-    <div className="_CoachStateSection mb-4 border rounded-md overflow-hidden border-gold-600">
+    <div className="_CoachStateSection mb-4 border rounded-md overflow-hidden border-border">
       <div
-        className="flex justify-between items-center px-4 py-2 bg-gold-200 dark:bg-neutral-800 cursor-pointer transition-colors"
+        className="flex justify-between items-center px-4 py-2 bg-muted dark:bg-neutral-800 cursor-pointer transition-colors"
         onClick={() => toggleSection(sectionKey)}
       >
-        <h3 className="m-0 text-base font-semibold text-gold-700 dark:text-gold-200">
+        <h3 className="m-0 text-base font-semibold text-foreground">
           Coach State
         </h3>
         <div className="flex items-center gap-2">
           <Button
-            className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-gold-600"
+            className="rounded-md px-2 py-1 text-xs font-medium transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(coachState);
@@ -308,15 +299,15 @@ export const renderCoachStateSection = (
         </div>
       </div>
       {isExpanded && (
-        <div className="p-4 bg-gold-50 dark:bg-neutral-700">
-          <Card className="border-gold-300 dark:border-gold-600">
+        <div className="p-4 bg-background dark:bg-neutral-700">
+          <Card className="border-border">
             <CardContent>
               <div className="space-y-4">
                 {/* Current Phase */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <TargetIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <TargetIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Current Phase
                     </span>
                   </div>
@@ -334,8 +325,8 @@ export const renderCoachStateSection = (
                 {/* Identity Focus */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <SparklesIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <SparklesIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Focused Identity Category
                     </span>
                   </div>
@@ -351,7 +342,7 @@ export const renderCoachStateSection = (
                         )}
                       </Badge>
                     ) : (
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
+                      <p className="text-xs text-muted-foreground italic">
                         No identity focus set
                       </p>
                     )}
@@ -361,18 +352,18 @@ export const renderCoachStateSection = (
                 {/* Current Identity */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <UserIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <UserIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Current Identity
                     </span>
                   </div>
                   <div className="text-right min-w-0 flex-1">
                     {coachState.current_identity ? (
-                      <p className="text-xs text-neutral-700 dark:text-neutral-300 break-words">
+                      <p className="text-xs text-foreground break-words">
                         {coachState.current_identity.name}
                       </p>
                     ) : (
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
+                      <p className="text-xs text-muted-foreground italic">
                         None yet...
                       </p>
                     )}
@@ -382,19 +373,19 @@ export const renderCoachStateSection = (
                 {/* Who You Are */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <HeartIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <HeartIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Who You Are
                     </span>
                   </div>
                   <div className="text-right min-w-0 flex-1">
                     {coachState.who_you_are &&
                     coachState.who_you_are.length > 0 ? (
-                      <p className="text-xs text-neutral-700 dark:text-neutral-300 text-right break-words">
+                      <p className="text-xs text-foreground text-right break-words">
                         {coachState.who_you_are.join(", ")}
                       </p>
                     ) : (
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
+                      <p className="text-xs text-muted-foreground italic">
                         Nothing yet...
                       </p>
                     )}
@@ -404,19 +395,19 @@ export const renderCoachStateSection = (
                 {/* Who You Want To Be */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <StarIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <StarIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Who You Want To Be
                     </span>
                   </div>
                   <div className="text-right min-w-0 flex-1">
                     {coachState.who_you_want_to_be &&
                     coachState.who_you_want_to_be.length > 0 ? (
-                      <p className="text-xs text-neutral-700 dark:text-neutral-300 text-right break-words">
+                      <p className="text-xs text-foreground text-right break-words">
                         {coachState.who_you_want_to_be.join(", ")}
                       </p>
                     ) : (
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
+                      <p className="text-xs text-muted-foreground italic">
                         Nothing yet...
                       </p>
                     )}
@@ -426,19 +417,19 @@ export const renderCoachStateSection = (
                 {/* Asked Questions */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <HelpCircleIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <HelpCircleIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Asked Questions
                     </span>
                   </div>
                   <div className="text-right min-w-0 flex-1">
                     {coachState.asked_questions &&
                     coachState.asked_questions.length > 0 ? (
-                      <p className="text-xs text-neutral-700 dark:text-neutral-300 text-right break-words">
+                      <p className="text-xs text-foreground text-right break-words">
                         {coachState.asked_questions.map(question => getGetToKnowYouQuestionDisplayName(question)).join(", ")}
                       </p>
                     ) : (
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
+                      <p className="text-xs text-muted-foreground italic">
                         Nothing yet...
                       </p>
                     )}
@@ -448,8 +439,8 @@ export const renderCoachStateSection = (
                 {/* Skipped Categories */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <ListIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <ListIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Skipped Categories
                     </span>
                   </div>
@@ -471,7 +462,7 @@ export const renderCoachStateSection = (
                         )}
                       </div>
                     ) : (
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
+                      <p className="text-xs text-muted-foreground italic">
                         No skipped categories
                       </p>
                     )}
@@ -480,25 +471,25 @@ export const renderCoachStateSection = (
                 {/* Last Updated */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <ClockIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                    <span className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                    <ClockIcon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
                       Last Updated
                     </span>
                   </div>
                   <div className="text-right min-w-0 flex-1">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-xs text-muted-foreground">
                       {formatDate(coachState.updated_at)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Metadata - Full Width */}
+              {/* Metadata */}
               {coachState.metadata &&
                 Object.keys(coachState.metadata).length > 0 && (
-                  <div className="mt-6 pt-4 border-t border-gold-200 dark:border-gold-700">
+                  <div className="mt-6 pt-4 border-t border-border">
                     <div className="space-y-2">
-                      <h4 className="text-sm font-semibold text-gold-800 dark:text-gold-200">
+                      <h4 className="text-sm font-semibold text-foreground">
                         Metadata
                       </h4>
                       <pre className="text-xs bg-neutral-100 dark:bg-neutral-800 p-2 rounded overflow-x-auto">

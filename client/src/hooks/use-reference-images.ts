@@ -16,7 +16,7 @@ import {
   deleteReferenceImage,
   uploadReferenceImage,
 } from "@/api/referenceImages";
-import {
+import type {
   ReferenceImage,
   CreateReferenceImageRequest,
   UpdateReferenceImageRequest,
@@ -42,7 +42,7 @@ export function useReferenceImages(userId?: string) {
   } = useQuery<ReferenceImage[]>({
     queryKey,
     queryFn: () => listReferenceImages(userId),
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    staleTime: 1000 * 60 * 5,
     retry: false,
   });
 
@@ -119,4 +119,3 @@ export function useReferenceImages(userId?: string) {
     isUploading: uploadMutation.isPending,
   };
 }
-

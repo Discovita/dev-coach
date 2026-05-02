@@ -1,44 +1,34 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { fetchIdentities } from "@/api/user";
+import { fetchTestScenarioUserIdentities } from "@/api/testScenarioUser";
+import { useUserTarget } from "@/context/UserTargetContext";
 
 /**
  * useIdentities hook
- * Handles fetching and updating the user's identities using TanStack Query.
+ * Handles fetching the user's identities using TanStack Query.
  *
- * Step-by-step:
- * 1. Fetch the user's identities from /user/me/identities/ using fetchIdentities.
- * 2. Expose loading, error, and data states for UI consumption.
- * 3. Provide a mutation for updating identities (to be implemented as needed).
- * 4. Invalidate the query on successful update to keep data fresh.
+ * Context-aware: reads from UserTargetContext to determine query key prefix
+ * and which API endpoint to call. When inside a UserTargetProvider, fetches
+ * from the admin test-user endpoint instead of /user/me/.
  *
- * Used in: Any component that needs to read or update the user's identities.
+ * Used in: Any component that needs to read the user's identities.
  */
 export function useIdentities() {
-  const queryClient = useQueryClient();
+  const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
 
-  // Fetch the user's identities
   const {
     data,
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["user", "identities"],
-    queryFn: fetchIdentities,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    queryKey: [...queryKeyPrefix, "identities"],
+    queryFn: isImpersonating
+      ? () => fetchTestScenarioUserIdentities(targetUserId!)
+      : fetchIdentities,
+    enabled: isImpersonating ? !!targetUserId : true,
+    staleTime: 1000 * 60 * 10,
     retry: false,
-  });
-
-  // Placeholder for update mutation (implement as needed)
-  // The argument will be added when the update API is implemented
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      // Implement update API call here
-      throw new Error("Update identities not implemented");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "identities"] });
-    },
   });
 
   return {
@@ -46,7 +36,5 @@ export function useIdentities() {
     isLoading,
     isError,
     refetchIdentities: refetch,
-    updateIdentities: updateMutation.mutateAsync,
-    updateStatus: updateMutation.status,
   };
-} 
+}

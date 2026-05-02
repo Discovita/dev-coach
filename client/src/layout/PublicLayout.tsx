@@ -1,21 +1,30 @@
-import PublicNavbar from "@/components/PublicNavbar";
-import Footer from "@/components/Footer";
-import { Outlet } from "react-router-dom";
+/**
+ * PublicLayout
+ *
+ * Purpose:
+ * - Layout for public pages (landing, login, signup) without the authenticated sidebar
+ * - Provides clean, minimal layout for marketing and auth pages
+ * - Renders child routes via TanStack Router's Outlet
+ */
 
-const PublicLayout = () => {
+import { Outlet } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+import PublicNavbar from "@/components/PublicNavbar";
+import PublicFooter from "@/components/PublicFooter";
+
+export default function PublicLayout({ children }: { children?: ReactNode }) {
   return (
-    <div className="_Layout flex h-screen w-full flex-col overflow-clip">
-      <nav className="relative z-[40] flex-none">
-        <PublicNavbar />
-      </nav>
-      <main className="_Main flex flex-col grow-1 justify-center overflow-auto dark:bg-[#333333]">
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          <Outlet />
-        </div>
+    <div className="min-h-screen max-h-screen bg-background text-foreground relative overflow-hidden flex flex-col">
+      <PublicNavbar />
+
+      {/* Page Content */}
+      <main className="flex-1 min-h-0 overflow-y-auto">
+        {children ?? <Outlet />}
       </main>
-      <Footer />
+
+      <div className="mt-auto">
+        <PublicFooter />
+      </div>
     </div>
   );
-};
-
-export default PublicLayout;
+}

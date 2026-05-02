@@ -13,4 +13,4 @@ const TestScenarioPageHeader = ({ onCreate }: TestScenarioPageHeaderProps) => (
   </div>
 );
 
-export default TestScenarioPageHeader; 
+export default TestScenarioPageHeader;

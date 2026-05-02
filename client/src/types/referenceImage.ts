@@ -1,4 +1,4 @@
-import { ImageSizes } from "./imageSizes";
+import type { ImageSizes } from "./imageSizes";
 
 /**
  * Reference Image type matching backend ReferenceImageSerializer.
@@ -29,7 +29,7 @@ export interface CreateReferenceImageRequest {
   name?: string;
   /** Optional order (0-4), auto-assigned if not provided */
   order?: number;
-  /** Optional user_id (admin only) */
+  /** Optional user_id (admin only — creates image for a specific user) */
   user_id?: string;
 }
 
@@ -42,4 +42,3 @@ export interface UpdateReferenceImageRequest {
   /** Optional order (0-4) */
   order?: number;
 }
-

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useFreezeTestScenarioSession } from "@/hooks/test-scenario/use-freeze-test-scenario-session";
 import { toast } from "sonner";
-import { TestScenario } from "@/types/testScenario";
+import type { TestScenario } from "@/types/testScenario";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,16 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
 
-/**
- * TestScenarioSessionFreezer
- * Button + modal to freeze the current session as a test scenario.
- *
- * Uses shadcn/ui Dialog for modal.
- *
- * Props:
- *   userId: string (required)
- *   onSuccess?: (scenario: TestScenario) => void (optional)
- */
 export const TestScenarioSessionFreezer: React.FC<{
   userId: string;
   onSuccess?: (scenario: TestScenario) => void;
@@ -38,7 +28,6 @@ export const TestScenarioSessionFreezer: React.FC<{
   const { mutateAsync, isPending, error } = useFreezeTestScenarioSession();
   const queryClient = useQueryClient();
 
-  // Type guard for API error shape
   function getErrorMessage(err: unknown): string {
     if (typeof err === "string") return err;
     if (err && typeof err === "object") {
@@ -51,10 +40,8 @@ export const TestScenarioSessionFreezer: React.FC<{
     return "Failed to create test scenario";
   }
 
-  // Handler for form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Use defaults if fields are blank
     const safeFirstName = firstName.trim() || "Test";
     const safeLastName = lastName.trim() || "User";
     if (!name.trim()) {
@@ -75,8 +62,7 @@ export const TestScenarioSessionFreezer: React.FC<{
       setDescription("");
       setFirstName("");
       setLastName("");
-      // Invalidate test scenarios query so the table updates
-      queryClient.invalidateQueries({ queryKey: ["testScenarios"] });
+      queryClient.invalidateQueries({ queryKey: ["test-scenarios", "all"] });
       if (onSuccess) onSuccess(scenario);
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -144,7 +130,6 @@ export const TestScenarioSessionFreezer: React.FC<{
               />
             </div>
           </div>
-          {/* Optionally show userId as email if present and looks like an email */}
           {userId && userId.includes("@") && (
             <div>
               <Label htmlFor="test_user_email">Test User Email</Label>

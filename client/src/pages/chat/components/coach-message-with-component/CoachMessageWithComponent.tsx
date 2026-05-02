@@ -1,6 +1,6 @@
 import React from "react";
-import { ComponentConfig } from "@/types/componentConfig";
-import { CoachRequest } from "@/types/coachRequest";
+import type { ComponentConfig } from "@/types/componentConfig";
+import type { CoachRequest } from "@/types/coachRequest";
 import { ComponentType } from "@/enums/componentType";
 import { IntroCannedResponseComponent } from "@/pages/chat/components/coach-message-with-component/IntroCannedResponseComponent";
 import { CombineIdentitiesConfirmation } from "@/pages/chat/components/coach-message-with-component/CombineIdentitiesConfirmation";
@@ -78,6 +78,6 @@ export const CoachMessageWithComponent: React.FC<
         />
       );
     default:
-      return null;
+      return <>{children}</>;
   }
 };

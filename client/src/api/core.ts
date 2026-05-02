@@ -1,5 +1,6 @@
 import { COACH_BASE_URL } from "@/constants/api";
-import { CoreEnumsResponse } from "@/types/coreEnums";
+import type { CoreEnumsResponse } from "@/types/coreEnums";
+import { authFetch } from "@/utils/authFetch";
 
 /**
  * Fetch all enums for coaching_phases, allowed_actions, context_keys, prompt_types, and appearance options.
@@ -8,10 +9,7 @@ import { CoreEnumsResponse } from "@/types/coreEnums";
  */
 export async function fetchEnums(): Promise<CoreEnumsResponse> {
   const url = `${COACH_BASE_URL}/core/enums`;
-  const response = await fetch(url, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const response = await authFetch(url);
   if (!response.ok) {
     throw new Error("Failed to fetch core enums");
   }

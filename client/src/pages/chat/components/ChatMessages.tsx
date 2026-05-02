@@ -1,12 +1,12 @@
 import React from "react";
 import { CoachMessage } from "@/pages/chat/components/CoachMessage";
-import { CoachMessageWithComponent } from "@/pages/chat/components/coach-message-with-component/CoachMessageWithComponent";
+import { CoachMessageWithComponent } from "@/pages/chat/components/coach-message-with-component/CoachMessageWithComponent.tsx";
 import { UserMessage } from "@/pages/chat/components/UserMessage";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { LoadingBubbles } from "@/pages/chat/components/LoadingBubbles";
-import { Message } from "@/types/message";
-import { CoachRequest } from "@/types/coachRequest";
-import { ComponentConfig } from "@/types/componentConfig";
+import type { Message } from "@/types/message";
+import type { CoachRequest } from "@/types/coachRequest";
+import type { ComponentConfig } from "@/types/componentConfig";
 
 /**
  * ChatMessages component is used to render the chat messages in both the
@@ -21,9 +21,8 @@ import { ComponentConfig } from "@/types/componentConfig";
  * - coachState: The current coach state (for proposed identity)
  * - handleIdentityChoice: Handler for when a user selects an identity
  * - messagesEndRef: Ref to scroll to the bottom of the messages
- * - testUserId: Optional user ID for test scenarios (admin impersonation)
  *
- * Used by: ChatInterface.tsx, TestScenarioChatInterface.tsx
+ * Used by: ChatInterface.tsx
  */
 interface ChatMessagesProps {
   messages: Message[];
@@ -33,8 +32,6 @@ interface ChatMessagesProps {
   componentConfig?: ComponentConfig | null;
   /** Handler for component button selection (sends a CoachRequest) */
   onSendUserMessageToCoach: (request: CoachRequest) => void;
-  /** Optional user ID for test scenarios (enables admin endpoints) */
-  testUserId?: string;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -43,12 +40,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   messagesEndRef,
   componentConfig,
   onSendUserMessageToCoach,
-  testUserId,
 }) => {
   return (
-    <div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto p-6 bg-gold-50  dark:bg-[#333333]">
+    <div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto sm:p-6 bg-gold-50  dark:bg-[#333333]">
       {messages.map((message: Message, index: number) => (
-        <div key={index}>
+        <div key={`${message.timestamp}-${message.role}-${index}`}>
           {message.role === "coach" ? (
             (() => {
               const isLastCoachMessage = index === messages.length - 1;
@@ -67,7 +63,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                   componentConfig={componentToRender}
                   onSendUserMessageToCoach={onSendUserMessageToCoach}
                   disabled={isProcessingMessage}
-                  testUserId={testUserId}
                 >
                   <MarkdownRenderer content={message.content} />
                 </CoachMessageWithComponent>

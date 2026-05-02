@@ -1,6 +1,6 @@
-import { DOMImplementation, XMLSerializer, DOMParser } from "xmldom";
-import { CoachState } from "@/types/coachState";
-import { Message } from "@/types/message";
+import { DOMImplementation, XMLSerializer, DOMParser } from "@xmldom/xmldom";
+import type { CoachState } from "@/types/coachState";
+import type { Message } from "@/types/message";
 
 const sanitizeContent = (content: string): string => {
   const parser = new DOMParser();
@@ -9,27 +9,23 @@ const sanitizeContent = (content: string): string => {
   return textNode.nodeValue || "";
 };
 
-// Helper function to format XML with proper indentation
 const formatXml = (xml: string): string => {
   let formatted = "";
   let indent = "";
-  const tab = "  "; // 2 spaces for indentation
+  const tab = "  ";
 
   xml.split(/>\s*</).forEach((node) => {
     if (node.match(/^\/\w/)) {
-      // Closing tag
       indent = indent.substring(tab.length);
     }
 
     formatted += indent + "<" + node + ">\n";
 
     if (node.match(/^<?\w[^>]*[^/]$/) && !node.startsWith("!--")) {
-      // Opening tag and not self-closing
       indent += tab;
     }
   });
 
-  // Replace XML declaration with properly formatted one
   return (
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     formatted.substring(formatted.indexOf("\n") + 1)
@@ -47,8 +43,8 @@ export const convertToXml = (
     null
   );
   const root = doc.documentElement;
+  if (!root) throw new Error("Failed to create XML document");
 
-  // Create metadata
   const metadata = doc.createElement("metadata");
   root.appendChild(metadata);
 
@@ -64,7 +60,6 @@ export const convertToXml = (
   messageCount.textContent = messages.length.toString();
   metadata.appendChild(messageCount);
 
-  // Create messages
   const messagesElement = doc.createElement("messages");
   root.appendChild(messagesElement);
 
@@ -83,18 +78,15 @@ export const convertToXml = (
     messagesElement.appendChild(messageElement);
   });
 
-  // Add coach state
   const coachStateElement = doc.createElement("coach_state");
   root.appendChild(coachStateElement);
 
-  // Add each property of the coach state
   Object.entries(coachState).forEach(([key, value]) => {
     const stateElement = doc.createElement(key);
 
     if (value === null) {
       stateElement.textContent = "null";
     } else if (typeof value === "object") {
-      // Convert objects to JSON strings and wrap in CDATA to preserve formatting
       const jsonString = JSON.stringify(value, null, 2);
       stateElement.appendChild(doc.createCDATASection(jsonString));
     } else {
@@ -104,7 +96,6 @@ export const convertToXml = (
     coachStateElement.appendChild(stateElement);
   });
 
-  // Get the XML string and format it with proper indentation
   const xmlString = new XMLSerializer().serializeToString(doc);
   return formatXml(xmlString);
 };

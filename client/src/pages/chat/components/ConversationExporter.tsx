@@ -11,14 +11,12 @@ export const ConversationExporter = () => {
   const messages = chatMessages || [];
   const { coachState } = useCoachState();
 
-  // Handler for exporting conversation as XML
   const handleExport = () => {
     if (!userId || !coachState) return;
     const xmlContent = convertToXml(messages, userId, coachState);
     downloadXml(xmlContent);
   };
 
-  // If no userId, show nothing
   if (!userId) return null;
 
   return (

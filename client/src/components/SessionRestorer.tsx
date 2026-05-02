@@ -2,32 +2,18 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { fetchUserComplete } from "@/api/user";
 import { getCookie } from "@/api/auth";
-import { User } from "@/types/user";
-
-/**
- * This component restores the user session by checking for an access token in cookies and fetching
- * the user data if the token is present. It essentially auto logs in the user if they have cookies
- * present.
- */
+import type { User } from "@/types/user";
 
 export function SessionRestorer() {
   const queryClient = useQueryClient();
-  console.log("[SessionRestorer] Rendering...");
 
   useEffect(() => {
     const profile = queryClient.getQueryData<User>(["user", "profile"]);
     if (!profile) {
-      console.log(
-        "[SessionRestorer] No user profile in cache, checking cookies..."
-      );
       const accessToken = getCookie("discovita-access-token");
       if (accessToken) {
-        console.log(
-          "[SessionRestorer] Access token found in cookies, fetching user data..."
-        );
         fetchUserComplete().then((user) => {
           if (user) {
-            // Set all cache keys as in setUserDataInCache
             queryClient.setQueryData(["user", "profile"], {
               id: user.id,
               email: user.email,
@@ -53,8 +39,6 @@ export function SessionRestorer() {
           }
         });
       }
-    } else {
-      console.log("[SessionRestorer] User profile already in cache.");
     }
   }, [queryClient]);
 
