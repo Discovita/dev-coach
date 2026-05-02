@@ -275,3 +275,14 @@ VERSATILEIMAGEFIELD_SETTINGS = {
     "image_key_post_processor": None,
     "progressive_jpeg": False,
 }
+
+# ----------------------------------------------
+# CELERY WORKER MEMORY HYGIENE
+# ----------------------------------------------
+# Prefork workers accumulate memory over time (Django app, ORM caches, AI
+# client state). Without these guards, a single worker can grow past the
+# host's RAM limit and get OOM-killed, eventually causing Render to suspend
+# the service.
+CELERY_WORKER_CONCURRENCY = 1               # one fork, one Django copy
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 50      # recycle worker after N tasks
+CELERY_WORKER_MAX_MEMORY_PER_CHILD = 400000  # recycle if RSS exceeds ~400 MB (KB)
