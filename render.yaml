@@ -183,7 +183,6 @@ services:
   - type: web
     name: preview-coach-frontend
     runtime: static
-    region: oregon
     rootDir: client
     previews:
       generation: manual
@@ -212,7 +211,6 @@ services:
   - type: web
     name: preview-coach-docs
     runtime: static
-    region: oregon
     rootDir: docs
     previews:
       generation: manual
