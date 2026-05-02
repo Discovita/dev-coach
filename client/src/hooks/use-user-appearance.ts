@@ -5,7 +5,7 @@ import {
   getTestUserAppearance,
   updateTestUserAppearance,
 } from "@/api/userAppearance";
-import { UserAppearance } from "@/types/userAppearance";
+import type { UserAppearance } from "@/types/userAppearance";
 import { useProfile } from "./use-profile";
 
 /**
@@ -26,7 +26,6 @@ export function useUserAppearance(userId: string | null) {
   const { profile } = useProfile();
   const isCurrentUser = profile && userId === profile.id;
 
-  // Fetch appearance data
   const {
     data,
     isLoading,
@@ -43,11 +42,10 @@ export function useUserAppearance(userId: string | null) {
       }
     },
     enabled: !!userId,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 10,
     retry: false,
   });
 
-  // Update appearance mutation
   const updateMutation = useMutation<UserAppearance, Error, Partial<UserAppearance>>({
     mutationFn: async (appearance: Partial<UserAppearance>) => {
       if (!userId) throw new Error("User ID is required");
@@ -58,9 +56,7 @@ export function useUserAppearance(userId: string | null) {
       }
     },
     onSuccess: () => {
-      // Invalidate appearance query
       queryClient.invalidateQueries({ queryKey: ["user", userId, "appearance"] });
-      // Also invalidate user profile queries to keep them in sync
       if (isCurrentUser) {
         queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
       } else {

@@ -1,6 +1,6 @@
 import React from "react";
-import { ComponentConfig } from "@/types/componentConfig";
-import { CoachRequest } from "@/types/coachRequest";
+import type { ComponentConfig } from "@/types/componentConfig";
+import type { CoachRequest } from "@/types/coachRequest";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 
 export const IntroCannedResponseComponent: React.FC<{
@@ -15,7 +15,11 @@ export const IntroCannedResponseComponent: React.FC<{
     <div
       className={`_IntroCannedResponseComponent mb-4 p-3.5 pr-4 pl-4 rounded-t-[18px] rounded-br-[18px] rounded-bl-[6px] ${
         hasButtons ? "w-fit max-w-[100%]" : "w-fit max-w-[75%]"
-      } leading-[1.5] shadow-sm animate-fadeIn break-words mr-auto bg-gold-200 border-l-[3px] border-l-gold-600 dark:bg-transparent dark:border-r-[1px] dark:border-r-gold-600 dark:border-t-[1px] dark:border-t-gold-600 dark:border-b-[1px] dark:border-b-gold-600 dark:text-gold-200`}
+      } shadow-sm animate-fadeIn break-words mr-auto text-[18px] font-medium leading-[1.5] text-black`}
+      style={{ 
+        fontFamily: "'Montserrat', sans-serif",
+        backgroundColor: 'var(--nv-pale-lavender, #eae6fb)'
+      }}
     >
       <div className="max-w-[75%]">
         {React.isValidElement(coachMessage) ? (
@@ -34,7 +38,17 @@ export const IntroCannedResponseComponent: React.FC<{
                 onSendUserMessageToCoach({ message: button.label, actions: button.actions })
               }
               disabled={disabled}
-              className="px-3 py-1.5 text-sm font-medium rounded-md bg-gold-500 text-black hover:bg-gold-600 hover:text-gold-50 transition-colors cursor-pointer"
+              className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
+              style={{
+                backgroundColor: 'var(--nv-royal-purple, #531e96)',
+                color: 'white'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--nv-violet-blue, #6a5ffb)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--nv-royal-purple, #531e96)';
+              }}
             >
               {button.label}
             </button>

@@ -1,4 +1,4 @@
-import { Identity } from "./identity";
+import type { Identity } from "./identity";
 
 /**
  * Error codes returned by the image generation API.
@@ -42,7 +42,8 @@ export class ImageGenerationError extends Error {
 }
 
 /**
- * Request payload for generating an identity image.
+ * Request payload for generating an identity image (admin, legacy endpoint).
+ * POST /api/v1/admin/identities/generate-image/
  */
 export interface GenerateImageRequest {
   /** UUID of the identity to generate image for */
@@ -56,7 +57,7 @@ export interface GenerateImageRequest {
 }
 
 /**
- * Response from image generation endpoint.
+ * Response from admin image generation endpoint.
  */
 export interface GenerateImageResponse {
   /** Whether generation was successful */
@@ -70,29 +71,9 @@ export interface GenerateImageResponse {
 }
 
 /**
- * Request payload for saving a generated image to an identity.
- */
-export interface SaveImageRequest {
-  /** UUID of the identity */
-  identity_id: string;
-  /** Base64 encoded image data */
-  image_base64: string;
-}
-
-/**
- * Response from save image endpoint.
- */
-export interface SaveImageResponse {
-  /** Whether save was successful */
-  success: boolean;
-  /** Updated identity with image */
-  identity: Identity;
-  /** Error message (if success is false) */
-  error?: string;
-}
-
-/**
  * Request payload for starting a new image chat session.
+ * Public: POST /api/v1/identity-image-chat/start/
+ * Admin: POST /api/v1/admin/identity-image-chat/start/ (when user_id provided)
  */
 export interface StartImageChatRequest {
   /** UUID of the identity to generate image for */
@@ -117,6 +98,8 @@ export interface StartImageChatResponse {
 
 /**
  * Request payload for continuing an image chat session.
+ * Public: POST /api/v1/identity-image-chat/continue/
+ * Admin: POST /api/v1/admin/identity-image-chat/continue/ (when user_id provided)
  */
 export interface ContinueImageChatRequest {
   /** UUID of the user (for admin endpoints only) */
@@ -137,3 +120,24 @@ export interface ContinueImageChatResponse {
   identity_name: string;
 }
 
+/**
+ * Request payload for saving a generated image to an identity.
+ */
+export interface SaveImageRequest {
+  /** UUID of the identity */
+  identity_id: string;
+  /** Base64 encoded image data */
+  image_base64: string;
+}
+
+/**
+ * Response from save image endpoint.
+ */
+export interface SaveImageResponse {
+  /** Whether save was successful */
+  success: boolean;
+  /** Updated identity with image */
+  identity: Identity;
+  /** Error message (if success is false) */
+  error?: string;
+}

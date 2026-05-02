@@ -35,4 +35,4 @@ const TestScenarioGeneralForm = ({ name, description, onChange }: TestScenarioGe
   );
 };
 
-export default TestScenarioGeneralForm; 
+export default TestScenarioGeneralForm;

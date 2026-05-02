@@ -1,4 +1,4 @@
-import { Message } from "./message";
+import type { Message } from "./message";
 
 /**
  * Represents a single action performed by the coach.

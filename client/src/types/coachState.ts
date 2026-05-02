@@ -1,5 +1,5 @@
 import { CoachingPhase } from "@/enums/coachingPhase";
-import { Identity } from "./identity";
+import type { Identity } from "./identity";
 import { GetToKnowYouQuestions } from "@/enums/getToKnowYouQuestions";
 
 /**

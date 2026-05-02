@@ -1,6 +1,9 @@
 import React from "react";
-import { ComponentConfig, ComponentIdentity } from "@/types/componentConfig";
-import { CoachRequest } from "@/types/coachRequest";
+import {
+  type ComponentConfig,
+  type ComponentIdentity,
+} from "@/types/componentConfig";
+import type { CoachRequest } from "@/types/coachRequest";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import {
   getIdentityCategoryColor,
@@ -125,7 +128,11 @@ export const CombineIdentitiesConfirmation: React.FC<{
     <div
       className={`_CombineIdentitiesConfirmation mb-4 p-4 rounded-xl ${
         hasButtons ? "w-fit max-w-[100%]" : "w-fit max-w-[75%]"
-      } leading-[1.5] shadow-sm animate-fadeIn break-words mr-auto bg-gold-200`}
+      } shadow-sm animate-fadeIn break-words mr-auto text-[18px] font-medium leading-[1.5] text-black`}
+      style={{ 
+        fontFamily: "'Montserrat', sans-serif",
+        backgroundColor: 'var(--nv-pale-lavender, #eae6fb)'
+      }}
     >
       <div className="mb-3">
         {React.isValidElement(coachMessage) ? (
@@ -157,7 +164,7 @@ export const CombineIdentitiesConfirmation: React.FC<{
           const passionsValue = "passions_and_talents";
           const categoryA = identityA?.category || "";
           const categoryB = identityB?.category || "";
-          
+
           let savedIdentity;
           if ((categoryA === passionsValue) !== (categoryB === passionsValue)) {
             // Exactly one is Passions and Talents → keep the non-Passions one
@@ -166,14 +173,22 @@ export const CombineIdentitiesConfirmation: React.FC<{
             // Neither or both are Passions and Talents → keep identity A
             savedIdentity = identityA;
           }
-          
+
           if (savedIdentity?.category) {
-            const lightColorClasses = getIdentityCategoryLightColor(String(savedIdentity.category));
-            const darkColorClasses = getIdentityCategoryDarkColor(String(savedIdentity.category));
-            const IconComponent = getCategoryIcon(String(savedIdentity.category));
-            
+            const lightColorClasses = getIdentityCategoryLightColor(
+              String(savedIdentity.category)
+            );
+            const darkColorClasses = getIdentityCategoryDarkColor(
+              String(savedIdentity.category)
+            );
+            const IconComponent = getCategoryIcon(
+              String(savedIdentity.category)
+            );
+
             return (
-              <div className={`w-fit min-w-[160px] max-w-[300px] p-4 rounded-lg border shadow-sm ${lightColorClasses} ${darkColorClasses}`}>
+              <div
+                className={`w-fit min-w-[160px] max-w-[300px] p-4 rounded-lg border shadow-sm ${lightColorClasses} ${darkColorClasses}`}
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <IconComponent
                     className={`w-4 h-4 ${darkColorClasses
@@ -195,11 +210,17 @@ export const CombineIdentitiesConfirmation: React.FC<{
               </div>
             );
           }
-          
+
           // Fallback if no saved identity category
           return (
-            <div className="w-fit min-w-[160px] max-w-[300px] p-4 rounded-lg border-2 border-gold-400/80 dark:border-gold-500/80 bg-gold-50/60 dark:bg-gold-900/20">
-              <div className="text-lg font-semibold text-gold-900 dark:text-gold-200 text-center">
+            <div 
+              className="w-fit min-w-[160px] max-w-[300px] p-4 rounded-lg border-2 text-center"
+              style={{
+                borderColor: 'var(--nv-royal-purple, #531e96)',
+                backgroundColor: 'var(--nv-lilac-white, #f7f5ff)'
+              }}
+            >
+              <div className="text-lg font-semibold text-center" style={{ color: 'var(--nv-indigo, #0b1c4a)' }}>
                 {identityA?.name && identityB?.name ? (
                   <div>
                     <div>{identityA.name}/</div>
@@ -227,11 +248,27 @@ export const CombineIdentitiesConfirmation: React.FC<{
                 });
               }}
               disabled={disabled}
-              className={`${
-                button.label.toLowerCase() === "yes"
-                  ? "bg-gold-500 hover:bg-gold-600 text-black"
-                  : "bg-gold-300 hover:bg-gold-400 text-black dark:bg-gold-100 dark:hover:bg-gold-200 dark:text-gold-100"
-              } px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer`}
+              className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
+              style={{
+                backgroundColor: button.label.toLowerCase() === "yes" 
+                  ? 'var(--nv-royal-purple, #531e96)' 
+                  : 'var(--nv-pale-lavender, #eae6fb)',
+                color: button.label.toLowerCase() === "yes" ? 'white' : 'var(--nv-indigo, #0b1c4a)'
+              }}
+              onMouseEnter={(e) => {
+                if (button.label.toLowerCase() === "yes") {
+                  e.currentTarget.style.backgroundColor = 'var(--nv-violet-blue, #6a5ffb)';
+                } else {
+                  e.currentTarget.style.backgroundColor = 'var(--nv-lilac-white, #f7f5ff)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (button.label.toLowerCase() === "yes") {
+                  e.currentTarget.style.backgroundColor = 'var(--nv-royal-purple, #531e96)';
+                } else {
+                  e.currentTarget.style.backgroundColor = 'var(--nv-pale-lavender, #eae6fb)';
+                }
+              }}
             >
               {button.label}
             </button>

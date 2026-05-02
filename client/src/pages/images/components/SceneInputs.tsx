@@ -1,8 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { SceneInputs as SceneInputsType } from "@/types/sceneInputs";
-import { ClothingInput } from "./scene/ClothingInput";
-import { MoodInput } from "./scene/MoodInput";
-import { SettingInput } from "./scene/SettingInput";
+import type { SceneInputs as SceneInputsType } from "@/types/sceneInputs";
+import { ClothingInput, MoodInput, SettingInput } from "./scene";
 import { Button } from "@/components/ui/button";
 import { Info, Save, Check, AlertCircle } from "lucide-react";
 
@@ -75,11 +73,6 @@ function getEmptyFields(values: SceneInputsType): string[] {
  * - Validation showing which fields are empty (soft warning)
  * - Dirty state tracking
  * - Success feedback after saving
- * 
- * Displays three text inputs:
- * - What are you wearing? (clothing)
- * - How do you feel? (mood)
- * - What is the setting? (setting)
  */
 export function SceneInputs({
   values,
@@ -130,27 +123,27 @@ export function SceneInputs({
   };
 
   return (
-    <div className="space-y-6 p-4 border rounded-lg bg-neutral-50 dark:bg-neutral-900/50">
+    <div className="space-y-6 p-4 border rounded-lg bg-[var(--nv-pale-lavender)]/30">
       {/* Header */}
       <div className="flex items-start gap-2">
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-lg font-semibold text-[var(--nv-indigo)]">
           Scene Details for this Identity
         </h2>
-        <Info className="size-4 text-neutral-500 mt-0.5" />
+        <Info className="size-4 text-[var(--nv-royal-purple)]/60 mt-0.5" />
       </div>
-      <p className="text-xs text-neutral-500 -mt-4">
+      <p className="text-xs text-[var(--nv-royal-purple)]/60 -mt-4">
         These are saved to the identity
       </p>
 
       {/* Validation Warning */}
       {!hasAllFields && (
-        <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-          <AlertCircle className="size-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-amber-800 dark:text-amber-200">
+        <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <AlertCircle className="size-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-amber-800">
             <p className="font-medium">
               Fill in all scene details for best results
             </p>
-            <p className="text-xs mt-1 text-amber-700 dark:text-amber-300">
+            <p className="text-xs mt-1 text-amber-700">
               Missing: {emptyFields.join(", ")}
             </p>
           </div>
@@ -179,15 +172,15 @@ export function SceneInputs({
       </div>
 
       {/* Footer with status and save button */}
-      <div className="flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-neutral-700">
+      <div className="flex items-center justify-between pt-4 border-t border-[var(--nv-royal-purple)]/20">
         {/* Status indicator */}
         <div className="flex items-center gap-2">
           {isDirty ? (
-            <span className="text-sm text-amber-600 dark:text-amber-400">
+            <span className="text-sm text-amber-600">
               Unsaved changes
             </span>
           ) : (
-            <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+            <span className="text-sm text-green-600 flex items-center gap-1">
               <Check className="size-4" />
               All changes saved
             </span>
@@ -197,7 +190,7 @@ export function SceneInputs({
         {/* Save button */}
         <div className="flex items-center gap-2">
           {showSaveSuccess && (
-            <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+            <span className="text-sm text-green-600 flex items-center gap-1">
               <Check className="size-4" />
               Saved!
             </span>
@@ -207,7 +200,7 @@ export function SceneInputs({
             variant="default"
             onClick={handleSave}
             disabled={!isDirty || isSaving || disabled}
-            className="gap-2"
+            className="gap-2 bg-[var(--nv-royal-purple)] hover:bg-[var(--nv-royal-purple)]/90"
           >
             {isSaving ? (
               <>

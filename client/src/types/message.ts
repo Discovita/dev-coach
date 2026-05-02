@@ -1,4 +1,4 @@
-import { ComponentConfig } from "./componentConfig";
+import type { ComponentConfig } from "./componentConfig";
 
 /**
  * A single message in the conversation history.

@@ -1,4 +1,4 @@
-import { ComponentConfig } from "./componentConfig";
+import type { ComponentConfig } from "./componentConfig";
 
 export interface CoachResponse {
   message: string;

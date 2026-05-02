@@ -1,6 +1,6 @@
 import React from "react";
-import { ComponentConfig, ComponentIdentity } from "@/types/componentConfig";
-import { CoachRequest } from "@/types/coachRequest";
+import type { ComponentConfig, ComponentIdentity } from "@/types/componentConfig";
+import type { CoachRequest } from "@/types/coachRequest";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import {
   getIdentityCategoryColor,

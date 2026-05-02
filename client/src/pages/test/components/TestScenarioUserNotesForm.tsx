@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { TestScenarioUserNote } from "@/types/testScenario";
+import type { TestScenarioUserNote } from "@/types/testScenario";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,15 +57,15 @@ export default function TestScenarioUserNotesForm({ value, onChange }: Props) {
       </div>
       <div
         ref={parentRef}
-        className="overflow-auto border border-[#eee] rounded-lg bg-white"
+        className="overflow-auto border border-border rounded-lg bg-background"
         style={{ height: 500, width: "100%" }}
       >
         {value.map((note, idx) => (
           <div
             key={idx}
             className={[
-              "flex items-center gap-2 border-b border-[#f3f3f3] px-4 py-3 min-h-[48px] box-border w-full",
-              idx % 2 === 0 ? "bg-[#fafbfc]" : "bg-white"
+              "flex items-center gap-2 border-b border-border/50 px-4 py-3 min-h-[48px] box-border w-full",
+              idx % 2 === 0 ? "bg-muted/30" : "bg-background"
             ].join(" ")}
           >
             <span className="flex-1 whitespace-pre-wrap break-words leading-[1.5] py-0.5">{note.note}</span>
@@ -80,4 +80,4 @@ export default function TestScenarioUserNotesForm({ value, onChange }: Props) {
       </div>
     </div>
   );
-} 
+}

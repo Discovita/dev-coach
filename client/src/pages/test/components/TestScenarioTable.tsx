@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { Button } from "@/components/ui/button";
-import { TestScenario } from "@/types/testScenario";
+import type { TestScenario } from "@/types/testScenario";
 import { themeQuartz } from "ag-grid-community";
 
 interface TestScenarioTableProps {
@@ -31,23 +31,13 @@ const TestScenarioTable = ({
   onDelete,
   onStart,
 }: TestScenarioTableProps) => {
-  // Dummy handlers for Start and Start Fresh actions
-  // const handleStart = (scenario: TestScenario) => {
-  //   // TODO: Implement navigation to session (continue)
-  //   console.log("Start (continue) scenario", scenario.id);
-  // };
-  // const handleStartFresh = (scenario: TestScenario) => {
-  //   // TODO: Implement reset and navigation
-  //   console.log("Start Fresh scenario", scenario.id);
-  // };
-
   const columnDefs = useMemo<ColDef<TestScenario>[]>(
     () => [
       { field: "name", headerName: "Name", flex: 1 },
       { field: "description", headerName: "Description", flex: 2 },
       {
         headerName: "Actions",
-        field: undefined, // Not a real data field
+        field: undefined,
         cellRenderer: (params: ICellRendererParams<TestScenario>) => (
           <div className="flex gap-2 mt-1">
             <Button

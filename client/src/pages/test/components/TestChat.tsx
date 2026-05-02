@@ -1,7 +1,7 @@
 import React from "react";
 import { CoachStateVisualizer } from "@/pages/test/components/coach-state-visualizer/CoachStateVisualizer";
 import { Button } from "@/components/ui/button";
-import { TestScenario } from "@/types/testScenario";
+import type { TestScenario } from "@/types/testScenario";
 import { ChatInterface } from "@/pages/chat/components/ChatInterface";
 import { UserTargetProvider } from "@/providers/UserTargetProvider";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ const TestChat: React.FC<TestChatProps> = ({
   return (
     <UserTargetProvider targetUserId={testUserId} scenarioId={scenario.id}>
       <div className="_TestChat relative z-10 flex flex-col h-full">
-        <div className="_TestChatHeader sticky top-0 left-0 w-full flex justify-between items-center px-5 py-3 shadow-gold-sm z-50 border-b-2 border-primary-color h-[62px]">
+        <div className="_TestChatHeader sticky top-0 left-0 w-full flex justify-between items-center px-5 py-3 shadow-sm z-50 border-b-2 border-border h-[62px]">
           <h2 className="text-[1.2rem] font-semibold m-0">
             Test Mode: {scenario.name}
           </h2>
@@ -50,7 +50,7 @@ const TestChat: React.FC<TestChatProps> = ({
               }}
             />
           </div>
-          <div className="_TestChatCoachStateVisualizerContainer w-full xl:w-2/5 min-w-0 xl:min-w-[600px] border-t xl:border-t-0 xl:border-l border-border-color overflow-hidden h-full min-h-0">
+          <div className="_TestChatCoachStateVisualizerContainer w-full xl:w-2/5 min-w-0 xl:min-w-[600px] border-t xl:border-t-0 xl:border-l border-border overflow-hidden h-full min-h-0">
             <CoachStateVisualizer
               key={testUserId ? `test-${testUserId}` : "admin"}
             />

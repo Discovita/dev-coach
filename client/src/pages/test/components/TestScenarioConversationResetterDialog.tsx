@@ -9,13 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 
-/**
- * Props for the TestScenarioConversationResetterDialog component
- * @param isOpen - Whether the dialog is open
- * @param onClose - Function to call when the dialog is closed
- * @param onConfirm - Function to call when reset is confirmed
- * @param isResetting - Whether the reset is currently in progress
- */
 interface TestScenarioConversationResetterDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,17 +16,6 @@ interface TestScenarioConversationResetterDialogProps {
   isResetting: boolean;
 }
 
-/**
- * Dialog component for confirming conversation reset (deletion)
- * Shows loader during reset
- *
- * Step-by-step:
- * 1. Show a modal dialog when isOpen is true.
- * 2. Display a warning about resetting conversation history.
- * 3. Show a loader if isResetting is true.
- * 4. Confirm and Cancel buttons: Confirm triggers onConfirm, Cancel triggers onClose.
- * 5. Confirm button is disabled while isResetting.
- */
 export function TestScenarioConversationResetterDialog({
   isOpen,
   onClose,
@@ -42,7 +24,6 @@ export function TestScenarioConversationResetterDialog({
 }: TestScenarioConversationResetterDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* Modal content with fixed width for readability */}
       <DialogContent className="max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="text-red-700">Reset Test Scenario</DialogTitle>

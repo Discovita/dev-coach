@@ -1,5 +1,6 @@
 import React from "react";
-import { TabName, ExpandedSectionsConfig } from "../types";
+import { TabName } from "../types";
+import type { ExpandedSectionsConfig } from "../types";
 import {
   renderJsonSection,
   renderEmptyState,
@@ -16,15 +17,6 @@ import { useIdentities } from "@/hooks/use-identities";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import IdentityItem from "./IdentityItem";
 
-/**
- * TabContent component
- * Renders the content for each tab in the CoachStateVisualizer.
- * Fetches all required data using context-aware hooks directly.
- * Only UI state (expandedSections, toggleSection) is passed as props.
- *
- * Works in both regular and impersonating mode — hooks read from
- * UserTargetContext internally to determine data source.
- */
 export const TabContent: React.FC<{
   tabName: TabName;
   expandedSections: ExpandedSectionsConfig;
@@ -109,7 +101,7 @@ export const TabContent: React.FC<{
 
           {coachState?.proposed_identity && (
             <div className="mb-4">
-              <h3 className="text-base font-semibold text-gold-800 dark:text-gold-200 mb-3">
+              <h3 className="text-base font-semibold text-foreground mb-3">
                 Proposed Identity
               </h3>
               <IdentityItem identity={coachState.proposed_identity} />

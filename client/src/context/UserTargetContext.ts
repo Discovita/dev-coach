@@ -13,6 +13,8 @@ import { createContext, useContext } from "react";
  *
  * Used by: use-chat-messages, use-coach-state, use-identities, use-actions,
  *          use-final-prompt, ConversationResetter, ChatControls, ChatInterface
+ *
+ * Ported from: dev-coach/client/src/context/UserTargetContext.ts
  */
 export interface UserTargetContextValue {
   /** Whether we are impersonating a test scenario user */

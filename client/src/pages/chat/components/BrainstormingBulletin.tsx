@@ -1,8 +1,11 @@
 import React from "react";
-import { CoachState } from "@/types/coachState";
+import type { CoachState } from "@/types/coachState";
 import { CoachingPhase } from "@/enums/coachingPhase";
-import { Identity } from "@/types/identity";
-import { getIdentityCategoryColor, getIdentityCategoryIcon } from "@/enums/identityCategory";
+import type { Identity } from "@/types/identity";
+import {
+  getIdentityCategoryColor,
+  getIdentityCategoryIcon,
+} from "@/enums/identityCategory";
 
 const IdentityBadge: React.FC<{ identity: Identity }> = ({ identity }) => {
   const IconComponent = getIdentityCategoryIcon(String(identity.category));
@@ -45,12 +48,13 @@ export const BrainstormingBulletin: React.FC<{
       ) : (
         <div className="flex flex-wrap gap-2">
           {items.map((identity) => (
-            <IdentityBadge key={identity.id || identity.name} identity={identity} />
+            <IdentityBadge
+              key={identity.id || identity.name}
+              identity={identity}
+            />
           ))}
         </div>
       )}
     </div>
   );
 };
-
-

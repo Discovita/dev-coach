@@ -7,16 +7,6 @@ import { useState } from "react";
 import { ConversationResetterDialog } from "./ConversationResetterDialog";
 import { TestScenarioConversationResetterDialog } from "@/pages/test/components/TestScenarioConversationResetterDialog";
 
-/**
- * ConversationResetter component
- * Allows the user to reset their conversation.
- *
- * Context-aware: reads from UserTargetContext to determine behavior.
- * - Regular mode: resets the logged-in user's chat messages via useChatMessages.
- * - Impersonating mode: resets the test scenario via useResetTestScenario.
- *
- * Used in: ChatControls (both regular and test scenario contexts).
- */
 export const ConversationResetter = ({
   onResetSuccess,
 }: {
