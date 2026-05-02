@@ -1,0 +1,228 @@
+# =============================================================================
+# Render Blueprint — PR Preview Environments
+# =============================================================================
+# This file defines the six "base" services that Render uses as the template
+# for ephemeral PR-preview environments. Each open PR can spin up its own
+# isolated copy of all six services via the "Create Preview" button on the PR.
+#
+# Lifecycle:
+#   1. Sync this blueprint into the discovita > Previews environment in the
+#      Render dashboard (one-time, after merge).
+#   2. Render creates the six base services (always-on; lowest tier).
+#   3. When a teammate clicks "Create Preview" on a PR, Render forks ephemeral
+#      copies of every service with `previews: { generation: manual }` set.
+#   4. The preview API service runs `pg_dump` of staging into the preview's
+#      ephemeral Postgres during build, then runs migrations from the PR
+#      branch.
+#   5. The preview frontend builds with VITE_COACH_BASE_URL pointing at the
+#      preview's own API URL (wired by Render's fromService ref).
+#   6. The PR comment shows the preview URL. Click → smoke test.
+#
+# Secrets to set in the Render dashboard once after first sync:
+#   - STAGING_DATABASE_URL    (full postgres:// URL of staging-coach-database)
+#   - DJANGO_SECRET_KEY       (any random string; previews don't need to share
+#                              with prod)
+#   - AWS_ACCESS_KEY_ID       (same as staging — see staging dashboard)
+#   - AWS_SECRET_ACCESS_KEY   (same as staging)
+#   - AWS_SES_REGION_NAME, AWS_SES_REGION_ENDPOINT, AWS_SES_SOURCE_EMAIL
+#     (same as staging)
+# =============================================================================
+
+databases:
+  - name: preview-coach-database
+    region: oregon
+    plan: basic-256mb
+    previews:
+      generation: manual
+
+services:
+  # ---------------------------------------------------------------------------
+  # Django API (web)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: preview-coach-api
+    runtime: python
+    region: oregon
+    plan: starter
+    rootDir: server
+    previews:
+      generation: manual
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      pg_dump "$STAGING_DATABASE_URL" --no-owner --no-acl --clean --if-exists | psql "$PREVIEW_DATABASE_URL"
+      python manage.py migrate --noinput
+    startCommand: gunicorn wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: settings.previews
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      # Per-PR S3 prefix so previews never collide with each other or with
+      # real staging data. RENDER_GIT_PR_NUMBER is auto-set by Render on
+      # preview environments.
+      - key: S3_LOCATION_PREFIX
+        value: previews/pr-${RENDER_GIT_PR_NUMBER}/media
+      # Staging DB — used as the source for pg_dump during build only.
+      - key: STAGING_DATABASE_URL
+        sync: false
+      # Preview DB — wired in five forms because previews.py reads them
+      # individually and the build script needs the URL for pg_dump dest.
+      - key: PREVIEW_DATABASE_URL
+        fromDatabase:
+          name: preview-coach-database
+          property: connectionString
+      - key: PREVIEW_DB_NAME
+        fromDatabase:
+          name: preview-coach-database
+          property: database
+      - key: PREVIEW_DB_USER
+        fromDatabase:
+          name: preview-coach-database
+          property: user
+      - key: PREVIEW_DB_PASSWORD
+        fromDatabase:
+          name: preview-coach-database
+          property: password
+      - key: PREVIEW_DB_HOST
+        fromDatabase:
+          name: preview-coach-database
+          property: host
+      - key: PREVIEW_DB_PORT
+        fromDatabase:
+          name: preview-coach-database
+          property: port
+      # Redis (Valkey) — Celery broker for the sentinel worker.
+      - key: PREVIEW_REDIS_URL
+        fromService:
+          name: preview-coach-redis
+          type: redis
+          property: connectionString
+      # AWS — same creds as staging, same bucket as staging (scoped by prefix).
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      - key: AWS_SES_REGION_NAME
+        sync: false
+      - key: AWS_SES_REGION_ENDPOINT
+        sync: false
+      - key: AWS_SES_SOURCE_EMAIL
+        sync: false
+      - key: STAGING_AWS_STORAGE_BUCKET_NAME
+        value: discovita-dev-coach-staging
+      # Frontend URL (used in password-reset emails etc).
+      - key: FRONTEND_URL
+        fromService:
+          name: preview-coach-frontend
+          type: web
+          property: host
+
+  # ---------------------------------------------------------------------------
+  # Sentinel — Celery worker for user-note extraction
+  # ---------------------------------------------------------------------------
+  # Same image as the api, different start command. Memory hygiene flags
+  # come from CELERY_WORKER_* settings in server/settings/common.py.
+  - type: worker
+    name: preview-coach-sentinel
+    runtime: python
+    region: oregon
+    plan: starter
+    rootDir: server
+    previews:
+      generation: manual
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A celery_config worker --loglevel=INFO
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: settings.previews
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: S3_LOCATION_PREFIX
+        value: previews/pr-${RENDER_GIT_PR_NUMBER}/media
+      - key: PREVIEW_DB_NAME
+        fromDatabase:
+          name: preview-coach-database
+          property: database
+      - key: PREVIEW_DB_USER
+        fromDatabase:
+          name: preview-coach-database
+          property: user
+      - key: PREVIEW_DB_PASSWORD
+        fromDatabase:
+          name: preview-coach-database
+          property: password
+      - key: PREVIEW_DB_HOST
+        fromDatabase:
+          name: preview-coach-database
+          property: host
+      - key: PREVIEW_DB_PORT
+        fromDatabase:
+          name: preview-coach-database
+          property: port
+      - key: PREVIEW_REDIS_URL
+        fromService:
+          name: preview-coach-redis
+          type: redis
+          property: connectionString
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      - key: STAGING_AWS_STORAGE_BUCKET_NAME
+        value: discovita-dev-coach-staging
+
+  # ---------------------------------------------------------------------------
+  # Frontend — Vite/React static site
+  # ---------------------------------------------------------------------------
+  # VITE_* env vars are baked into the bundle at build time; we export them
+  # before `npm run build` so each preview's bundle points at its own API.
+  - type: web
+    name: preview-coach-frontend
+    runtime: static
+    region: oregon
+    rootDir: client
+    previews:
+      generation: manual
+    buildCommand: |
+      export VITE_COACH_BASE_URL="https://${PREVIEW_API_HOST}/api/v1"
+      export VITE_ENV=preview
+      npm install
+      npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: PREVIEW_API_HOST
+        fromService:
+          name: preview-coach-api
+          type: web
+          property: host
+
+  # ---------------------------------------------------------------------------
+  # Docs — Docusaurus static site
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: preview-coach-docs
+    runtime: static
+    region: oregon
+    rootDir: docs
+    previews:
+      generation: manual
+    buildCommand: |
+      npm install
+      npm run build
+    staticPublishPath: build
+
+  # ---------------------------------------------------------------------------
+  # Redis (Valkey) — Celery broker
+  # ---------------------------------------------------------------------------
+  - type: redis
+    name: preview-coach-redis
+    region: oregon
+    plan: free
+    ipAllowList: []
+    previews:
+      generation: manual
