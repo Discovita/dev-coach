@@ -15,11 +15,11 @@ The `number_of_identities` context key provides the total count of identities th
 
 ## What Data It Provides
 
-Returns the total number of identities the user has created across all categories.
+Returns the total number of non-archived identities the user has created across all categories.
 
 ## How It Gets the Data
 
-The function uses Django's `count()` method on the user's identities relationship to get the total number of identity records.
+The function excludes archived identities and uses Django's `count()` method on the filtered queryset.
 
 ## Example Data
 
@@ -35,8 +35,8 @@ The function uses Django's `count()` method on the user's identities relationshi
 ```python
 def get_number_of_identites_context(coach_state: CoachState) -> int:
     """
-    Get the number of identities that the User has created.
+    Get the number of identities that the User has created (excluding archived).
     """
     user = coach_state.user
-    return user.identities.count()
+    return user.identities.exclude(state=IdentityState.ARCHIVED).count()
 ```

@@ -5,12 +5,14 @@ Used by prompt_manager and generation prompt logic.
 
 import os
 import time
+from typing import Any, Dict, Tuple, Union
+
 from pydantic import BaseModel
+
+from apps.prompts.models import Prompt
 from enums.ai import AIProvider
 from services.prompt_manager.models import PromptContext
 from services.prompt_manager.utils import log_context_stats
-from apps.prompts.models import Prompt
-from typing import Dict, Any, Tuple, Union
 
 
 def format_for_provider(

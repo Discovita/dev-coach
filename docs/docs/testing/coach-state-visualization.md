@@ -10,12 +10,11 @@ The Coach State Visualizer is a powerful debugging and monitoring tool that prov
 
 ## Overview
 
-The visualizer consists of two main components:
+The visualizer is a single unified component:
 
-- **CoachStateVisualizer**: For monitoring regular user sessions
-- **TestScenarioCoachStateVisualizer**: For monitoring test scenario sessions
+- **CoachStateVisualizer**: Used for both regular user sessions and test scenario sessions
 
-Both components provide identical functionality but fetch data from different sources using specialized hooks.
+The component uses context-aware hooks (via `UserTargetContext`) that automatically switch between regular user endpoints and admin/test-user endpoints based on whether the component is wrapped in a `UserTargetProvider`.
 
 > **📋 For detailed information about session types and system architecture, see [Session Types and Architecture](./overview#session-types-and-architecture) in the overview.**
 
@@ -46,25 +45,15 @@ The visualizer organizes data into five main tabs:
 
 ## Data Sources
 
-### Regular User Sessions
+The `CoachStateVisualizer` uses context-aware hooks that automatically resolve to the correct endpoints based on `UserTargetContext`:
 
-The `CoachStateVisualizer` fetches data using these hooks:
+- **useCoachState()**: Fetches coach state (regular: `/user/me/coach-state/`, impersonating: `/admin/test-user/{userId}/coach-state/`)
+- **useChatMessages()**: Fetches chat history (regular: `/user/me/chat-messages/`, impersonating: `/admin/test-user/{userId}/chat-messages/`)
+- **useIdentities()**: Fetches identities (regular: `/user/me/identities/`, impersonating: `/admin/test-user/{userId}/identities/`)
+- **useActions()**: Fetches actions (regular: `/user/me/actions/`, impersonating: `/admin/test-user/{userId}/actions/`)
+- **useFinalPrompt()**: Retrieves the latest final prompt from cache (uses dynamic query key prefix)
 
-- **useCoachState()**: Fetches coach state from `/user/me/coach-state/`
-- **useChatMessages()**: Fetches chat history from `/user/me/chat-messages/`
-- **useIdentities()**: Fetches identities from `/user/me/identities/`
-- **useActions()**: Fetches actions from `/user/me/actions/`
-- **useFinalPrompt()**: Retrieves the latest final prompt from cache
-
-### Test Scenario Sessions
-
-The `TestScenarioCoachStateVisualizer` uses specialized test scenario hooks:
-
-- **useTestScenarioUserCoachState(testUserId)**: Fetches coach state from `/test-user/{userId}/coach-state/`
-- **useTestScenarioChatMessages(testUserId)**: Fetches chat history from `/test-user/{userId}/chat-messages/`
-- **useTestScenarioUserIdentities(testUserId)**: Fetches identities from `/test-user/{userId}/identities/`
-- **useTestScenarioUserActions(testUserId)**: Fetches actions from `/test-user/{userId}/actions/`
-- **useTestScenarioUserFinalPrompt(testUserId)**: Retrieves the latest final prompt from cache
+When wrapped in a `UserTargetProvider` (as in `TestChat.tsx`), these hooks read `isImpersonating` and `targetUserId` from context and switch to admin endpoints automatically.
 
 ## API Endpoints Used
 
@@ -77,14 +66,14 @@ The `TestScenarioCoachStateVisualizer` uses specialized test scenario hooks:
 | `/user/me/identities/`    | GET    | User identities        | useIdentities   |
 | `/user/me/actions/`       | GET    | Action history         | useActions      |
 
-### Test Scenario Endpoints
+### Test Scenario Endpoints (via admin impersonation)
 
-| Endpoint                             | Method | Description              | Used By                         |
-| ------------------------------------ | ------ | ------------------------ | ------------------------------- |
-| `/test-user/{userId}/coach-state/`   | GET    | Test user coaching state | useTestScenarioUserCoachState   |
-| `/test-user/{userId}/chat-messages/` | GET    | Test user chat history   | useTestScenarioChatMessages |
-| `/test-user/{userId}/identities/`    | GET    | Test user identities     | useTestScenarioUserIdentities   |
-| `/test-user/{userId}/actions/`       | GET    | Test user actions        | useTestScenarioUserActions      |
+| Endpoint                                    | Method | Description              | Used By                                    |
+| ------------------------------------------- | ------ | ------------------------ | ------------------------------------------ |
+| `/admin/test-user/{userId}/coach-state/`    | GET    | Test user coaching state | useCoachState (via UserTargetContext)       |
+| `/admin/test-user/{userId}/chat-messages/`  | GET    | Test user chat history   | useChatMessages (via UserTargetContext)     |
+| `/admin/test-user/{userId}/identities/`     | GET    | Test user identities     | useIdentities (via UserTargetContext)       |
+| `/admin/test-user/{userId}/actions/`        | GET    | Test user actions        | useActions (via UserTargetContext)          |
 
 ## Tab Content Details
 
@@ -197,9 +186,8 @@ The visualizer implements sophisticated change detection:
 ### Component Architecture
 
 ```
-coach-state-visualizer/
-├── CoachStateVisualizer.tsx           # Main component for regular sessions
-├── TestScenarioCoachStateVisualizer.tsx # Main component for test scenarios
+client/src/pages/test/components/coach-state-visualizer/
+├── CoachStateVisualizer.tsx           # Unified component for all sessions
 ├── types.ts                           # Type definitions
 ├── index.ts                           # Public exports
 └── utils/

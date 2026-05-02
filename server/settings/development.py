@@ -1,5 +1,6 @@
-from settings.common import *
 import os
+
+from settings.common import *
 
 DEBUG = True
 
@@ -24,7 +25,7 @@ WHITENOISE_ROOT = STATIC_ROOT  # Use the same absolute path
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_INDEX_FILE = True
 
-CELERY_BROKER_URL = "redis://redis:6379/0" # Local Redis instance
+CELERY_BROKER_URL = "redis://redis:6379/0"  # Local Redis instance
 CELERY_RESULT_BACKEND = None  # Or 'redis://...' if you want to store results
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TIMEZONE = "UTC"
@@ -35,4 +36,4 @@ if DEBUG:
     print(f"Base dir: {BASE_DIR}")
     print(f"Database: {DATABASES}")
     print(f"Settings Module: {env('DJANGO_SETTINGS_MODULE')}")
-    print(f"Access the backend here: http://localhost:8000/admin")
+    print("Access the backend here: http://localhost:8000/admin")

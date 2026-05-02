@@ -30,7 +30,9 @@ CELERY_TIMEZONE = "UTC"
 
 # S3 Configuration - Local development uses staging bucket
 # Note: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set in common.py
-bucket_name = env("STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging")
+bucket_name = env(
+    "STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging"
+)
 custom_domain = f"{bucket_name}.s3.amazonaws.com"
 
 # Media files configuration - Use S3 for local development (staging bucket)
@@ -63,4 +65,4 @@ if DEBUG:
     print(f"Base dir: {BASE_DIR}")
     print(f"Database: {DATABASES}")
     print(f"Settings Module: {env('DJANGO_SETTINGS_MODULE')}")
-    print(f"Access the backend here: http://localhost:8000/admin")
+    print("Access the backend here: http://localhost:8000/admin")

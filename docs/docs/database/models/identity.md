@@ -20,12 +20,19 @@ The Identity model stores user identities with their components (name, "I Am" St
 - `clothing` (TextField): What the person is wearing in this identity visualization, optional
 - `mood` (TextField): Emotional state/feeling in this identity visualization, optional
 - `setting` (TextField): Environment/location for this identity visualization, optional
-- `state` (CharField): Current identity state, max 32 characters, defaults to ACCEPTED
+- `state` (CharField): Current identity state, max 32 characters, defaults to PROPOSED
 - `notes` (ArrayField): List of notes about the identity
 - `category` (CharField): Identity category, max 32 characters
 - `created_at` (DateTimeField): Creation timestamp, auto-set
 - `updated_at` (DateTimeField): Last update timestamp, auto-updated
+- `image` (VersatileImageField): Identity image file, stored in S3 (inherited from ImageMixin), optional
+- `image_ppoi` (PPOIField): Primary Point of Interest for smart cropping (inherited from ImageMixin)
 - `test_scenario` (ForeignKey): Link to [TestScenario](./test-scenario.md) for test data isolation, optional
+
+## Inheritance
+
+Identity inherits from:
+- `ImageMixin`: Provides VersatileImageField with automatic S3 storage and size variant generation
 
 ## Configuration
 
@@ -40,26 +47,34 @@ The Identity model stores user identities with their components (name, "I Am" St
 
 - Many-to-One with [User](./users.md) (via `identities`)
 - One-to-Many with [CoachState](./coach-state.md) (via `current_coach_states` and `proposed_coach_states`)
+- One-to-Many with IdentityImageChat (via `image_chats`)
 - Many-to-One with [TestScenario](./test-scenario.md) (via `test_scenario`)
 
 ## Identity State Choices
 
-- `PROPOSED`: Identity has been proposed but not yet accepted
-- `ACCEPTED`: Identity has been accepted by the user
-- `REFINEMENT_COMPLETE`: Identity refinement process is complete
+- `PROPOSED` (stored: `proposed`): Identity has been proposed but not yet accepted (default)
+- `ACCEPTED` (stored: `accepted`): Identity has been accepted by the user
+- `REFINEMENT_COMPLETE` (stored: `refinement_complete`): Identity refinement process is complete
+- `COMMITMENT_COMPLETE` (stored: `commitment_complete`): Identity commitment process is complete
+- `I_AM_COMPLETE` (stored: `i_am_complete`): "I Am" statement has been created
+- `VISUALIZATION_COMPLETE` (stored: `visualization_complete`): Identity visualization is complete
+- `ARCHIVED` (stored: `archived`): Identity has been archived
 
 ## Identity Category Choices
 
-- `PASSIONS`: Passion-based identities
-- `VALUES`: Value-based identities
-- `STRENGTHS`: Strength-based identities
-- `GOALS`: Goal-based identities
-- `RELATIONSHIPS`: Relationship-based identities
-- `CAREER`: Career-based identities
-- `HEALTH`: Health-based identities
-- `FINANCE`: Finance-based identities
-- `SPIRITUALITY`: Spirituality-based identities
-- `CREATIVITY`: Creativity-based identities
+- `PASSIONS` (stored: `passions_and_talents`): "Passions and Talents"
+- `MONEY_MAKER` (stored: `maker_of_money`): "Maker of Money"
+- `MONEY_KEEPER` (stored: `keeper_of_money`): "Keeper of Money"
+- `SPIRITUAL` (stored: `spiritual`): "Spiritual"
+- `APPEARANCE` (stored: `personal_appearance`): "Personal Appearance"
+- `HEALTH` (stored: `physical_expression`): "Physical Expression"
+- `FAMILY` (stored: `familial_relations`): "Familial Relations"
+- `ROMANTIC` (stored: `romantic_relation`): "Romantic Relation"
+- `ACTION` (stored: `doer_of_things`): "Doer of Things"
+
+## Related Models
+
+The IdentityImageChat model also exists in the same app, tracking image generation chat sessions for identities.
 
 ## Usage Context
 

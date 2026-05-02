@@ -1,5 +1,5 @@
-from apps.user_notes.models import UserNote
 from apps.coach_states.models import CoachState
+from apps.user_notes.models import UserNote
 
 
 def get_user_notes_context(coach_state: CoachState) -> str:
@@ -15,4 +15,4 @@ def get_user_notes_context(coach_state: CoachState) -> str:
         notes_block = "\n".join(formatted_notes)
         return f"## User Notes\n\n{notes_block}\n"
     else:
-        return f"## User Notes\n\nNo Notes Yet...\n"
+        return "## User Notes\n\nNo Notes Yet...\n"

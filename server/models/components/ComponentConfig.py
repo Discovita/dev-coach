@@ -1,6 +1,6 @@
-from typing import List, Optional, Literal
+from typing import List, Literal, Optional
+
 from pydantic import BaseModel, Field
-from enums.component_type import ComponentType
 
 
 class ComponentAction(BaseModel):

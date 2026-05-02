@@ -32,7 +32,7 @@ def extract_user_notes(chat_message_id):
     """
     user_msg = ChatMessage.objects.get(id=chat_message_id)
     sentinel = Sentinel(user_msg.user)
-    sentinel.extract_notes()
+    sentinel.extract_notes(user_msg)
 ```
 
 ### 3. Django Signal
@@ -68,16 +68,18 @@ class Sentinel:
     def __init__(self, user: User):
         self.user = user
         self.prompt_manager = PromptManager()
-        self.model = AIModel.GPT_4O_MINI
+        self.model = AIModel.GPT_4O
         try:
             self.coach_state = CoachState.objects.get(user=user)
         except CoachState.DoesNotExist:
             log.error(f"User Coach State Not Found: {user.id}")
 
-    def extract_notes(self):
+    def extract_notes(self, chat_message: ChatMessage):
         """
-        Extract user notes from the latest chat message.
-        Uses the PromptManager to build the sentinel prompt and calls the AI service.
+        Extract user notes from a chat message using the sentinel AI service.
+
+        Args:
+            chat_message: The ChatMessage to analyze for user notes
         """
         ai_service = AIServiceFactory.create(self.model)
 
@@ -93,7 +95,7 @@ class Sentinel:
             sentinel_prompt, response_format, self.model
         )
 
-        apply_actions(self.coach_state, response)
+        apply_coach_actions(self.coach_state, response, chat_message)
         log.debug(f"Sentinel Response: {response}")
 ```
 

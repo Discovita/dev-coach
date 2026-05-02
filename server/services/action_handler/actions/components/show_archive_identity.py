@@ -1,18 +1,18 @@
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.action_type import ActionType
+from enums.component_type import ComponentType
+from models.components.ComponentConfig import (
+    ComponentAction,
+    ComponentButton,
+    ComponentConfig,
+    ComponentIdentity,
+)
 from services.action_handler.models.params import (
     ShowArchiveIdentityParams,
 )
-from models.components.ComponentConfig import (
-    ComponentConfig,
-    ComponentButton,
-    ComponentAction,
-    ComponentIdentity,
-)
-from enums.component_type import ComponentType
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -31,9 +31,7 @@ def show_archive_identity(
 
     # Fetch the identity and construct display object
     try:
-        identity = Identity.objects.get(
-            id=params.identity_id, user=coach_state.user
-        )
+        identity = Identity.objects.get(id=params.identity_id, user=coach_state.user)
     except Identity.DoesNotExist:
         log.warning(
             f"Identity {params.identity_id} not found for user {coach_state.user.id}"
@@ -108,4 +106,3 @@ def show_archive_identity(
     log.info("Successfully built archive identity component")
 
     return component
-

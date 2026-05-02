@@ -31,8 +31,11 @@ Information about the user's identities:
 - `current_identity`: Currently selected identity
 - `focused_identities`: List of focused identities
 - `refinement_identities`: Identities in refinement phase
+- `commitment_identities`: Identities awaiting commitment evaluation
 - `i_am_identities`: Identities with no "I Am" Statement
-- `visualization_identities`: Identities with visualizations
+- `visualization_identities`: Identities NOT yet visualization_complete (pending work, not completed)
+- `identity_ids`: Identity IDs for the user
+- `identity_for_image`: Identity context for image generation (populated directly by `PromptManager.create_image_generation_prompt()`, not via CoachState)
 
 ### Coaching Context
 
@@ -49,7 +52,8 @@ Chat history and message data:
 
 - `current_message`: The user's current message
 - `previous_message`: The previous message in conversation
-- `recent_messages`: Recent chat messages
+
+**Note**: Recent messages are **not** a `ContextKey` enum value. They are appended to the prompt post-format via `append_recent_messages()`. See the [Recent Messages](recent-messages) page for details.
 
 ### Process Context
 
@@ -84,7 +88,7 @@ Some context keys provide different data depending on the current coaching phase
 
 ### Identity Visualization Phase
 
-- `visualization_identities`: Shows identities with visualizations
+- `visualization_identities`: Shows identities NOT yet visualization_complete (a "to do" list, not a completed list)
 
 ## How Context Keys Work
 
@@ -118,9 +122,9 @@ def get_context_value(key: ContextKey, coach_state: CoachState):
 Context data is injected into the prompt template:
 
 ```markdown
-You are helping {{user_name}} with {{current_phase}}.
+You are helping {user_name} with {current_phase}.
 
-Current Identities: {{identities}}
+Current Identities: {identities}
 ```
 
 ## Context Key Implementation
@@ -171,8 +175,8 @@ def get_identities_context(coach_state: CoachState) -> str:
 To add a new context key:
 
 1. **Add to ContextKey enum** in `server/enums/context_keys.py`
-2. **Create context function** in `server/services/prompt_manager/utils/context.py`
-3. **Add to get_context_value** function
+2. **Create context function** in `server/services/prompt_manager/utils/context/func/` (one file per function)
+3. **Register in `get_context_value`** in `server/services/prompt_manager/utils/context/get_context_value.py`
 4. **Update PromptContext model** if needed
 5. **Document the new key** in the appropriate category
 

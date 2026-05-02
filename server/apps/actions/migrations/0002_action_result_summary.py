@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('actions', '0001_initial'),
+        ("actions", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='action',
-            name='result_summary',
-            field=models.TextField(blank=True, help_text='Natural language description of what the action accomplished.', null=True),
+            model_name="action",
+            name="result_summary",
+            field=models.TextField(
+                blank=True,
+                help_text="Natural language description of what the action accomplished.",
+                null=True,
+            ),
         ),
     ]

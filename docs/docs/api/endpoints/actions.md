@@ -1,265 +1,158 @@
 # Actions
 
-## Base URL
-
-`/actions/`
-
----
-
 ## Overview
 
-The ActionViewSet provides read-only access to coaching actions performed by the system. Actions represent the operations that the coach performs during coaching sessions, such as creating identities, transitioning phases, or updating user data. This endpoint is primarily used for admin interfaces, action history tracking, and conversation reconstruction.
+Actions represent the operations that the coach performs during coaching sessions, such as creating identities, transitioning phases, or updating user data. **There is no standalone `/actions/` ViewSet.** Actions are accessed through the User and Test User endpoints.
 
-**Important**: All endpoints require authentication. Regular users can only see their own actions, while admin users can see all actions.
+**Important**: Actions are read-only records created by the system during coach message processing.
 
 ---
 
 ## Endpoints
 
-### 1. List Actions
+### 1. Get Current User's Actions
 
-- **URL:** `/actions/`
+- **URL:** `/api/v1/user/me/actions`
 - **Method:** `GET`
-- **Description:** List actions with optional filtering. Regular users see only their own actions, while admin users see all actions.
-- **Authentication:** Required
-- **Query Parameters:**
-  - `action_type` (optional): Filter by specific action type
-  - `user` (optional): Filter by user ID (admin only)
-  - `test_scenario` (optional): Filter by test scenario ID (admin only)
-- **Response:**
-  - `200 OK`: Array of action objects (simplified list format).
-
-#### Example Response
-
-```json
-[
-  {
-    "id": "uuid-string",
-    "action_type": "CREATE_IDENTITY",
-    "action_type_display": "Create Identity",
-    "result_summary": "Created new identity 'Creative Visionary' in PASSIONS category",
-    "timestamp": "2024-06-01T12:00:00Z",
-    "coach_message_preview": "I've created a new identity for you based on our conversation..."
-  },
-  {
-    "id": "uuid-string-2",
-    "action_type": "TRANSITION_PHASE",
-    "action_type_display": "Transition Phase",
-    "result_summary": "Transitioned from INTRODUCTION to GET_TO_KNOW_YOU phase",
-    "timestamp": "2024-06-01T11:55:00Z",
-    "coach_message_preview": "Great! Now let's move to the next phase of our coaching..."
-  }
-]
-```
-
----
-
-### 2. Retrieve Action
-
-- **URL:** `/actions/{id}/`
-- **Method:** `GET`
-- **Description:** Retrieve a specific action with full details including the related coach message.
+- **Description:** Returns all actions performed for the authenticated user, ordered by most recent first.
 - **Authentication:** Required
 - **Response:**
-  - `200 OK`: Action object with complete details.
-  - `404 Not Found`: Action not found or not accessible.
+  - `200 OK`: Array of action objects.
 
-#### Example Response
+### 2. Get Test User's Actions (Admin Only)
 
-```json
-{
-  "id": "uuid-string",
-  "user": "user-uuid",
-  "action_type": "CREATE_IDENTITY",
-  "action_type_display": "Create Identity",
-  "parameters": {
-    "identity_name": "Creative Visionary",
-    "category": "PASSIONS",
-    "i_am_statement": "I am a bold creator, transforming ideas into reality.",
-    "visualization": "I see myself confidently presenting innovative solutions to complex problems, inspiring others with my creative vision."
-  },
-  "result_summary": "Created new identity 'Creative Visionary' in PASSIONS category with 'I Am' statement and visualization",
-  "timestamp": "2024-06-01T12:00:00Z",
-  "timestamp_formatted": "2024-06-01 12:00:00",
-  "coach_message": {
-    "id": "message-uuid",
-    "user": "user-uuid",
-    "role": "COACH",
-    "content": "Based on our conversation about your creative projects and passion for innovation, I've created a new identity for you: 'Creative Visionary'. This identity captures your ability to see possibilities where others see obstacles. Your 'I Am' statement is: 'I am a bold creator, transforming ideas into reality.' And your visualization is: 'I see myself confidently presenting innovative solutions to complex problems, inspiring others with my creative vision.' How does this identity resonate with you?",
-    "timestamp": "2024-06-01T12:00:00Z"
-  },
-  "test_scenario": null
-}
-```
-
----
-
-### 3. Get Actions for User (Admin Only)
-
-- **URL:** `/actions/for-user/`
+- **URL:** `/api/v1/admin/test-user/{pk}/actions`
 - **Method:** `GET`
-- **Description:** Get all actions for a specific user. Admin users only.
-- **Authentication:** Required (Admin/Superuser only)
-- **Query Parameters:**
-  - `user_id` (required): ID of the user whose actions to retrieve
+- **Description:** Returns all actions performed for a specific user, ordered by most recent first.
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
-  - `200 OK`: Array of action objects for the specified user.
-  - `400 Bad Request`: Missing user_id parameter.
-  - `403 Forbidden`: Not authorized (non-admin user).
+  - `200 OK`: Array of action objects.
   - `404 Not Found`: User not found.
 
-#### Example Request
-
-```
-GET /actions/for-user/?user_id=123
-```
-
-#### Example Response
-
-```json
-[
-  {
-    "id": "uuid-string",
-    "action_type": "CREATE_IDENTITY",
-    "action_type_display": "Create Identity",
-    "parameters": {
-      "identity_name": "Creative Visionary",
-      "category": "PASSIONS"
-    },
-    "result_summary": "Created new identity 'Creative Visionary' in PASSIONS category",
-    "timestamp": "2024-06-01T12:00:00Z",
-    "timestamp_formatted": "2024-06-01 12:00:00",
-    "coach_message": {
-      "id": "message-uuid",
-      "user": "123",
-      "role": "COACH",
-      "content": "Based on our conversation...",
-      "timestamp": "2024-06-01T12:00:00Z"
-    },
-    "test_scenario": null
-  }
-]
-```
-
 ---
 
-### 4. Get Actions by Coach Message
+## Response Format
 
-- **URL:** `/actions/by-coach-message/`
-- **Method:** `GET`
-- **Description:** Get all actions triggered by a specific coach message. Users can only see actions for their own messages unless they are admin.
-- **Authentication:** Required
-- **Query Parameters:**
-  - `message_id` (required): ID of the coach message
-- **Response:**
-  - `200 OK`: Array of action objects triggered by the message.
-  - `400 Bad Request`: Missing message_id parameter.
-  - `403 Forbidden`: Not authorized to view actions for this message.
-  - `404 Not Found`: Message not found.
-
-#### Example Request
-
-```
-GET /actions/by-coach-message/?message_id=456
-```
-
-#### Example Response
+Both endpoints return the same `ActionSerializer` format:
 
 ```json
 [
   {
     "id": "uuid-string",
-    "action_type": "CREATE_IDENTITY",
+    "user": "user-uuid",
+    "action_type": "transition_phase",
+    "action_type_display": "Transition Phase",
+    "parameters": {
+      "from_phase": "introduction",
+      "to_phase": "get_to_know_you"
+    },
+    "result_summary": "Successfully transitioned from Introduction to Get To Know You phase",
+    "timestamp": "2024-06-01T12:00:00Z",
+    "updated_at": "2024-06-01T12:00:00Z",
+    "timestamp_formatted": "2024-06-01 12:00:00",
+    "coach_message": {
+      "id": "uuid-string",
+      "role": "coach",
+      "content": "Great! Let's move to the next phase...",
+      "timestamp": "2024-06-01T12:00:00Z",
+      "component_config": null
+    },
+    "test_scenario": null
+  },
+  {
+    "id": "uuid-string",
+    "user": "user-uuid",
+    "action_type": "create_identity",
     "action_type_display": "Create Identity",
     "parameters": {
       "identity_name": "Creative Visionary",
-      "category": "PASSIONS"
+      "category": "passions_and_talents"
     },
-    "result_summary": "Created new identity 'Creative Visionary' in PASSIONS category",
-    "timestamp": "2024-06-01T12:00:00Z",
-    "timestamp_formatted": "2024-06-01 12:00:00",
+    "result_summary": "Created new identity: Creative Visionary",
+    "timestamp": "2024-06-01T11:00:00Z",
+    "updated_at": "2024-06-01T11:00:00Z",
+    "timestamp_formatted": "2024-06-01 11:00:00",
     "coach_message": {
-      "id": "456",
-      "user": "user-uuid",
-      "role": "COACH",
-      "content": "Based on our conversation...",
-      "timestamp": "2024-06-01T12:00:00Z"
+      "id": "uuid-string",
+      "role": "coach",
+      "content": "I've created a new identity for you...",
+      "timestamp": "2024-06-01T11:00:00Z",
+      "component_config": null
     },
     "test_scenario": null
   }
 ]
 ```
+
+### ActionSerializer Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID (string) | Unique identifier for the action |
+| `user` | UUID (string) | User ID this action belongs to |
+| `action_type` | string | Action type enum value (lowercase). See [Action Types](#action-types). |
+| `action_type_display` | string | Human-readable action type label |
+| `parameters` | object | Action-specific parameters (JSON) |
+| `result_summary` | string | Summary of the action result |
+| `timestamp` | DateTime (ISO 8601) | When the action was created |
+| `updated_at` | DateTime (ISO 8601) | When the action was last updated |
+| `timestamp_formatted` | string | Formatted timestamp (YYYY-MM-DD HH:MM:SS) |
+| `coach_message` | object or null | Nested ChatMessage that triggered this action |
+| `test_scenario` | UUID or null | Associated test scenario ID, if any |
 
 ---
 
 ## Action Types
 
-The system supports various action types that represent different coaching operations:
+All action type values are lowercase strings (see `enums/action_type.py`):
 
-### Common Action Types
+### Identity Actions
+- `create_identity`: Creates a new identity for the user
+- `create_multiple_identities`: Creates multiple identities at once
+- `update_identity`: Updates an existing identity
+- `update_identity_name`: Updates an identity's name
+- `update_i_am_statement`: Updates an identity's I Am statement
+- `update_identity_visualization`: Updates an identity's visualization
+- `accept_identity`: Accepts a proposed identity
+- `accept_identity_refinement`: Accepts identity refinement
+- `accept_identity_commitment`: Accepts identity commitment
+- `accept_i_am_statement`: Accepts an I Am statement
+- `accept_identity_visualization`: Accepts an identity visualization
+- `archive_identity`: Archives an identity
+- `nest_identity`: Nests an identity under another
+- `add_identity_note`: Adds a note to an identity
+- `combine_identities`: Combines two or more identities
 
-- **`CREATE_IDENTITY`**: Creates a new identity for the user
-- **`UPDATE_IDENTITY`**: Updates an existing identity
-- **`TRANSITION_PHASE`**: Moves the coaching session to a new phase
-- **`CREATE_USER_NOTE`**: Creates a note about the user
-- **`UPDATE_COACH_STATE`**: Updates the user's coaching state
-- **`SKIP_IDENTITY_CATEGORY`**: Marks an identity category as skipped
+### Phase & State Actions
+- `transition_phase`: Moves the coaching session to a new phase
+- `select_identity_focus`: Selects the identity category to focus on
+- `skip_identity_category`: Marks an identity category as skipped
+- `unskip_identity_category`: Un-skips a previously skipped identity category
+- `set_current_identity`: Sets the current identity being worked on
 
-### Action Parameters
+### User Data Actions
+- `update_who_you_are`: Updates the "who you are" list
+- `update_who_you_want_to_be`: Updates the "who you want to be" list
+- `update_asked_questions`: Updates the asked questions list
+- `add_user_note`: Creates a note about the user (sentinel action)
+- `update_user_note`: Updates a user note (sentinel action)
+- `delete_user_note`: Deletes a user note (sentinel action)
 
-Each action type has specific parameters that define what the action does:
+### Component Actions
+- `show_introduction_canned_response_component`: Shows introduction canned response UI
+- `show_accept_i_am_component`: Shows accept I Am statement UI
+- `show_suggest_i_am_statement_component`: Shows suggest I Am statement UI
+- `show_i_am_statements_summary_component`: Shows I Am statements summary UI
+- `show_combine_identities`: Shows combine identities UI
+- `show_nest_identities`: Shows nest identities UI
+- `show_archive_identity`: Shows archive identity UI
 
-#### CREATE_IDENTITY Parameters
-
-```json
-{
-  "identity_name": "string",
-  "category": "string",
-  "i_am_statement": "string (optional)",
-  "visualization": "string (optional)"
-}
-```
-
-#### TRANSITION_PHASE Parameters
-
-```json
-{
-  "from_phase": "string",
-  "to_phase": "string"
-}
-```
-
-#### UPDATE_IDENTITY Parameters
-
-```json
-{
-  "identity_id": "string",
-  "field_name": "string",
-  "new_value": "string"
-}
-```
-
----
-
-## Use Cases
-
-### Admin Interface
-
-- **Action History**: View all actions performed by the system
-- **User Investigation**: Examine specific user's coaching journey
-- **System Monitoring**: Track coaching system performance and usage
-
-### Debugging and Development
-
-- **Conversation Reconstruction**: Understand what actions were triggered by specific messages
-- **Action Validation**: Verify that actions are being performed correctly
-- **Test Scenario Analysis**: Examine actions in test scenarios
-
-### User Experience
-
-- **Progress Tracking**: Users can see what actions have been performed on their behalf
-- **Transparency**: Understand what the coaching system is doing
-- **Accountability**: Track coaching system decisions and actions
+### Persistent Component Actions
+- `persist_combine_identities`: Persists combine identities component
+- `persist_nest_identities`: Persists nest identities component
+- `persist_archive_identity`: Persists archive identity component
+- `persist_suggest_i_am_statement_component`: Persists suggest I Am statement component
+- `persist_i_am_statements_summary_component`: Persists I Am statements summary component
 
 ---
 
@@ -275,12 +168,9 @@ For detailed field information on models used in these endpoints, see:
 
 ## Notes
 
-- All endpoints require authentication.
-- Regular users can only see their own actions.
-- Admin users can see all actions and use the `for-user` endpoint.
-- Actions are ordered by timestamp (newest first) in list responses.
-- The `by-coach-message` endpoint helps trace which actions were triggered by specific coach messages.
-- Action parameters are stored as JSON and validated to ensure they are objects.
-- Actions can only be linked to coach messages, not user messages.
-- The list endpoint uses a simplified serializer to reduce response size.
+- There is no standalone `/actions/` ViewSet. Actions are accessed via `/api/v1/user/me/actions` and `/api/v1/admin/test-user/{pk}/actions`.
+- All action_type values in responses use lowercase stored values (e.g., `"create_identity"` not `"CREATE_IDENTITY"`).
+- Actions are ordered by timestamp (newest first).
+- Actions are read-only — they are created automatically during coach message processing.
+- Each action may have a nested `coach_message` showing the message that triggered it.
 - Update this document whenever the API changes.

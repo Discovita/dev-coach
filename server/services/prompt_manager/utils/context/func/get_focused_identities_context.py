@@ -1,9 +1,11 @@
 from typing import List
+
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.identity_category import IdentityCategory
 from enums.identity_state import IdentityState
 from services.prompt_manager.utils.format_identities import format_identities
+
 
 def get_focused_identities_context(coach_state: CoachState) -> str:
     """
@@ -26,4 +28,4 @@ def get_focused_identities_context(coach_state: CoachState) -> str:
         if focus_category.value in skipped:
             return f"The category '{focus_category.label}' was skipped."
         return f"No identities found for focus: {focus_category.label}"
-    return format_identities(focused) 
+    return format_identities(focused)

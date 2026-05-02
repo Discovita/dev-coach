@@ -1,13 +1,12 @@
-from enums.ai import AIModel
-
+from apps.chat_messages.models import ChatMessage
 from apps.coach_states.models import CoachState
 from apps.users.models import User
-from apps.chat_messages.models import ChatMessage
+from enums.ai import AIModel
+from models.SentinelChatResponse import SentinelChatResponse
+from services.action_handler.handler import apply_coach_actions
 from services.ai.ai_service_factory import AIServiceFactory
 from services.logger import configure_logging
 from services.prompt_manager.manager import PromptManager
-from models.SentinelChatResponse import SentinelChatResponse
-from services.action_handler.handler import apply_coach_actions
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -29,7 +28,7 @@ class Sentinel:
     def extract_notes(self, chat_message: ChatMessage):
         """
         Extract user notes from a chat message using the sentinel AI service.
-        
+
         Args:
             chat_message: The ChatMessage to analyze for user notes
         """

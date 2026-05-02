@@ -19,15 +19,16 @@ Sets the state of the specified identity to 'i_am_complete', indicating that the
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | The ID of the identity to mark as i_am_complete |
+| Parameter | Type          | Required | Description                                        |
+|-----------|---------------|----------|----------------------------------------------------|
+| `id`      | string (UUID) | Yes      | The UUID of the identity to mark as i_am_complete  |
 
 ## Implementation Steps
 
 1. **State Update**: Updates the identity's state to `IdentityState.I_AM_COMPLETE`
 2. **Identity Retrieval**: Gets the updated identity for logging
-3. **Action Logging**: Records the action with details
+3. **Current Identity Advance**: Calls `set_current_identity_to_next_pending(coach_state, IdentityState.I_AM_COMPLETE)` to advance the current identity to the next one awaiting I Am Statement work
+4. **Action Logging**: Records the action with details
 
 ## Example Usage
 
@@ -35,7 +36,7 @@ Sets the state of the specified identity to 'i_am_complete', indicating that the
 {
   "action": "accept_i_am_statement",
   "params": {
-    "id": 123
+    "id": "550e8400-e29b-41d4-a716-446655440000"
   }
 }
 ```

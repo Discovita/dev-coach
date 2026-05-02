@@ -26,13 +26,10 @@ class ComponentType(models.TextChoices):
             if member.name.lower() == normalized or member.value.lower() == normalized:
                 return member
         valid_types = ", ".join([t.name for t in cls])
-        raise ValueError(
-            f"Unknown component type: {value}. Valid types: {valid_types}"
-        )
+        raise ValueError(f"Unknown component type: {value}. Valid types: {valid_types}")
 
     def __str__(self) -> str:
         """
         Get a human-readable string representation of the component type.
         """
         return self.label
-

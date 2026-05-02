@@ -7,10 +7,16 @@ class GetToKnowYouQuestions(models.TextChoices):
     """
 
     BACKGROUND_UPBRINGING = "background_upbringing", "Background/upbringing"
-    FAMILY_STRUCTURE = "family_structure", "Family structure (siblings, parents, children, etc.)"
+    FAMILY_STRUCTURE = (
+        "family_structure",
+        "Family structure (siblings, parents, children, etc.)",
+    )
     WORK_LIVING = "work_living", "Work or what they do for a living"
     HOBBIES_INTERESTS = "hobbies_interests", "Hobbies or interests"
-    WHY_HERE_HOPES = "why_here_hopes", "Why are you here? What do you hope to get out of this coaching?"
+    WHY_HERE_HOPES = (
+        "why_here_hopes",
+        "Why are you here? What do you hope to get out of this coaching?",
+    )
 
     @classmethod
     def from_string(cls, value: str) -> "GetToKnowYouQuestions":

@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/reference-images/`
+`/api/v1/reference-images`
 
 ---
 
@@ -16,7 +16,7 @@ Reference images are user-uploaded photos used as input for AI-powered identity 
 
 ### 1. List Reference Images
 
-- **URL:** `/reference-images/`
+- **URL:** `/api/v1/reference-images`
 - **Method:** `GET`
 - **Description:** List all reference images for the authenticated user. Admin users can list images for other users by providing a `user_id` query parameter.
 - **Authentication:** Required
@@ -30,8 +30,8 @@ Reference images are user-uploaded photos used as input for AI-powered identity 
 #### Example Request
 
 ```
-GET /reference-images/
-GET /reference-images/?user_id=abc123-def456  (admin only)
+GET /api/v1/reference-images
+GET /api/v1/reference-images?user_id=abc123-def456  (admin only)
 ```
 
 #### Example Response
@@ -68,7 +68,7 @@ GET /reference-images/?user_id=abc123-def456  (admin only)
 
 ### 2. Retrieve Reference Image
 
-- **URL:** `/reference-images/{id}/`
+- **URL:** `/api/v1/reference-images/{id}`
 - **Method:** `GET`
 - **Description:** Retrieve a single reference image by ID. Only returns reference images belonging to the authenticated user (or any user's images for admins with `user_id` filter active).
 - **Authentication:** Required
@@ -100,7 +100,7 @@ GET /reference-images/?user_id=abc123-def456  (admin only)
 
 ### 3. Create Reference Image
 
-- **URL:** `/reference-images/`
+- **URL:** `/api/v1/reference-images`
 - **Method:** `POST`
 - **Description:** Create a new reference image slot for the authenticated user. Admin users can create for other users by providing `user_id` in the request body. Each user can have a maximum of 5 reference images.
 - **Authentication:** Required
@@ -168,7 +168,7 @@ GET /reference-images/?user_id=abc123-def456  (admin only)
 
 ### 4. Update Reference Image (Partial Update)
 
-- **URL:** `/reference-images/{id}/`
+- **URL:** `/api/v1/reference-images/{id}`
 - **Method:** `PATCH`
 - **Description:** Partially update a reference image's metadata (name, order). Only reference images belonging to the authenticated user can be updated.
 - **Authentication:** Required
@@ -188,7 +188,7 @@ GET /reference-images/?user_id=abc123-def456  (admin only)
 
 ### 5. Delete Reference Image
 
-- **URL:** `/reference-images/{id}/`
+- **URL:** `/api/v1/reference-images/{id}`
 - **Method:** `DELETE`
 - **Description:** Permanently delete a reference image and its associated image file from S3. Only reference images belonging to the authenticated user can be deleted.
 - **Authentication:** Required
@@ -203,7 +203,7 @@ GET /reference-images/?user_id=abc123-def456  (admin only)
 
 ### 6. Upload Reference Image File
 
-- **URL:** `/reference-images/{id}/upload-image/`
+- **URL:** `/api/v1/reference-images/{id}/upload-image`
 - **Method:** `POST`
 - **Description:** Upload or replace the image file for a reference image slot. If an image already exists, it will be deleted and replaced.
 - **Authentication:** Required
@@ -219,7 +219,7 @@ GET /reference-images/?user_id=abc123-def456  (admin only)
 #### Example Request
 
 ```
-POST /reference-images/{id}/upload-image/
+POST /api/v1/reference-images/{id}/upload-image
 Content-Type: multipart/form-data
 
 image: [binary file data]

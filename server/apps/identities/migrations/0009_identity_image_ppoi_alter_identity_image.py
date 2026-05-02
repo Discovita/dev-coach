@@ -2,24 +2,34 @@
 
 import uuid_upload_path.storage
 import versatileimagefield.fields
+
 from django.db import migrations
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('identities', '0008_alter_identity_options_identity_image_and_more'),
+        ("identities", "0008_alter_identity_options_identity_image_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='identity',
-            name='image_ppoi',
-            field=versatileimagefield.fields.PPOIField(default='0.5x0.5', editable=False, max_length=20, verbose_name='Image PPOI'),
+            model_name="identity",
+            name="image_ppoi",
+            field=versatileimagefield.fields.PPOIField(
+                default="0.5x0.5",
+                editable=False,
+                max_length=20,
+                verbose_name="Image PPOI",
+            ),
         ),
         migrations.AlterField(
-            model_name='identity',
-            name='image',
-            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to=uuid_upload_path.storage.upload_to, verbose_name='Image'),
+            model_name="identity",
+            name="image",
+            field=versatileimagefield.fields.VersatileImageField(
+                null=True,
+                upload_to=uuid_upload_path.storage.upload_to,
+                verbose_name="Image",
+            ),
         ),
     ]

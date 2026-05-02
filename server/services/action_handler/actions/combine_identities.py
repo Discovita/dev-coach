@@ -1,6 +1,6 @@
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.action_type import ActionType
 from enums.identity_category import IdentityCategory
@@ -9,6 +9,7 @@ from services.action_handler.models.params import (
     CombineIdentitiesParams,
 )
 from services.logger import configure_logging
+
 log = configure_logging(__name__, log_level="DEBUG")
 
 
@@ -33,7 +34,9 @@ def combine_identities(
         )
     )
     if len(identities) != 2:
-        raise ValueError("combine_identities requires exactly two valid identities for the user")
+        raise ValueError(
+            "combine_identities requires exactly two valid identities for the user"
+        )
 
     # Map them back to A and B for deterministic rule application
     identity_map = {str(i.id): i for i in identities}
@@ -72,7 +75,10 @@ def combine_identities(
     # Merge notes: prepend source marker and append to save_identity notes
     save_notes = list(save_identity.notes or [])
     source_name = archive_identity.name or "Unnamed Identity"
-    merged_notes = [f"[Merged from {source_name}]: {note}" for note in (archive_identity.notes or [])]
+    merged_notes = [
+        f"[Merged from {source_name}]: {note}"
+        for note in (archive_identity.notes or [])
+    ]
     save_identity.notes = save_notes + merged_notes
 
     # Apply name change and save
@@ -83,14 +89,16 @@ def combine_identities(
     archived_identity_id = str(archive_identity.id)
     archived_identity_name = archive_identity.name or ""
     save_identity_name = save_identity.name or "Unnamed Identity"
-    
+
     # Add note to archived identity indicating it was combined/nested
     archive_notes = list(archive_identity.notes or [])
-    archive_notes.append(f"[Combined/Nested with {save_identity_name}]: This identity was combined or nested with '{save_identity_name}'.")
+    archive_notes.append(
+        f"[Combined/Nested with {save_identity_name}]: This identity was combined or nested with '{save_identity_name}'."
+    )
     archive_identity.notes = archive_notes
     archive_identity.state = IdentityState.ARCHIVED
     archive_identity.save(update_fields=["state", "notes", "updated_at"])
-    
+
     log.debug(f"Merged Identity Name: {save_identity.name}")
     log.debug(f"Merged Identity Notes: {save_identity.notes}")
     log.debug(f"Archived Identity: {archived_identity_name} ({archived_identity_id})")
@@ -112,5 +120,3 @@ def combine_identities(
     )
 
     return None
-
-

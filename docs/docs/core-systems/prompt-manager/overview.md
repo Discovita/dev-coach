@@ -51,23 +51,23 @@ graph TD
 Templates are stored in the database and use Python string formatting with placeholders:
 
 ```markdown
-You are helping {{user_name}} with {{current_phase}}.
+You are helping {user_name} with {current_phase}.
 
-Current Identities: {{identities}}
+Current Identities: {identities}
 
-Focus: {{identity_focus}}
+Focus: {identity_focus}
 ```
 
 ### Context Placeholders
 
-Templates use placeholders that get replaced with actual data:
+Templates use Python `str.format(**context)` syntax with single braces:
 
-| Placeholder          | Description                |
-| -------------------- | -------------------------- |
-| `{{user_name}}`      | User's display name        |
-| `{{identities}}`     | All user identities        |
-| `{{current_phase}}`  | Current coaching phase     |
-| `{{identity_focus}}` | Currently focused identity |
+| Placeholder         | Description                |
+| ------------------- | -------------------------- |
+| `{user_name}`       | User's display name        |
+| `{identities}`      | All user identities        |
+| `{current_phase}`   | Current coaching phase     |
+| `{identity_focus}`  | Currently focused identity |
 
 For a complete list of available context keys, see the [Context Keys documentation](context-keys/overview).
 
@@ -139,13 +139,14 @@ The `Prompt` model contains:
 
 - `required_context_keys`: List of context keys needed for this prompt
 - `allowed_actions`: List of actions the AI can perform
-- `prompt_type`: Type of prompt (coach, sentinel, system)
+- `prompt_type`: Type of prompt (coach, sentinel, system, image_generation)
 
 ### Version Management
 
 - **Automatic Versioning**: New prompts get the next version number
-- **Active Version**: Only one version per coaching phase can be active
+- **Active Version**: Only one version per `(prompt_type, coaching_phase)` pair can be active
 - **Unique Constraint**: `(coaching_phase, version)` must be unique
+- **Scoping**: Versions are scoped by `(prompt_type, coaching_phase)`, not just by phase alone. This means a `COACH` prompt and a `SENTINEL` prompt for the same phase have independent version histories.
 
 ## Complete Assembly Process
 
@@ -170,11 +171,12 @@ The `Prompt` model contains:
    prompt_context = gather_prompt_context(prompt, coach_state)
    ```
 
-4. **Format Template**
+4. **Format for AI Provider** (includes template rendering via `str.format(**context)` and provider-specific formatting)
 
    ```python
-   if callable(getattr(prompt_body, "format", None)):
-       prompt_body = prompt_body.format(**prompt_context.model_dump())
+   coach_prompt, response_format = format_for_provider(
+       prompt, prompt_context, provider, response_format_model
+   )
    ```
 
 5. **Add User Notes**
@@ -199,13 +201,6 @@ The `Prompt` model contains:
 
    ```python
    coach_prompt = append_recent_messages(coach_prompt, coach_state)
-   ```
-
-9. **Format for AI Provider**
-   ```python
-   coach_prompt, response_format = format_for_provider(
-       prompt, prompt_context, provider, response_format_model
-   )
    ```
 
 ## Final Prompt Structure

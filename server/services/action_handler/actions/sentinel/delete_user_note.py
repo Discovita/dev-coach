@@ -1,6 +1,6 @@
+from apps.coach_states.models import CoachState
 from apps.user_notes.models import UserNote
 from services.action_handler.models import DeleteUserNoteParams
-from apps.coach_states.models import CoachState
 
 
 # NOTE: For now, this function does not log actions to the Action table.

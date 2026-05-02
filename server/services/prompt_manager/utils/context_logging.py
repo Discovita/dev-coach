@@ -3,8 +3,8 @@ Utility for logging prompt context statistics for debugging and development.
 Used by prompt_manager.manager and other prompt modules to log context details.
 """
 
-from services.prompt_manager.models import PromptContext
 from services.logger import configure_logging
+from services.prompt_manager.models import PromptContext
 
 log = configure_logging(__name__, log_level="INFO")
 
@@ -32,9 +32,17 @@ def log_context_stats(prompt_context: PromptContext):
     )
     log.debug(f"CURRENT_IDENTITY: {getattr(prompt_context, 'current_identity', None)}")
     log.debug(f"ASKED_QUESTIONS: {getattr(prompt_context, 'asked_questions', None)}")
-    log.debug(f"REFINEMENT_IDENTITIES: {getattr(prompt_context, 'refinement_identities', None)}")
-    log.debug(f"COMMITMENT_IDENTITIES: {getattr(prompt_context, 'commitment_identities', None)}")
+    log.debug(
+        f"REFINEMENT_IDENTITIES: {getattr(prompt_context, 'refinement_identities', None)}"
+    )
+    log.debug(
+        f"COMMITMENT_IDENTITIES: {getattr(prompt_context, 'commitment_identities', None)}"
+    )
     log.debug(f"I_AM_IDENTITIES: {getattr(prompt_context, 'i_am_identities', None)}")
-    log.debug(f"VISUALIZATION_IDENTITIES: {getattr(prompt_context, 'visualization_identities', None)}")
+    log.debug(
+        f"VISUALIZATION_IDENTITIES: {getattr(prompt_context, 'visualization_identities', None)}"
+    )
     log.debug(f"IDENTITY_IDS: {getattr(prompt_context, 'identity_ids', None)}")
-    log.debug(f"IDENTITY_FOR_IMAGE: {getattr(prompt_context, 'identity_for_image', None)}")
+    log.debug(
+        f"IDENTITY_FOR_IMAGE: {getattr(prompt_context, 'identity_for_image', None)}"
+    )

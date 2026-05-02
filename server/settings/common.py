@@ -10,9 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from datetime import timedelta
-import environ
 import os
+from datetime import timedelta
+
+import environ
 
 env = environ.Env()
 
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     "django_filters",
     # Your apps...
     "apps.authentication",
+    "apps.core",
     "apps.coach",
     "apps.coach_states",
     "apps.chat_messages",
@@ -64,7 +66,7 @@ INSTALLED_APPS = [
     "apps.prompts",
     "apps.users",
     "apps.user_notes",
-    'apps.test_scenario',
+    "apps.test_scenario",
     "apps.actions",
     "apps.reference_images",
     # Third-party apps...

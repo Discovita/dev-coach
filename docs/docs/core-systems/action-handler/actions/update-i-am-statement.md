@@ -19,10 +19,10 @@ Updates only the "I Am" Statement field of an existing identity. This is used du
 
 ## Parameters
 
-| Parameter        | Type    | Required | Description                           |
-| ---------------- | ------- | -------- | ------------------------------------- |
-| `id`             | integer | Yes      | The ID of the identity to update      |
-| `i_am_statement` | string  | Yes      | New 'I Am' statement for the identity |
+| Parameter        | Type          | Required | Description                           |
+| ---------------- | ------------- | -------- | ------------------------------------- |
+| `id`             | string (UUID) | Yes      | The UUID of the identity to update    |
+| `i_am_statement` | string        | Yes      | New 'I Am' statement for the identity |
 
 ## Implementation Steps
 
@@ -37,7 +37,7 @@ Updates only the "I Am" Statement field of an existing identity. This is used du
 {
   "action": "update_i_am_statement",
   "params": {
-    "id": 123,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "i_am_statement": "I am a Visionary Entrepreneur who leads with innovation and creates lasting impact in the world."
   }
 }

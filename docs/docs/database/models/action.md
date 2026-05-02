@@ -19,6 +19,7 @@ The Action model provides an audit trail for coaching sessions, linking actions 
 - `result_summary` (TextField): Natural language description of action result, optional
 - `timestamp` (DateTimeField): Action timestamp, auto-set, indexed
 - `coach_message` (ForeignKey): Link to [ChatMessage](./chat-message.md) that triggered the action
+- `updated_at` (DateTimeField): When this row was last updated, auto-updated, indexed
 - `test_scenario` (ForeignKey): Link to [TestScenario](./test-scenario.md) for test data isolation, optional
 
 ## Configuration
@@ -50,6 +51,7 @@ The Action model provides an audit trail for coaching sessions, linking actions 
 - Composite index on `user` and `timestamp`
 - Index on `coach_message` field
 - Index on `action_type` field
+- Index on `updated_at` field
 
 ## Usage Context
 

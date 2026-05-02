@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+
 from .params import *
 
 
@@ -182,7 +183,8 @@ class ShowAcceptIAMComponentAction(BaseActionModel):
 
 class ShowSuggestIAMStatementComponentAction(BaseActionModel):
     params: ShowSuggestIAMStatementComponentParams = Field(
-        ..., description="Parameters for showing the suggest 'I am' statement component."
+        ...,
+        description="Parameters for showing the suggest 'I am' statement component.",
     )
 
 

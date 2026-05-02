@@ -4,25 +4,27 @@ Handles prompt construction, context gathering, and formatting for LLM calls.
 Follows a modular, extensible pattern for easy future expansion.
 """
 
-from enums.ai import AIModel
+from typing import Any, Dict, Tuple, Union
+
+from pydantic import BaseModel
+
 from apps.coach_states.models import CoachState
+from apps.identities.models import Identity
 from apps.prompts.models import Prompt
 from apps.users.models import User
-from apps.identities.models import Identity
 from enums.action_type import ActionType
-from services.prompt_manager import gather_prompt_context, format_for_provider
+from enums.ai import AIModel
+from enums.prompt_type import PromptType
 from services.action_handler.utils import build_dynamic_response_format
+from services.logger import configure_logging
+from services.prompt_manager import format_for_provider, gather_prompt_context
 from services.prompt_manager.utils import (
-    prepend_system_context,
-    prepend_user_notes,
-    append_user_notes,
     append_action_instructions,
     append_recent_messages,
+    append_user_notes,
+    prepend_system_context,
+    prepend_user_notes,
 )
-from services.logger import configure_logging
-from enums.prompt_type import PromptType
-from typing import Tuple, Union, Dict, Any
-from pydantic import BaseModel
 
 log = configure_logging(__name__, log_level="DEBUG")
 
@@ -49,7 +51,7 @@ class PromptManager:
             Tuple[str, Type[BaseModel]]: prompt for the chat endpoint and the response format.
         """
         # 1. Retrieve the user's CoachState
-        log.info(f"Creating chat prompt")
+        log.info("Creating chat prompt")
         coach_state = CoachState.objects.get(user=user)
         log.debug(f"coach_state: {coach_state}")
         state_value = coach_state.current_phase
@@ -160,8 +162,8 @@ class PromptManager:
             Formatted prompt string for Gemini image generation
         """
         from services.prompt_manager.utils.context.func import (
-            get_identity_context_for_image,
             get_appearance_context,
+            get_identity_context_for_image,
             get_scene_context,
         )
 
@@ -182,10 +184,10 @@ class PromptManager:
 
         # Gather identity context using our dedicated function
         identity_context = get_identity_context_for_image(identity)
-        
+
         # Gather appearance context from user preferences
         appearance_context = get_appearance_context(user)
-        
+
         # Gather scene context from identity fields
         scene_context = get_scene_context(identity)
 

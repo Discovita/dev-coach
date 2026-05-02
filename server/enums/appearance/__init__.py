@@ -6,13 +6,13 @@ in image generation, including gender, skin tone, hair color, eye color,
 height, build, and age range options.
 """
 
-from .gender import Gender
-from .skin_tone import SkinTone
-from .hair_color import HairColor
-from .eye_color import EyeColor
-from .height import Height
-from .build import Build
 from .age_range import AgeRange
+from .build import Build
+from .eye_color import EyeColor
+from .gender import Gender
+from .hair_color import HairColor
+from .height import Height
+from .skin_tone import SkinTone
 
 __all__ = [
     "Gender",

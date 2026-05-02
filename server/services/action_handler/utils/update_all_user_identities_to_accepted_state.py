@@ -1,5 +1,3 @@
-from typing import Optional
-
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.identity_state import IdentityState
@@ -15,6 +13,8 @@ def update_all_user_identities_to_accepted_state(coach_state: CoachState) -> int
     Excludes archived identities from being updated.
     """
     user = coach_state.user
-    return Identity.objects.filter(user=user).exclude(state=IdentityState.ARCHIVED).update(state=IdentityState.ACCEPTED)
-
-
+    return (
+        Identity.objects.filter(user=user)
+        .exclude(state=IdentityState.ARCHIVED)
+        .update(state=IdentityState.ACCEPTED)
+    )

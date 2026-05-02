@@ -24,7 +24,9 @@ STATIC_ROOT = ".staticfiles"
 
 # S3 Configuration
 # Note: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set in common.py
-bucket_name = env("STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging")
+bucket_name = env(
+    "STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging"
+)
 custom_domain = f"{bucket_name}.s3.amazonaws.com"
 
 # Media files configuration

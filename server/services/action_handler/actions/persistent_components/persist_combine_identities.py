@@ -1,17 +1,18 @@
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
+from typing import List
+
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.action_type import ActionType
-from services.action_handler.models.params import (
-    PersistCombineIdentitiesParams,
-)
+from enums.component_type import ComponentType
 from models.components.ComponentConfig import (
     ComponentConfig,
     ComponentIdentity,
 )
-from enums.component_type import ComponentType
-from typing import List
+from services.action_handler.models.params import (
+    PersistCombineIdentitiesParams,
+)
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -37,7 +38,9 @@ def persist_combine_identities(
     for identity_id in identity_ids:
         identity = id_to_identity.get(identity_id)
         if identity is None:
-            log.warning(f"Identity {identity_id} not found for user {coach_state.user.id}")
+            log.warning(
+                f"Identity {identity_id} not found for user {coach_state.user.id}"
+            )
             continue
         component_identities.append(
             ComponentIdentity(
@@ -55,16 +58,18 @@ def persist_combine_identities(
     # Get the coach message from the parameters
     try:
         coach_message = ChatMessage.objects.get(
-            id=params.coach_message_id,
-            user=coach_state.user,
-            role="coach"
+            id=params.coach_message_id, user=coach_state.user, role="coach"
         )
         # Update the coach message with persistent component
         coach_message.component_config = display_component.model_dump()
-        coach_message.save(update_fields=['component_config'])
-        log.info(f"Persisted combine identities component to message {coach_message.id}")
+        coach_message.save(update_fields=["component_config"])
+        log.info(
+            f"Persisted combine identities component to message {coach_message.id}"
+        )
     except ChatMessage.DoesNotExist:
-        log.warning(f"Coach message {params.coach_message_id} not found for user {coach_state.user.id}")
+        log.warning(
+            f"Coach message {params.coach_message_id} not found for user {coach_state.user.id}"
+        )
 
     # Log the action
     Action.objects.create(
@@ -85,5 +90,3 @@ def persist_combine_identities(
     log.info("Successfully persisted combine identities component")
 
     return None
-
-

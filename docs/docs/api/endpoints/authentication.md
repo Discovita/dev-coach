@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/auth/`
+`/api/v1/auth`
 
 ---
 
@@ -32,7 +32,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
 ### 1. Register User
 
-- **URL:** `/auth/register/`
+- **URL:** `/api/v1/auth/register`
 - **Method:** `POST`
 - **Description:** Create a new user account and return JWT tokens.
 - **Authentication:** Not required
@@ -73,7 +73,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
 ### 2. Login User
 
-- **URL:** `/auth/login/`
+- **URL:** `/api/v1/auth/login`
 - **Method:** `POST`
 - **Description:** Authenticate existing user and return JWT tokens.
 - **Authentication:** Not required
@@ -114,7 +114,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
 ### 3. Forgot Password
 
-- **URL:** `/auth/forgot-password/`
+- **URL:** `/api/v1/auth/forgot-password`
 - **Method:** `POST`
 - **Description:** Initiate password reset process by sending a reset email.
 - **Authentication:** Not required
@@ -150,7 +150,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
 ### 4. Reset Password
 
-- **URL:** `/auth/reset-password/`
+- **URL:** `/api/v1/auth/reset-password`
 - **Method:** `POST`
 - **Description:** Complete password reset using the token from the reset email.
 - **Authentication:** Not required
@@ -189,12 +189,14 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
 ### Password Requirements
 
-The system enforces the following password requirements:
+The system enforces the following password requirements (see `apps/authentication/utils/password_validator.py`):
 
 - **Minimum Length**: 8 characters
 - **Uppercase Letter**: Must contain at least one uppercase letter
-- **Number**: Must contain at least one number
+- **Digit**: Must contain at least one digit
 - **Special Character**: Must contain at least one special character (`!@#$%^&*(),.?":{}|<>`)
+
+**Note:** Lowercase letters are NOT explicitly required (though most passwords will naturally contain them).
 
 ### Token Configuration
 
@@ -228,7 +230,7 @@ The system enforces the following password requirements:
 ```json
 {
   "success": false,
-  "error": "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character"
+  "error": "Password must be at least 8 characters and contain an uppercase letter, a digit, and a special character"
 }
 ```
 

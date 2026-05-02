@@ -1,6 +1,7 @@
 from .append_action_instructions import append_action_instructions
 from .append_recent_messages import append_recent_messages
 from .append_user_notes import append_user_notes
+from .context import *
 from .context_logging import log_context_stats
 from .format_for_provider import format_for_provider
 from .format_identities import format_identities
@@ -8,7 +9,6 @@ from .format_identities_needing_refinement import format_identities_needing_refi
 from .format_skipped_categories import format_skipped_categories
 from .prepend_system_context import prepend_system_context
 from .prepend_user_notes import prepend_user_notes
-from .context import *
 
 __all__ = [
     "append_action_instructions",

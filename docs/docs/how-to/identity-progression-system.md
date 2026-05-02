@@ -1,6 +1,8 @@
 # Identity Progression System
 
-This document explains how to keep the coach synchronized when working through multiple identities in a phase. This pattern is used in Identity Refinement, Identity Commitment, I Am Statements, and Identity Visualization phases.
+This document explains how to keep the coach synchronized when working through multiple identities in a phase. This pattern is used in Identity Refinement, Identity Commitment, and I Am Statements phases.
+
+> **Note:** Identity Visualization uses the same context key pattern (`visualization_identities`) and `current_identity` tracking, but `accept_identity_visualization` does **not** call `set_current_identity_to_next_pending()`. It only marks the identity as `VISUALIZATION_COMPLETE`. Advancement to the next identity in the visualization phase is handled differently.
 
 ## The Problem
 
@@ -43,7 +45,7 @@ The `set_current_identity_to_next_pending()` function automatically sets `curren
 - Orders by `created_at` (oldest first)
 - Sets `current_identity` to `None` when no identities remain
 
-This function is called inside the `accept_*` action handlers:
+This function is called inside the `accept_*` action handlers for refinement, commitment, and I Am statements:
 
 ```python
 # In accept_i_am_statement.py
@@ -54,6 +56,8 @@ def accept_i_am_statement(coach_state, params, coach_message):
     # Automatically advance to next pending identity
     set_current_identity_to_next_pending(coach_state, IdentityState.I_AM_COMPLETE)
 ```
+
+> **Exception:** `accept_identity_visualization` does **not** call `set_current_identity_to_next_pending()`. It only updates the identity state to `VISUALIZATION_COMPLETE`.
 
 ## How It Works Together
 

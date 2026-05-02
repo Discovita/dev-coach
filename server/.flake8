@@ -1,0 +1,36 @@
+# --------------------------------------------------------------------------
+# Flake8: Linting
+#
+# Runs PEP 8 checks with adjustments to match black's formatting.
+# - max-line-length 88 matches black's default.
+# - E203: whitespace before ':' — black adds this in slices, so we ignore it.
+# - E501: line too long — black handles line length, so we let it take the lead.
+#   (We still set max-line-length so flake8 catches genuinely absurd lines.)
+# - W503: line break before binary operator — black prefers this style.
+# --------------------------------------------------------------------------
+[flake8]
+max-line-length = 88
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    migrations,
+    .staticfiles
+extend-ignore =
+    E203,
+    E501,
+    W503
+# Star imports in Django split settings files are idiomatic — env, BASE_DIR, etc.
+# come from common.py via `from settings.common import *`.
+# The action_handler and prompt_manager use star imports for re-exporting and
+# dynamic dispatch — these are intentional patterns, not accidental star imports.
+per-file-ignores =
+    */ai_service_factory.py: E402
+    */settings/*.py: F401, F403, F405
+    */action_handler/*.py: F403, F405
+    */prompt_manager/utils/__init__.py: F403, F405
+    */prompt_manager/utils/context/__init__.py: F403, F405
+    */prompt_manager/utils/context/get_context_value.py: F403, F405
+# Show the source of each error and a short summary at the end
+show-source = true
+statistics = true

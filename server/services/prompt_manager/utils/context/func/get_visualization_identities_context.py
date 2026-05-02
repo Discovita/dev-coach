@@ -1,4 +1,5 @@
 from typing import List
+
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.identity_state import IdentityState
@@ -14,10 +15,12 @@ def get_visualization_identities_context(coach_state: CoachState) -> str:
     """
     user = coach_state.user
     # Filter to only show identities that are NOT visualization_complete and NOT archived
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.VISUALIZATION_COMPLETE).exclude(state=IdentityState.ARCHIVED)
+    identities: List[Identity] = user.identities.exclude(
+        state=IdentityState.VISUALIZATION_COMPLETE
+    ).exclude(state=IdentityState.ARCHIVED)
 
     # Check if there are any identities left to visualize
     if identities.count() == 0:
         return "No more identities left to visualize - time to move to the next phase!"
-    
+
     return format_identities(identities)

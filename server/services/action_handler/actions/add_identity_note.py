@@ -1,9 +1,9 @@
-from apps.identities.models import Identity
-from apps.coach_states.models import CoachState
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
-from services.action_handler.models import AddIdentityNoteParams
+from apps.coach_states.models import CoachState
+from apps.identities.models import Identity
 from enums.action_type import ActionType
+from services.action_handler.models import AddIdentityNoteParams
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
@@ -14,13 +14,13 @@ def add_identity_note(
 ):
     """
     Append a note to the notes list of the specified Identity.
-    
+
     This function checks for duplicate notes before adding. If the note already exists,
     it logs the duplicate attempt and returns without adding the note.
     """
     identity = Identity.objects.get(id=params.id, user=coach_state.user)
     notes = identity.notes or []
-    
+
     # Check if the note already exists to prevent duplicates
     if params.note in notes:
         log.warning(
@@ -28,7 +28,7 @@ def add_identity_note(
             f"Note already exists: '{params.note}'"
         )
         return
-    
+
     # Add the note if it doesn't already exist
     notes.append(params.note)
     identity.notes = notes

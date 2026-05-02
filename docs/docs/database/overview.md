@@ -25,6 +25,7 @@ dev_coach_db/
 ├── identities/              # User identity creation and management
 ├── prompts/                 # AI prompt templates and versioning
 ├── actions/                 # System action tracking and audit trails
+├── reference_images/        # User reference photos for image generation
 ├── test_scenario/           # Test scenario isolation and management
 └── user_notes/              # User notes extracted by Sentinel agent
 ```
@@ -43,6 +44,11 @@ dev_coach_db/
 - **[Action](./models/action.md)**: System actions with parameters and result tracking
 - **[UserNote](./models/user-note.md)**: Long-term user memory extracted by Sentinel agent
 
+### Image Generation
+
+- **[ReferenceImage](./models/reference-image.md)**: User-uploaded photos used as input for AI identity image generation
+- **IdentityImageChat**: Tracks image generation chat sessions for identities
+
 ### System Administration
 
 - **[Prompt](./models/prompt.md)**: AI prompt templates with version control and action permissions
@@ -57,12 +63,13 @@ dev_coach_db/
 - **User → ChatMessage**: One-to-many relationship for conversation history
 - **User → Action**: One-to-many relationship for action audit trails
 - **User → UserNote**: One-to-many relationship for long-term memory
+- **User → ReferenceImage**: One-to-many relationship for reference photos
 
 ### Identity Management
 
 - **Identity → CoachState**: Current and proposed identity tracking
-- **Identity Categories**: 10 life areas (career, health, relationships, etc.)
-- **Identity States**: Proposed, accepted, refinement complete
+- **Identity Categories**: 9 life areas (Passions and Talents, Maker of Money, Keeper of Money, Spiritual, Personal Appearance, Physical Expression, Familial Relations, Romantic Relation, Doer of Things)
+- **Identity States**: proposed, accepted, refinement_complete, commitment_complete, i_am_complete, visualization_complete, archived
 
 ### Conversation Flow
 
@@ -73,7 +80,7 @@ dev_coach_db/
 ### Test Scenario Isolation
 
 - **TestScenario → All Models**: Complete test data isolation
-- **Optional Foreign Keys**: All models support test scenario linking
+- **Optional Foreign Keys**: Most models support test scenario linking. Exceptions: ReferenceImage, IdentityImageChat, and Prompt do NOT have a `test_scenario` field
 
 ## Data Integrity
 
@@ -103,9 +110,8 @@ dev_coach_db/
 
 - **Primary Keys**: UUID primary keys with automatic indexing
 - **Foreign Keys**: Indexed for join performance
-- **Timestamp Indexes**: Time-based queries for all models
-- **Composite Indexes**: User + timestamp, user + category, user + role
-- **Search Indexes**: Full-text search on message content and user notes
+- **Timestamp Indexes**: Explicit db_index on `chat_message.timestamp`, `action.timestamp`, and `action.updated_at`
+- **Composite Indexes**: Action user + timestamp
 
 ### Query Optimization
 
@@ -131,8 +137,8 @@ dev_coach_db/
 
 ### 3. **Test Scenario Isolation**
 
-- All models support test scenario isolation
-- Optional foreign key to TestScenario model
+- Most models support test scenario isolation via optional foreign key to TestScenario model
+- Exceptions: ReferenceImage, IdentityImageChat, and Prompt do NOT have `test_scenario`
 
 ### 4. **Extensibility**
 

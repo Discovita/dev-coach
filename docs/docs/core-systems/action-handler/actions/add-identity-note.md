@@ -19,10 +19,10 @@ Adds a note to an existing identity. Notes are appended to the existing notes li
 
 ## Parameters
 
-| Parameter | Type    | Required | Description                             |
-| --------- | ------- | -------- | --------------------------------------- |
-| `id`      | integer | Yes      | The ID of the identity to add a note to |
-| `note`    | string  | Yes      | The note to add to the identity         |
+| Parameter | Type          | Required | Description                              |
+| --------- | ------------- | -------- | ---------------------------------------- |
+| `id`      | string (UUID) | Yes      | The UUID of the identity to add a note to |
+| `note`    | string        | Yes      | The note to add to the identity           |
 
 ## Implementation Steps
 
@@ -38,7 +38,7 @@ Adds a note to an existing identity. Notes are appended to the existing notes li
 {
   "action": "add_identity_note",
   "params": {
-    "id": 123,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "note": "This identity emerged from their passion for creative problem-solving"
   }
 }
@@ -47,7 +47,7 @@ Adds a note to an existing identity. Notes are appended to the existing notes li
 ## Result
 
 - **Success**: Adds the note to the identity and returns the updated identity object
-- **Duplicate**: Returns without adding if the note already exists
+- **Duplicate**: Returns without adding if the note already exists. No Action row is created in this case (the handler returns before logging).
 - **Logging**: Records the action with result summary: "Added note to identity 'Visionary Entrepreneur': [note text]"
 
 ## Related Actions

@@ -9,14 +9,14 @@
    - Should consist of key/value pairs
    - Cannot use `List` or `Dict` as a type. OpenAI will throw an error if you do.
    - You can limit string choices to a set of values using Django TextChoices (see `server/enums/` for an example).
-   - Ensure you update the `__init__.py` file in the `server/services/action_handler/models/params.py` directory to export your new model.
+   - Ensure you update the `__init__.py` file in the `server/services/action_handler/models/` directory to export your new model.
 
 3. **Create the Pydantic model for the action in `server/services/action_handler/models/actions.py`.**
 
    - The model should inherit from `BaseModel`.
    - The model should only have `params` for the only parameter which should be of the type of the model created in step 2.
    - Ensure you add the same class config as the other models in this file. OpenAI will throw an error if you do not.
-   - Ensure you update the `__init__.py` file in the `server/services/action_handler/models/actions.py` directory to export your new model.
+   - Ensure you update the `__init__.py` file in the `server/services/action_handler/models/` directory to export your new model.
 
 4. **Update the `server/services/action_handler/models/__init__.py` file to export your new parameter and action models.**
 
@@ -63,13 +63,13 @@
      ```
    - Make sure to make the result_summary a natural language description of what was done. Use f strings if need be to ensure the most accurate description possible.
 
-8. **Update the `server/services/action_handler/actions/__init__.py` file to export your new action function from the directory.**
+8. **Update the `server/services/action_handler/actions/__init__.py` file to export your new action function from the `actions/` package.**
 
-9. **Add your new action function to the Action Handler in `server/services/action_handler/handler.py`.**
+9. **Register your new action in the `ACTION_REGISTRY` dictionary in `server/services/action_handler/handler.py`.**
 
-   - Import it at the top
-   - Add an entry to the `ACTION_HANDLERS` map for your new action
-   - Add a case in the `apply_actions` function to handle your new action.
+   - Import your new action function at the top
+   - Add an entry to the `ACTION_REGISTRY` map that maps your `ActionType` value to the handler function
+   - No per-action switch case is needed — `apply_coach_actions` iterates over `response.model_dump()` and looks up handlers from `ACTION_REGISTRY` automatically.
 
 10. **Update the CoachChatResponse model to contain your new action.**
 

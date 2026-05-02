@@ -42,7 +42,7 @@ EXAMPLE JSON OUTPUT:
         },
         {
             "speaker": "Client",
-            "timestamp": "00:01:45", 
+            "timestamp": "00:01:45",
             "content": "I want to transition to a leadership role...",
             "coach_phase": ""
         }
@@ -55,11 +55,11 @@ NOTES:
     - Manual categorization of coach_phase can be done after JSON generation
 """
 
-import os
-import re
 import json
+import os
 
 from bs4 import BeautifulSoup, Comment
+
 from django.core.management.base import BaseCommand
 
 # ------ CONFIGURE LOGGING ------

@@ -17,7 +17,7 @@ class ContinueImageChatRequestSerializer(serializers.Serializer):
 
     user_id = serializers.UUIDField(
         required=False,
-        help_text="UUID of the user (admin only - omit for user endpoints)"
+        help_text="UUID of the user (admin only - omit for user endpoints)",
     )
 
     edit_prompt = serializers.CharField(

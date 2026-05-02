@@ -6,13 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('identities', '0003_identity_test_scenario'),
+        ("identities", "0003_identity_test_scenario"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='identity',
-            name='state',
-            field=models.CharField(blank=True, choices=[('proposed', 'Proposed'), ('accepted', 'Accepted'), ('refinement_complete', 'Refinement Complete')], default='proposed', help_text='Current state of the identity (proposed, accepted, refinement complete).', max_length=32, null=True),
+            model_name="identity",
+            name="state",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("proposed", "Proposed"),
+                    ("accepted", "Accepted"),
+                    ("refinement_complete", "Refinement Complete"),
+                ],
+                default="proposed",
+                help_text="Current state of the identity (proposed, accepted, refinement complete).",
+                max_length=32,
+                null=True,
+            ),
         ),
     ]

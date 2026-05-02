@@ -1,4 +1,11 @@
+"""
+Compute the next available order slot for a user's reference images.
+
+See: apps/reference_images/utils/__init__.py
+"""
+
 from typing import Set
+
 from apps.reference_images.models import ReferenceImage
 from apps.users.models import User
 
@@ -27,4 +34,3 @@ def get_next_available_order(user: User) -> int:
             return i
 
     raise ValueError(f"Maximum {MAX_REFERENCE_IMAGES} reference images allowed")
-

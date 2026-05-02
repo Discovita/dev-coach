@@ -19,10 +19,10 @@ Updates only the name field of an existing identity. This is a specialized actio
 
 ## Parameters
 
-| Parameter | Type    | Required | Description                      |
-| --------- | ------- | -------- | -------------------------------- |
-| `id`      | integer | Yes      | The ID of the identity to update |
-| `name`    | string  | Yes      | New name for the identity        |
+| Parameter | Type          | Required | Description                       |
+| --------- | ------------- | -------- | --------------------------------- |
+| `id`      | string (UUID) | Yes      | The UUID of the identity to update |
+| `name`    | string        | Yes      | New name for the identity          |
 
 ## Implementation Steps
 
@@ -37,7 +37,7 @@ Updates only the name field of an existing identity. This is a specialized actio
 {
   "action": "update_identity_name",
   "params": {
-    "id": 123,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "name": "Visionary Entrepreneur"
   }
 }

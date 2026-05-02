@@ -3,7 +3,6 @@ Tests for IdentityImageChat model.
 """
 
 from django.test import TestCase
-from django.db import IntegrityError
 
 from apps.identities.models import Identity, IdentityImageChat
 from apps.users.models import User
@@ -32,7 +31,7 @@ class IdentityImageChatModelTests(TestCase):
             identity=self.identity,
             chat_history=[],
         )
-        
+
         self.assertIsNotNone(chat.id)
         self.assertEqual(chat.user, self.user)
         self.assertEqual(chat.identity, self.identity)
@@ -49,7 +48,7 @@ class IdentityImageChatModelTests(TestCase):
             },
         )
         self.assertTrue(created1)
-        
+
         # Try to create another chat for same user - should update existing
         chat2, created2 = IdentityImageChat.objects.update_or_create(
             user=self.user,
@@ -69,7 +68,7 @@ class IdentityImageChatModelTests(TestCase):
             identity=None,
             chat_history=[],
         )
-        
+
         self.assertIsNone(chat.identity)
 
     def test_cascade_delete_with_user(self):
@@ -80,10 +79,10 @@ class IdentityImageChatModelTests(TestCase):
             chat_history=[],
         )
         chat_id = chat.id
-        
+
         # Delete user
         self.user.delete()
-        
+
         # Chat should be deleted
         self.assertFalse(IdentityImageChat.objects.filter(id=chat_id).exists())
 
@@ -93,7 +92,7 @@ class IdentityImageChatModelTests(TestCase):
             user=self.user,
             identity=self.identity,
         )
-        
+
         self.assertEqual(chat.chat_history, [])
 
     def test_str_representation(self):
@@ -103,7 +102,7 @@ class IdentityImageChatModelTests(TestCase):
             identity=self.identity,
             chat_history=[],
         )
-        
+
         expected = f"ImageChat for {self.user.email} - {self.identity.name}"
         self.assertEqual(str(chat), expected)
 
@@ -114,32 +113,29 @@ class IdentityImageChatModelTests(TestCase):
             identity=None,
             chat_history=[],
         )
-        
+
         expected = f"ImageChat for {self.user.email} - No identity"
         self.assertEqual(str(chat), expected)
 
     def test_chat_history_stores_json(self):
         """Test that chat_history can store complex JSON data."""
         complex_history = [
-            {
-                "role": "user",
-                "parts": [{"text": "Generate an image"}]
-            },
+            {"role": "user", "parts": [{"text": "Generate an image"}]},
             {
                 "role": "model",
                 "parts": [
                     {"text": "I'll generate that for you"},
-                    {"inline_data": {"mime_type": "image/png", "data": "base64data"}}
-                ]
-            }
+                    {"inline_data": {"mime_type": "image/png", "data": "base64data"}},
+                ],
+            },
         ]
-        
+
         chat = IdentityImageChat.objects.create(
             user=self.user,
             identity=self.identity,
             chat_history=complex_history,
         )
-        
+
         # Refresh from database
         chat.refresh_from_db()
         self.assertEqual(chat.chat_history, complex_history)
@@ -151,10 +147,10 @@ class IdentityImageChatModelTests(TestCase):
             identity=self.identity,
             chat_history=[],
         )
-        
+
         # Delete identity
         self.identity.delete()
-        
+
         # Refresh chat from database
         chat.refresh_from_db()
         self.assertIsNone(chat.identity)

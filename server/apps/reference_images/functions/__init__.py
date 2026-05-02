@@ -1,5 +1,7 @@
-from . import public
-from . import admin
+"""
+Business logic functions for the reference_images app.
 
-__all__ = ["public", "admin"]
-
+Organized into:
+    public/ — Functions for authenticated user operations.
+    admin/  — Functions for admin-scoped operations.
+"""

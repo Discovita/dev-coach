@@ -1,64 +1,59 @@
 """
 UserSerializer for complete user data serialization.
 
-This serializer includes nested related data like identities, coach state, and chat messages.
+Includes nested related data (identities, coach state, chat messages).
+
+See: apps/users/serializers/__init__.py
 """
 
 from rest_framework import serializers
 
-from apps.users.models import User
-from apps.identities.serializers import IdentitySerializer
+from apps.chat_messages.serializers import ChatMessageSerializer
 from apps.coach_states.serializers import CoachStateSerializer
-from apps.chat_messages.serializer import ChatMessageSerializer
+from apps.identities.serializers import IdentitySerializer
+from apps.users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
     """
-    Serializer for User model.
+    Full User serializer with nested related data.
 
-    Used for:
-    - Profile data serialization
-    - User data in responses
-    - About Me page (frontend)
+    Used for the ``me/complete`` endpoint and anywhere the frontend
+    needs the full user object with identities, coach state, and
+    chat messages.
     """
 
-    # Groups and permissions as lists of IDs
     groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     user_permissions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    # Include identities as a nested serializer
     identities = IdentitySerializer(many=True, read_only=True)
-    # Include coach state as a nested serializer
     coach_state = CoachStateSerializer(read_only=True)
-    # Include chat messages as a nested serializer
     chat_messages = ChatMessageSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        # Expose all safe fields for the frontend
         fields = (
-            "id",  # User ID
-            "email",  # Email address
-            "first_name",  # First name
-            "last_name",  # Last name
-            "is_active",  # Active status
-            "is_superuser",  # Django superuser flag
-            "is_staff",  # Staff/admin page access
-            "last_login",  # Last login timestamp
-            "created_at",  # Created at timestamp
-            "updated_at",  # Updated at timestamp
-            "groups",  # Group memberships (IDs)
-            "user_permissions",  # User permissions (IDs)
-            "identities",  # User's identities
-            "coach_state",  # User's coach state
-            "chat_messages",  # User's chat messages
-            # Appearance/visualization preferences for image generation
-            "gender",  # Gender preference
-            "skin_tone",  # Skin tone preference
-            "hair_color",  # Hair color preference
-            "eye_color",  # Eye color preference
-            "height",  # Height preference
-            "build",  # Build preference
-            "age_range",  # Age range preference
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_superuser",
+            "is_staff",
+            "last_login",
+            "created_at",
+            "updated_at",
+            "groups",
+            "user_permissions",
+            "identities",
+            "coach_state",
+            "chat_messages",
+            "gender",
+            "skin_tone",
+            "hair_color",
+            "eye_color",
+            "height",
+            "build",
+            "age_range",
         )
         read_only_fields = (
             "created_at",
@@ -72,4 +67,3 @@ class UserSerializer(serializers.ModelSerializer):
             "coach_state",
             "chat_messages",
         )
-

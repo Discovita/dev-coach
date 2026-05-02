@@ -1,26 +1,29 @@
 # Third Party Modules
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
 # Local Modules - Regular Viewsets
 from apps.authentication.views import AuthViewSet
-from apps.prompts.views import PromptViewSet
-from apps.core.views import CoreViewSet
-from apps.coach.views import CoachViewSet
-from apps.users.views import UserViewSet, TestUserViewSet
-from apps.test_scenario.views import TestScenarioViewSet
-from apps.actions.views import ActionViewSet
-from apps.identities.views import IdentityViewSet, IdentityImageChatViewSet
-from apps.reference_images.views import ReferenceImageViewSet
 
 # Local Modules - Admin Viewsets
-from apps.coach.views import AdminCoachViewSet
-from apps.identities.views import AdminIdentityViewSet, AdminIdentityImageChatViewSet
+from apps.coach.views import AdminCoachViewSet, CoachViewSet
+from apps.core.views import CoreViewSet
+from apps.identities.views import (
+    AdminIdentityImageChatViewSet,
+    AdminIdentityViewSet,
+    IdentityImageChatViewSet,
+    IdentityViewSet,
+)
+from apps.prompts.views import PromptViewSet
+from apps.reference_images.views import ReferenceImageViewSet
+from apps.test_scenario.views import AdminTestScenarioViewSet
+from apps.users.views import AdminTestUserViewSet, UserViewSet
 
 # Initialize routers
 default_router = DefaultRouter(trailing_slash=False)
@@ -34,18 +37,27 @@ default_router.register(r"prompts", PromptViewSet, basename="prompts")
 default_router.register(r"core", CoreViewSet, basename="core")
 default_router.register(r"coach", CoachViewSet, basename="coach")
 default_router.register(r"user", UserViewSet, basename="user")
-default_router.register(r"test-user", TestUserViewSet, basename="test-user")
-default_router.register(r"test-scenarios", TestScenarioViewSet, basename="test-scenarios")
-default_router.register(r"actions", ActionViewSet, basename="actions")
 default_router.register(r"identities", IdentityViewSet, basename="identities")
-default_router.register(r"identity-image-chat", IdentityImageChatViewSet, basename="identity-image-chat")
-default_router.register(r"reference-images", ReferenceImageViewSet, basename="reference-images")
+default_router.register(
+    r"identity-image-chat", IdentityImageChatViewSet, basename="identity-image-chat"
+)
+default_router.register(
+    r"reference-images", ReferenceImageViewSet, basename="reference-images"
+)
 
 # Register admin viewsets
 # These will be available at /api/v1/admin/{resource}/
 admin_router.register(r"coach", AdminCoachViewSet, basename="admin-coach")
+admin_router.register(
+    r"test-scenarios", AdminTestScenarioViewSet, basename="admin-test-scenarios"
+)
 admin_router.register(r"identities", AdminIdentityViewSet, basename="admin-identities")
-admin_router.register(r"identity-image-chat", AdminIdentityImageChatViewSet, basename="admin-identity-image-chat")
+admin_router.register(
+    r"identity-image-chat",
+    AdminIdentityImageChatViewSet,
+    basename="admin-identity-image-chat",
+)
+admin_router.register(r"test-user", AdminTestUserViewSet, basename="admin-test-user")
 
 # JWT token URLs
 jwt_patterns = [
@@ -66,8 +78,8 @@ docs_paths = [
 # Admin endpoints are mounted at /admin/ prefix
 # Regular endpoints are at the root level
 urlpatterns = (
-    default_router.urls +
-    [path("admin/", include(admin_router.urls))] +
-    auth_paths +
-    docs_paths
+    default_router.urls
+    + [path("admin/", include(admin_router.urls))]
+    + auth_paths
+    + docs_paths
 )

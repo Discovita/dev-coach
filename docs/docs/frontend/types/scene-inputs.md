@@ -34,4 +34,4 @@ All fields are optional text inputs that describe the scene for visualization. T
 
 ## Backend Model
 
-These fields correspond to the Identity model in `server/apps/identities/models.py`.
+These fields correspond to the Identity model in `server/apps/identities/models/identity.py`.

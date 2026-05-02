@@ -40,4 +40,3 @@ def get_identity_context_for_image(identity: Identity) -> str:
         parts.append(f"Notes: {notes_str}")
 
     return "\n".join(parts)
-

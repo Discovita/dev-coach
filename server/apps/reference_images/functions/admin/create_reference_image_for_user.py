@@ -1,9 +1,17 @@
+"""
+Admin function to create a reference image for any user by ID.
+
+See: apps/reference_images/functions/admin/__init__.py
+"""
+
 from typing import Any, Optional
 from uuid import UUID
+
 from django.db import transaction
 from rest_framework.exceptions import NotFound
-from apps.reference_images.models import ReferenceImage
+
 from apps.reference_images.functions.public import create_reference_image
+from apps.reference_images.models import ReferenceImage
 from apps.users.models import User
 
 
@@ -41,4 +49,3 @@ def create_reference_image_for_user(
         order=order,
         image_file=image_file,
     )
-

@@ -11,15 +11,13 @@ This document details the database indexes, constraints, and performance optimiz
 All models use UUID primary keys with automatic indexing:
 
 ### **UUID Primary Keys**
+
+All tables use UUID primary keys. UUIDs are generated in Django application code (via `uuid.uuid4`), not by PostgreSQL's `gen_random_uuid()`.
+
 ```sql
 -- All tables have UUID primary keys
 CREATE TABLE users_user (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    -- other fields...
-);
-
-CREATE TABLE coach_states_coachstate (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     -- other fields...
 );
 
@@ -86,64 +84,46 @@ CREATE INDEX test_scenario_testscenario_created_by_id_idx ON test_scenario_tests
 ## Performance Indexes
 
 ### **Timestamp Indexes**
+
+Only fields with explicit `db_index=True` in Django models have dedicated timestamp indexes:
+
 ```sql
--- Time-based queries for all models
-CREATE INDEX users_user_created_at_idx ON users_user(created_at);
-CREATE INDEX users_user_updated_at_idx ON users_user(updated_at);
-CREATE INDEX users_user_last_login_idx ON users_user(last_login);
-
-CREATE INDEX coach_states_coachstate_updated_at_idx ON coach_states_coachstate(updated_at);
-
-CREATE INDEX identities_identity_created_at_idx ON identities_identity(created_at);
-CREATE INDEX identities_identity_updated_at_idx ON identities_identity(updated_at);
-
+-- ChatMessage timestamp (db_index=True)
 CREATE INDEX chat_messages_chatmessage_timestamp_idx ON chat_messages_chatmessage(timestamp);
 
+-- Action timestamp (db_index=True)
 CREATE INDEX actions_action_timestamp_idx ON actions_action(timestamp);
 
-CREATE INDEX user_notes_usernote_created_at_idx ON user_notes_usernote(created_at);
-
-CREATE INDEX test_scenario_testscenario_created_at_idx ON test_scenario_testscenario(created_at);
-CREATE INDEX test_scenario_testscenario_updated_at_idx ON test_scenario_testscenario(updated_at);
+-- Action updated_at (db_index=True)
+CREATE INDEX actions_action_updated_at_idx ON actions_action(updated_at);
 ```
 
-### **Composite Indexes**
+Note: Other models have `created_at`/`updated_at` fields with `auto_now_add`/`auto_now`, but these do NOT have explicit `db_index=True` and therefore have no dedicated indexes.
+
+### **Action-Specific Indexes**
+
+The Action model has the most explicit indexes due to its query patterns:
+
 ```sql
--- User + timestamp for chronological queries
+-- Composite index on user + timestamp
 CREATE INDEX actions_action_user_id_timestamp_idx ON actions_action(user_id, timestamp);
 
--- User + role for message filtering
-CREATE INDEX chat_messages_chatmessage_user_id_role_idx ON chat_messages_chatmessage(user_id, role);
+-- Index on coach_message for join performance
+CREATE INDEX actions_action_coach_message_id_idx ON actions_action(coach_message_id);
 
--- User + category for identity filtering
-CREATE INDEX identities_identity_user_id_category_idx ON identities_identity(user_id, category);
+-- Index on action_type for filtering
+CREATE INDEX actions_action_action_type_idx ON actions_action(action_type);
 
--- User + state for identity state queries
-CREATE INDEX identities_identity_user_id_state_idx ON identities_identity(user_id, state);
-```
-
-### **Search Indexes**
-```sql
--- Full-text search on message content
-CREATE INDEX chat_messages_chatmessage_content_gin_idx ON chat_messages_chatmessage USING gin(to_tsvector('english', content));
-
--- Full-text search on user notes
-CREATE INDEX user_notes_usernote_note_gin_idx ON user_notes_usernote USING gin(to_tsvector('english', note));
-
--- Full-text search on identity content
-CREATE INDEX identities_identity_i_am_statement_gin_idx ON identities_identity USING gin(to_tsvector('english', i_am_statement));
-CREATE INDEX identities_identity_visualization_gin_idx ON identities_identity USING gin(to_tsvector('english', visualization));
+-- Index on updated_at for time-based queries
+CREATE INDEX actions_action_updated_at_idx ON actions_action(updated_at);
 ```
 
 ## Unique Constraints
 
 ### **User Constraints**
 ```sql
--- Email uniqueness
+-- Email uniqueness (User has no username field)
 ALTER TABLE users_user ADD CONSTRAINT users_user_email_key UNIQUE (email);
-
--- Username uniqueness (if used)
-ALTER TABLE users_user ADD CONSTRAINT users_user_username_key UNIQUE (username);
 ```
 
 ### **CoachState Constraints**
@@ -154,8 +134,8 @@ ALTER TABLE coach_states_coachstate ADD CONSTRAINT coach_states_coachstate_user_
 
 ### **Prompt Constraints**
 ```sql
--- Unique version per coaching phase
-ALTER TABLE prompts_prompt ADD CONSTRAINT prompts_prompt_coaching_phase_version_key UNIQUE (coaching_phase, version);
+-- Unique version per combination of prompt_type, coaching_phase, and version
+ALTER TABLE prompts_prompt ADD CONSTRAINT prompts_prompt_prompt_type_coaching_phase_version_key UNIQUE (prompt_type, coaching_phase, version);
 ```
 
 ### **TestScenario Constraints**
@@ -164,56 +144,17 @@ ALTER TABLE prompts_prompt ADD CONSTRAINT prompts_prompt_coaching_phase_version_
 ALTER TABLE test_scenario_testscenario ADD CONSTRAINT test_scenario_testscenario_name_key UNIQUE (name);
 ```
 
-## Check Constraints
-
-### **Data Validation**
+### **ReferenceImage Constraints**
 ```sql
--- Email format validation
-ALTER TABLE users_user ADD CONSTRAINT users_user_email_check CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
-
--- Phase validation
-ALTER TABLE coach_states_coachstate ADD CONSTRAINT coach_states_coachstate_current_phase_check 
-CHECK (current_phase IN ('GET_TO_KNOW_YOU', 'IDENTITY_CREATION', 'IDENTITY_REFINEMENT', 'INTEGRATION', 'COMPLETED'));
-
--- Role validation
-ALTER TABLE chat_messages_chatmessage ADD CONSTRAINT chat_messages_chatmessage_role_check 
-CHECK (role IN ('USER', 'COACH'));
-
--- State validation
-ALTER TABLE identities_identity ADD CONSTRAINT identities_identity_state_check 
-CHECK (state IN ('PROPOSED', 'ACCEPTED', 'REFINEMENT_COMPLETE'));
+-- One image per order slot per user
+ALTER TABLE reference_images_referenceimage ADD CONSTRAINT reference_images_referenceimage_user_id_order_key UNIQUE (user_id, "order");
 ```
 
-### **Business Logic Constraints**
-```sql
--- Version must be positive
-ALTER TABLE prompts_prompt ADD CONSTRAINT prompts_prompt_version_check CHECK (version > 0);
+## Note on Constraints
 
--- Timestamps must be valid
-ALTER TABLE users_user ADD CONSTRAINT users_user_created_at_updated_at_check CHECK (created_at <= updated_at);
-```
+Django uses `choices` on CharField/IntegerField for validation at the application level. These do **not** create PostgreSQL `CHECK` constraints in the database. Validation of phases, roles, states, and categories is enforced by Django, not by database-level constraints.
 
-## Partial Indexes
-
-### **Active Data Indexes**
-```sql
--- Only index active prompts
-CREATE INDEX prompts_prompt_active_idx ON prompts_prompt(coaching_phase, version) WHERE is_active = true;
-
--- Only index non-test users
-CREATE INDEX users_user_real_users_idx ON users_user(email, created_at) WHERE test_scenario_id IS NULL;
-
--- Only index recent messages
-CREATE INDEX chat_messages_chatmessage_recent_idx ON chat_messages_chatmessage(user_id, timestamp) 
-WHERE timestamp > NOW() - INTERVAL '30 days';
-```
-
-### **Test Scenario Indexes**
-```sql
--- Separate indexes for test data
-CREATE INDEX users_user_test_scenario_idx ON users_user(test_scenario_id) WHERE test_scenario_id IS NOT NULL;
-CREATE INDEX chat_messages_chatmessage_test_scenario_idx ON chat_messages_chatmessage(test_scenario_id) WHERE test_scenario_id IS NOT NULL;
-```
+No partial indexes or GIN/full-text search indexes exist in this schema.
 
 ## Query Optimization
 

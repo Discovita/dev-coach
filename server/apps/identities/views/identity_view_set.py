@@ -4,14 +4,15 @@ Identity ViewSet
 Provides CRUD operations for user identities and PDF download for authenticated users.
 """
 
-from rest_framework import mixins, viewsets, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.http import Http404, FileResponse
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from apps.identities.models import Identity
 from apps.identities.serializers import IdentitySerializer
 from enums.identity_state import IdentityState
@@ -60,11 +61,15 @@ class IdentityViewSet(
         - archived_only=true: Return only archived identities
         """
         queryset = Identity.objects.filter(user=self.request.user)
-        
+
         # Check query parameters
-        include_archived = self.request.query_params.get('include_archived', 'false').lower() == 'true'
-        archived_only = self.request.query_params.get('archived_only', 'false').lower() == 'true'
-        
+        include_archived = (
+            self.request.query_params.get("include_archived", "false").lower() == "true"
+        )
+        archived_only = (
+            self.request.query_params.get("archived_only", "false").lower() == "true"
+        )
+
         if archived_only:
             return queryset.filter(state=IdentityState.ARCHIVED)
         elif not include_archived:
@@ -355,23 +360,25 @@ class IdentityViewSet(
         """
         try:
             pdf_buffer = PDFService.generate_i_am_statements_pdf(request.user)
-            
+
             # Create filename with user identifier
-            user_name = getattr(request.user, 'name', None) or 'user'
-            safe_name = "".join(c for c in user_name if c.isalnum() or c in (' ', '-', '_')).strip()
-            safe_name = safe_name.replace(' ', '-')[:30]  # Limit length
+            user_name = getattr(request.user, "name", None) or "user"
+            safe_name = "".join(
+                c for c in user_name if c.isalnum() or c in (" ", "-", "_")
+            ).strip()
+            safe_name = safe_name.replace(" ", "-")[:30]  # Limit length
             filename = f"i-am-statements-{safe_name}.pdf"
-            
+
             response = FileResponse(
                 pdf_buffer,
-                content_type='application/pdf',
+                content_type="application/pdf",
                 as_attachment=True,
                 filename=filename,
             )
-            
+
             log.info(f"Downloaded I Am Statements PDF for user {request.user.id}")
             return response
-            
+
         except ValueError as e:
             log.warning(f"Cannot generate PDF for user {request.user.id}: {str(e)}")
             return Response(

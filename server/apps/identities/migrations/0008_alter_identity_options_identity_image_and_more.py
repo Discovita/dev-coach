@@ -6,22 +6,41 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('identities', '0007_alter_identity_category'),
+        ("identities", "0007_alter_identity_category"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='identity',
-            options={'verbose_name': 'Identity', 'verbose_name_plural': 'Identities'},
+            name="identity",
+            options={"verbose_name": "Identity", "verbose_name_plural": "Identities"},
         ),
         migrations.AddField(
-            model_name='identity',
-            name='image',
-            field=models.ImageField(blank=True, help_text='Image associated with this identity. Stored in S3 (production/staging) or local media directory (development).', null=True, upload_to='identities/%Y/%m/%d/'),
+            model_name="identity",
+            name="image",
+            field=models.ImageField(
+                blank=True,
+                help_text="Image associated with this identity. Stored in S3 (production/staging) or local media directory (development).",
+                null=True,
+                upload_to="identities/%Y/%m/%d/",
+            ),
         ),
         migrations.AlterField(
-            model_name='identity',
-            name='state',
-            field=models.CharField(blank=True, choices=[('proposed', 'Proposed'), ('accepted', 'Accepted'), ('refinement_complete', 'Refinement Complete'), ('commitment_complete', 'Commitment Complete'), ('i_am_complete', 'I Am Complete'), ('visualization_complete', 'Visualization Complete')], default='proposed', help_text='Current state of the identity (proposed, accepted, refinement complete).', max_length=32, null=True),
+            model_name="identity",
+            name="state",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("proposed", "Proposed"),
+                    ("accepted", "Accepted"),
+                    ("refinement_complete", "Refinement Complete"),
+                    ("commitment_complete", "Commitment Complete"),
+                    ("i_am_complete", "I Am Complete"),
+                    ("visualization_complete", "Visualization Complete"),
+                ],
+                default="proposed",
+                help_text="Current state of the identity (proposed, accepted, refinement complete).",
+                max_length=32,
+                null=True,
+            ),
         ),
     ]

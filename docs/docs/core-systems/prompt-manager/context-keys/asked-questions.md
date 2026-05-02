@@ -25,9 +25,16 @@ The function retrieves the `asked_questions` list from the coach state, converts
 
 ```python
 # Example return values
-"What is your biggest challenge right now?, What would success look like for you?, What are your core values?"  # Multiple questions
-"What is your biggest challenge right now?"  # Single question
-"No questions have been asked yet..."       # No questions asked
+"Background/upbringing, Family structure (siblings, parents, children, etc.), Work or what they do for a living"  # Multiple questions
+"Background/upbringing"  # Single question
+"No questions have been asked yet..."  # No questions asked
+
+# All possible question labels (from GetToKnowYouQuestions enum):
+# - "Background/upbringing"
+# - "Family structure (siblings, parents, children, etc.)"
+# - "Work or what they do for a living"
+# - "Hobbies or interests"
+# - "Why are you here? What do you hope to get out of this coaching?"
 ```
 
 ## Implementation

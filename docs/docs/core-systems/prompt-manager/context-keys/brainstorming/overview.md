@@ -42,7 +42,7 @@ Each category file contains:
 
 **Key Name**: `brainstorming_category_context`  
 **Enum Value**: `ContextKey.BRAINSTORMING_CATEGORY_CONTEXT`  
-**Data Source**: `CoachState.identity_focus` (reads from markdown files)  
+**Data Source**: Markdown files on disk, keyed by `CoachState.identity_focus` (an `IdentityCategory` value)  
 **Phase**: Identity Brainstorming (`IDENTITY_BRAINSTORMING`)
 
 ## Usage in Prompts

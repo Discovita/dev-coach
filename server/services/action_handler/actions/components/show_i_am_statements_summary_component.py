@@ -1,20 +1,21 @@
 from typing import List
-from apps.coach_states.models import CoachState
-from apps.chat_messages.models import ChatMessage
+
 from apps.actions.models import Action
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
 from enums.action_type import ActionType
+from enums.component_type import ComponentType
 from enums.identity_state import IdentityState
+from models.components.ComponentConfig import (
+    ComponentAction,
+    ComponentButton,
+    ComponentConfig,
+    ComponentIdentity,
+)
 from services.action_handler.models.params import (
     ShowIAmStatementsSummaryComponentParams,
 )
-from models.components.ComponentConfig import (
-    ComponentConfig,
-    ComponentButton,
-    ComponentAction,
-    ComponentIdentity,
-)
-from enums.component_type import ComponentType
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="DEBUG")
@@ -37,12 +38,14 @@ def show_i_am_statements_summary_component(
     )
 
     # Fetch all identities that have completed their I Am statements
-    identities = Identity.objects.filter(
-        user=coach_state.user,
-        state=IdentityState.I_AM_COMPLETE,
-    ).exclude(
-        state=IdentityState.ARCHIVED
-    ).order_by("created_at")
+    identities = (
+        Identity.objects.filter(
+            user=coach_state.user,
+            state=IdentityState.I_AM_COMPLETE,
+        )
+        .exclude(state=IdentityState.ARCHIVED)
+        .order_by("created_at")
+    )
 
     component_identities: List[ComponentIdentity] = []
     for identity in identities:

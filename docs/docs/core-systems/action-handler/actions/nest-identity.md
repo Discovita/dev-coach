@@ -35,6 +35,7 @@ Nests an identity under a parent identity by copying all notes from the nested i
    - Sets the identity state to `ARCHIVED`
    - Preserves the identity in the database for historical reference
 6. **Action Logging**: Records the action with details including number of notes copied
+7. **Current Identity Advance**: If the current phase is `IDENTITY_COMMITMENT`, calls `set_current_identity_to_next_pending(coach_state, IdentityState.COMMITMENT_COMPLETE)` to advance to the next identity awaiting commitment
 
 ## Example Usage
 

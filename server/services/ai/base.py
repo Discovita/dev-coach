@@ -1,21 +1,30 @@
 """
 AI Service Base Module
 
-This module provides the abstract base class that defines the interface
-for all AI service implementations.
+Defines the AIService abstract base class — the contract all AI service
+implementations must satisfy.
+
+Current implementations:
+    OpenAIService  (services/ai/openai_service.py)
+
+To add a new provider (e.g. Anthropic), create a new class that inherits from
+AIService, implement the abstract methods, and register it in AIServiceFactory.
+
+To add a new capability (e.g. streaming), declare it here as an abstract method
+and implement it on each concrete service.
 """
 
-from abc import ABC, abstractmethod
-from typing import Optional, Union, Type
-
-from pydantic import BaseModel
-from enums.ai import AIModel, AIProvider
-from models.CoachChatResponse import CoachChatResponse
-from models.SentinelChatResponse import SentinelChatResponse
 import json
 import re
+from abc import ABC, abstractmethod
+from typing import Optional, Type, Union
+
+from pydantic import BaseModel
 
 from apps.chat_messages.models import ChatMessage
+from enums.ai import AIProvider
+from models.CoachChatResponse import CoachChatResponse
+from models.SentinelChatResponse import SentinelChatResponse
 from services.logger import configure_logging
 
 log = configure_logging(__name__)
@@ -23,10 +32,10 @@ log = configure_logging(__name__)
 
 class AIService(ABC):
     """
-    Abstract base class defining the interface for AI services.
+    Abstract base class defining the interface for all AI service implementations.
 
-    This class defines the methods that all AI services must implement,
-    regardless of which AI provider they use.
+    Callers interact exclusively with this interface. The concrete implementation
+    is resolved by AIServiceFactory.create(model) and is an implementation detail.
     """
 
     @abstractmethod
@@ -38,39 +47,44 @@ class AIService(ABC):
         self,
         coach_prompt: Optional[str],
         chat_history: list[ChatMessage],
+        response_format: Type[BaseModel],
+        model,
         **kwargs,
     ) -> CoachChatResponse:
-        """Run a generation prompt."""
+        """Generate a coach response for the given prompt and chat history."""
         pass
 
     @abstractmethod
     def call_sentinel(
         self,
         sentinel_prompt: Optional[str],
+        response_format: Type[BaseModel],
+        model,
         **kwargs,
     ) -> SentinelChatResponse:
-        """Call the sentinel."""
+        """Call the sentinel service to extract structured notes from the conversation."""
         pass
 
     @abstractmethod
     def get_provider_name(self) -> AIProvider:
-        """
-        Get the name of the provider being used.
-
-        Returns:
-            The name of the provider
-        """
+        """Return the AIProvider enum value for this implementation."""
         pass
+
+    # -------------------------------------------------------------------------
+    # Shared static helpers (used by all concrete implementations)
+    # -------------------------------------------------------------------------
 
     @staticmethod
     def extract_json_from_response(response: str) -> dict:
-        """Extracts the first JSON object found in a string, even if surrounded by text or markdown
-        code fences."""
+        """
+        Extract the first JSON object from a string, even if surrounded by text
+        or markdown code fences.
+
+        Raises ValueError if no valid JSON object is found.
+        """
         response = response.strip()
         if response.startswith("```"):
-            response = re.sub(
-                r"^```(?:json)?", "", response, flags=re.IGNORECASE
-            ).strip()
+            response = re.sub(r"^```(?:json)?", "", response, flags=re.IGNORECASE).strip()
             response = re.sub(r"```$", "", response).strip()
         start = response.find("{")
         end = response.rfind("}")
@@ -88,7 +102,10 @@ class AIService(ABC):
         dynamic_model: Type[BaseModel],
     ) -> CoachChatResponse:
         """
-        Standard pipeline to parse any LLM output into a consistent CoachChatResponse model.
+        Standard pipeline: parse any LLM output into a CoachChatResponse.
+
+        Accepts a raw string (with optional JSON extraction), a dict, or a
+        Pydantic model instance.
         """
         if isinstance(response, str):
             response = AIService.extract_json_from_response(response)
@@ -104,7 +121,10 @@ class AIService(ABC):
         dynamic_model: Type[BaseModel],
     ) -> SentinelChatResponse:
         """
-        Standard pipeline to parse any LLM output into a consistent SentinelChatResponse model.
+        Standard pipeline: parse any LLM output into a SentinelChatResponse.
+
+        Accepts a raw string (with optional JSON extraction), a dict, or a
+        Pydantic model instance.
         """
         if isinstance(response, str):
             response = AIService.extract_json_from_response(response)

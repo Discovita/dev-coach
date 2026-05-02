@@ -1,9 +1,9 @@
 from pydantic import BaseModel, Field
-from enums.coaching_phase import CoachingPhase
-from enums.identity_category import IdentityCategory
-from enums.get_to_know_you_questions import GetToKnowYouQuestions
-from enums.identity_state import IdentityState
 
+from enums.coaching_phase import CoachingPhase
+from enums.get_to_know_you_questions import GetToKnowYouQuestions
+from enums.identity_category import IdentityCategory
+from enums.identity_state import IdentityState
 
 # NOTE: Cannot use the following pydantic model features on structured outputs from Open AI: Dict, Optional, Field(None)
 
@@ -124,8 +124,12 @@ class ArchiveIdentityParams(BaseParamsModel):
 
 
 class NestIdentityParams(BaseParamsModel):
-    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
-    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+    nested_identity_id: str = Field(
+        ..., description="ID of the identity to nest (will be archived)"
+    )
+    parent_identity_id: str = Field(
+        ..., description="ID of the parent identity to nest under (will be kept)"
+    )
 
 
 class TransitionPhaseParams(BaseParamsModel):
@@ -221,6 +225,7 @@ class ShowIAmStatementsSummaryComponentParams(BaseParamsModel):
     Parameters for showing the I Am Statements Summary component.
     No parameters needed - fetches all i_am_complete identities automatically.
     """
+
     pass
 
 
@@ -261,13 +266,21 @@ class PersistIAmStatementsSummaryComponentParams(BaseParamsModel):
 
 
 class ShowNestIdentitiesParams(BaseParamsModel):
-    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
-    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+    nested_identity_id: str = Field(
+        ..., description="ID of the identity to nest (will be archived)"
+    )
+    parent_identity_id: str = Field(
+        ..., description="ID of the parent identity to nest under (will be kept)"
+    )
 
 
 class PersistNestIdentitiesParams(BaseParamsModel):
-    nested_identity_id: str = Field(..., description="ID of the identity to nest (will be archived)")
-    parent_identity_id: str = Field(..., description="ID of the parent identity to nest under (will be kept)")
+    nested_identity_id: str = Field(
+        ..., description="ID of the identity to nest (will be archived)"
+    )
+    parent_identity_id: str = Field(
+        ..., description="ID of the parent identity to nest under (will be kept)"
+    )
     coach_message_id: str = Field(
         ..., description="ID of the coach message to persist the component to"
     )

@@ -3,11 +3,12 @@ Management command to test prompt rendering.
 This bypasses Django's test database and tests against your live database.
 """
 
-from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+
+from apps.chat_messages.models import ChatMessage
 from apps.coach_states.models import CoachState
 from apps.identities.models import Identity
-from apps.chat_messages.models import ChatMessage
 from apps.prompts.models import Prompt
 from enums.coaching_phase import CoachingPhase
 from enums.identity_category import IdentityCategory
@@ -78,7 +79,7 @@ class Command(BaseCommand):
             try:
                 phase = CoachingPhase.from_string(options["phase"])
                 phases_to_test = [phase]
-            except:
+            except Exception:
                 self.stdout.write(
                     self.style.ERROR(f"Invalid phase: {options['phase']}")
                 )
@@ -213,7 +214,9 @@ class Command(BaseCommand):
 
             # Validate context keys - check for None values and template placeholders
             if prompt:
-                validation_errors = self._validate_prompt_context(prompt, coach_prompt, coach_state)
+                validation_errors = self._validate_prompt_context(
+                    prompt, coach_prompt, coach_state
+                )
                 if validation_errors:
                     return False, "; ".join(validation_errors), prompt_info
 
@@ -261,7 +264,9 @@ class Command(BaseCommand):
 
             # Validate context keys - check for None values and template placeholders
             if prompt:
-                validation_errors = self._validate_prompt_context(prompt, coach_prompt, coach_state)
+                validation_errors = self._validate_prompt_context(
+                    prompt, coach_prompt, coach_state
+                )
                 if validation_errors:
                     return False, "; ".join(validation_errors), prompt_info
 
@@ -285,52 +290,58 @@ class Command(BaseCommand):
     def _validate_prompt_context(self, prompt, rendered_prompt, coach_state):
         """
         Validate 1-to-1 match between prompt template placeholders and required_context_keys.
-        
+
         Rules:
         1. Every placeholder in the template must be in required_context_keys
         2. Every context key in required_context_keys must be used in the template
         3. Warn if any required context keys have None values when used
         """
         import re
-        from services.prompt_manager.utils.context.gather_prompt_context import gather_prompt_context
-        
+
+        from services.prompt_manager.utils.context.gather_prompt_context import (
+            gather_prompt_context,
+        )
+
         errors = []
-        
+
         # Extract template placeholders from prompt body
-        placeholder_pattern = r'\{(\w+)\}'
+        placeholder_pattern = r"\{(\w+)\}"
         placeholders = set(re.findall(placeholder_pattern, prompt.body))
-        
+
         # Get the required context keys as strings
-        required_keys = {key if isinstance(key, str) else key.value for key in prompt.required_context_keys}
-        
+        required_keys = {
+            key if isinstance(key, str) else key.value
+            for key in prompt.required_context_keys
+        }
+
         # Rule 1: Check if any placeholders are not in required_context_keys
         missing_keys = placeholders - required_keys
         if missing_keys:
             errors.append(
                 f"Template uses placeholders not in required_context_keys: {', '.join(sorted(missing_keys))}"
             )
-        
+
         # Rule 2: Check if any required_context_keys are not used in the template
         unused_keys = required_keys - placeholders
         if unused_keys:
             errors.append(
                 f"Required context keys not used in template: {', '.join(sorted(unused_keys))}"
             )
-        
+
         # Rule 3: Check for None values in gathered context (might indicate wrong context key used)
         try:
             if coach_state:
                 prompt_context = gather_prompt_context(prompt, coach_state)
                 context_dict = prompt_context.model_dump()
-                
+
                 # Check required keys for None values
                 for key in required_keys:
                     if context_dict.get(key) is None and key in placeholders:
                         errors.append(
                             f"Required context key '{key}' is None but used in template"
                         )
-        except Exception as e:
+        except Exception:
             # If we can't validate context, just skip this check
             pass
-        
+
         return errors

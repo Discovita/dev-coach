@@ -1,13 +1,13 @@
 import uuid
+
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from apps.identities.models import Identity
 from apps.users.models import User
-
 from enums.coaching_phase import CoachingPhase
-from enums.identity_category import IdentityCategory
 from enums.get_to_know_you_questions import GetToKnowYouQuestions
-from django.contrib.postgres.fields import ArrayField
+from enums.identity_category import IdentityCategory
 
 
 class CoachState(models.Model):
@@ -91,11 +91,11 @@ class CoachState(models.Model):
         auto_now=True, help_text="Timestamp when the coach state was last updated."
     )
     test_scenario = models.ForeignKey(
-        'test_scenario.TestScenario',
+        "test_scenario.TestScenario",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        help_text="Test scenario this coach state is associated with (for test data isolation)."
+        help_text="Test scenario this coach state is associated with (for test data isolation).",
     )
 
     def __str__(self):

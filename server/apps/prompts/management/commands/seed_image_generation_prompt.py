@@ -4,10 +4,10 @@ Creates the initial version of the prompt if it doesn't exist.
 """
 
 from django.core.management.base import BaseCommand
-from apps.prompts.models import Prompt
-from enums.prompt_type import PromptType
-from enums.context_keys import ContextKey
 
+from apps.prompts.models import Prompt
+from enums.context_keys import ContextKey
+from enums.prompt_type import PromptType
 
 IMAGE_GENERATION_PROMPT_BODY = """We're creating an Identity Image for this person.
 
@@ -41,10 +41,14 @@ class Command(BaseCommand):
         force = options["force"]
 
         # Check if an image generation prompt already exists
-        existing = Prompt.objects.filter(
-            prompt_type=PromptType.IMAGE_GENERATION,
-            is_active=True,
-        ).order_by("-version").first()
+        existing = (
+            Prompt.objects.filter(
+                prompt_type=PromptType.IMAGE_GENERATION,
+                is_active=True,
+            )
+            .order_by("-version")
+            .first()
+        )
 
         if existing and not force:
             self.stdout.write(
@@ -71,7 +75,7 @@ class Command(BaseCommand):
             version=version,
             name="Identity Image Generation Prompt",
             description="Prompt template for generating identity images using Gemini. "
-                        "Uses {identity_context}, {appearance_context}, {scene_context}, and {additional_prompt} placeholders.",
+            "Uses {identity_context}, {appearance_context}, {scene_context}, and {additional_prompt} placeholders.",
             body=IMAGE_GENERATION_PROMPT_BODY,
             required_context_keys=[ContextKey.IDENTITY_FOR_IMAGE],
             allowed_actions=[],  # No actions for image generation
@@ -84,4 +88,3 @@ class Command(BaseCommand):
                 f"Created image generation prompt version {prompt.version} (id: {prompt.id})"
             )
         )
-

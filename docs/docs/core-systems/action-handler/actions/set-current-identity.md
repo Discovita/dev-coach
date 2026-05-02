@@ -19,9 +19,9 @@ Sets the `current_identity` field of the user's coach state to point to a specif
 
 ## Parameters
 
-| Parameter     | Type    | Required | Description                              |
-| ------------- | ------- | -------- | ---------------------------------------- |
-| `identity_id` | integer | Yes      | The ID of the identity to set as current |
+| Parameter     | Type          | Required | Description                               |
+| ------------- | ------------- | -------- | ----------------------------------------- |
+| `identity_id` | string (UUID) | Yes      | The UUID of the identity to set as current |
 
 ## Implementation Steps
 
@@ -36,7 +36,7 @@ Sets the `current_identity` field of the user's coach state to point to a specif
 {
   "action": "set_current_identity",
   "params": {
-    "identity_id": 123
+    "identity_id": "550e8400-e29b-41d4-a716-446655440000"
   }
 }
 ```

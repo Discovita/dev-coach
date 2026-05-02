@@ -26,9 +26,10 @@ Updates the `current_phase` field of the user's coach state to move between coac
 ## Implementation Steps
 
 1. **Phase Update**: Updates the `current_phase` field in the [CoachState](/docs/database/models/coach-state)
-2. **Special Handling**: If transitioning to Identity Refinement phase:
-   - Accepts all current identities for the user
-   - Sets the current identity to the next pending refinement
+2. **Special Handling**: Depending on the target phase:
+   - **Identity Refinement**: Accepts all current identities for the user, then calls `set_current_identity_to_next_pending(coach_state, IdentityState.REFINEMENT_COMPLETE)`
+   - **Identity Commitment**: Calls `set_current_identity_to_next_pending(coach_state, IdentityState.COMMITMENT_COMPLETE)`
+   - **I Am Statement**: Calls `set_current_identity_to_next_pending(coach_state, IdentityState.I_AM_COMPLETE)`
 3. **Save**: Saves the updated coach state
 4. **Action Logging**: Records the action with old and new phase labels
 

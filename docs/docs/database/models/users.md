@@ -33,7 +33,7 @@ The User model uses email-based authentication (no username field) and includes 
 - `hair_color` (CharField): Hair color preference for image generation. Choices: `black`, `brown`, `blonde`, `red`, `auburn`, `gray`, `white`, `bald`. Optional
 - `eye_color` (CharField): Eye color preference for image generation. Choices: `brown`, `blue`, `green`, `hazel`, `gray`, `amber`. Optional
 - `height` (CharField): Height preference for image generation. Choices: `short`, `below_average`, `average`, `above_average`, `tall`. Optional
-- `build` (CharField): Build/body type preference for image generation. Choices: `slim`, `athletic`, `average`, `stocky`, `large`. Optional
+- `build` (CharField): Build/body type preference for image generation. Choices: `slim`, `athletic`, `average`, `stocky`, `large`, `muscular`, `petite`, `curvy`, `full_figured`, `heavyset`. Filtered by gender on frontend. Optional
 - `age_range` (CharField): Age range preference for image generation. Choices: `twenties`, `thirties`, `forties`, `fifties`, `sixty_plus`. Optional
 
 ## Configuration
@@ -55,6 +55,8 @@ The User model uses email-based authentication (no username field) and includes 
 - One-to-Many with [ChatMessage](./chat-message.md) (via `chat_messages`)
 - One-to-Many with [Action](./action.md) (via `actions`)
 - One-to-Many with [UserNote](./user-note.md) (via `user_notes`)
+- One-to-Many with [ReferenceImage](./reference-image.md) (via `reference_images`)
+- One-to-One with IdentityImageChat (via `identity_image_chat`)
 - Many-to-One with [TestScenario](./test-scenario.md) (via `test_scenario`)
 
 ## Usage Context

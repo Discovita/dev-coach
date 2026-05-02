@@ -48,7 +48,7 @@ The Action Handler System works closely with the [Prompt Manager](../prompt-mana
 
 ## Action Logging
 
-Every action is logged with:
+Most actions are logged to the [Action](../../database/models/action) model with:
 
 - **User**: The user who triggered the action
 - **Action Type**: The specific action performed
@@ -57,15 +57,17 @@ Every action is logged with:
 - **Coach Message**: The message that triggered the action
 - **Test Scenario**: Associated test scenario (if applicable)
 
+> **Note**: Sentinel actions (`add_user_note`, `update_user_note`, `delete_user_note`) do **not** write to the Action table. They are called without a `coach_message` parameter and have no Action logging. Additionally, some handlers perform early returns on certain conditions (e.g., duplicate checks) and skip Action row creation in those cases.
+
 For detailed information about action logging and retrieval, see the [Actions API Reference](../../api/endpoints/actions).
 
 ## Error Handling
 
-The system includes comprehensive error handling:
+The system includes error handling at multiple levels:
 
-- **Parameter Validation**: Ensures all required parameters are present and valid
+- **Parameter Validation**: Ensures all required parameters are present and valid via Pydantic models
 - **Database Integrity**: Maintains referential integrity across related models
-- **Graceful Degradation**: Continues processing other actions if one fails
+- **No Per-Action Try/Except**: The `apply_coach_actions` loop does **not** wrap individual handler calls in try/except. If a handler raises an exception, the loop aborts and remaining actions are not executed.
 - **Detailed Logging**: Records errors for debugging and monitoring
 
 ## Related Documentation

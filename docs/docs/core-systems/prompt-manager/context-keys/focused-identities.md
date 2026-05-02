@@ -19,7 +19,7 @@ Returns identities that match the current `identity_focus` category, formatted a
 
 ## How It Gets the Data
 
-The function filters the user's identities by the current focus category and formats them using the `format_identities` utility. It handles cases where the category was skipped or no identities exist.
+The function filters the user's non-archived identities by the current focus category and formats them using the `format_identities` utility. It handles cases where the category was skipped or no identities exist.
 
 ## Example Data
 
@@ -43,7 +43,8 @@ def get_focused_identities_context(coach_state: CoachState) -> str:
     If the category is in skipped categories and there are no identities, return a skipped message.
     """
     user = coach_state.user
-    identities: List[Identity] = user.identities.all()
+    # Exclude archived identities from focused identities
+    identities: List[Identity] = user.identities.exclude(state=IdentityState.ARCHIVED)
     focus = coach_state.identity_focus
     if not focus:
         return "No identity focus set."

@@ -7,19 +7,41 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('coach_states', '0009_coachstate_test_scenario'),
-        ('identities', '0005_alter_identity_state'),
+        ("coach_states", "0009_coachstate_test_scenario"),
+        ("identities", "0005_alter_identity_state"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='coachstate',
-            name='current_identity',
-            field=models.ForeignKey(blank=True, help_text='The Identity currently being refined in the Identity Refinement Phase', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='current_coach_states', to='identities.identity'),
+            model_name="coachstate",
+            name="current_identity",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The Identity currently being refined in the Identity Refinement Phase",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="current_coach_states",
+                to="identities.identity",
+            ),
         ),
         migrations.AlterField(
-            model_name='coachstate',
-            name='identity_focus',
-            field=models.CharField(choices=[('passions_and_talents', 'Passions and Talents'), ('maker_of_money', 'Maker of Money'), ('keeper_of_money', 'Keeper of Money'), ('spiritual', 'Spiritual'), ('personal_appearance', 'Personal Appearance'), ('physical_expression', 'Physical Expression'), ('familial_relations', 'Familial Relations'), ('romantic_relation', 'Romantic Relation'), ('doer_of_things', 'Doer of Things')], default='passions_and_talents', help_text='The identity category focus for the coaching session. Used when ', max_length=255),
+            model_name="coachstate",
+            name="identity_focus",
+            field=models.CharField(
+                choices=[
+                    ("passions_and_talents", "Passions and Talents"),
+                    ("maker_of_money", "Maker of Money"),
+                    ("keeper_of_money", "Keeper of Money"),
+                    ("spiritual", "Spiritual"),
+                    ("personal_appearance", "Personal Appearance"),
+                    ("physical_expression", "Physical Expression"),
+                    ("familial_relations", "Familial Relations"),
+                    ("romantic_relation", "Romantic Relation"),
+                    ("doer_of_things", "Doer of Things"),
+                ],
+                default="passions_and_talents",
+                help_text="The identity category focus for the coaching session. Used when ",
+                max_length=255,
+            ),
         ),
     ]

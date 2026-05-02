@@ -2,7 +2,7 @@
 
 ## Base URL
 
-`/identities/`
+`/api/v1/identities`
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1. List Identities
 
-- **URL:** `/identities/`
+- **URL:** `/api/v1/identities`
 - **Method:** `GET`
 - **Description:** List all identities for the authenticated user. By default, archived identities are excluded from the results.
 - **Authentication:** Required
@@ -24,9 +24,9 @@
 #### Example Request
 
 ```
-GET /identities/
-GET /identities/?include_archived=true
-GET /identities/?archived_only=true
+GET /api/v1/identities
+GET /api/v1/identities?include_archived=true
+GET /api/v1/identities?archived_only=true
 ```
 
 #### Example Response
@@ -42,10 +42,15 @@ GET /identities/?archived_only=true
     "clothing": "linen button-down shirt",
     "mood": "proud and calm",
     "setting": "on a hill overlooking Hawaiian agricultural land",
-    "state": "ACCEPTED",
+    "state": "accepted",
     "notes": ["Note 1", "Note 2"],
-    "category": "PASSIONS",
-    "image": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/identities/2024/06/01/image.png",
+    "category": "passions_and_talents",
+    "image": {
+      "original": "https://bucket.s3.amazonaws.com/media/uuid/image.png",
+      "thumbnail": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-100x100.png",
+      "medium": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-300x300.png",
+      "large": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-600x600.png"
+    },
     "created_at": "2024-01-01T12:00:00Z",
     "updated_at": "2024-06-01T12:00:00Z"
   },
@@ -58,9 +63,9 @@ GET /identities/?archived_only=true
     "clothing": null,
     "mood": null,
     "setting": null,
-    "state": "ACCEPTED",
+    "state": "accepted",
     "notes": [],
-    "category": "PHYSICAL_HEALTH",
+    "category": "physical_expression",
     "image": null,
     "created_at": "2024-01-01T12:00:00Z",
     "updated_at": "2024-06-01T12:00:00Z"
@@ -72,7 +77,7 @@ GET /identities/?archived_only=true
 
 ### 2. Retrieve Identity
 
-- **URL:** `/identities/{id}/`
+- **URL:** `/api/v1/identities/{id}`
 - **Method:** `GET`
 - **Description:** Retrieve a single identity by ID. Only returns identities belonging to the authenticated user. Archived identities can be retrieved by ID even though they are excluded from list endpoints by default.
 - **Authentication:** Required
@@ -93,10 +98,15 @@ GET /identities/?archived_only=true
   "clothing": "linen button-down shirt",
   "mood": "proud and calm",
   "setting": "on a hill overlooking Hawaiian agricultural land",
-  "state": "ACCEPTED",
+  "state": "accepted",
   "notes": ["Note 1", "Note 2"],
-  "category": "PASSIONS",
-  "image": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/identities/2024/06/01/image.png",
+  "category": "passions_and_talents",
+  "image": {
+    "original": "https://bucket.s3.amazonaws.com/media/uuid/image.png",
+    "thumbnail": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-100x100.png",
+    "medium": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-300x300.png",
+    "large": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-600x600.png"
+  },
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T12:00:00Z"
 }
@@ -106,7 +116,7 @@ GET /identities/?archived_only=true
 
 ### 3. Create Identity
 
-- **URL:** `/identities/`
+- **URL:** `/api/v1/identities`
 - **Method:** `POST`
 - **Description:** Create a new identity for the authenticated user. The `user` field is automatically set to the authenticated user and cannot be specified in the request.
 - **Authentication:** Required
@@ -119,9 +129,9 @@ GET /identities/?archived_only=true
     "clothing": "linen button-down shirt",
     "mood": "proud and calm",
     "setting": "on a hill overlooking Hawaiian agricultural land",
-    "state": "PROPOSED",
+    "state": "proposed",
     "notes": ["Initial note about this identity"],
-    "category": "PASSIONS"
+    "category": "passions_and_talents"
   }
   ```
 - **Response:**
@@ -141,9 +151,9 @@ GET /identities/?archived_only=true
   "clothing": "linen button-down shirt",
   "mood": "proud and calm",
   "setting": "on a hill overlooking Hawaiian agricultural land",
-  "state": "PROPOSED",
+  "state": "proposed",
   "notes": ["Initial note about this identity"],
-  "category": "PASSIONS",
+  "category": "passions_and_talents",
   "image": null,
   "created_at": "2024-06-01T12:00:00Z",
   "updated_at": "2024-06-01T12:00:00Z"
@@ -156,7 +166,7 @@ GET /identities/?archived_only=true
 
 ### 4. Update Identity (Full Update)
 
-- **URL:** `/identities/{id}/`
+- **URL:** `/api/v1/identities/{id}`
 - **Method:** `PUT`
 - **Description:** Update an identity with all fields (full update). Only identities belonging to the authenticated user can be updated.
 - **Authentication:** Required
@@ -169,9 +179,9 @@ GET /identities/?archived_only=true
     "clothing": "formal conductor's attire",
     "mood": "passionate and focused",
     "setting": "grand concert hall",
-    "state": "ACCEPTED",
+    "state": "accepted",
     "notes": ["Updated note 1", "Updated note 2"],
-    "category": "PASSIONS"
+    "category": "passions_and_talents"
   }
   ```
 - **Response:**
@@ -192,10 +202,15 @@ GET /identities/?archived_only=true
   "clothing": "formal conductor's attire",
   "mood": "passionate and focused",
   "setting": "grand concert hall",
-  "state": "ACCEPTED",
+  "state": "accepted",
   "notes": ["Updated note 1", "Updated note 2"],
-  "category": "PASSIONS",
-  "image": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/identities/2024/06/01/image.png",
+  "category": "passions_and_talents",
+  "image": {
+    "original": "https://bucket.s3.amazonaws.com/media/uuid/image.png",
+    "thumbnail": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-100x100.png",
+    "medium": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-300x300.png",
+    "large": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/image-thumbnail-600x600.png"
+  },
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T13:00:00Z"
 }
@@ -205,7 +220,7 @@ GET /identities/?archived_only=true
 
 ### 5. Update Identity (Partial Update)
 
-- **URL:** `/identities/{id}/`
+- **URL:** `/api/v1/identities/{id}`
 - **Method:** `PATCH`
 - **Description:** Partially update an identity with only the provided fields. Only identities belonging to the authenticated user can be updated.
 - **Authentication:** Required
@@ -214,7 +229,7 @@ GET /identities/?archived_only=true
   {
     "name": "Updated Creative Visionary",
     "clothing": "linen button-down shirt",
-    "state": "ACCEPTED"
+    "state": "accepted"
   }
   ```
 - **Response:**
@@ -235,9 +250,9 @@ GET /identities/?archived_only=true
   "clothing": "linen button-down shirt",
   "mood": null,
   "setting": null,
-  "state": "ACCEPTED",
+  "state": "accepted",
   "notes": ["Note 1", "Note 2"],
-  "category": "PASSIONS",
+  "category": "passions_and_talents",
   "image": null,
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T13:00:00Z"
@@ -248,7 +263,7 @@ GET /identities/?archived_only=true
 
 ### 6. Delete Identity
 
-- **URL:** `/identities/{id}/`
+- **URL:** `/api/v1/identities/{id}`
 - **Method:** `DELETE`
 - **Description:** Permanently delete an identity. If the identity has an associated image, the image file will also be deleted. Only identities belonging to the authenticated user can be deleted.
 - **Authentication:** Required
@@ -263,7 +278,7 @@ GET /identities/?archived_only=true
 
 ### 7. Upload Identity Image
 
-- **URL:** `/identities/{id}/upload-image/`
+- **URL:** `/api/v1/identities/{id}/upload-image`
 - **Method:** `PATCH` or `PUT`
 - **Description:** Upload or update the image for an identity. If an image already exists, it will be replaced. Only identities belonging to the authenticated user can be updated.
 - **Authentication:** Required
@@ -280,7 +295,7 @@ GET /identities/?archived_only=true
 #### Example Request
 
 ```
-PATCH /identities/{id}/upload-image/
+PATCH /api/v1/identities/{id}/upload-image
 Content-Type: multipart/form-data
 
 image: [binary file data]
@@ -298,10 +313,15 @@ image: [binary file data]
   "clothing": "linen button-down shirt",
   "mood": "proud and calm",
   "setting": "on a hill overlooking Hawaiian agricultural land",
-  "state": "ACCEPTED",
+  "state": "accepted",
   "notes": ["Note 1", "Note 2"],
-  "category": "PASSIONS",
-  "image": "https://discovita-dev-coach-staging.s3.amazonaws.com/media/identities/2024/06/01/new-image.png",
+  "category": "passions_and_talents",
+  "image": {
+    "original": "https://bucket.s3.amazonaws.com/media/uuid/new-image.png",
+    "thumbnail": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/new-image-thumbnail-100x100.png",
+    "medium": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/new-image-thumbnail-300x300.png",
+    "large": "https://bucket.s3.amazonaws.com/media/uuid/__sized__/new-image-thumbnail-600x600.png"
+  },
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T13:00:00Z"
 }
@@ -317,7 +337,7 @@ image: [binary file data]
 
 ### 8. Delete Identity Image
 
-- **URL:** `/identities/{id}/delete-image/`
+- **URL:** `/api/v1/identities/{id}/delete-image`
 - **Method:** `DELETE`
 - **Description:** Delete the image associated with an identity. The image file will be removed from storage. Only identities belonging to the authenticated user can be updated.
 - **Authentication:** Required
@@ -339,9 +359,9 @@ image: [binary file data]
   "clothing": null,
   "mood": null,
   "setting": null,
-  "state": "ACCEPTED",
+  "state": "accepted",
   "notes": ["Note 1", "Note 2"],
-  "category": "PASSIONS",
+  "category": "passions_and_talents",
   "image": null,
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-06-01T13:00:00Z"
@@ -352,7 +372,7 @@ image: [binary file data]
 
 ### 9. Download I Am Statements PDF
 
-- **URL:** `/identities/download-i-am-statements-pdf/`
+- **URL:** `/api/v1/identities/download-i-am-statements-pdf`
 - **Method:** `GET`
 - **Description:** Download a PDF document containing all of the authenticated user's completed I Am statements. The PDF includes identity names, categories, and I Am statements in a two-column layout.
 - **Authentication:** Required
@@ -364,7 +384,7 @@ image: [binary file data]
 #### Example Request
 
 ```
-GET /identities/download-i-am-statements-pdf/
+GET /api/v1/identities/download-i-am-statements-pdf
 ```
 
 #### Response Headers
@@ -375,7 +395,7 @@ Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
 ```
 
 **Note:** 
-- Only identities with `state = I_AM_COMPLETE` are included in the PDF.
+- Only identities with `state = i_am_complete` are included in the PDF.
 - Archived identities are excluded.
 - If the user has no completed identities, a 400 error is returned.
 
@@ -383,10 +403,10 @@ Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
 
 ### 10. Download I Am Statements PDF for User (Admin Only)
 
-- **URL:** `/admin/identities/download-i-am-statements-pdf-for-user/`
+- **URL:** `/api/v1/admin/identities/download-i-am-statements-pdf-for-user`
 - **Method:** `GET`
 - **Description:** Admin endpoint to download a PDF of I Am statements for any user by ID.
-- **Authentication:** Required (Admin only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Query Parameters:**
   - `user_id` (required): The ID of the user to generate the PDF for.
 - **Response:**
@@ -398,7 +418,7 @@ Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
 #### Example Request
 
 ```
-GET /admin/identities/download-i-am-statements-pdf-for-user/?user_id=abc123
+GET /api/v1/admin/identities/download-i-am-statements-pdf-for-user?user_id=abc123
 ```
 
 #### Response Headers
@@ -408,7 +428,72 @@ Content-Type: application/pdf
 Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
 ```
 
-**Note:** This endpoint is only accessible to admin users.
+**Note:** This endpoint is only accessible to admin users (is_staff OR is_superuser).
+
+---
+
+## Admin Identity Endpoints
+
+These endpoints are on the admin router at `/api/v1/admin/identities/`.
+
+### 11. Update Identity (Admin)
+
+- **URL:** `/api/v1/admin/identities/update-identity`
+- **Method:** `PATCH`
+- **Description:** Partially update any identity regardless of owner (admin only). Used for updating test user identities from the admin image generation page.
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
+- **Request Body:**
+  ```json
+  {
+    "identity_id": "uuid-string",
+    "name": "Updated Name",
+    "clothing": "new outfit description"
+  }
+  ```
+- **Response:**
+  - `200 OK`: Updated identity object.
+  - `400 Bad Request`: Missing identity_id.
+  - `404 Not Found`: Identity not found.
+
+### 12. Generate Identity Image (Admin)
+
+- **URL:** `/api/v1/admin/identities/generate-image`
+- **Method:** `POST`
+- **Description:** Generate an identity image using Gemini.
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
+- **Request Body:**
+  ```json
+  {
+    "identity_id": "uuid-string",
+    "user_id": "uuid-string",
+    "additional_prompt": "optional extra instructions",
+    "save_to_identity": false
+  }
+  ```
+- **Response:**
+  - `200 OK`: `{ "success": true, "image_base64": "...", "identity": {...} (if save_to_identity=true) }`
+  - `400 Bad Request`: Missing required fields or no reference images.
+  - `404 Not Found`: Identity or user not found.
+  - `500 Internal Server Error`: Image generation failed.
+
+### 13. Save Generated Image (Admin)
+
+- **URL:** `/api/v1/admin/identities/save-generated-image`
+- **Method:** `POST`
+- **Description:** Save a previously generated base64 image to an identity.
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
+- **Request Body:**
+  ```json
+  {
+    "identity_id": "uuid-string",
+    "image_base64": "base64-encoded-image-data"
+  }
+  ```
+- **Response:**
+  - `200 OK`: `{ "success": true, "identity": {...} }`
+  - `400 Bad Request`: Missing required fields.
+  - `404 Not Found`: Identity not found.
+  - `500 Internal Server Error`: Failed to save image.
 
 ---
 
@@ -429,36 +514,35 @@ Content-Disposition: attachment; filename="i-am-statements-{user-name}.pdf"
 | `state` | String | Optional | Current state of the identity. See [Identity State Choices](#identity-state-choices) |
 | `notes` | Array of Strings | Optional | List of notes about the identity |
 | `category` | String | Required | Category this identity belongs to. See [Identity Category Choices](#identity-category-choices) |
-| `image` | String (URL) or null | Optional | URL to the image associated with this identity. Stored in S3 (production/staging) or local media (development) |
+| `image` | Object or null | Optional | Image URLs object with size variants (`original`, `thumbnail`, `medium`, `large`) or `null` if no image |
 | `created_at` | DateTime (ISO 8601) | Auto-generated | Timestamp when the identity was created |
 | `updated_at` | DateTime (ISO 8601) | Auto-updated | Timestamp when the identity was last updated |
 
 ### Identity State Choices
 
-The `state` field accepts the following values:
+The `state` field accepts the following lowercase values (see `enums/identity_state.py`):
 
-- `PROPOSED`: Identity has been proposed but not yet accepted
-- `ACCEPTED`: Identity has been accepted by the user
-- `REFINEMENT_COMPLETE`: Identity refinement process is complete
-- `COMMITMENT_COMPLETE`: User has committed to the identity and wants to advance to the I Am Statement Phase
-- `I_AM_COMPLETE`: User has created an I Am statement for the identity
-- `VISUALIZATION_COMPLETE`: User has created a visualization for the identity
-- `ARCHIVED`: Identity has been archived and is excluded from active coaching workflows by default
+- `proposed`: Identity has been proposed but not yet accepted
+- `accepted`: Identity has been accepted by the user
+- `refinement_complete`: Identity refinement process is complete
+- `commitment_complete`: User has committed to the identity and wants to advance to the I Am Statement Phase
+- `i_am_complete`: User has created an I Am statement for the identity
+- `visualization_complete`: User has created a visualization for the identity
+- `archived`: Identity has been archived and is excluded from active coaching workflows by default
 
 ### Identity Category Choices
 
-The `category` field accepts the following values (see `enums/identity_category.py` for complete list):
+The `category` field accepts the following lowercase values (see `enums/identity_category.py`). There are 9 categories:
 
-- `PASSIONS`: Passion-based identities
-- `VALUES`: Value-based identities
-- `STRENGTHS`: Strength-based identities
-- `PHYSICAL_HEALTH`: Physical health-related identities
-- `MENTAL_HEALTH`: Mental health-related identities
-- `RELATIONSHIPS`: Relationship-based identities
-- `CAREER`: Career-related identities
-- `FINANCIAL`: Financial-related identities
-- `SPIRITUAL`: Spiritual identities
-- `CREATIVE`: Creative identities
+- `passions_and_talents`: Passions and Talents (enum name: PASSIONS)
+- `maker_of_money`: Maker of Money (enum name: MONEY_MAKER)
+- `keeper_of_money`: Keeper of Money (enum name: MONEY_KEEPER)
+- `spiritual`: Spiritual (enum name: SPIRITUAL)
+- `personal_appearance`: Personal Appearance (enum name: APPEARANCE)
+- `physical_expression`: Physical Expression (enum name: HEALTH)
+- `familial_relations`: Familial Relations (enum name: FAMILY)
+- `romantic_relation`: Romantic Relation (enum name: ROMANTIC)
+- `doer_of_things`: Doer of Things (enum name: ACTION)
 
 ---
 
@@ -466,9 +550,9 @@ The `category` field accepts the following values (see `enums/identity_category.
 
 These endpoints enable multi-turn image generation using Gemini's chat functionality. Users can start a new image generation session and then iteratively refine the generated image through conversation.
 
-### 11. Start Image Chat
+### 14. Start Image Chat
 
-- **URL:** `/identity-image-chat/start/`
+- **URL:** `/api/v1/identity-image-chat/start`
 - **Method:** `POST`
 - **Description:** Start a new image generation chat session for an identity. Creates a new Gemini chat, generates the initial image using the user's reference images and identity context, and stores the chat history for future edits. If a chat session already exists for the user, it will be replaced.
 - **Authentication:** Required
@@ -488,7 +572,7 @@ These endpoints enable multi-turn image generation using Gemini's chat functiona
 #### Example Request
 
 ```
-POST /identity-image-chat/start/
+POST /api/v1/identity-image-chat/start
 Content-Type: application/json
 
 {
@@ -514,9 +598,9 @@ Content-Type: application/json
 
 ---
 
-### 12. Continue Image Chat
+### 15. Continue Image Chat
 
-- **URL:** `/identity-image-chat/continue/`
+- **URL:** `/api/v1/identity-image-chat/continue`
 - **Method:** `POST`
 - **Description:** Continue an existing image chat session with an edit request. Loads the user's existing chat history, sends the edit prompt to Gemini, and returns the newly generated image.
 - **Authentication:** Required
@@ -534,7 +618,7 @@ Content-Type: application/json
 #### Example Request
 
 ```
-POST /identity-image-chat/continue/
+POST /api/v1/identity-image-chat/continue
 Content-Type: application/json
 
 {
@@ -559,9 +643,9 @@ Content-Type: application/json
 
 ---
 
-### 13. Start Image Chat (Admin)
+### 16. Start Image Chat (Admin)
 
-- **URL:** `/admin/identity-image-chat/start/`
+- **URL:** `/api/v1/admin/identity-image-chat/start`
 - **Method:** `POST`
 - **Description:** Admin endpoint to start a new image generation chat session for any user by ID.
 - **Authentication:** Required (Admin only)
@@ -582,7 +666,7 @@ Content-Type: application/json
 #### Example Request
 
 ```
-POST /admin/identity-image-chat/start/
+POST /api/v1/admin/identity-image-chat/start
 Content-Type: application/json
 
 {
@@ -606,9 +690,9 @@ Content-Type: application/json
 
 ---
 
-### 14. Continue Image Chat (Admin)
+### 17. Continue Image Chat (Admin)
 
-- **URL:** `/admin/identity-image-chat/continue/`
+- **URL:** `/api/v1/admin/identity-image-chat/continue`
 - **Method:** `POST`
 - **Description:** Admin endpoint to continue an existing image chat session for any user by ID.
 - **Authentication:** Required (Admin only)
@@ -628,7 +712,7 @@ Content-Type: application/json
 #### Example Request
 
 ```
-POST /admin/identity-image-chat/continue/
+POST /api/v1/admin/identity-image-chat/continue
 Content-Type: application/json
 
 {
@@ -658,7 +742,7 @@ Content-Type: application/json
 - The `user` field is read-only and automatically set to the authenticated user when creating identities.
 - **Archived Identities**: Archived identities are excluded from list endpoints by default but can be accessed:
   - Via query parameters: `?include_archived=true` to include them, or `?archived_only=true` to see only archived identities
-  - By direct ID retrieval: Archived identities can be retrieved using the `GET /identities/{id}/` endpoint
+  - By direct ID retrieval: Archived identities can be retrieved using the `GET /api/v1/identities/{id}` endpoint
   - Archived identities are excluded from all active coaching workflows (context functions, action handlers, etc.)
 - Image uploads use `multipart/form-data` content type. The image field name in the form data must be `image`.
 - Images are automatically stored in:
@@ -681,10 +765,10 @@ Content-Type: application/json
 - **Context Preservation**: The chat history includes all previous messages and generated images, allowing Gemini to understand the full context when processing edit requests.
 - **Typical Workflow**:
   1. Upload reference images (see Reference Images API)
-  2. Call `/identity-image-chat/start/` to generate the initial image
-  3. Call `/identity-image-chat/continue/` with edit prompts to refine the image
+  2. Call `/api/v1/identity-image-chat/start` to generate the initial image
+  3. Call `/api/v1/identity-image-chat/continue` with edit prompts to refine the image
   4. Repeat step 3 as needed until satisfied
-  5. Save the final image to the identity using `/identities/{id}/upload-image/`
+  5. Save the final image to the identity using `/api/v1/identities/{id}/upload-image`
 
 - Update this document whenever the API changes.
 

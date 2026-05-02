@@ -1,5 +1,7 @@
 from typing import List
+
 from enums.identity_category import IdentityCategory
+
 
 def format_skipped_categories(skipped: List[str]) -> str:
     """
@@ -14,7 +16,7 @@ def format_skipped_categories(skipped: List[str]) -> str:
         except Exception:
             skipped_labels.append(str(cat))
     return (
-        "\n\n---\n\n" +
-        "**Skipped Identity Categories:**\n" +
-        "\n".join([f"- {label}" for label in skipped_labels])
-    ) 
+        "\n\n---\n\n"
+        + "**Skipped Identity Categories:**\n"
+        + "\n".join([f"- {label}" for label in skipped_labels])
+    )

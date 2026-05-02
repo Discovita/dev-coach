@@ -19,7 +19,7 @@ Returns identities that are NOT refinement_complete, formatted as a numbered lis
 
 ## How It Gets the Data
 
-The function filters identities to exclude those with `REFINEMENT_COMPLETE` state, sorts them by creation date (oldest first), and formats them using the `format_identities_needing_refinement` utility.
+The function filters identities to exclude those with `REFINEMENT_COMPLETE` state **and** archived identities, sorts them by creation date (oldest first), and formats them using the `format_identities_needing_refinement` utility.
 
 The formatting utility creates a numbered list with:
 - A clear heading "## Identities Needing Refinement"
@@ -47,8 +47,12 @@ def get_refinement_identities_context(coach_state: CoachState) -> str:
     If no identities remain to be refined, returns instructions to move to the next phase.
     """
     user = coach_state.user
-    # Filter to only show identities that are NOT refinement_complete, sorted by oldest first
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.REFINEMENT_COMPLETE).order_by('created_at')
+    # Filter to only show identities that are NOT refinement_complete and NOT archived, sorted by oldest first
+    identities: List[Identity] = (
+        user.identities.exclude(state=IdentityState.REFINEMENT_COMPLETE)
+        .exclude(state=IdentityState.ARCHIVED)
+        .order_by("created_at")
+    )
 
     # Check if there are any identities left to refine
     if identities.count() == 0:

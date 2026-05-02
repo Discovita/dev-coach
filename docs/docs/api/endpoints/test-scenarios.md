@@ -2,15 +2,15 @@
 
 ## Base URL
 
-`/test-scenarios/`
+`/api/v1/admin/test-scenarios`
 
 ---
 
 ## Overview
 
-The TestScenarioViewSet provides admin-only endpoints for creating, managing, and manipulating test scenarios. Test scenarios are complete snapshots of user coaching sessions that can be instantiated and reset for testing purposes. Each scenario includes user data, coach state, identities, chat messages, user notes, and actions.
+The AdminTestScenarioViewSet provides admin-only endpoints for creating, managing, and manipulating test scenarios. Test scenarios are complete snapshots of user coaching sessions that can be instantiated and reset for testing purposes. Each scenario includes user data, coach state, identities, chat messages, user notes, and actions.
 
-**Important**: All endpoints require admin/superuser privileges.
+**Important**: All endpoints require IsAdminUser permission (is_staff OR is_superuser).
 
 ---
 
@@ -18,10 +18,10 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
 
 ### 1. List Test Scenarios
 
-- **URL:** `/test-scenarios/`
+- **URL:** `/api/v1/admin/test-scenarios`
 - **Method:** `GET`
 - **Description:** List all test scenarios in the system.
-- **Authentication:** Required (Admin/Superuser only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `200 OK`: Array of test scenario objects.
 
@@ -53,10 +53,10 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
 
 ### 2. Retrieve Test Scenario
 
-- **URL:** `/test-scenarios/{id}/`
+- **URL:** `/api/v1/admin/test-scenarios/{id}`
 - **Method:** `GET`
 - **Description:** Retrieve a specific test scenario by ID.
-- **Authentication:** Required (Admin/Superuser only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `200 OK`: Test scenario object.
   - `404 Not Found`: Scenario not found.
@@ -77,16 +77,16 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
       "last_name": "Doe"
     },
     "coach_state": {
-      "current_phase": "IDENTITY_CREATION",
-      "identity_focus": "PASSIONS",
+      "current_phase": "identity_brainstorming",
+      "identity_focus": "passions_and_talents",
       "who_you_are": ["Creative", "Determined"],
       "who_you_want_to_be": ["Successful", "Inspiring"]
     },
     "identities": [
       {
         "name": "Creative Visionary",
-        "category": "PASSIONS",
-        "state": "ACCEPTED",
+        "category": "passions_and_talents",
+        "state": "accepted",
         "i_am_statement": "I am a bold creator, transforming ideas into reality.",
         "visualization": "I see myself confidently presenting innovative solutions...",
         "notes": ["Note 1", "Note 2"]
@@ -94,12 +94,12 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
     ],
     "chat_messages": [
       {
-        "role": "COACH",
+        "role": "coach",
         "content": "Welcome to Dev Coach! I'm here to help you...",
         "timestamp": "2024-06-01T12:00:00Z"
       },
       {
-        "role": "USER",
+        "role": "user",
         "content": "Hi! I'm excited to start this journey.",
         "timestamp": "2024-06-01T12:01:00Z"
       }
@@ -113,10 +113,10 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
     ],
     "actions": [
       {
-        "action_type": "TRANSITION_PHASE",
+        "action_type": "transition_phase",
         "parameters": {
-          "from_phase": "INTRODUCTION",
-          "to_phase": "GET_TO_KNOW_YOU"
+          "from_phase": "introduction",
+          "to_phase": "get_to_know_you"
         },
         "result_summary": "Successfully transitioned from Introduction to Get To Know You phase",
         "timestamp": "2024-06-01T12:02:00Z",
@@ -134,10 +134,10 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
 
 ### 3. Create Test Scenario
 
-- **URL:** `/test-scenarios/`
+- **URL:** `/api/v1/admin/test-scenarios`
 - **Method:** `POST`
 - **Description:** Create a new test scenario with a complete template. The scenario will be automatically instantiated with all related data.
-- **Authentication:** Required (Admin/Superuser only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Request Body:**
   ```json
   {
@@ -150,8 +150,8 @@ The TestScenarioViewSet provides admin-only endpoints for creating, managing, an
         "email": "test@example.com"
       },
       "coach_state": {
-        "current_phase": "INTRODUCTION",
-        "identity_focus": "PASSIONS",
+        "current_phase": "introduction",
+        "identity_focus": "passions_and_talents",
         "who_you_are": [],
         "who_you_want_to_be": []
       }
@@ -170,10 +170,10 @@ Same format as the retrieve endpoint.
 
 ### 4. Update Test Scenario
 
-- **URL:** `/test-scenarios/{id}/`
-- **Method:** `PUT`
-- **Description:** Update an existing test scenario. The scenario will be re-instantiated with the new template data.
-- **Authentication:** Required (Admin/Superuser only)
+- **URL:** `/api/v1/admin/test-scenarios/{id}`
+- **Method:** `PUT` or `PATCH`
+- **Description:** Update an existing test scenario. Supports both full update (PUT) and partial update (PATCH). The scenario will be re-instantiated with the new template data.
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Request Body:**
   ```json
   {
@@ -186,8 +186,8 @@ Same format as the retrieve endpoint.
         "email": "updated@example.com"
       },
       "coach_state": {
-        "current_phase": "GET_TO_KNOW_YOU",
-        "identity_focus": "PASSIONS",
+        "current_phase": "get_to_know_you",
+        "identity_focus": "passions_and_talents",
         "who_you_are": ["Creative"],
         "who_you_want_to_be": ["Successful"]
       }
@@ -203,10 +203,10 @@ Same format as the retrieve endpoint.
 
 ### 5. Delete Test Scenario
 
-- **URL:** `/test-scenarios/{id}/`
+- **URL:** `/api/v1/admin/test-scenarios/{id}`
 - **Method:** `DELETE`
 - **Description:** Permanently delete a test scenario and all associated data.
-- **Authentication:** Required (Admin/Superuser only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `200 OK`: Success message.
   - `404 Not Found`: Scenario not found.
@@ -224,10 +224,10 @@ Same format as the retrieve endpoint.
 
 ### 6. Reset Test Scenario
 
-- **URL:** `/test-scenarios/{id}/reset/`
+- **URL:** `/api/v1/admin/test-scenarios/{id}/reset`
 - **Method:** `POST`
 - **Description:** Reset a test scenario to its original template state. This will delete all current instantiated data and recreate it from the template.
-- **Authentication:** Required (Admin/Superuser only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Response:**
   - `200 OK`: Success message.
 
@@ -244,10 +244,10 @@ Same format as the retrieve endpoint.
 
 ### 7. Freeze Session
 
-- **URL:** `/test-scenarios/freeze-session/`
+- **URL:** `/api/v1/admin/test-scenarios/freeze-session`
 - **Method:** `POST`
 - **Description:** Capture the current state of a user session as a new test scenario. This creates a complete snapshot of a user's coaching session.
-- **Authentication:** Required (Admin/Superuser only)
+- **Authentication:** Required (IsAdminUser — is_staff OR is_superuser)
 - **Request Body:**
   ```json
   {
@@ -406,10 +406,13 @@ For detailed field information on models used in these endpoints, see:
 
 ## Notes
 
-- All endpoints require admin/superuser privileges for security.
+- All endpoints require IsAdminUser permission (is_staff OR is_superuser).
+- The resource is registered as `test-scenarios` on the admin router, so all paths use `/api/v1/admin/test-scenarios/...`.
+- Both PUT and PATCH are supported for updates (the ViewSet includes `UpdateModelMixin`).
 - Template validation is strict - only defined fields are allowed. The freeze-session endpoint ensures the correct structure as well as the create and update endpoints. These are all used on the front end on the Test page available to Admins.
 - Scenario instantiation creates all related database objects automatically.
 - The freeze-session endpoint captures complete user state for scenario creation.
 - Test users are automatically assigned unique emails if conflicts exist.
 - All test users have the password "Coach123!" for consistency.
+- All enum values in templates should use lowercase stored values (e.g., `"introduction"` not `"INTRODUCTION"`, `"passions_and_talents"` not `"PASSIONS"`).
 - Scenario reset completely recreates all related data from the template.

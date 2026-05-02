@@ -63,11 +63,11 @@ Structured notes about users stored in the database. For detailed information ab
 
 ### Celery Task
 
-Background task that processes new messages and updates notes. Located in `server/apps/user_notes/tasks.py`.
+Background task that processes new messages and updates notes. Located in `server/apps/user_notes/tasks/extract_user_notes.py`.
 
 ### Django Signal
 
-Automatically triggers note extraction when new user messages are saved. Located in `server/apps/user_notes/signals.py`.
+Automatically triggers note extraction when new user messages are saved (post-save on `ChatMessage`). Located in `server/apps/chat_messages/signals/trigger_sentinel_on_user_message.py`.
 
 ## Sentinel-Only Actions
 

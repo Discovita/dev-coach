@@ -19,7 +19,7 @@ Returns identities that are NOT visualization_complete, formatted as markdown te
 
 ## How It Gets the Data
 
-The function filters identities to exclude those with `VISUALIZATION_COMPLETE` state and formats them using the `format_identities` utility.
+The function filters identities to exclude those with `VISUALIZATION_COMPLETE` state **and** archived identities, then formats them using the `format_identities` utility. This returns a "to do" list of identities that still need visualization, not a list of completed ones.
 
 ## Example Data
 
@@ -41,8 +41,10 @@ def get_visualization_identities_context(coach_state: CoachState) -> str:
     If no identities remain to be visualized, returns instructions to move to the next phase.
     """
     user = coach_state.user
-    # Filter to only show identities that are NOT visualization_complete
-    identities: List[Identity] = user.identities.exclude(state=IdentityState.VISUALIZATION_COMPLETE)
+    # Filter to only show identities that are NOT visualization_complete and NOT archived
+    identities: List[Identity] = user.identities.exclude(
+        state=IdentityState.VISUALIZATION_COMPLETE
+    ).exclude(state=IdentityState.ARCHIVED)
 
     # Check if there are any identities left to visualize
     if identities.count() == 0:

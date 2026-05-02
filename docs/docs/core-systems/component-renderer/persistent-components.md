@@ -127,24 +127,18 @@ The frontend rendering logic has been updated to handle both active and persiste
 The system includes utility functions to handle display-only components:
 
 ```typescript
-// Create a display-only version of a component config
-export function createDisplayOnlyComponent(componentConfig: ComponentConfig): ComponentConfig {
-  return {
-    component_type: componentConfig.component_type,
-    texts: componentConfig.texts,
-    identities: componentConfig.identities,
-    // Explicitly exclude buttons and actions
-    buttons: undefined,
-  };
-}
+// Create a display-only version of a component config (client/src/utils/componentConfig.ts)
+export function makeComponentDisplayOnly(config: ComponentConfig | null | undefined): ComponentConfig | null {
+  if (!config) return null;
 
-// Check if a component is display-only
-export function isDisplayOnlyComponent(componentConfig: ComponentConfig): boolean {
-  return !componentConfig.buttons || componentConfig.buttons.length === 0;
+  return {
+    ...config,
+    buttons: undefined, // Remove buttons to make display-only
+  };
 }
 ```
 
-**Frontend Handling**: Display-only components automatically receive `onSelect={undefined}` to prevent any interaction, ensuring they remain purely visual.
+**Frontend Handling**: Display-only components (those with no buttons) automatically receive `onSelect={undefined}` to prevent any interaction, ensuring they remain purely visual.
 
 ## Development Workflow
 
