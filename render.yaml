@@ -33,8 +33,6 @@ databases:
     region: oregon
     plan: basic-256mb
     postgresMajorVersion: "17"
-    previews:
-      generation: manual
 
 services:
   # ---------------------------------------------------------------------------
@@ -232,5 +230,3 @@ services:
     plan: starter
     maxmemoryPolicy: allkeys-lru
     ipAllowList: []
-    previews:
-      generation: manual
