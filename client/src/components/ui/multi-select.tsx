@@ -36,6 +36,13 @@ interface MultiSelectProps {
   placeholder?: string;
 }
 
+/**
+ * Multi-select dropdown built on top of shadcn's Command component.
+ * Supports both controlled (value + onValueChange) and uncontrolled modes.
+ *
+ * Ported from: dev-coach/client/src/components/ui/multi-select.tsx
+ * Adapted from gold theme to use shadcn semantic CSS variables.
+ */
 export function MultiSelect({
   options,
   value,
@@ -44,11 +51,9 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
-  // Internal state for uncontrolled mode
   const [selected, setSelected] = React.useState<MultiSelectOption[]>([]);
   const [inputValue, setInputValue] = React.useState("");
 
-  // Determine selected options: controlled or uncontrolled
   const selectedOptions = value
     ? options.filter((o) => value.includes(o.value))
     : selected;
@@ -56,14 +61,12 @@ export function MultiSelect({
   const handleUnselect = React.useCallback(
     (option: MultiSelectOption) => {
       if (value && onValueChange) {
-        // Controlled mode: update parent
         onValueChange(
           selectedOptions
             .filter((s) => s.value !== option.value)
             .map((s) => s.value)
         );
       } else {
-        // Uncontrolled mode: update internal state
         setSelected((prev) => prev.filter((s) => s.value !== option.value));
       }
     },
@@ -77,7 +80,6 @@ export function MultiSelect({
         if (e.key === "Delete" || e.key === "Backspace") {
           if (input.value === "") {
             if (value && onValueChange) {
-              // Controlled
               onValueChange(selectedOptions.slice(0, -1).map((s) => s.value));
             } else {
               setSelected((prev) => {
@@ -96,17 +98,14 @@ export function MultiSelect({
     [value, onValueChange, selectedOptions]
   );
 
-  // Only show options that are not already selected
   const selectables = options.filter(
     (option) => !selectedOptions.some((s) => s.value === option.value)
   );
 
   const handleSelect = (option: MultiSelectOption) => {
     if (value && onValueChange) {
-      // Controlled mode
       onValueChange([...selectedOptions.map((s) => s.value), option.value]);
     } else {
-      // Uncontrolled mode
       setSelected((prev) => [...prev, option]);
     }
     setInputValue("");
@@ -116,17 +115,15 @@ export function MultiSelect({
     <Command
       onKeyDown={handleKeyDown}
       className={cn(
-        "overflow-visible bg-gold-50 text-gold-900 border border-gold-300 rounded-md",
-        "focus-within:ring-1 focus-within:ring-gold-400 focus-within:border-gold-500 hover:border-gold-500",
-        "dark:bg-gold-100 dark:text-gold-800 dark:border-gold-700 dark:hover:border-gold-600",
+        "overflow-visible bg-background text-foreground border border-input rounded-md",
+        "focus-within:ring-1 focus-within:ring-ring focus-within:border-ring hover:border-ring",
         "ring-offset-background focus-within:ring-offset-2"
       )}
     >
       <div
         className={cn(
-          "group border border-gold-300 bg-gold-50 text-gold-900 rounded-md px-3 py-2 text-sm",
-          "focus-within:ring-1 focus-within:ring-gold-400 focus-within:border-gold-500 hover:border-gold-500",
-          "dark:bg-gold-100 dark:text-gold-800 dark:border-gold-700 dark:hover:border-gold-600",
+          "group border border-input bg-background text-foreground rounded-md px-3 py-2 text-sm",
+          "focus-within:ring-1 focus-within:ring-ring focus-within:border-ring hover:border-ring",
           "ring-offset-background focus-within:ring-offset-2"
         )}
       >
@@ -135,14 +132,12 @@ export function MultiSelect({
             return (
               <Badge
                 key={option.value}
-                className={cn(
-                  "bg-gold-200 text-gold-900 border border-gold-400 rounded-md px-2 py-1 flex items-center gap-1",
-                  "dark:bg-gold-300 dark:text-gold-900 dark:border-gold-600"
-                )}
+                variant="secondary"
+                className="rounded-md px-2 py-1 flex items-center gap-1"
               >
                 {option.label}
                 <button
-                  className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-gold-400 focus:ring-offset-2"
+                  className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       handleUnselect(option);
@@ -154,7 +149,7 @@ export function MultiSelect({
                   }}
                   onClick={() => handleUnselect(option)}
                 >
-                  <X className="h-3 w-3 text-gold-400 hover:text-gold-700" />
+                  <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                 </button>
               </Badge>
             );
@@ -166,7 +161,7 @@ export function MultiSelect({
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
             placeholder={placeholder}
-            className="ml-2 flex-1 bg-transparent outline-none placeholder:text-gold-400"
+            className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
           />
         </div>
       </div>
@@ -175,8 +170,7 @@ export function MultiSelect({
           {open && selectables.length > 0 ? (
             <div
               className={cn(
-                "mt-2 absolute top-0 z-10 w-full rounded-md border bg-gold-50 text-gold-900 border-gold-400 shadow-gold-md outline-none animate-in",
-                "dark:bg-gold-300 dark:text-gold-900 border dark:border-gold-600 dark:shadow-gold-md"
+                "mt-2 absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground border-border shadow-md outline-none animate-in"
               )}
             >
               <CommandGroup className="h-full overflow-auto">
@@ -189,11 +183,7 @@ export function MultiSelect({
                         e.stopPropagation();
                       }}
                       onSelect={() => handleSelect(option)}
-                      className={cn(
-                        "cursor-pointer px-2 py-1.5 rounded-md text-sm",
-                        "focus:bg-gold-500 data-[state=checked]:bg-gold-200 data-[highlighted]:bg-gold-100",
-                        "dark:focus:bg-gold-500 dark:data-[state=checked]:bg-gold-600 dark:data-[state=checked]:text-gold-50 dark:data-[highlighted]:bg-gold-500"
-                      )}
+                      className="cursor-pointer"
                     >
                       {option.label}
                     </CommandItem>

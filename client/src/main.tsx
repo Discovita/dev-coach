@@ -1,32 +1,38 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.tsx";
-import { BrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "@/providers/ThemeProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { StrictMode, lazy, Suspense } from 'react'
+import ReactDOM from 'react-dom/client'
+import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx'
+import App from './App.tsx'
+import './styles.css'
+import reportWebVitals from './reportWebVitals.ts'
 import { Toaster } from "@/components/ui/sonner";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 48000 * 60 * 60, // 48 hours
-      staleTime: 1000 * 60 * 60, // 1 hour
-    },
-  },
-});
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import("@tanstack/react-query-devtools").then((mod) => ({
+        default: mod.ReactQueryDevtools,
+      }))
+    )
+  : () => null;
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ThemeProvider>
-          <App />
-          <Toaster closeButton richColors position="top-right" />
+const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
+
+const rootElement = document.getElementById('app')
+if (rootElement && !rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement)
+  root.render(
+    <StrictMode>
+      <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
+        <App />
+        <Suspense>
           <ReactQueryDevtools />
-        </ThemeProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
-  </StrictMode>
-);
+        </Suspense>
+        <Toaster closeButton position="bottom-right" />
+      </TanStackQueryProvider.Provider>
+    </StrictMode>,
+  )
+}
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals()

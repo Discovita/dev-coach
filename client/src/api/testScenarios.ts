@@ -1,7 +1,7 @@
 import { COACH_BASE_URL, TEST_SCENARIOS } from "@/constants/api";
-import { TestScenario } from "@/types/testScenario";
+import type { TestScenario } from "@/types/testScenario";
 import { authFetch } from "@/utils/authFetch";
-import { TestScenarioTemplate } from "@/types/testScenario";
+import type { TestScenarioTemplate } from "@/types/testScenario";
 
 export async function fetchTestScenarios(): Promise<TestScenario[]> {
   const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}`);
@@ -12,26 +12,23 @@ export async function fetchTestScenarios(): Promise<TestScenario[]> {
 export async function createTestScenario(
   data: Partial<TestScenario> | FormData
 ): Promise<TestScenario> {
-  // Check if data is FormData
   if (data instanceof FormData) {
-    // Send FormData directly (don't stringify, don't set Content-Type header)
     const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}`, {
       method: "POST",
       body: data,
-      // Don't set Content-Type - browser will set it with boundary
     });
     if (!res.ok) throw new Error("Failed to create test scenario");
     return res.json();
   }
   
-  // Handle regular JSON payload
-  const template: any =
+  const template =
     typeof data.template === "object" && data.template !== null
       ? data.template
       : {};
   const user =
-    typeof (template as any).user === "object" && (template as any).user !== null
-      ? (template as any).user
+    typeof (template as Partial<TestScenarioTemplate>).user === "object" &&
+    (template as Partial<TestScenarioTemplate>).user !== null
+      ? (template as Partial<TestScenarioTemplate>).user
       : {};
   const payload = {
     ...data,
@@ -52,19 +49,15 @@ export async function updateTestScenario(
   id: string,
   data: Partial<TestScenario> | FormData
 ): Promise<TestScenario> {
-  // Check if data is FormData
   if (data instanceof FormData) {
-    // Send FormData directly (don't stringify, don't set Content-Type header)
     const res = await authFetch(`${COACH_BASE_URL}${TEST_SCENARIOS}/${id}`, {
       method: "PUT",
       body: data,
-      // Don't set Content-Type - browser will set it with boundary
     });
     if (!res.ok) throw new Error("Failed to update test scenario");
     return res.json();
   }
-  
-  // Handle regular JSON payload
+
   const template =
     typeof data.template === "object" && data.template !== null
       ? data.template

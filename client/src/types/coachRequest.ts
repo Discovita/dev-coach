@@ -1,4 +1,4 @@
-import { ComponentAction } from "./componentConfig";
+import type { ComponentAction } from "./componentConfig";
 
 /**
  * Request model for coach API.

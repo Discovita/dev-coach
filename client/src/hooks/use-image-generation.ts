@@ -11,10 +11,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   generateIdentityImage,
   saveGeneratedImage,
+  adminSaveGeneratedImage,
   startImageChat,
   continueImageChat,
 } from "@/api/imageGeneration";
-import {
+import type {
   GenerateImageRequest,
   GenerateImageResponse,
   SaveImageRequest,
@@ -23,9 +24,9 @@ import {
   StartImageChatResponse,
   ContinueImageChatRequest,
   ContinueImageChatResponse,
-  ImageGenerationError,
   ImageGenerationErrorCode,
 } from "@/types/imageGeneration";
+import { ImageGenerationError } from "@/types/imageGeneration";
 import { toast } from "sonner";
 
 /**
@@ -45,7 +46,6 @@ export function parseImageError(error: Error | null): ParsedImageError | null {
   if (!error) return null;
   
   if (error instanceof ImageGenerationError) {
-    // Determine if the error is retryable (user can try again without changes)
     const retryableCodes: ImageGenerationErrorCode[] = [
       "MODEL_OVERLOADED",
       "RATE_LIMITED",
@@ -60,7 +60,6 @@ export function parseImageError(error: Error | null): ParsedImageError | null {
     };
   }
   
-  // Generic error
   return {
     message: error.message || "An unexpected error occurred. Please try again.",
     errorCode: "UNKNOWN",
@@ -69,26 +68,15 @@ export function parseImageError(error: Error | null): ParsedImageError | null {
   };
 }
 
-/**
- * Get a user-friendly error message based on the error type.
- * Provides specific guidance for different error scenarios.
- */
 function getErrorMessage(error: Error): string {
   if (error instanceof ImageGenerationError) {
-    // The error message from the backend is already user-friendly
     return error.message;
   }
-  // Fallback for generic errors
   return error.message || "An unexpected error occurred. Please try again.";
 }
 
-/**
- * Get the appropriate toast duration based on error type.
- * Longer duration for errors that need user action.
- */
 function getToastDuration(error: Error): number {
   if (error instanceof ImageGenerationError) {
-    // Give users more time to read actionable error messages
     return 8000;
   }
   return 5000;
@@ -114,7 +102,7 @@ export function useImageGeneration(options: UseImageGenerationOptions = {}) {
   const queryClient = useQueryClient();
   const { onStartChatSuccess, onContinueChatSuccess } = options;
 
-  // Generate image mutation
+  // Legacy generate image mutation (admin endpoint)
   const generateMutation = useMutation<
     GenerateImageResponse,
     Error,
@@ -130,23 +118,25 @@ export function useImageGeneration(options: UseImageGenerationOptions = {}) {
     },
   });
 
-  // Save image mutation
-  const saveMutation = useMutation<SaveImageResponse, Error, SaveImageRequest>(
-    {
-      mutationFn: saveGeneratedImage,
-      onSuccess: () => {
-        // Invalidate identities queries to refresh the identity with new image
-        queryClient.invalidateQueries({ queryKey: ["user", "identities"] });
-        queryClient.invalidateQueries({ queryKey: ["testScenarioUser"] });
-        toast.success("Image saved to identity successfully!");
-      },
-      onError: (error) => {
-        toast.error(`Failed to save image: ${error.message}`);
-      },
-    }
-  );
+  // Save image mutation — uses admin endpoint when `admin` flag is set (impersonation)
+  const saveMutation = useMutation<
+    SaveImageResponse,
+    Error,
+    SaveImageRequest & { admin?: boolean }
+  >({
+    mutationFn: ({ admin, ...request }) =>
+      admin ? adminSaveGeneratedImage(request) : saveGeneratedImage(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "identities"] });
+      queryClient.invalidateQueries({ queryKey: ["testScenarioUser"] });
+      toast.success("Image saved to identity successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to save image: ${error.message}`);
+    },
+  });
 
-  // Start chat mutation - fires callback reliably on every success
+  // Start chat mutation
   const startChatMutation = useMutation<
     StartImageChatResponse,
     Error,
@@ -163,7 +153,7 @@ export function useImageGeneration(options: UseImageGenerationOptions = {}) {
     },
   });
 
-  // Continue chat mutation - fires callback reliably on every success
+  // Continue chat mutation
   const continueChatMutation = useMutation<
     ContinueImageChatResponse,
     Error,
@@ -181,7 +171,7 @@ export function useImageGeneration(options: UseImageGenerationOptions = {}) {
   });
 
   return {
-    // Legacy generate/save (kept for backwards compatibility)
+    // Legacy generate/save (admin endpoint, kept for backwards compatibility)
     generateImage: generateMutation.mutateAsync,
     saveImage: saveMutation.mutateAsync,
     isGenerating: generateMutation.isPending,
@@ -192,7 +182,7 @@ export function useImageGeneration(options: UseImageGenerationOptions = {}) {
     saveData: saveMutation.data,
     resetGenerate: generateMutation.reset,
     resetSave: saveMutation.reset,
-    // New chat-based mutations
+    // Chat-based mutations
     startChat: startChatMutation.mutateAsync,
     continueChat: continueChatMutation.mutateAsync,
     isStartingChat: startChatMutation.isPending,
@@ -205,4 +195,3 @@ export function useImageGeneration(options: UseImageGenerationOptions = {}) {
     resetContinueChat: continueChatMutation.reset,
   };
 }
-

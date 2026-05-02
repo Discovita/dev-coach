@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { fetchIdentities } from "@/api/user";
 import { fetchTestScenarioUserIdentities } from "@/api/testScenarioUser";
 import { useUserTarget } from "@/context/UserTargetContext";
@@ -15,7 +15,6 @@ import { useUserTarget } from "@/context/UserTargetContext";
  */
 export function useIdentities() {
   const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
-  const queryClient = useQueryClient();
 
   const {
     data,
@@ -32,21 +31,10 @@ export function useIdentities() {
     retry: false,
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      throw new Error("Update identities not implemented");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...queryKeyPrefix, "identities"] });
-    },
-  });
-
   return {
     identities: data,
     isLoading,
     isError,
     refetchIdentities: refetch,
-    updateIdentities: updateMutation.mutateAsync,
-    updateStatus: updateMutation.status,
   };
-} 
+}

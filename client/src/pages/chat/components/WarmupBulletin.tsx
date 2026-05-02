@@ -1,5 +1,5 @@
 import React from "react";
-import { CoachState } from "@/types/coachState";
+import type { CoachState } from "@/types/coachState";
 import { CoachingPhase } from "@/enums/coachingPhase";
 
 /**

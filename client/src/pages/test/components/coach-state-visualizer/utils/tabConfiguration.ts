@@ -1,11 +1,6 @@
-import { TabName, ExpandedSectionsConfig } from "../types";
+import { TabName } from "../types";
+import type { ExpandedSectionsConfig } from "../types";
 
-/**
- * Default configuration for expanded sections
- * All sections are expanded by default for better visibility.
- * 'userProfile' removed as it is not used in the new model.
- * Ensure all keys match the actual sections rendered in the visualizer.
- */
 export const getDefaultExpandedSections = (): ExpandedSectionsConfig => ({
   state: true,
   metadata: true,
@@ -18,17 +13,11 @@ export const getDefaultExpandedSections = (): ExpandedSectionsConfig => ({
   currentActions: true,
 });
 
-/**
- * Tab configuration with labels
- */
 interface TabConfig {
   name: TabName;
   label: string;
 }
 
-/**
- * Gets the configuration for all tabs
- */
 export const getTabsConfig = (): TabConfig[] => [
   { name: TabName.STATE, label: "Coach State" },
   { name: TabName.PROMPT, label: "Prompt Info" },

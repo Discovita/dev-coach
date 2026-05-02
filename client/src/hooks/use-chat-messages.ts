@@ -3,10 +3,10 @@ import { fetchChatMessages, resetChatMessages } from "@/api/user";
 import { fetchTestScenarioChatMessages } from "@/api/testScenarioUser";
 import { apiClient } from "@/api/coach";
 import { useUserTarget } from "@/context/UserTargetContext";
-import { CoachResponse } from "@/types/coachResponse";
-import { CoachRequest } from "@/types/coachRequest";
-import { Message } from "@/types/message";
-import { ComponentConfig } from "@/types/componentConfig";
+import type { CoachResponse } from "@/types/coachResponse";
+import type { CoachRequest } from "@/types/coachRequest";
+import type { Message } from "@/types/message";
+import type { ComponentConfig } from "@/types/componentConfig";
 import { makeComponentDisplayOnly } from "@/utils/componentConfig";
 
 /**
@@ -97,7 +97,6 @@ export function useChatMessages() {
       }
     },
     onSuccess: (response: CoachResponse, variables) => {
-      console.log("[useChatMessages] Response:", response);
       queryClient.cancelQueries({ queryKey: chatMessagesKey });
 
       queryClient.setQueryData<Message[] | undefined>(
@@ -127,16 +126,13 @@ export function useChatMessages() {
             ? [...current]
             : [...current, userMsg];
 
-          if (response.component) {
-            console.log(
-              "[useChatMessages] Component response detected, invalidating chat messages to get persistent components"
-            );
-            queryClient.invalidateQueries({ queryKey: chatMessagesKey });
-          }
-
           return coachMsg ? [...next, coachMsg] : next;
         }
       );
+
+      if (response.component) {
+        queryClient.invalidateQueries({ queryKey: chatMessagesKey });
+      }
 
       if (response.final_prompt !== undefined) {
         queryClient.setQueryData(

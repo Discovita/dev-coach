@@ -1,6 +1,6 @@
-import { IdentityCategory } from "@/enums/identityCategory";
-import { IdentityState } from "@/enums/identityState";
-import { ImageSizes } from "@/types/imageSizes";
+import type { IdentityCategory } from "@/enums/identityCategory";
+import type { IdentityState } from "@/enums/identityState";
+import type { ImageSizes } from "@/types/imageSizes";
 
 /**
  * Represents a single identity with its state for test scenario editing.
@@ -23,14 +23,23 @@ export interface Identity {
   category: IdentityCategory;
   /** Current state of the identity (optional) */
   state?: IdentityState;
+  /** Scene: What clothing/attire for visualization (optional) */
+  clothing?: string | null;
+  /** Scene: What mood/feeling for visualization (optional) */
+  mood?: string | null;
+  /** Scene: What setting/environment for visualization (optional) */
+  setting?: string | null;
   /** Created timestamp (optional) */
   created_at?: string;
   /** Updated timestamp (optional) */
   updated_at?: string;
-  /** What the person is wearing in this identity visualization (optional) */
+}
+
+/**
+ * Request payload for updating an identity's scene details.
+ */
+export interface UpdateIdentityRequest {
   clothing?: string | null;
-  /** Emotional state/feeling in this identity visualization (optional) */
   mood?: string | null;
-  /** Environment/location for this identity visualization (optional) */
   setting?: string | null;
 }

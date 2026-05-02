@@ -1,36 +1,11 @@
 import { COACH_BASE_URL, REFRESH } from "@/constants/api";
-import { RequestOptions } from "@/types/auth";
+import type { RequestOptions } from "@/types/auth";
+import { getCookie, setCookie } from "@/api/auth";
+import { createLogger, LogLevel } from "@/lib/logger";
+
+const log = createLogger("authFetch", LogLevel.DEBUG);
 
 let refreshPromise: Promise<string> | null = null;
-
-// Helper function to get cookies
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift();
-  return null;
-};
-
-// Helper function to set cookies
-const setCookie = (
-  name: string,
-  value: string,
-  maxAge: number = 60 * 60 * 24
-) => {
-  const cookieOptions = [
-    `${name}=${value}`,
-    "path=/",
-    `max-age=${maxAge}`,
-    "SameSite=Lax",
-  ];
-
-  if (process.env.NEXT_PUBLIC_ENV === "production") {
-    cookieOptions.push("secure");
-    cookieOptions.push("domain=.incept.school");
-  }
-
-  document.cookie = cookieOptions.join("; ");
-};
 
 /**
 All these fire at once
@@ -53,8 +28,8 @@ export const authFetch = async (
   onLogout?: () => void
 ): Promise<Response> => {
   // Get tokens from cookies
-  let accessToken = getCookie("discovita-access-token");
-  const refreshToken = getCookie("discovita-refresh-token");
+  let accessToken = getCookie("neovita-access-token");
+  const refreshToken = getCookie("neovita-refresh-token");
 
   // Set default headers if not provided
   options.headers = options.headers || {};
@@ -71,6 +46,7 @@ export const authFetch = async (
 
   // Helper function to refresh the access token
   const refreshAccessToken = async () => {
+    log.debug("Refreshing access token");
     if (refreshPromise) {
       return refreshPromise;
     }
@@ -89,7 +65,7 @@ export const authFetch = async (
         if (response.ok) {
           const data = await response.json();
           if (data.access) {
-            setCookie("discovita-access-token", data.access);
+            setCookie("neovita-access-token", data.access);
             return data.access;
           }
           throw new Error("Access token is missing in the response.");
@@ -104,17 +80,7 @@ export const authFetch = async (
     return refreshPromise;
   };
 
-  // Make the initial request
-  console.log("[authFetch] Making request to:", url);
-  console.log("[authFetch] Request options:", options);
-  if (options.body) {
-    try {
-      const parsedBody = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
-      console.log("[authFetch] Request body:", parsedBody);
-    } catch (e) {
-      console.log("[authFetch] Request body (raw):", options.body);
-    }
-  }
+  log.debug("Making request to:", url);
   let response = await fetch(url, options);
 
   // If access token has expired, refresh it and retry the request
@@ -124,7 +90,7 @@ export const authFetch = async (
       // Update the Authorization header with the new access token
       options.headers["Authorization"] = `Bearer ${accessToken}`;
       // Retry the original request
-      console.log("[authFetch] Retrying request to:", url);
+      log.debug("Retrying request to:", url);
       response = await fetch(url, options);
     } catch (error) {
       // If refreshing the token fails, call onLogout if provided

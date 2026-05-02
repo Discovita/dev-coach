@@ -6,6 +6,10 @@ import { useUserTarget } from "@/context/UserTargetContext";
  * Retrieves the latest final_prompt from the TanStack Query cache.
  * Updates reactively when the value changes.
  *
+ * This is a cache-only query — data is written by useChatMessages onSuccess,
+ * not fetched from an API. The query is disabled to prevent refetches from
+ * overwriting cached values.
+ *
  * Context-aware: reads from UserTargetContext to determine query key prefix.
  * When inside a UserTargetProvider, uses scoped keys for the impersonated user.
  *
@@ -16,8 +20,8 @@ export function useFinalPrompt(): string | undefined {
 
   const { data } = useQuery<string | undefined>({
     queryKey: [...queryKeyPrefix, "finalPrompt"],
-    // Cache subscription only — real value is set by useChatMessages on coach response.
-    queryFn: () => "",
+    queryFn: () => undefined,
+    enabled: false,
   });
   return data;
 }

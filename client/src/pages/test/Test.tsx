@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import TestChat from "@/pages/test/components/TestChat";
 import {
   ModuleRegistry,
@@ -6,7 +6,7 @@ import {
   ValidationModule,
 } from "ag-grid-community";
 import { useTestScenarios } from "@/hooks/test-scenario/use-test-scenarios";
-import { TestScenario } from "@/types/testScenario";
+import type { TestScenario } from "@/types/testScenario";
 import TestScenarioPageHeader from "@/pages/test/components/TestScenarioPageHeader";
 import TestScenarioTable from "@/pages/test/components/TestScenarioTable";
 import TestScenarioEditor from "@/pages/test/components/TestScenarioEditor";
@@ -21,7 +21,6 @@ import { toast } from "sonner";
 import { DeleteTestScenarioDialog } from "@/pages/test/components/DeleteTestScenarioDialog";
 import { Button } from "@/components/ui/button";
 
-// Register AG Grid modules
 ModuleRegistry.registerModules([ClientSideRowModelModule, ValidationModule]);
 
 function Test() {
@@ -40,16 +39,8 @@ function Test() {
   );
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    if (scenarios) {
-      console.log("[Test] scenarios loaded:", scenarios.length);
-    }
-  }, [scenarios]);
-
-  // Create mutation
   const createMutation = useMutation({
     mutationFn: createTestScenario,
-    // Remove toast logic from here
     onSuccess: () => {
       refetch();
       setShowEditor(false);
@@ -58,11 +49,9 @@ function Test() {
     onError: () => {},
   });
 
-  // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<TestScenario> }) =>
       updateTestScenario(id, data),
-    // Remove toast logic from here
     onSuccess: () => {
       refetch();
       setShowEditor(false);
@@ -71,7 +60,6 @@ function Test() {
     onError: () => {},
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteTestScenario(id),
     onSuccess: () => {
@@ -85,21 +73,17 @@ function Test() {
     },
   });
 
-  // Handler for editing a scenario
   const handleEditScenario = (scenario: TestScenario) => {
-    // Find the scenario from the current scenarios array to ensure we have the latest data
     const currentScenario = scenarios?.find(s => s.id === scenario.id);
     setEditingScenario(currentScenario || scenario);
     setShowEditor(true);
   };
 
-  // Handler for creating a new scenario
   const handleCreateScenario = () => {
     setEditingScenario(null);
     setShowEditor(true);
   };
 
-  // Handler for saving a scenario
   const handleSaveScenario = async (fields: {
     name: string;
     description: string;
@@ -107,16 +91,13 @@ function Test() {
     imageFiles?: Map<number, File>;
   }) => {
     if (editingScenario) {
-      // Update
       const toastId = toast.loading("Updating scenario...");
       try {
-        // Always use FormData (backend only accepts multipart/form-data)
         const formData = new FormData();
         formData.append("name", fields.name);
         formData.append("description", fields.description);
         formData.append("template", JSON.stringify(fields.template));
         
-        // Add image files if any
         if (fields.imageFiles && fields.imageFiles.size > 0) {
           fields.imageFiles.forEach((file, index) => {
             formData.append(`identity_${index}_image`, file);
@@ -140,16 +121,13 @@ function Test() {
         });
       }
     } else {
-      // Create
       const toastId = toast.loading("Creating scenario...");
       try {
-        // Always use FormData (backend only accepts multipart/form-data)
         const formData = new FormData();
         formData.append("name", fields.name);
         formData.append("description", fields.description);
         formData.append("template", JSON.stringify(fields.template));
         
-        // Add image files if any
         if (fields.imageFiles && fields.imageFiles.size > 0) {
           fields.imageFiles.forEach((file, index) => {
             formData.append(`identity_${index}_image`, file);
@@ -170,13 +148,11 @@ function Test() {
     }
   };
 
-  // Handler for deleting a scenario (open dialog)
   const handleDeleteScenario = (scenario: TestScenario) => {
     setScenarioToDelete(scenario);
     setDeleteDialogOpen(true);
   };
 
-  // Handler for confirming deletion
   const handleConfirmDelete = () => {
     if (!scenarioToDelete) return;
     setIsDeleting(true);
@@ -186,8 +162,8 @@ function Test() {
         toast.success("Test scenario deleted successfully!", { id: toastId });
         setDeleteDialogOpen(false);
         setScenarioToDelete(null);
-        setShowEditor(false); // Close the editor if open
-        setEditingScenario(null); // Clear editing scenario
+        setShowEditor(false);
+        setEditingScenario(null);
       },
       onError: (err) => {
         toast.error("Failed to delete test scenario", {
@@ -201,35 +177,27 @@ function Test() {
     });
   };
 
-  // Handler for canceling delete
   const handleCancelDelete = () => {
     setDeleteDialogOpen(false);
     setScenarioToDelete(null);
     setIsDeleting(false);
   };
 
-  // Handler for canceling edit/create
   const handleCancelEdit = () => {
     setShowEditor(false);
     setEditingScenario(null);
   };
 
-  // Handler for starting a scenario (continue from current state)
   const handleStartScenario = (scenario: TestScenario) => {
-    // Step 1: Set the selected scenario to launch chat
     setSelectedScenario(scenario);
   };
 
-  // Handler for starting a scenario fresh (reset to template)
   const handleStartFreshScenario = async (scenario: TestScenario) => {
-    // Step 1: Reset the scenario on the backend
     const toastId = toast.loading("Resetting scenario...");
     try {
       await resetTestScenario(scenario.id);
       toast.success("Scenario reset. Launching...", { id: toastId });
-      // Step 2: Refetch scenarios to get the updated state
       await refetch();
-      // Step 3: Find the updated scenario and set as selected
       const updated = scenarios?.find((s) => s.id === scenario.id);
       if (updated) {
         setSelectedScenario(updated);
@@ -244,20 +212,17 @@ function Test() {
     }
   };
 
-  // Handler for resuming admin's own chat
   const handleResumeOwnSession = () => {
     setIsResumingOwnSession(true);
     setSelectedScenario(null);
   };
 
-  // Handler for returning to the scenario table
   const handleBackToTable = () => {
     setSelectedScenario(null);
     setIsResumingOwnSession(false);
   };
 
   if (selectedScenario) {
-    console.log("[Test] selectedScenario: ", selectedScenario);
     return (
       <TestChat
         scenario={selectedScenario}
@@ -272,7 +237,6 @@ function Test() {
   }
 
   if (isResumingOwnSession) {
-    // Provide a dummy scenario object for admin session
     const adminScenario = { name: "My Chat Session" } as TestScenario;
     return (
       <TestChat scenario={adminScenario} setHasStarted={handleBackToTable} />

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Identity } from "@/types/identity";
+import type { Identity } from "@/types/identity";
 import { IdentityState } from "@/enums/identityState";
 import {
   getIdentityCategoryDisplayName,
@@ -21,9 +21,7 @@ interface IdentityItemProps {
 const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Get state display info
   const getStateInfo = (state?: string) => {
-    console.log("state", state);
     switch (state) {
       case IdentityState.PROPOSED.toString():
         return {
@@ -61,7 +59,6 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
   const stateInfo = getStateInfo(identity.state);
   const StateIcon = stateInfo.icon;
 
-  // Check if there are expandable details
   const hasExpandableDetails = 
     identity.i_am_statement || 
     identity.visualization || 
@@ -70,12 +67,12 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
   return (
     <div className="_IdentityItem border rounded-md overflow-hidden bg-white dark:bg-neutral-800 shadow">
       <div
-        className="flex justify-between items-center px-4 py-2 bg-gold-100 dark:bg-gold-900/20 cursor-pointer transition-colors"
+        className="flex justify-between items-center px-4 py-2 bg-muted dark:bg-muted/20 cursor-pointer transition-colors"
         onClick={() => hasExpandableDetails && setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-2">
-          <UserIcon className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-          <div className="text-sm text-gold-600 dark:text-gold-300">
+          <UserIcon className="w-4 h-4 text-primary" />
+          <div className="text-sm text-primary">
             {identity.name}
           </div>
         </div>
@@ -90,8 +87,7 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
         )}
       </div>
       {isExpanded && hasExpandableDetails && (
-        <div className="p-3 bg-[#f8f8f8] dark:bg-neutral-700">
-          {/* Category and State Badges */}
+        <div className="p-3 bg-muted/30 dark:bg-neutral-700">
           <div className="flex flex-wrap gap-2 mb-3">
             <Badge className={`text-xs ${getIdentityCategoryColor(identity.category)}`}>
               {getIdentityCategoryDisplayName(identity.category)}
@@ -102,39 +98,36 @@ const IdentityItem: React.FC<IdentityItemProps> = ({ identity }) => {
             </Badge>
           </div>
 
-          {/* I Am Statement */}
           {identity.i_am_statement && (
             <div className="mb-3">
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+              <div className="text-xs text-muted-foreground mb-1">
                 <strong>I Am Statement:</strong>
               </div>
-              <div className="text-xs text-[#333] dark:text-gold-50 italic">
+              <div className="text-xs text-foreground italic">
                 "{identity.i_am_statement}"
               </div>
             </div>
           )}
 
-          {/* Visualization */}
           {identity.visualization && (
             <div className="mb-3">
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+              <div className="text-xs text-muted-foreground mb-1">
                 <strong>Visualization:</strong>
               </div>
-              <div className="text-xs text-[#333] dark:text-gold-50">
+              <div className="text-xs text-foreground">
                 {identity.visualization}
               </div>
             </div>
           )}
 
-          {/* Notes */}
           {identity.notes && identity.notes.length > 0 && (
             <div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+              <div className="text-xs text-muted-foreground mb-1">
                 <strong>Notes ({identity.notes.length}):</strong>
               </div>
               <ul className="space-y-1">
                 {identity.notes.map((note, index) => (
-                  <li key={index} className="text-xs text-[#333] dark:text-gold-50">
+                  <li key={index} className="text-xs text-foreground">
                     • {note}
                   </li>
                 ))}

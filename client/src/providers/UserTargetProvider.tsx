@@ -19,6 +19,8 @@ interface UserTargetProviderProps {
  *     <ChatInterface />
  *     <CoachStateVisualizer />
  *   </UserTargetProvider>
+ *
+ * Ported from: dev-coach/client/src/providers/UserTargetProvider.tsx
  */
 export const UserTargetProvider: React.FC<UserTargetProviderProps> = ({
   targetUserId,

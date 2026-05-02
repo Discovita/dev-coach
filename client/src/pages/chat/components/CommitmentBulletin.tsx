@@ -1,7 +1,7 @@
 import React from "react";
-import { CoachState } from "@/types/coachState";
+import type { CoachState } from "@/types/coachState";
 import { CoachingPhase } from "@/enums/coachingPhase";
-import { Identity } from "@/types/identity";
+import type { Identity } from "@/types/identity";
 import {
   getIdentityCategoryColor,
   getIdentityCategoryDisplayName,

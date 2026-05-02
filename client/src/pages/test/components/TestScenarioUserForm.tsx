@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TestScenarioUser } from "@/types/testScenario";
+import type { TestScenarioUser } from "@/types/testScenario";
 
 interface TestScenarioUserFormProps {
   firstName: string;
@@ -19,7 +19,7 @@ const TestScenarioUserForm = ({
 }: TestScenarioUserFormProps) => {
   return (
     <div className="flex flex-col gap-4 mt-4">
-      <div className="mb-2 text-neutral-500 text-sm">
+      <div className="mb-2 text-muted-foreground text-sm">
         Email and password are backend-controlled and not editable.
       </div>
       <div>

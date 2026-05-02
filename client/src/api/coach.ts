@@ -1,5 +1,5 @@
-import { CoachResponse } from "@/types/coachResponse";
-import { CoachRequest } from "@/types/coachRequest";
+import type { CoachResponse } from "@/types/coachResponse";
+import type { CoachRequest } from "@/types/coachRequest";
 import { COACH_BASE_URL } from "@/constants/api";
 import { authFetch } from "@/utils/authFetch";
 

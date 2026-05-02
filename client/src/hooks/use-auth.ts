@@ -7,13 +7,13 @@ import {
   logout as logoutApi,
 } from "@/api/auth";
 import {
-  RegisterCredentials,
-  LoginCredentials,
-  AuthResponse,
-  ResetPasswordCredentials,
+  type RegisterCredentials,
+  type LoginCredentials,
+  type AuthResponse,
+  type ResetPasswordCredentials,
 } from "@/types/auth";
-import { User } from "@/types/user";
-
+import type { User } from "@/types/user";
+import { isAdminUser } from "@/permissions/isAdminUser";
 /**
  * useAuth hook
  * Handles only authentication state and actions using TanStack Query.
@@ -46,7 +46,7 @@ export function useAuth() {
     queryClient.setQueryData(["user", "identities"], user.identities);
     queryClient.setQueryData(["user", "chatMessages"], user.chat_messages);
     queryClient.setQueryData(["user", "complete"], user);
-    queryClient.setQueryData(["user", "isAdmin"], !!user.is_staff);
+    queryClient.setQueryData(["user", "isAdmin"], isAdminUser(user));
   }
 
   // Login mutation

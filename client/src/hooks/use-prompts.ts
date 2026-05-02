@@ -11,7 +11,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllPrompts } from "@/api/prompts";
-import { Prompt } from "@/types/prompt";
+import type { Prompt } from "@/types/prompt";
 
 export function usePrompts() {
   return useQuery<Prompt[]>({
