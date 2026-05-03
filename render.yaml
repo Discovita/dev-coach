@@ -226,7 +226,11 @@ services:
     runtime: static
     rootDir: client
     buildCommand: |
-      export VITE_COACH_BASE_URL="https://${PREVIEW_API_HOST}/api/v1"
+      # Render's fromService property: host returns just the service slug
+      # (e.g. "preview-coach-api-pr-78"), not the full hostname. Append
+      # .onrender.com so VITE_COACH_BASE_URL is a valid URL the browser
+      # can resolve.
+      export VITE_COACH_BASE_URL="https://${PREVIEW_API_HOST}.onrender.com/api/v1"
       export VITE_ENV=preview
       npm install
       npm run build
