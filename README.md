@@ -1,6 +1,6 @@
 # Dev Coach – Local & Dev Docker Environments
 
-This project uses Docker Compose to run both the backend (Django) and frontend (Vite/React) in isolated environments for local development and dev/staging integration.
+This project uses Docker Compose to run both the backend (Django) and frontend (Vite/React) in isolated environments for local development and dev/staging integration. PR previews are deployed via Render's Blueprint (`render.yaml`).
 
 ## Prerequisites
 
