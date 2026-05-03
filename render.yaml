@@ -127,12 +127,22 @@ services:
         return 1
       }
       wait_for_db
+      # Diagnostic — surface which Render env vars are actually populated
+      # so we can pick the right "am I a preview" signal without guessing.
+      # Top-level Preview Environments don't set the older RENDER_GIT_PR_NUMBER
+      # / IS_PULL_REQUEST vars from per-service Pull Request Previews; we
+      # use RENDER_GIT_BRANCH instead.
+      echo "RENDER_SERVICE_NAME=$RENDER_SERVICE_NAME"
+      echo "RENDER_GIT_BRANCH=$RENDER_GIT_BRANCH"
+      echo "RENDER_EXTERNAL_HOSTNAME=$RENDER_EXTERNAL_HOSTNAME"
+      echo "RENDER_GIT_PR_NUMBER=${RENDER_GIT_PR_NUMBER:-<unset>}"
+      echo "IS_PULL_REQUEST=${IS_PULL_REQUEST:-<unset>}"
       # Skip the staging dump on the BASE service — it's just a template,
       # never serves real traffic, and its DB is intentionally basic-256mb
-      # (too small for the staging dump). RENDER_GIT_PR_NUMBER is unset on
-      # the base service and set on every PR-spawned preview, which is the
-      # cleanest signal Render exposes for "am I a real preview".
-      if [ -n "$RENDER_GIT_PR_NUMBER" ]; then
+      # (too small for the staging dump). The base service always deploys
+      # main; PR-spawned previews deploy their PR branch, so branch != main
+      # is the cleanest universally-set signal for "am I a real preview".
+      if [ "$RENDER_GIT_BRANCH" != "main" ]; then
         # Dump staging to a local file first, then restore from the file.
         # Streaming `pg_dump | psql` kept two SSL connections open
         # simultaneously and consistently dropped one mid-transfer.
