@@ -55,20 +55,28 @@ services:
     # to the freshly-created preview DB is racy — the dump would start, COPY
     # a few tables, then drop the SSL connection mid-stream.
     #
-    # The retry loop at the start handles a different race: each new preview
-    # creates a fresh Postgres that takes ~1-2 min to fully accept connections.
-    # preDeployCommand fires as soon as build finishes, so the first attempt
-    # often hits Connection refused. We poll up to 2 minutes before giving up.
+    # The retry loop handles two distinct races:
+    #   1. Fresh Postgres takes ~1-2 min to accept connections after creation.
+    #   2. After pg_dump's --clean rebuilds the schema, the small basic-256mb
+    #      DB briefly enters "starting up" mode and rejects connections with
+    #      "FATAL: the database system is starting up" — different from
+    #      Connection refused. Need to wait both before AND after the dump.
     preDeployCommand: |
-      for i in 1 2 3 4 5 6 7 8; do
-        if psql "$PREVIEW_DATABASE_URL" -c 'SELECT 1' >/dev/null 2>&1; then
-          echo "Preview DB is ready (attempt $i)"
-          break
-        fi
-        echo "Preview DB not ready (attempt $i/8), waiting 15s..."
-        sleep 15
-      done
+      wait_for_db() {
+        for i in 1 2 3 4 5 6 7 8; do
+          if psql "$PREVIEW_DATABASE_URL" -c 'SELECT 1' >/dev/null 2>&1; then
+            echo "Preview DB is ready (attempt $i)"
+            return 0
+          fi
+          echo "Preview DB not ready (attempt $i/8), waiting 15s..."
+          sleep 15
+        done
+        echo "Preview DB never came up after 2 minutes"
+        return 1
+      }
+      wait_for_db
       pg_dump "$STAGING_DATABASE_URL" --no-owner --no-acl --clean --if-exists | psql "$PREVIEW_DATABASE_URL"
+      wait_for_db
       python manage.py migrate --noinput
     startCommand: gunicorn asgi:application --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 600 --workers 2
     envVars:
