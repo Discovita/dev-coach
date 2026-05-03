@@ -121,6 +121,14 @@ services:
         echo "Preview DB never came up after 2 minutes"
         return 1
       }
+      # Diagnostic: surface whether STAGING_DATABASE_URL is actually
+      # propagating from the workspace env group into this preview's
+      # runtime. Print only the prefix to avoid leaking the password.
+      echo "STAGING_DATABASE_URL set? length=${#STAGING_DATABASE_URL} prefix=${STAGING_DATABASE_URL:0:30}"
+      if [ -z "$STAGING_DATABASE_URL" ]; then
+        echo "FATAL: STAGING_DATABASE_URL is empty — env group not propagating. Aborting."
+        exit 1
+      fi
       wait_for_db
       pg_dump "$STAGING_DATABASE_URL" --no-owner --no-acl --clean --if-exists | psql "$PREVIEW_DATABASE_URL"
       wait_for_db
