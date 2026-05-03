@@ -137,6 +137,12 @@ services:
       echo "RENDER_EXTERNAL_HOSTNAME=$RENDER_EXTERNAL_HOSTNAME"
       echo "RENDER_GIT_PR_NUMBER=${RENDER_GIT_PR_NUMBER:-<unset>}"
       echo "IS_PULL_REQUEST=${IS_PULL_REQUEST:-<unset>}"
+      # Presence-check the env-group-provided vars (lengths only, no values)
+      # so we can see exactly which keys propagated from preview-shared-secrets.
+      for k in STAGING_DATABASE_URL DJANGO_SECRET_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION AWS_SES_REGION_NAME AWS_SES_REGION_ENDPOINT AWS_SES_SOURCE_EMAIL STAGING_AWS_STORAGE_BUCKET_NAME PYTHON_VERSION DJANGO_SETTINGS_MODULE; do
+        v=$(eval echo \"\$$k\")
+        echo "ENV_CHECK $k length=${#v}"
+      done
       # Skip the staging dump on the BASE service — it's just a template,
       # never serves real traffic, and its DB is intentionally basic-256mb
       # (too small for the staging dump). The base service always deploys
