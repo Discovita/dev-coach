@@ -49,6 +49,12 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
+    # preDeployCommand runs after build, in the runtime environment where the
+    # preview DB is fully provisioned and reachable. Running pg_dump | psql in
+    # buildCommand was unreliable because the build container's connectivity
+    # to the freshly-created preview DB is racy — the dump would start, COPY
+    # a few tables, then drop the SSL connection mid-stream.
+    preDeployCommand: |
       pg_dump "$STAGING_DATABASE_URL" --no-owner --no-acl --clean --if-exists | psql "$PREVIEW_DATABASE_URL"
       python manage.py migrate --noinput
     startCommand: gunicorn asgi:application --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 600 --workers 2
