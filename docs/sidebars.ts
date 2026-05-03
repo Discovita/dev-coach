@@ -242,6 +242,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "development/overview",
         "development/deployment-process",
+        "development/preview-environments",
         "development/docker-configuration",
         "development/common-commands",
       ],
