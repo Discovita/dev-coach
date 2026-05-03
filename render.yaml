@@ -49,48 +49,33 @@
 previews:
   generation: manual
 
-# Shared env vars consumed by both the api and the sentinel worker. Living
-# in an envVarGroup is critical because Render's docs explicitly state:
-# "Placeholder environment variables defined with `sync: false` are not
-# copied to preview environments." Group values, by contrast, propagate
-# into preview instances — so this is the only correct place to put
-# preview-side secrets.
-envVarGroups:
-  - name: preview-shared-secrets
-    envVars:
-      # Pin Python to 3.11 — matches local dev. Render's default (3.14)
-      # has no wheels for several pinned deps (pydantic_core 2.23.4,
-      # python-dotenv 1.0.1) so pip falls back to source builds that
-      # fail on the read-only Rust cache or silently skip packages.
-      - key: PYTHON_VERSION
-        value: 3.11.10
-      - key: DJANGO_SETTINGS_MODULE
-        value: settings.previews
-      - key: DJANGO_SECRET_KEY
-        sync: false
-      # Staging DB — used as the source for pg_dump during the api's
-      # preDeploy. The worker doesn't use it but inheriting it via the
-      # group is harmless.
-      - key: STAGING_DATABASE_URL
-        sync: false
-      # AWS — same creds and region as staging. Same bucket as staging,
-      # scoped per-PR via the per-service S3_LOCATION_PREFIX below.
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: AWS_REGION
-        value: us-east-1
-      # SES vars are required by common.py at import time — even the worker
-      # (which doesn't send emails) fails to import settings without them.
-      - key: AWS_SES_REGION_NAME
-        sync: false
-      - key: AWS_SES_REGION_ENDPOINT
-        sync: false
-      - key: AWS_SES_SOURCE_EMAIL
-        sync: false
-      - key: STAGING_AWS_STORAGE_BUCKET_NAME
-        value: discovita-dev-coach-staging
+# NOTE on env groups and previews:
+# The shared env group `preview-shared-secrets` is referenced below from the
+# api and worker services, but it is intentionally NOT declared in this
+# blueprint. Per Render's docs:
+#
+#   "Placeholder environment variables defined with `sync: false` are not
+#    copied to preview environments. To share secret variables across
+#    preview environments: 1. Manually create an environment group in the
+#    Dashboard. 2. Add one or more environment variables. 3. Reference the
+#    environment group in your render.yaml file, as needed."
+#
+# In other words, blueprint-managed env groups have the same sync:false
+# propagation problem as per-service vars — only DASHBOARD-CREATED groups
+# are inherited by preview instances. So `preview-shared-secrets` must
+# exist in the workspace as a manually-created env group, populated with:
+#
+#   PYTHON_VERSION              = 3.11.10
+#   DJANGO_SETTINGS_MODULE      = settings.previews
+#   DJANGO_SECRET_KEY           (random string)
+#   STAGING_DATABASE_URL        (full postgres:// URL of staging-coach-database)
+#   AWS_ACCESS_KEY_ID           (same as staging)
+#   AWS_SECRET_ACCESS_KEY       (same as staging)
+#   AWS_REGION                  = us-east-1
+#   AWS_SES_REGION_NAME         (same as staging)
+#   AWS_SES_REGION_ENDPOINT     (same as staging)
+#   AWS_SES_SOURCE_EMAIL        (same as staging)
+#   STAGING_AWS_STORAGE_BUCKET_NAME = discovita-dev-coach-staging
 
 databases:
   - name: preview-coach-database
