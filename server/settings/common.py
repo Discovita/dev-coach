@@ -287,3 +287,4 @@ CELERY_WORKER_CONCURRENCY = 1               # one fork, one Django copy
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 50      # recycle worker after N tasks
 CELERY_WORKER_MAX_MEMORY_PER_CHILD = 400000  # recycle if RSS exceeds ~400 MB (KB)
 # (no-op edit to satisfy Render's rootDir filter for Preview Environment trigger)
+# (and another to surface the STAGING_DATABASE_URL diagnostic)
