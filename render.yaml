@@ -10,8 +10,11 @@
 #   1. Sync this blueprint into the discovita > Previews environment in the
 #      Render dashboard (one-time).
 #   2. Render creates the six base services (always-on; lowest tier).
-#   3. When a teammate edits a PR title to include `[render preview]`, Render
-#      clones the entire blueprint into a new Preview Environment for that PR.
+#   3. When a teammate opens or pushes to a PR with `[render preview]` in the
+#      title, Render clones the entire blueprint into a new Preview Environment
+#      for that PR. Note: the PR must change at least one file inside a
+#      service's rootDir (server/, client/, docs/) for the trigger to fire —
+#      root-only changes (README.md, render.yaml) won't trigger.
 #   4. The preview API service runs `pg_dump` of staging into the preview's
 #      ephemeral Postgres during preDeploy, then runs migrations from the PR
 #      branch.
@@ -22,7 +25,11 @@
 #   7. When the PR is merged or closed, Render auto-destroys the entire
 #      preview environment.
 #
-# Secrets to set in the Render dashboard once after first sync:
+# Secrets to set ONCE in the Render dashboard after first sync (on the
+# preview-shared-secrets envVarGroup, not on individual services). Values
+# defined here propagate to every preview environment automatically — unlike
+# per-service `sync: false` vars, which Render deliberately does NOT copy
+# into preview instances.
 #   - STAGING_DATABASE_URL    (full postgres:// URL of staging-coach-database)
 #   - DJANGO_SECRET_KEY       (any random string; previews don't need to share
 #                              with prod)
@@ -41,6 +48,49 @@
 # Preview Environments require a Render Pro plan or higher.
 previews:
   generation: manual
+
+# Shared env vars consumed by both the api and the sentinel worker. Living
+# in an envVarGroup is critical because Render's docs explicitly state:
+# "Placeholder environment variables defined with `sync: false` are not
+# copied to preview environments." Group values, by contrast, propagate
+# into preview instances — so this is the only correct place to put
+# preview-side secrets.
+envVarGroups:
+  - name: preview-shared-secrets
+    envVars:
+      # Pin Python to 3.11 — matches local dev. Render's default (3.14)
+      # has no wheels for several pinned deps (pydantic_core 2.23.4,
+      # python-dotenv 1.0.1) so pip falls back to source builds that
+      # fail on the read-only Rust cache or silently skip packages.
+      - key: PYTHON_VERSION
+        value: 3.11.10
+      - key: DJANGO_SETTINGS_MODULE
+        value: settings.previews
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      # Staging DB — used as the source for pg_dump during the api's
+      # preDeploy. The worker doesn't use it but inheriting it via the
+      # group is harmless.
+      - key: STAGING_DATABASE_URL
+        sync: false
+      # AWS — same creds and region as staging. Same bucket as staging,
+      # scoped per-PR via the per-service S3_LOCATION_PREFIX below.
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      # SES vars are required by common.py at import time — even the worker
+      # (which doesn't send emails) fails to import settings without them.
+      - key: AWS_SES_REGION_NAME
+        sync: false
+      - key: AWS_SES_REGION_ENDPOINT
+        sync: false
+      - key: AWS_SES_SOURCE_EMAIL
+        sync: false
+      - key: STAGING_AWS_STORAGE_BUCKET_NAME
+        value: discovita-dev-coach-staging
 
 databases:
   - name: preview-coach-database
@@ -92,24 +142,15 @@ services:
       python manage.py migrate --noinput
     startCommand: gunicorn asgi:application --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 600 --workers 2
     envVars:
-      # Pin Python to 3.11 — matches local dev. Render's default (3.14)
-      # has no wheels for several pinned deps (pydantic_core 2.23.4,
-      # python-dotenv 1.0.1) so pip falls back to source builds that
-      # fail on the read-only Rust cache or silently skip packages.
-      - key: PYTHON_VERSION
-        value: 3.11.10
-      - key: DJANGO_SETTINGS_MODULE
-        value: settings.previews
-      - key: DJANGO_SECRET_KEY
-        sync: false
+      # Shared secrets / Python pin / settings module / AWS / SES — see the
+      # preview-shared-secrets envVarGroup at the top of this file.
+      - fromGroup: preview-shared-secrets
       # Per-PR S3 prefix so previews never collide with each other or with
-      # real staging data. RENDER_GIT_PR_NUMBER is auto-set by Render on
-      # preview environments.
+      # real staging data. RENDER_GIT_PR_NUMBER is auto-set on previews and
+      # empty on the base service (which is fine — base service doesn't
+      # serve real upload traffic).
       - key: S3_LOCATION_PREFIX
         value: previews/pr-${RENDER_GIT_PR_NUMBER}/media
-      # Staging DB — used as the source for pg_dump during build only.
-      - key: STAGING_DATABASE_URL
-        sync: false
       # Preview DB — wired in five forms because previews.py reads them
       # individually and the build script needs the URL for pg_dump dest.
       - key: PREVIEW_DATABASE_URL
@@ -142,21 +183,6 @@ services:
           name: preview-coach-redis
           type: keyvalue
           property: connectionString
-      # AWS — same creds as staging, same bucket as staging (scoped by prefix).
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: AWS_REGION
-        value: us-east-1
-      - key: AWS_SES_REGION_NAME
-        sync: false
-      - key: AWS_SES_REGION_ENDPOINT
-        sync: false
-      - key: AWS_SES_SOURCE_EMAIL
-        sync: false
-      - key: STAGING_AWS_STORAGE_BUCKET_NAME
-        value: discovita-dev-coach-staging
       # FRONTEND_URL is intentionally unset for previews. Render's
       # fromService property: host doesn't resolve for static-site refs,
       # and previews don't need real password-reset email links —
@@ -176,13 +202,7 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: celery -A celery_config worker --loglevel=INFO
     envVars:
-      # Pin Python — same reason as the api service above.
-      - key: PYTHON_VERSION
-        value: 3.11.10
-      - key: DJANGO_SETTINGS_MODULE
-        value: settings.previews
-      - key: DJANGO_SECRET_KEY
-        sync: false
+      - fromGroup: preview-shared-secrets
       - key: S3_LOCATION_PREFIX
         value: previews/pr-${RENDER_GIT_PR_NUMBER}/media
       - key: PREVIEW_DB_NAME
@@ -210,22 +230,6 @@ services:
           name: preview-coach-redis
           type: keyvalue
           property: connectionString
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: AWS_REGION
-        value: us-east-1
-      # SES vars are required by common.py — even though the worker doesn't
-      # send emails directly, importing settings fails without them.
-      - key: AWS_SES_REGION_NAME
-        sync: false
-      - key: AWS_SES_REGION_ENDPOINT
-        sync: false
-      - key: AWS_SES_SOURCE_EMAIL
-        sync: false
-      - key: STAGING_AWS_STORAGE_BUCKET_NAME
-        value: discovita-dev-coach-staging
 
   # ---------------------------------------------------------------------------
   # Frontend — Vite/React static site
