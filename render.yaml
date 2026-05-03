@@ -53,6 +53,12 @@ services:
       python manage.py migrate --noinput
     startCommand: gunicorn asgi:application --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 600 --workers 2
     envVars:
+      # Pin Python to 3.11 — matches local dev. Render's default (3.14)
+      # has no wheels for several pinned deps (pydantic_core 2.23.4,
+      # python-dotenv 1.0.1) so pip falls back to source builds that
+      # fail on the read-only Rust cache or silently skip packages.
+      - key: PYTHON_VERSION
+        value: 3.11.10
       - key: DJANGO_SETTINGS_MODULE
         value: settings.previews
       - key: DJANGO_SECRET_KEY
@@ -112,12 +118,10 @@ services:
         sync: false
       - key: STAGING_AWS_STORAGE_BUCKET_NAME
         value: discovita-dev-coach-staging
-      # Frontend URL (used in password-reset emails etc).
-      - key: FRONTEND_URL
-        fromService:
-          name: preview-coach-frontend
-          type: web
-          property: host
+      # FRONTEND_URL is intentionally unset for previews. Render's
+      # fromService property: host doesn't resolve for static-site refs,
+      # and previews don't need real password-reset email links —
+      # common.py defaults FRONTEND_URL to "" which is acceptable here.
 
   # ---------------------------------------------------------------------------
   # Sentinel — Celery worker for user-note extraction
@@ -135,6 +139,9 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: celery -A celery_config worker --loglevel=INFO
     envVars:
+      # Pin Python — same reason as the api service above.
+      - key: PYTHON_VERSION
+        value: 3.11.10
       - key: DJANGO_SETTINGS_MODULE
         value: settings.previews
       - key: DJANGO_SECRET_KEY
