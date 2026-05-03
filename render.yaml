@@ -80,7 +80,12 @@ previews:
 databases:
   - name: preview-coach-database
     region: oregon
+    # Base service stays on basic-256mb — it's just the template, never
+    # serves real traffic. Previews use basic-1gb because basic-256mb
+    # consistently OOMs / drops its connection partway through restoring
+    # the staging dump (after ~11 tables, before the users table).
     plan: basic-256mb
+    previewPlan: basic-1gb
     postgresMajorVersion: "17"
 
 services:
