@@ -185,6 +185,14 @@ services:
         sync: false
       - key: AWS_REGION
         value: us-east-1
+      # SES vars are required by common.py — even though the worker doesn't
+      # send emails directly, importing settings fails without them.
+      - key: AWS_SES_REGION_NAME
+        sync: false
+      - key: AWS_SES_REGION_ENDPOINT
+        sync: false
+      - key: AWS_SES_SOURCE_EMAIL
+        sync: false
       - key: STAGING_AWS_STORAGE_BUCKET_NAME
         value: discovita-dev-coach-staging
 
