@@ -30,7 +30,7 @@
 # defined here propagate to every preview environment automatically — unlike
 # per-service `sync: false` vars, which Render deliberately does NOT copy
 # into preview instances.
-#   - STAGING_DATABASE_URL    (full postgres:// URL of staging-coach-database)
+#   - STAGING_DB_URL    (full postgres:// URL of staging-coach-database)
 #   - DJANGO_SECRET_KEY       (any random string; previews don't need to share
 #                              with prod)
 #   - AWS_ACCESS_KEY_ID       (same as staging — see staging dashboard)
@@ -68,7 +68,7 @@ previews:
 #   PYTHON_VERSION              = 3.11.10
 #   DJANGO_SETTINGS_MODULE      = settings.previews
 #   DJANGO_SECRET_KEY           (random string)
-#   STAGING_DATABASE_URL        (full postgres:// URL of staging-coach-database)
+#   STAGING_DB_URL        (full postgres:// URL of staging-coach-database)
 #   AWS_ACCESS_KEY_ID           (same as staging)
 #   AWS_SECRET_ACCESS_KEY       (same as staging)
 #   AWS_REGION                  = us-east-1
@@ -127,16 +127,25 @@ services:
         return 1
       }
       wait_for_db
-      # Dump staging to a local file first, then restore from the file. The
-      # previous streaming `pg_dump | psql` approach kept two SSL connections
-      # open simultaneously and consistently dropped one of them mid-transfer
-      # (after ~11 tables of ~25), leaving the preview DB only partially
-      # populated. Buffering through a file means each connection only has to
-      # stay open for ONE side of the transfer.
-      pg_dump "$STAGING_DATABASE_URL" --no-owner --no-acl --clean --if-exists -f /tmp/staging-dump.sql
-      psql "$PREVIEW_DATABASE_URL" -f /tmp/staging-dump.sql
-      rm -f /tmp/staging-dump.sql
-      wait_for_db
+      # Skip the staging dump on the BASE service — it's just a template,
+      # never serves real traffic, and its DB is intentionally basic-256mb
+      # (too small for the staging dump). The base service always deploys
+      # main; PR-spawned previews deploy their PR branch, so branch != main
+      # is the cleanest universally-set signal for "am I a real preview"
+      # (top-level Preview Environments do NOT set RENDER_GIT_PR_NUMBER or
+      # IS_PULL_REQUEST — those are only populated by the older per-service
+      # Pull Request Previews feature).
+      if [ "$RENDER_GIT_BRANCH" != "main" ]; then
+        # Dump staging to a local file first, then restore from the file.
+        # Streaming `pg_dump | psql` kept two SSL connections open
+        # simultaneously and consistently dropped one mid-transfer.
+        # Buffering through a file means each connection only has to stay
+        # open for ONE side of the transfer.
+        pg_dump "$STAGING_DB_URL" --no-owner --no-acl --clean --if-exists -f /tmp/staging-dump.sql
+        psql "$PREVIEW_DATABASE_URL" -f /tmp/staging-dump.sql
+        rm -f /tmp/staging-dump.sql
+        wait_for_db
+      fi
       python manage.py migrate --noinput
     startCommand: gunicorn asgi:application --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 600 --workers 2
     envVars:
