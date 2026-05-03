@@ -5,7 +5,9 @@ DEBUG = False
 
 # Database — the preview's own ephemeral Postgres, wired by Render's
 # fromDatabase ref in render.yaml. The data inside is seeded from a
-# pg_dump of the staging DB during the preview's build step.
+# pg_dump of the staging DB during the preview's preDeploy step.
+# (The seed only runs on PR-spawned previews, gated by RENDER_GIT_PR_NUMBER
+# in render.yaml — the base/template service skips it.)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
