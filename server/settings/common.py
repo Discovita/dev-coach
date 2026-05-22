@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "apps.reference_images",
     # Third-party apps...
     "rest_framework",
+    "rest_framework_api_key",
     "corsheaders",
     "drf_spectacular",
     "storages",  # Required for S3 file storage (django-storages)
@@ -99,6 +100,9 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+# API key auth ships keys via X-Api-Key. Authorization is reserved for JWT.
+API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Discovita Dev Coach API",
@@ -131,6 +135,7 @@ CORS_ALLOW_HEADERS = [
     "dnt",
     "origin",
     "user-agent",
+    "x-api-key",
     "x-csrftoken",
     "x-requested-with",
 ]
