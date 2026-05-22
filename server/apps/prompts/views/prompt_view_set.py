@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_api_key.permissions import HasAPIKey
 
 from apps.prompts.models import Prompt
 from apps.prompts.serializers import PromptSerializer
@@ -39,7 +40,7 @@ class PromptViewSet(
     - latest:         GET    /api/prompts/latest?coaching_phase=...
     """
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [HasAPIKey | IsAdminUser]
     serializer_class = PromptSerializer
 
     def get_queryset(self):
