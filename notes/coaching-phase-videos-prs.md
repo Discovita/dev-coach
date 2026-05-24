@@ -143,7 +143,7 @@ def my_action(
 | 3   | `CoachState.shown_videos` migration                                         | `casey/cpv-03-shown-videos-migration`        | `[✓]`  | casey 2026-05-24 | [#91](https://github.com/Discovita/dev-coach/pull/91) merged `f9d439a` 2026-05-24 | — |
 | 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[✓]`  | casey 2026-05-24 | [#92](https://github.com/Discovita/dev-coach/pull/92) merged `c42d2e0` 2026-05-24 | — |
 | 5   | Video registry + new enum values                                            | `casey/cpv-05-video-registry-enums`          | `[✓]`  | casey 2026-05-24 | [#93](https://github.com/Discovita/dev-coach/pull/93) merged `15163de` 2026-05-24 | 2 |
-| 6   | `ACKNOWLEDGE_SESSION_VIDEO` handler                                         | `casey/cpv-06-ack-session-video-action`      | `[~]`  | casey 2026-05-24 | —   | 3, 5 |
+| 6   | `ACKNOWLEDGE_SESSION_VIDEO` handler                                         | `casey/cpv-06-ack-session-video-action`      | `[👀]` | casey 2026-05-24 | [#94](https://github.com/Discovita/dev-coach/pull/94) | 3, 5 |
 | 7   | `START_BREAK` handler                                                       | `casey/cpv-07-start-break-action`            | `[ ]`  | —     | —   | 4, 5 |
 | 8   | `END_BREAK` handler (basic close)                                           | `casey/cpv-08-end-break-action`              | `[ ]`  | —     | —   | 4 |
 | 9   | `on_break` API field                                                        | `casey/cpv-09-on-break-api-field`            | `[ ]`  | —     | —   | 4 |
