@@ -145,7 +145,7 @@ def my_action(
 | 5   | Video registry + new enum values                                            | `casey/cpv-05-video-registry-enums`          | `[✓]`  | casey 2026-05-24 | [#93](https://github.com/Discovita/dev-coach/pull/93) merged `15163de` 2026-05-24 | 2 |
 | 6   | `ACKNOWLEDGE_SESSION_VIDEO` handler                                         | `casey/cpv-06-ack-session-video-action`      | `[✓]`  | casey 2026-05-24 | [#94](https://github.com/Discovita/dev-coach/pull/94) merged `95a6eff` 2026-05-24 | 3, 5 |
 | 7   | `START_BREAK` handler                                                       | `casey/cpv-07-start-break-action`            | `[✓]`  | casey 2026-05-24 | [#95](https://github.com/Discovita/dev-coach/pull/95) merged `400a495` 2026-05-24 | 4, 5 |
-| 8   | `END_BREAK` handler (basic close)                                           | `casey/cpv-08-end-break-action`              | `[~]`  | casey 2026-05-24 | —   | 4 |
+| 8   | `END_BREAK` handler (basic close)                                           | `casey/cpv-08-end-break-action`              | `[👀]` | casey 2026-05-24 | [#96](https://github.com/Discovita/dev-coach/pull/96) | 4 |
 | 9   | `on_break` API field                                                        | `casey/cpv-09-on-break-api-field`            | `[ ]`  | —     | —   | 4 |
 | 10  | `process_message` null-message contract + skip-LLM-on-component rule        | `casey/cpv-10-null-message-contract`         | `[ ]`  | —     | —   | — |
 | 11  | History serialization + count bump (LLM read shim)                          | `casey/cpv-11-history-serialization`         | `[ ]`  | —     | —   | 3, 4 |
