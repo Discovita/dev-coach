@@ -956,3 +956,9 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 - **Tests must run inside the backend container.** Test settings (`settings.test`) point at `LOCAL_DB_HOST=db` (the Docker compose hostname). Use: `COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest <path>`.
 - **`apps/core/functions/` did not exist before PR 1.** Created `__init__.py` for both `functions/` and `functions/public/`. The convention is to re-export from `apps.core.functions` (mirroring how `apps.core.views.__init__` aggregates).
 - **No frontend hook added.** Per the PR spec, backend handlers gate their own behavior on `settings.COACHING_PHASE_VIDEOS_ENABLED`. The endpoint exists for future FE wiring (e.g., banner outside chat) but nothing consumes it yet.
+
+### 2026-05-24 — casey — PR 3
+
+- **Pre-existing pending migration on `actions.timestamp`.** `python manage.py makemigrations --check --dry-run` flags `actions/0009_alter_action_timestamp.py` as unmade. Confirmed on `main` independently of this PR. PR 3's `coach_states` portion is clean; the `actions` drift is unrelated and not fixed here.
+- **`CoachStateSerializer` uses an explicit `fields` tuple** (not `fields = "__all__"`). New fields on `CoachState` must be added to that tuple manually or they won't appear over the API. Updated in this PR.
+- **No serializer test file existed for `coach_states`.** Created `test_coach_state_serializer.py` to assert `shown_videos` is exposed. Future serializer-shape assertions for this app should land in the same file.
