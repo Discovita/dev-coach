@@ -56,6 +56,7 @@ ACTION_REGISTRY = {
     # User-button-only actions (Coaching Phase Videos; LLM never emits them)
     ActionType.ACKNOWLEDGE_SESSION_VIDEO.value: acknowledge_session_video,
     ActionType.START_BREAK.value: start_break,
+    ActionType.END_BREAK.value: end_break,
 }
 
 

@@ -316,3 +316,14 @@ class StartBreakParams(BaseParamsModel):
             "current_phase session, which has already advanced by this point"
         ),
     )
+
+
+class EndBreakParams(BaseParamsModel):
+    """
+    Zero-field params for END_BREAK — the handler closes the user's single
+    open Break, which is identified by `(user, ended_at__isnull=True)`.
+
+    The empty model is required so the dispatcher's `params_param.annotation(**dict)`
+    convention in apply_component_actions has something to construct (the
+    frontend dispatches `{action: "end_break", params: {}}`).
+    """
