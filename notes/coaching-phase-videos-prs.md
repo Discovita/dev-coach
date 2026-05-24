@@ -138,7 +138,7 @@ def my_action(
 
 | #   | Title                                                                       | Branch                                       | Status | Claim | PR  | Logical deps |
 |-----|-----------------------------------------------------------------------------|----------------------------------------------|--------|-------|-----|--------------|
-| 1   | Feature flag scaffold                                                       | `casey/cpv-01-feature-flag`                  | `[~]`  | casey 2026-05-24 | —   | — |
+| 1   | Feature flag scaffold                                                       | `casey/cpv-01-feature-flag`                  | `[👀]` | casey 2026-05-24 | [#89](https://github.com/Discovita/dev-coach/pull/89) | — |
 | 2   | SESSIONS map + helpers                                                      | `casey/cpv-02-sessions-map`                  | `[ ]`  | —     | —   | — |
 | 3   | `CoachState.shown_videos` migration                                         | `casey/cpv-03-shown-videos-migration`        | `[ ]`  | —     | —   | — |
 | 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[ ]`  | —     | —   | — |
