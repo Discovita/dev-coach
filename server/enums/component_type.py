@@ -15,6 +15,9 @@ class ComponentType(models.TextChoices):
     ACCEPT_I_AM = "accept_i_am", "Accept I Am"
     SUGGEST_I_AM_STATEMENT = "suggest_i_am_statement", "Suggest I Am Statement"
     I_AM_STATEMENTS_SUMMARY = "i_am_statements_summary", "I Am Statements Summary"
+    # Coaching Phase Videos
+    SESSION_VIDEO = "session_video", "Session Video"
+    SESSION_BREAK = "session_break", "Session Break"
 
     @classmethod
     def from_string(cls, value: str) -> "ComponentType":

@@ -12,4 +12,7 @@ export enum ComponentType {
   ARCHIVE_IDENTITY = "archive_identity",
   SUGGEST_I_AM_STATEMENT = "suggest_i_am_statement",
   I_AM_STATEMENTS_SUMMARY = "i_am_statements_summary",
+  // Coaching Phase Videos
+  SESSION_VIDEO = "session_video",
+  SESSION_BREAK = "session_break",
 }

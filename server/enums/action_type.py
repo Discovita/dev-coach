@@ -89,6 +89,18 @@ class ActionType(models.TextChoices):
         "persist_i_am_statements_summary_component",
         "Persist I Am Statements Summary Component",
     )
+    # Coaching Phase Videos — user-button-only actions (LLM never emits them)
+    ACKNOWLEDGE_SESSION_VIDEO = (
+        "acknowledge_session_video",
+        "Acknowledge Session Video",
+    )
+    START_BREAK = "start_break", "Start Break"
+    END_BREAK = "end_break", "End Break"
+
+    @classmethod
+    def llm_callable_actions(cls) -> "list[ActionType]":
+        """All actions the LLM may emit — excludes user-button-only ones."""
+        return [a for a in cls if a not in USER_BUTTON_ONLY_ACTIONS]
 
     def get_all_actions() -> list:
         """Get all action types as a list."""
@@ -111,3 +123,17 @@ class ActionType(models.TextChoices):
         Get a human-readable string representation of the action type.
         """
         return self.label
+
+
+# Actions the user invokes via UI buttons and that the LLM is NOT allowed
+# to emit. These intentionally do NOT appear in ACTION_TYPE_TO_MODEL or in
+# CoachChatResponse — they have no place in the LLM's structured output.
+# Used by services.action_handler.utils.dynamic_schema to gate which
+# actions get pydantic fields generated for the LLM.
+USER_BUTTON_ONLY_ACTIONS: frozenset["ActionType"] = frozenset(
+    {
+        ActionType.ACKNOWLEDGE_SESSION_VIDEO,
+        ActionType.START_BREAK,
+        ActionType.END_BREAK,
+    }
+)

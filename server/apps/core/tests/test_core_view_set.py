@@ -97,3 +97,30 @@ class CoreViewSetEnumsEndpointTests(TestCase):
         response = self.client.get("/api/v1/core/enums")
         for key, items in response.data["appearance"].items():
             self.assertGreater(len(items), 0, f"Empty appearance group: {key}")
+
+    def test_response_includes_component_types_group(self):
+        """`component_types` group is exposed (added with the videos feature)."""
+        response = self.client.get("/api/v1/core/enums")
+        self.assertIn("component_types", response.data)
+
+    def test_component_types_has_value_and_label(self):
+        """Each component_types item must have value + label keys."""
+        response = self.client.get("/api/v1/core/enums")
+        for item in response.data["component_types"]:
+            self.assertIn("value", item)
+            self.assertIn("label", item)
+
+    def test_enums_endpoint_response_includes_new_action_types(self):
+        """The three Coaching Phase Videos actions appear in `allowed_actions`."""
+        response = self.client.get("/api/v1/core/enums")
+        values = {item["value"] for item in response.data["allowed_actions"]}
+        self.assertIn("acknowledge_session_video", values)
+        self.assertIn("start_break", values)
+        self.assertIn("end_break", values)
+
+    def test_enums_endpoint_response_includes_new_component_types(self):
+        """The two Coaching Phase Videos components appear in `component_types`."""
+        response = self.client.get("/api/v1/core/enums")
+        values = {item["value"] for item in response.data["component_types"]}
+        self.assertIn("session_video", values)
+        self.assertIn("session_break", values)

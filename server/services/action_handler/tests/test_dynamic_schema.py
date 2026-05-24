@@ -89,11 +89,17 @@ class BuildDynamicResponseFormatTests(SimpleTestCase):
         fields = model_cls.model_fields
         self.assertIn("create_identity", fields)
 
-    def test_all_actions_can_build(self):
-        """Every ActionType value should be buildable without error."""
-        all_action_values = [a.value for a in ActionType]
-        model_cls = build_dynamic_response_format(all_action_values)
+    def test_all_llm_callable_actions_can_build(self):
+        """Every LLM-callable ActionType should be buildable without error.
+
+        User-button-only actions (e.g., ACKNOWLEDGE_SESSION_VIDEO, START_BREAK,
+        END_BREAK) are intentionally excluded: they're invoked by the frontend
+        on button clicks, never emitted by the LLM, and therefore have no
+        entry in ACTION_TYPE_TO_MODEL.
+        """
+        action_values = [a.value for a in ActionType.llm_callable_actions()]
+        model_cls = build_dynamic_response_format(action_values)
         self.assertIn("message", model_cls.model_fields)
         self.assertEqual(
-            len(model_cls.model_fields), len(all_action_values) + 1
+            len(model_cls.model_fields), len(action_values) + 1
         )
