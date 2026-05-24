@@ -139,7 +139,7 @@ def my_action(
 | #   | Title                                                                       | Branch                                       | Status | Claim | PR  | Logical deps |
 |-----|-----------------------------------------------------------------------------|----------------------------------------------|--------|-------|-----|--------------|
 | 1   | Feature flag scaffold                                                       | `casey/cpv-01-feature-flag`                  | `[✓]`  | casey 2026-05-24 | [#89](https://github.com/Discovita/dev-coach/pull/89) merged `5e3919d` 2026-05-24 | — |
-| 2   | SESSIONS map + helpers                                                      | `casey/cpv-02-sessions-map`                  | `[👀]` | casey 2026-05-24 | [#90](https://github.com/Discovita/dev-coach/pull/90) | — |
+| 2   | SESSIONS map + helpers                                                      | `casey/cpv-02-sessions-map`                  | `[✓]`  | casey 2026-05-24 | [#90](https://github.com/Discovita/dev-coach/pull/90) merged `f97336b` 2026-05-24 | — |
 | 3   | `CoachState.shown_videos` migration                                         | `casey/cpv-03-shown-videos-migration`        | `[👀]` | casey 2026-05-24 | [#91](https://github.com/Discovita/dev-coach/pull/91) | — |
 | 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[ ]`  | —     | —   | — |
 | 5   | Video registry + new enum values                                            | `casey/cpv-05-video-registry-enums`          | `[ ]`  | —     | —   | 2 |
