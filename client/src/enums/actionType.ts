@@ -37,4 +37,8 @@ export enum ActionType {
   PERSIST_I_AM_STATEMENTS_SUMMARY_COMPONENT = "persist_i_am_statements_summary_component",
   PERSIST_NEST_IDENTITIES = "persist_nest_identities",
   PERSIST_ARCHIVE_IDENTITY = "persist_archive_identity",
+  // Coaching Phase Videos — user-button-only actions (LLM never emits them)
+  ACKNOWLEDGE_SESSION_VIDEO = "acknowledge_session_video",
+  START_BREAK = "start_break",
+  END_BREAK = "end_break",
 }

@@ -18,6 +18,7 @@ from enums.appearance import (
 )
 from enums.appearance.build import BUILDS_FEMALE, BUILDS_MALE, BUILDS_NEUTRAL
 from enums.coaching_phase import CoachingPhase
+from enums.component_type import ComponentType
 from enums.context_keys import ContextKey
 from enums.prompt_type import PromptType
 
@@ -44,6 +45,7 @@ class CoreViewSet(viewsets.GenericViewSet):
         """
         coaching_phases = [{"value": c.value, "label": c.label} for c in CoachingPhase]
         allowed_actions = [{"value": a.value, "label": a.label} for a in ActionType]
+        component_types = [{"value": c.value, "label": c.label} for c in ComponentType]
         context_keys = [{"value": k.value, "label": k.label} for k in ContextKey]
         prompt_types = [{"value": p.value, "label": p.label} for p in PromptType]
 
@@ -62,6 +64,7 @@ class CoreViewSet(viewsets.GenericViewSet):
             {
                 "coaching_phases": coaching_phases,
                 "allowed_actions": allowed_actions,
+                "component_types": component_types,
                 "context_keys": context_keys,
                 "prompt_types": prompt_types,
                 "appearance": {
