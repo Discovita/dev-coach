@@ -36,6 +36,17 @@ class CoachStateSerializer(serializers.ModelSerializer):
         help_text="The currently proposed identity (nested data).",
     )
 
+    on_break = serializers.SerializerMethodField(
+        help_text=(
+            "True iff the user has an open Break row "
+            "(`ended_at IS NULL`). Drives the frontend composer-disable "
+            "rule on initial chat load / refresh."
+        ),
+    )
+
+    def get_on_break(self, obj: CoachState) -> bool:
+        return obj.user.breaks.filter(ended_at__isnull=True).exists()
+
     class Meta:
         model = CoachState
         fields = (
@@ -50,6 +61,7 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "who_you_want_to_be",  # List of 'who you want to be' identities
             "asked_questions",  # List of questions asked during Get To Know You phase
             "shown_videos",  # List of session video keys the user has acknowledged
+            "on_break",  # Derived: open Break row exists for this user
             "updated_at",  # Timestamp of last update
         )
         read_only_fields = (
@@ -57,5 +69,6 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "user",
             "current_identity",
             "proposed_identity",
+            "on_break",
             "updated_at",
         )

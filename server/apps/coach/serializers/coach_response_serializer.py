@@ -12,3 +12,10 @@ class CoachResponseSerializer(serializers.Serializer):
         required=False,
         help_text="Optional component configuration for frontend rendering.",
     )
+    on_break = serializers.BooleanField(
+        help_text=(
+            "True iff the user has an open Break row "
+            "(`ended_at IS NULL`) after this turn. Drives the frontend "
+            "composer-disable rule."
+        ),
+    )
