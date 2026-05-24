@@ -142,7 +142,7 @@ def my_action(
 | 2   | SESSIONS map + helpers                                                      | `casey/cpv-02-sessions-map`                  | `[✓]`  | casey 2026-05-24 | [#90](https://github.com/Discovita/dev-coach/pull/90) merged `f97336b` 2026-05-24 | — |
 | 3   | `CoachState.shown_videos` migration                                         | `casey/cpv-03-shown-videos-migration`        | `[✓]`  | casey 2026-05-24 | [#91](https://github.com/Discovita/dev-coach/pull/91) merged `f9d439a` 2026-05-24 | — |
 | 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[✓]`  | casey 2026-05-24 | [#92](https://github.com/Discovita/dev-coach/pull/92) merged `c42d2e0` 2026-05-24 | — |
-| 5   | Video registry + new enum values                                            | `casey/cpv-05-video-registry-enums`          | `[~]`  | casey 2026-05-24 | —   | 2 |
+| 5   | Video registry + new enum values                                            | `casey/cpv-05-video-registry-enums`          | `[👀]` | casey 2026-05-24 | [#93](https://github.com/Discovita/dev-coach/pull/93) | 2 |
 | 6   | `ACKNOWLEDGE_SESSION_VIDEO` handler                                         | `casey/cpv-06-ack-session-video-action`      | `[ ]`  | —     | —   | 3, 5 |
 | 7   | `START_BREAK` handler                                                       | `casey/cpv-07-start-break-action`            | `[ ]`  | —     | —   | 4, 5 |
 | 8   | `END_BREAK` handler (basic close)                                           | `casey/cpv-08-end-break-action`              | `[ ]`  | —     | —   | 4 |
