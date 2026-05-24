@@ -295,3 +295,14 @@ class PersistArchiveIdentityParams(BaseParamsModel):
     coach_message_id: str = Field(
         ..., description="ID of the coach message to persist the component to"
     )
+
+
+# Coaching Phase Videos — user-button-only action params.
+# These do NOT appear in ACTION_TYPE_TO_MODEL or CoachChatResponse; the LLM
+# cannot emit them. The frontend constructs the params when building a video
+# card's Continue button, and the server validates on dispatch.
+class AcknowledgeSessionVideoParams(BaseParamsModel):
+    video_key: str = Field(
+        ...,
+        description="Session video key (e.g. 'welcome_session_intro') being acknowledged",
+    )
