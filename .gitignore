@@ -60,3 +60,6 @@ backend/public/*
 storybook-static
 server/services/ai/openai_service/scripts/images/
 server/services/image_generation/research/gemini/images
+
+# Coaching session video source files (uploaded to S3, not committed)
+videos/
