@@ -175,6 +175,22 @@ class CoachStateModelTests(TestCase):
             GetToKnowYouQuestions.HOBBIES_INTERESTS, self.coach_state.asked_questions
         )
 
+    def test_shown_videos_defaults_to_empty_list(self):
+        """shown_videos should default to empty list on a new CoachState."""
+        self.assertEqual(self.coach_state.shown_videos, [])
+
+    def test_shown_videos_accepts_appended_strings(self):
+        """shown_videos can be appended to and persists across a re-fetch."""
+        self.coach_state.shown_videos.append("welcome_session_intro")
+        self.coach_state.shown_videos.append("get_to_know_session_intro")
+        self.coach_state.save()
+
+        self.coach_state.refresh_from_db()
+        self.assertEqual(
+            self.coach_state.shown_videos,
+            ["welcome_session_intro", "get_to_know_session_intro"],
+        )
+
     def test_metadata_defaults_to_empty_dict(self):
         """metadata should default to empty dict."""
         self.assertEqual(self.coach_state.metadata, {})

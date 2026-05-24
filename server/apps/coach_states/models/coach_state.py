@@ -81,6 +81,12 @@ class CoachState(models.Model):
         blank=True,
         help_text="List of questions that have been asked during the Get To Know You phase.",
     )
+    shown_videos = ArrayField(
+        models.CharField(max_length=255),
+        default=list,
+        blank=True,
+        help_text="List of session video keys the user has acknowledged.",
+    )
     metadata = models.JSONField(
         default=dict,
         null=True,

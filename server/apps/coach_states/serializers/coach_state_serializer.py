@@ -49,6 +49,7 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "who_you_are",  # List of 'who you are' identities
             "who_you_want_to_be",  # List of 'who you want to be' identities
             "asked_questions",  # List of questions asked during Get To Know You phase
+            "shown_videos",  # List of session video keys the user has acknowledged
             "updated_at",  # Timestamp of last update
         )
         read_only_fields = (
