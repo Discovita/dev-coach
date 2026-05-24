@@ -55,6 +55,7 @@ ACTION_REGISTRY = {
     ActionType.PERSIST_ARCHIVE_IDENTITY.value: persist_archive_identity,
     # User-button-only actions (Coaching Phase Videos; LLM never emits them)
     ActionType.ACKNOWLEDGE_SESSION_VIDEO.value: acknowledge_session_video,
+    ActionType.START_BREAK.value: start_break,
 }
 
 
@@ -134,9 +135,15 @@ def apply_component_actions(
     user_message: ChatMessage,
 ) -> Tuple[CoachState, Optional[ComponentConfig]]:
     """
-    Applies actions from component interactions (e.g., button clicks) to a CoachState object.
-    This is similar to apply_actions but handles the different input format from component interactions.
-    It is not currently programatically controlled, but it is the intention of this program to only perform actions that perform database updates. Sentinel actions and any actions that return ComponentConfig are not handled here.
+    Applies actions from component interactions (e.g., button clicks) to a
+    CoachState object. Mirrors apply_coach_actions but handles the different
+    input format from component interactions.
+
+    If any handler returns a `ComponentConfig` (e.g., `START_BREAK` returns
+    a `SESSION_BREAK` card, `END_BREAK` may return a `SESSION_VIDEO` intro),
+    that config is propagated back so the orchestrator can apply the
+    skip-LLM-on-component rule. The config of the LAST returning action
+    wins if multiple actions return one in a single dispatch.
 
     Args:
         coach_state: The current coach state
@@ -144,9 +151,11 @@ def apply_component_actions(
         user_message: The user chat message that triggered the component interaction
 
     Returns:
-        updated_coach_state
+        Tuple of (updated_coach_state, component_config)
+        - component_config is None unless an action handler returned one
     """
     log.debug(f"Component actions: {component_actions}")
+    component_config: Optional[ComponentConfig] = None
 
     for component_action in component_actions:
         action_type = component_action.action
@@ -198,15 +207,18 @@ def apply_component_actions(
             ActionType.DELETE_USER_NOTE.value,
         ]:
             # These Sentinel actions don't take user_message as a parameter because they are not logged in the Action table
-            handler_func(coach_state, action_params)
+            result = handler_func(coach_state, action_params)
         else:
             # All other actions take user_message as a parameter because they get logged in the Action table
-            handler_func(coach_state, action_params, user_message)
+            result = handler_func(coach_state, action_params, user_message)
+
+        if isinstance(result, ComponentConfig):
+            component_config = result
+            log.debug(f"Component action '{action_type}' returned ComponentConfig")
 
         log.action(f"COMPONENT PARAMS:\t  {action_params}")
 
     # Refresh from DB to ensure latest state
     coach_state.refresh_from_db()
 
-    # Returning the updated coach state however, it is not currently used in the process_message endpoints.
-    return coach_state
+    return coach_state, component_config

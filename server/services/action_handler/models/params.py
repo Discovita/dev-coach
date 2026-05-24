@@ -306,3 +306,13 @@ class AcknowledgeSessionVideoParams(BaseParamsModel):
         ...,
         description="Session video key (e.g. 'welcome_session_intro') being acknowledged",
     )
+
+
+class StartBreakParams(BaseParamsModel):
+    session_key: str = Field(
+        ...,
+        description=(
+            "Session being left (the outro's session) — NOT the user's "
+            "current_phase session, which has already advanced by this point"
+        ),
+    )
