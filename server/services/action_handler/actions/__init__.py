@@ -38,6 +38,7 @@ from .persistent_components.persist_nest_identities import persist_nest_identiti
 from .persistent_components.persist_suggest_i_am_statement_component import (
     persist_suggest_i_am_statement_component,
 )
+from .persistent_components.start_break import start_break
 from .select_identity_focus import select_identity_focus
 
 # SENTINEL ACTIONS
@@ -98,4 +99,5 @@ __all__ = [
     "persist_nest_identities",
     "persist_archive_identity",
     "acknowledge_session_video",
+    "start_break",
 ]

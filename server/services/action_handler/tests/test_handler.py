@@ -202,10 +202,16 @@ class ApplyComponentActionsTests(SimpleTestCase):
         result = apply_component_actions(coach_state, [ca], user_message)
         coach_state.refresh_from_db.assert_called_once()
 
-    def test_returns_updated_coach_state(self):
-        """Should return the coach_state after refresh."""
+    def test_returns_tuple_of_state_and_component(self):
+        """Should return (coach_state, component_config) tuple. Empty input
+        means no handler ran, so component_config is None."""
         coach_state = MagicMock()
         user_message = MagicMock()
 
         result = apply_component_actions(coach_state, [], user_message)
+
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 2)
+        self.assertIs(result[0], coach_state)
+        self.assertIsNone(result[1])
         coach_state.refresh_from_db.assert_called_once()
