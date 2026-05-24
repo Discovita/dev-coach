@@ -26,6 +26,7 @@ from .components.show_suggest_i_am_statement_component import (
 )
 from .create_identity import create_identity
 from .create_multiple_identities import create_multiple_identities
+from .end_break import end_break
 from .nest_identity import nest_identity
 from .persistent_components.persist_archive_identity import persist_archive_identity
 
@@ -100,4 +101,5 @@ __all__ = [
     "persist_archive_identity",
     "acknowledge_session_video",
     "start_break",
+    "end_break",
 ]

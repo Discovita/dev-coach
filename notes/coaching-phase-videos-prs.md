@@ -144,8 +144,8 @@ def my_action(
 | 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[✓]`  | casey 2026-05-24 | [#92](https://github.com/Discovita/dev-coach/pull/92) merged `c42d2e0` 2026-05-24 | — |
 | 5   | Video registry + new enum values                                            | `casey/cpv-05-video-registry-enums`          | `[✓]`  | casey 2026-05-24 | [#93](https://github.com/Discovita/dev-coach/pull/93) merged `15163de` 2026-05-24 | 2 |
 | 6   | `ACKNOWLEDGE_SESSION_VIDEO` handler                                         | `casey/cpv-06-ack-session-video-action`      | `[✓]`  | casey 2026-05-24 | [#94](https://github.com/Discovita/dev-coach/pull/94) merged `95a6eff` 2026-05-24 | 3, 5 |
-| 7   | `START_BREAK` handler                                                       | `casey/cpv-07-start-break-action`            | `[👀]` | casey 2026-05-24 | [#95](https://github.com/Discovita/dev-coach/pull/95) | 4, 5 |
-| 8   | `END_BREAK` handler (basic close)                                           | `casey/cpv-08-end-break-action`              | `[ ]`  | —     | —   | 4 |
+| 7   | `START_BREAK` handler                                                       | `casey/cpv-07-start-break-action`            | `[✓]`  | casey 2026-05-24 | [#95](https://github.com/Discovita/dev-coach/pull/95) merged `400a495` 2026-05-24 | 4, 5 |
+| 8   | `END_BREAK` handler (basic close)                                           | `casey/cpv-08-end-break-action`              | `[👀]` | casey 2026-05-24 | [#96](https://github.com/Discovita/dev-coach/pull/96) | 4 |
 | 9   | `on_break` API field                                                        | `casey/cpv-09-on-break-api-field`            | `[ ]`  | —     | —   | 4 |
 | 10  | `process_message` null-message contract + skip-LLM-on-component rule        | `casey/cpv-10-null-message-contract`         | `[ ]`  | —     | —   | — |
 | 11  | History serialization + count bump (LLM read shim)                          | `casey/cpv-11-history-serialization`         | `[ ]`  | —     | —   | 3, 4 |
@@ -992,3 +992,11 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 - **Existing `test_apply_user_component_actions.py` tests had to set `mock_apply.return_value = (MagicMock(), None)`.** Before this PR they passed by accident — the function's return value was unused. With the new unpack-then-return shape, three tests would have crashed on `TypeError` trying to unpack a default `MagicMock`. Updated in this PR; future tests that mock `apply_component_actions` must return the 2-tuple.
 - **Existing `test_returns_updated_coach_state` test renamed to `test_returns_tuple_of_state_and_component`** to lock in the new return shape (was already mismatched with the function's type annotation; this PR brings them in sync).
 - **Backend suite at 751 after PR 7** (up from 741 after PR 6). +8 new START_BREAK tests, +2 new tests on the propagation-shape changes.
+
+### 2026-05-24 — casey — PR 8
+
+- **`EndBreakParams` is a zero-field Pydantic model, not omitted.** The dispatcher in `apply_component_actions` (handler.py) uses `params_param.annotation(**action_params)` to convert the FE's `{action, params: {}}` dict into a typed object. Without a Params class, the dispatcher would `None(**{})` and fail. Added a comment in `params.py` so PR 8's empty class doesn't look like an oversight.
+- **`end_break.py` lives at the `actions/` top level**, not under `persistent_components/`, because in PR 8 it returns `None`. PR 14 will extend it to optionally return a `ComponentConfig`; the plan flags that this would be a reasonable point to move the file, but it's not required (dispatcher doesn't care about file location).
+- **No-open-break is a no-op, not an error.** PR 7's invariant guarantees ≤1 open break per user, so the lookup is `.filter(...).first()` and a missing row is treated as a defensive idempotency case (e.g., duplicate click on a stale break card). Matches PR 6's idempotent ACK pattern.
+- **Used `django.utils.timezone.now()`** for `ended_at` — Django's tz-aware now() rather than `datetime.utcnow()`, matching the pattern PR 4's `started_at = auto_now_add=True` produces (also tz-aware).
+- **Backend suite at 756 after PR 8** (up from 751 after PR 7; +5 new END_BREAK tests).
