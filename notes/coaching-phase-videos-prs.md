@@ -1,7 +1,7 @@
 # Coaching Phase Videos — PR Coordination
 
 **Spec:** [`notes/coaching-phase-videos.md`](./coaching-phase-videos.md)
-**Feature flag:** `COACHING_PHASE_VIDEOS_ENABLED` (created in PR 1, flipped in PR 22, removed in PR 23).
+**Feature flag:** `COACHING_PHASE_VIDEOS_ENABLED` (hardcoded boolean in `server/settings/common.py`, **Summer Program pattern**). Created in PR 1, flipped via code change in PR 22, optionally removed in PR 23 (default: keep as kill switch).
 **Owner / coordinator:** Casey
 
 ## Approach (locked in)
@@ -20,6 +20,92 @@ Welcome video is seeded in `ensure_initial_message_exists`. The video Continue b
 - No multi-message coach response shape — components ride along on the existing single-message-with-component pattern.
 - No pre-LLM intro gate or post-LLM outro hook in `process_message` — handlers carry the logic.
 - No `process_message` surgery beyond the null-message contract and skip-LLM-on-component rule (both lightweight).
+
+## Codebase paths reference (verified 2026-05-24)
+
+Treat this as the source of truth. Every `<coach>` / `<core>` / `<users>` placeholder in the PR sections below resolves to one of these. Patterns called out here are what new code mirrors.
+
+**Backend layout**
+- Django settings: `server/settings/common.py` (plus `local.py`, `staging.py`, `production.py`, `test.py`, `previews.py`)
+- API router: `server/apps/api_urls.py` — `DefaultRouter` instances registered here, mounted by `server/urls.py` at `/api/v1/`
+- Test runner: `pytest` via `server/pytest.ini`. Run as `pytest server/` from repo root, or `cd server && pytest`. **Note:** the homeschool-backend Summer Program tests use Django's test runner (`manage.py test ...`) — for dev-coach we follow the local convention and use pytest.
+
+**Apps (`server/apps/<name>/`)**
+- `coach/` — coach orchestration:
+  - `functions/public/process_message.py` (orchestrator)
+  - `utils/` — `apply_coach_response_actions.py`, `apply_user_component_actions.py`, `build_coach_prompt.py`, `build_coach_response_data.py`, `generate_coach_ai_response.py`, `get_recent_chat_messages_for_prompt.py`
+  - `views/coach_view_set.py`, `views/admin_coach_view_set.py`
+  - `serializers/coach_request_serializer.py`, `serializers/coach_response_serializer.py`, `serializers/admin_coach_request_serializer.py`
+- `coach_states/` — `CoachState` model (`models/coach_state.py`), `admin/coach_state_admin.py`, `serializers/coach_state_serializer.py`, `migrations/`. **New `Break` model and `SESSION_VIDEOS` registry live in this app** (next to CoachState).
+- `chat_messages/` — `ChatMessage` model (`models/chat_message.py`, includes `component_config` JSONField), `INITIAL_MESSAGE` constant at `constants/initial_messages.py`, `utils/ensure_initial_message_exists.py`, `utils/add_chat_message.py`
+- `users/` — `UserViewSet` at `views/user_viewset.py` serves `/api/v1/user/me/*` (actions: `me`, `complete`, `coach-state`, …). `AdminTestUserViewSet` at `views/test_user_viewset.py` serves `/api/v1/admin/test-user/{pk}/*`. Serializers: `serializers/user_serializer.py` (full nested), `serializers/user_profile_serializer.py` (profile only)
+- `core/` — `CoreViewSet` registered as `r"core"` in `api_urls.py`. **No `functions/` directory exists yet — PR 1 creates `apps/core/functions/__init__.py` and `apps/core/functions/public/__init__.py`.**
+- `actions/` — `Action` model (audit log of action invocations). Action handlers themselves live in `services/action_handler/` (see below).
+- `prompts/`, `identities/`, `reference_images/`, `test_scenario/`, `user_notes/`, `authentication/` — out of scope for this feature
+
+**Services (`server/services/<name>/`)**
+- `action_handler/` — all action handlers + dispatch:
+  - State-mutation actions: `actions/<name>.py` (e.g., `transition_phase.py`, `accept_identity.py`, `create_identity.py`)
+  - Component-returning actions: `actions/components/show_*.py`
+  - Persistent-component-returning actions: `actions/persistent_components/persist_*.py`
+  - Sentinel actions (not Action-logged): `actions/sentinel/*.py`
+  - Param models (single file — append to it): `models/params.py`
+  - Action handler dispatch + `ACTION_REGISTRY`: `handler.py`
+  - Export aggregator: `actions/__init__.py`
+  - Tests: `tests/test_*_action.py` (`test_transition_phase_action.py` exists — mirror its structure)
+- `logger/`, `image_generation/` — out of scope
+
+**Enums (`server/enums/`)**
+- `action_type.py`, `component_type.py`, `coaching_phase.py`, `message_role.py`, `ai.py`, `identity_state.py`, `prompt_type.py`, `context_keys.py`, `identity_category.py`, `get_to_know_you_questions.py`
+
+**Top-level models (`server/models/`)**
+- `CoachChatResponse.py` — pydantic schema for the LLM's structured response. **New actions get added as optional fields here** so the LLM can emit them.
+- `SentinelChatResponse.py` — similar for sentinel responses
+- `components/ComponentConfig.py` — `ComponentConfig`, `ComponentButton`, `ComponentAction`, `ComponentIdentity` (mirror these when building new components)
+
+**Action handler contract (mirror this exactly for new actions):**
+```python
+# services/action_handler/actions/<name>.py
+def my_action(
+    coach_state: CoachState,
+    params: MyActionParams,
+    coach_message: ChatMessage,
+) -> Optional[ComponentConfig]:
+    # 1. Mutate state on coach_state (call .save() if needed)
+    # 2. Optionally build a ComponentConfig and return it (skip-LLM rule fires if so)
+    # 3. Log to Action.objects.create(user=..., action_type=ActionType.<NAME>.value, parameters=params.model_dump(), result_summary=..., coach_message=coach_message)
+    return component_config_or_None
+```
+
+**To register a new action, edit all 5 of these:**
+1. `enums/action_type.py` — add the enum value
+2. `services/action_handler/models/params.py` — append a `<Name>Params` pydantic class
+3. `services/action_handler/actions/<name>.py` — implement the handler
+4. `services/action_handler/actions/__init__.py` — add the import/export
+5. `services/action_handler/handler.py` — add to `ACTION_REGISTRY` dict
+6. `models/CoachChatResponse.py` — add an optional field so the LLM can emit it (only for LLM-callable actions; the three new video/break actions are user-button-only, so this step is **skipped** for them — they never appear in `CoachChatResponse`)
+
+**To register a new component type:**
+1. `enums/component_type.py` — add the enum value
+2. `client/src/enums/componentType.ts` — mirror on the frontend
+3. `client/src/pages/chat/components/coach-message-with-component/<Name>Component.tsx` — implement (mirror `IntroCannedResponseComponent.tsx`)
+4. `client/src/pages/chat/components/coach-message-with-component/CoachMessageWithComponent.tsx` — add a `case` arm in the switch
+
+**Coach response shape note:** the `on_break: bool` field is built into the response by `apps/coach/utils/build_coach_response_data.py` (call site that constructs the dict), **and** declared in `apps/coach/serializers/coach_response_serializer.py` (the DRF serializer). Both touchpoints are required.
+
+**Skip-LLM rule wiring:** `apply_user_component_actions` lives in `apps/coach/utils/apply_user_component_actions.py` but the skip-LLM check happens in the orchestrator `apps/coach/functions/public/process_message.py` — modify the orchestrator to check whether the user-action call returned a `ComponentConfig`, and skip the `generate_coach_ai_response` call if so.
+
+**Frontend layout (`client/src/`)**
+- API clients: `api/*.ts` (camelCase — `coach.ts`, `user.ts`, `auth.ts`, …)
+- Hooks: `hooks/use-*.ts` (kebab-case — `use-coach-state.ts`, `use-chat-messages.ts`, `use-profile.ts`)
+- Chat page entry: `pages/chat/Chat.tsx`
+- Chat children: `pages/chat/components/*.tsx` (`ChatInterface.tsx`, `ChatControls.tsx`, `ChatMessages.tsx`, `CoachMessage.tsx`, `UserMessage.tsx`)
+- Component renderer (the registry): `pages/chat/components/coach-message-with-component/CoachMessageWithComponent.tsx` — a switch statement on `component_type`. Adding a new component type means adding a `case` arm here AND a sibling component file.
+- Existing component implementations to mirror: `IntroCannedResponseComponent.tsx`, `CombineIdentitiesConfirmation.tsx`, `IAmStatementsSummaryComponent.tsx` (all in the same dir)
+- Enum types: `enums/componentType.ts`, `enums/actionType.ts`, `enums/coachingPhase.ts`, …
+- TS type definitions: `types/componentConfig.ts`, `types/coachRequest.ts`, …
+- Test runner: `vitest` — `cd client && npm test` (which is `vitest run`). Test files are `*.test.tsx` colocated under `__tests__/` directories.
+- **Composer / message input location:** not 100% confirmed at audit time. The composer-disable wiring goes wherever the chat input lives — likely `pages/chat/components/ChatControls.tsx` or `ChatInterface.tsx`. PR 15's first step is to identify the exact file and add the disable rule there.
 
 ## Workflow rules (strict)
 
@@ -73,8 +159,8 @@ Welcome video is seeded in `ensure_initial_message_exists`. The video Continue b
 | 19  | Rename `dev-coach/videos/` files to match session keys                      | `casey/cpv-19-rename-video-files`            | `[ ]`  | —     | —   | — |
 | 20  | S3 upload + populate registry URLs                                          | `casey/cpv-20-s3-upload-registry-urls`       | `[ ]`  | —     | —   | 5, 19 |
 | 21  | Docs update — phases, transition-phase, persistent-components, new actions  | `casey/cpv-21-docs-update`                   | `[ ]`  | —     | —   | 2, 5, 6, 7, 8, 13, 14 |
-| 22  | Flip flag in staging + prod (no code — ops change)                          | n/a — Render dashboard env var               | `[ ]`  | —     | —   | 12–14, 18, 20, 21 |
-| 23  | Remove flag plumbing                                                        | `casey/cpv-23-remove-flag-plumbing`          | `[ ]`  | —     | —   | 22 |
+| 22  | Flip flag to `True` (one-line code change)                                  | `casey/cpv-22-flip-flag`                     | `[ ]`  | —     | —   | 12–14, 18, 20, 21 |
+| 23  | Remove flag plumbing (OPTIONAL — default skip)                              | `casey/cpv-23-remove-flag-plumbing`          | `[ ]`  | —     | —   | 22 |
 | 24  | Delete `INITIAL_MESSAGE` constant                                           | `casey/cpv-24-delete-initial-message`        | `[ ]`  | —     | —   | 23 |
 | 25  | Procedure MCP doc — Add a Session Video                                     | n/a — Procedures MCP `create_document`       | `[ ]`  | —     | —   | 24 |
 
@@ -99,22 +185,110 @@ Every code PR must satisfy these before push:
 ## PR 1 — Feature flag scaffold
 
 **Branch:** `casey/cpv-01-feature-flag`
-**Scope:** Add `COACHING_PHASE_VIDEOS_ENABLED` Django setting (env-driven, default `False`), a `videos_enabled()` helper, and expose the flag as `videos_enabled: bool` on the user-state endpoint so frontend can branch on it.
-**Files likely touched:**
-- `server/settings.py` (or equivalent settings module)
-- `server/apps/<core>/utils/feature_flags.py` (new — or extend wherever existing flags live)
-- `server/apps/users/views/user_state.py` (or wherever `/user/me/` is served) — include in serializer
-- Admin test-user state endpoint (same field for parity)
+**Pattern reference:** Copy the **Summer Program flag pattern** from `AlphaAnywhere/homeschool-backend` verbatim. Specifically:
+- `homeschool-backend/server/settings/common.py:707` (hardcoded boolean + comment)
+- `homeschool-backend/server/apps/core/functions/public/get_summer_program.py` (TypedDict + helper)
+- `homeschool-backend/server/apps/core/views/summer_program_view_set.py` (public ViewSet)
+- `homeschool-backend/server/apps/core/tests/test_get_summer_program.py` (helper tests)
+- `homeschool-backend/server/apps/core/tests/test_summer_program_endpoint.py` (endpoint tests)
 
-**Tests required to pass before push:**
-- [ ] `test_videos_enabled_default_false` — env var unset → helper returns `False`
-- [ ] `test_videos_enabled_env_true` — env var `"true"` / `"1"` → `True`
-- [ ] `test_videos_enabled_env_false_explicit` — env var `"false"` / `"0"` → `False`
-- [ ] `test_user_state_response_includes_videos_enabled_field` — `/user/me/` JSON has `videos_enabled: bool`
-- [ ] `test_admin_test_user_state_includes_videos_enabled_field` — admin endpoint also includes it
+**Scope:** Add a `COACHING_PHASE_VIDEOS_ENABLED` flag as a **hardcoded boolean** in `server/settings/common.py` (not env-driven — flip via code change + deploy). Add a `get_coaching_phase_videos()` helper returning a TypedDict config. Expose it on a public ViewSet at `GET /api/v1/core/public/coaching-phase-videos/`. The endpoint always returns the full shape; `enabled` is the only field for now (shape can grow later if we expose tunables like the video Continue threshold).
+
+**Files to create / touch:**
+- `server/settings/common.py` — add the constant with a comment explaining the deploy-to-flip convention (mirror the wording from `common.py:703-706` in homeschool-backend)
+- `server/apps/core/functions/__init__.py` — create directory + re-export `get_coaching_phase_videos`
+- `server/apps/core/functions/public/__init__.py` — re-export
+- `server/apps/core/functions/public/get_coaching_phase_videos.py` — new (mirror `get_summer_program.py`)
+- `server/apps/core/views/__init__.py` — add export of the new ViewSet
+- `server/apps/core/views/coaching_phase_videos_view_set.py` — new (mirror `summer_program_view_set.py`)
+- `server/apps/api_urls.py` — register the new ViewSet on one of the existing routers (probably a new `public_router` since this is `AllowAny`, OR register directly on `default_router` with the path `r"core/public/coaching-phase-videos"`). Match the homeschool-backend convention: `router.register(r"core/public/coaching-phase-videos", CoachingPhaseVideosViewSet, basename="coaching-phase-videos")`. Mount the router in `urlpatterns` in the same file.
+- `server/apps/core/tests/test_get_coaching_phase_videos.py` — new (mirror `test_get_summer_program.py`)
+- `server/apps/core/tests/test_coaching_phase_videos_endpoint.py` — new (mirror `test_summer_program_endpoint.py`). **Use pytest** (dev-coach convention), not Django's test runner.
+
+**Code skeleton** (copy-this-shape, change names):
+
+```python
+# server/settings/common.py
+# -------------------------------------------------------------------------
+# Coaching Phase Videos feature flag
+# -------------------------------------------------------------------------
+# Exposed to the frontend via GET /api/v1/core/public/coaching-phase-videos/
+# so the UI can decide whether to expect / render video and break components.
+#
+# COACHING_PHASE_VIDEOS_ENABLED is the feature flag — flip it to control
+# visibility without an env-var change. Flipping is a code change + deploy.
+COACHING_PHASE_VIDEOS_ENABLED = False
+```
+
+```python
+# server/apps/core/functions/public/get_coaching_phase_videos.py
+from typing import TypedDict
+from django.conf import settings
+
+
+class CoachingPhaseVideosConfig(TypedDict):
+    enabled: bool
+
+
+def get_coaching_phase_videos() -> CoachingPhaseVideosConfig:
+    """
+    Return the Coaching Phase Videos config as a JSON-serializable dict.
+
+    Always returns the full shape regardless of whether the feature is
+    enabled — the frontend / backend decide what to render based on `enabled`.
+    """
+    return {
+        "enabled": settings.COACHING_PHASE_VIDEOS_ENABLED,
+    }
+```
+
+```python
+# server/apps/core/views/coaching_phase_videos_view_set.py
+import logging
+from rest_framework import status, viewsets
+from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
+from rest_framework.response import Response
+from apps.core.functions import get_coaching_phase_videos
+
+log = logging.getLogger(__name__)
+
+
+class CoachingPhaseVideosViewSet(viewsets.GenericViewSet):
+    """
+    Public Coaching Phase Videos config.
+
+    Endpoints:
+        GET /api/v1/core/public/coaching-phase-videos/ → list()
+    """
+
+    permission_classes = [AllowAny]
+
+    def list(self, request: Request) -> Response:
+        return Response(get_coaching_phase_videos(), status=status.HTTP_200_OK)
+```
+
+**Backend gating convention going forward (other PRs):** check the flag with `from django.conf import settings` and read `settings.COACHING_PHASE_VIDEOS_ENABLED` directly in app code (handlers, `ensure_initial_message_exists`, etc.). The helper function is for the endpoint contract; in-code gates use the setting directly. No `videos_enabled()` wrapper helper.
+
+**Tests required to pass before push** (mirror Summer Program tests one-for-one):
+- [ ] `test_get_coaching_phase_videos_returns_full_shape` — result keys == `{"enabled"}`
+- [ ] `test_get_coaching_phase_videos_reflects_enabled_true` — `@override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)` → `enabled` is `True`
+- [ ] `test_get_coaching_phase_videos_reflects_enabled_false` — `@override_settings(COACHING_PHASE_VIDEOS_ENABLED=False)` → `enabled` is `False`
+- [ ] `test_get_coaching_phase_videos_returns_full_shape_even_when_disabled` — shape doesn't shrink based on flag
+- [ ] `test_endpoint_returns_200` — `GET /api/v1/core/public/coaching-phase-videos/` returns 200
+- [ ] `test_endpoint_accessible_without_authentication` — `self.client.logout()` then GET still returns 200 (matches `AllowAny`)
+- [ ] `test_endpoint_response_has_expected_keys` — `set(response.data.keys()) == {"enabled"}`
+- [ ] `test_endpoint_reflects_enabled_flag_when_on` — `@override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)` → response `enabled` True
+- [ ] `test_endpoint_reflects_enabled_flag_when_off` — `@override_settings(COACHING_PHASE_VIDEOS_ENABLED=False)` → response `enabled` False, full shape still returned
+- [ ] `test_endpoint_post_not_allowed` — POST returns 405 (read-only)
 - [ ] Full backend test suite green (no regressions)
 
-**Manual verification:** none.
+**Manual verification:** `curl http://localhost:8000/api/v1/core/public/coaching-phase-videos/` returns `{"enabled": false}` without auth.
+
+**Notes:**
+- **Not env-driven.** The Summer Program flag is hardcoded; we follow that. No `os.environ.get(...)`, no `.env` line, no Render dashboard env var. Flipping the flag in PR 22 is a one-line code change + merge.
+- **No frontend hook in this PR.** Backend handlers gate their own behavior on `settings.COACHING_PHASE_VIDEOS_ENABLED`, so when the flag is off the frontend never sees video/break components and renders normally. A frontend hook can be added later if there's a use case (e.g., showing a "video feature available" banner outside chat) — none today.
+- **No removal planned in PR 23 by default.** Summer Program does not remove its flag plumbing; it's kept as a kill switch. We follow the same pattern (see PR 23 notes for the trade-off).
 
 ---
 
@@ -150,8 +324,9 @@ Every code PR must satisfy these before push:
 **Spec section:** Core design decision 3.
 **Scope:** Add `shown_videos = ArrayField(CharField(max_length=255), default=list, blank=True)` to `CoachState`. Migration only — nothing reads or writes it yet.
 **Files likely touched:**
-- `server/apps/<coach>/models/coach_state.py` (or wherever `CoachState` lives)
-- `server/apps/<coach>/migrations/00XX_coach_state_shown_videos.py` (new)
+- `server/apps/coach_states/models/coach_state.py` — add the field
+- `server/apps/coach_states/serializers/coach_state_serializer.py` — verify the field appears in the serializer (pin explicitly if `fields = "__all__"` isn't in use)
+- `server/apps/coach_states/migrations/00XX_coach_state_shown_videos.py` — generated via `python manage.py makemigrations coach_states`
 
 **Tests required to pass before push:**
 - [ ] `python manage.py makemigrations --check --dry-run` returns no pending migrations after the new one is added
@@ -170,12 +345,13 @@ Every code PR must satisfy these before push:
 
 **Branch:** `casey/cpv-04-break-model`
 **Spec section:** Core design decision 9.
-**Scope:** New `Break` model with `user`, `started_at` (auto_now_add), `ended_at` (nullable), `triggered_by_session` (CharField), `coach_message` (nullable FK). Basic admin registration. Nothing creates rows yet.
+**Scope:** New `Break` model with `user`, `started_at` (auto_now_add), `ended_at` (nullable), `triggered_by_session` (CharField), `coach_message` (nullable FK). Basic admin registration. Nothing creates rows yet. **App ownership decided: `Break` lives in the `coach_states` app** — it's a piece of coaching session state, lives next to `CoachState`, and shares migrations/admin conventions.
 **Files likely touched:**
-- `server/apps/<coach>/models/break.py` (new)
-- `server/apps/<coach>/models/__init__.py` — export
-- `server/apps/<coach>/admin.py` — register
-- `server/apps/<coach>/migrations/00XX_break.py` (new)
+- `server/apps/coach_states/models/break.py` — new model file
+- `server/apps/coach_states/models/__init__.py` — export `Break`
+- `server/apps/coach_states/admin/break_admin.py` — new admin file (mirror `coach_state_admin.py`)
+- `server/apps/coach_states/admin/__init__.py` — register the new admin
+- `server/apps/coach_states/migrations/00XX_break.py` — generated via `python manage.py makemigrations coach_states`
 
 **Tests required to pass before push:**
 - [ ] `python manage.py makemigrations --check --dry-run` clean after migration added
@@ -198,10 +374,13 @@ Every code PR must satisfy these before push:
 **Spec section:** Core design decision 4 + "Net surface area" enum rows.
 **Scope:** Add static `SESSION_VIDEOS = {video_key: {"name": ..., "url": ""}}` dict with all 12 keys derivable from the SESSIONS map. URLs blank — populated in PR 20. Add `ACKNOWLEDGE_SESSION_VIDEO`, `START_BREAK`, `END_BREAK` to `ActionType`. Add `SESSION_VIDEO`, `SESSION_BREAK` to `ComponentType`. Add a `get_video(key)` helper.
 **Files likely touched:**
-- `server/apps/<coach>/constants/session_videos.py` (new)
-- `server/enums/action_type.py`
-- `server/enums/component_type.py`
-- `server/apps/core/views/enums.py` (or wherever the enums endpoint is) — verify new values appear
+- `server/apps/coach_states/constants/__init__.py` (new directory + file)
+- `server/apps/coach_states/constants/session_videos.py` (new) — registry + `get_video(key)` helper. **Locating the registry in `coach_states` keeps it next to the `shown_videos` field and the `Break` model.**
+- `server/enums/action_type.py` — add `ACKNOWLEDGE_SESSION_VIDEO`, `START_BREAK`, `END_BREAK`
+- `server/enums/component_type.py` — add `SESSION_VIDEO`, `SESSION_BREAK`
+- `client/src/enums/actionType.ts` — mirror the three new action types (the frontend uses these when constructing `ComponentAction` objects on button clicks)
+- `client/src/enums/componentType.ts` — mirror the two new component types
+- `server/apps/core/views/core_view_set.py` (or wherever `CoreViewSet` lives — confirm via `apps/core/views/__init__.py`) — if there's an `/enums` endpoint exposing enum values, verify the new ones appear. If no such endpoint exists, skip this bullet.
 
 **Tests required to pass before push:**
 - [ ] `test_session_videos_has_intro_entry_for_every_session` — derived from SESSIONS map
@@ -225,12 +404,13 @@ Every code PR must satisfy these before push:
 
 **Branch:** `casey/cpv-06-ack-session-video-action`
 **Spec section:** Core design decision 7.
-**Scope:** Action handler that appends a `video_key` to `coach_state.shown_videos`. Idempotent. Param model with `video_key: str`. **Validates `video_key` against the `SESSION_VIDEOS` registry — raises `ValidationError` on unknown key.** Registered in the action handler dispatch table.
+**Scope:** Action handler that appends a `video_key` to `coach_state.shown_videos`. Idempotent. Param model with `video_key: str`. **Validates `video_key` against the `SESSION_VIDEOS` registry — raises `ValidationError` on unknown key.** Registered in the action handler dispatch table. Note: this is a **user-button-only action** — it does NOT appear in `models/CoachChatResponse.py` (the LLM cannot emit it).
 **Files likely touched:**
-- `server/apps/<coach>/handlers/acknowledge_session_video.py` (new)
-- Param model file
-- Handler registry / dispatch table
-- `server/apps/<coach>/handlers/__tests__/test_acknowledge_session_video.py` (new)
+- `server/services/action_handler/actions/acknowledge_session_video.py` — new handler (mirror `transition_phase.py` for the signature + Action logging)
+- `server/services/action_handler/models/params.py` — append `AcknowledgeSessionVideoParams(BaseModel)` with `video_key: str`
+- `server/services/action_handler/actions/__init__.py` — export
+- `server/services/action_handler/handler.py` — add to `ACTION_REGISTRY`
+- `server/services/action_handler/tests/test_acknowledge_session_video_action.py` — new (mirror `test_transition_phase_action.py`)
 
 **Tests required to pass before push:**
 - [ ] `test_ack_appends_video_key_to_shown_videos`
@@ -249,12 +429,13 @@ Every code PR must satisfy these before push:
 
 **Branch:** `casey/cpv-07-start-break-action`
 **Spec section:** Core design decision 7.
-**Scope:** Creates a `Break` row with `triggered_by_session=session_key, coach_message=<id>` and returns a `SESSION_BREAK` `ComponentConfig` (with the "I'm Ready" button + `END_BREAK()` action baked in). Param model with `session_key: str`. **Hard rule: it must be impossible to start a new break while one is already open. If `Break.objects.filter(user=u, ended_at__isnull=True).exists()`, raise `ValidationError`. No silent reuse, no replace, no overlap.**
+**Scope:** Creates a `Break` row with `triggered_by_session=session_key, coach_message=<id>` and returns a `SESSION_BREAK` `ComponentConfig` (with the "I'm Ready" button + `END_BREAK()` action baked in). Param model with `session_key: str`. **Hard rule: it must be impossible to start a new break while one is already open. If `Break.objects.filter(user=u, ended_at__isnull=True).exists()`, raise `ValidationError`. No silent reuse, no replace, no overlap.** User-button-only action — not added to `CoachChatResponse`.
 **Files likely touched:**
-- `server/apps/<coach>/handlers/start_break.py` (new)
-- Param model
-- Handler registry
-- `server/apps/<coach>/handlers/__tests__/test_start_break.py` (new)
+- `server/services/action_handler/actions/persistent_components/start_break.py` — new handler. **Place in the `persistent_components/` subdir** because it returns a `ComponentConfig` (mirror `persist_combine_identities.py` for structure).
+- `server/services/action_handler/models/params.py` — append `StartBreakParams(BaseModel)` with `session_key: str`
+- `server/services/action_handler/actions/__init__.py` — export
+- `server/services/action_handler/handler.py` — add to `ACTION_REGISTRY`
+- `server/services/action_handler/tests/test_start_break_action.py` — new
 
 **Tests required to pass before push:**
 - [ ] `test_start_break_creates_break_row_with_correct_triggered_by_session`
@@ -278,11 +459,13 @@ Every code PR must satisfy these before push:
 
 **Branch:** `casey/cpv-08-end-break-action`
 **Spec section:** Core design decision 7.
-**Scope:** Zero-param handler that closes the user's single open `Break` (`ended_at__isnull=True`) by stamping `ended_at=now()`. Because PR 7 guarantees at most one open break per user, this can safely use `.get()` (or `.filter().first()` + null-check). **Intro-emission logic is added in PR 14** — this PR keeps the handler scope minimal.
+**Scope:** Zero-param handler that closes the user's single open `Break` (`ended_at__isnull=True`) by stamping `ended_at=now()`. Because PR 7 guarantees at most one open break per user, this can safely use `.get()` (or `.filter().first()` + null-check). **Intro-emission logic is added in PR 14** — this PR keeps the handler scope minimal. User-button-only action — not added to `CoachChatResponse`.
 **Files likely touched:**
-- `server/apps/<coach>/handlers/end_break.py` (new)
-- Handler registry
-- `server/apps/<coach>/handlers/__tests__/test_end_break.py` (new)
+- `server/services/action_handler/actions/end_break.py` — new handler. **Place at the `actions/` top level (not under `persistent_components/`)** because in this PR it returns `None`. PR 14 will extend it to optionally return a `ComponentConfig` — at that point either leave it in place or move it to `persistent_components/` (your call when you do PR 14). Mirror `transition_phase.py` for shape.
+- `server/services/action_handler/models/params.py` — append `EndBreakParams(BaseModel)` (zero fields, but the param class must exist for the dispatcher pattern)
+- `server/services/action_handler/actions/__init__.py` — export
+- `server/services/action_handler/handler.py` — add to `ACTION_REGISTRY`
+- `server/services/action_handler/tests/test_end_break_action.py` — new
 
 **Tests required to pass before push:**
 - [ ] `test_end_break_stamps_ended_at_on_open_break`
@@ -302,9 +485,10 @@ Every code PR must satisfy these before push:
 **Spec section:** Core design decision 9.
 **Scope:** Add `on_break: bool` to coach response serializer AND user-state endpoint (regular + admin test-user variants). Derived from `Break.objects.filter(user=u, ended_at__isnull=True).exists()`.
 **Files likely touched:**
-- `server/apps/<coach>/serializers/coach_response.py`
-- `server/apps/<users>/views/user_state.py`
-- Admin test-user state endpoint
+- `server/apps/coach/serializers/coach_response_serializer.py` — add `on_break = serializers.BooleanField(...)`
+- `server/apps/coach/utils/build_coach_response_data.py` — include `on_break` in the returned dict (this is the actual call site; the serializer just validates the shape)
+- `server/apps/users/views/user_viewset.py` — `me`, `complete`, and `coach-state` actions all expose user state. Add `on_break` to at least the `coach-state` and `complete` responses (the frontend reads it on initial chat load). Update `CoachStateSerializer` (`apps/coach_states/serializers/coach_state_serializer.py`) and/or `UserSerializer` (`apps/users/serializers/user_serializer.py`) accordingly — pick whichever already aggregates derived fields.
+- `server/apps/users/views/test_user_viewset.py` — `AdminTestUserViewSet` mirror of the above for admin parity (`/api/v1/admin/test-user/{pk}/coach-state` and `/complete`)
 
 **Tests required to pass before push:**
 - [ ] `test_user_state_on_break_false_when_no_break_rows`
@@ -330,9 +514,10 @@ Every code PR must satisfy these before push:
 **No intro-gate clause, no pre/post-LLM injection hooks** — those don't exist in this approach. The handlers in PRs 13 + 14 attach components directly to messages they produce.
 
 **Files likely touched:**
-- `server/apps/<coach>/functions/public/process_message.py`
-- `server/apps/<coach>/serializers/process_message_request.py` — allow `message: Optional[str]`
-- `server/apps/<coach>/__tests__/test_process_message.py`
+- `server/apps/coach/functions/public/process_message.py` — orchestrator. Today it always calls `add_chat_message(user, message, MessageRole.USER)` and `generate_coach_ai_response`. Change: (a) skip the user-message save when `message is None`, (b) capture the return of `apply_user_component_actions` and skip `generate_coach_ai_response` if it returned a `ComponentConfig`. **Note:** `apply_user_component_actions` currently has no return path for ComponentConfig — modify `server/apps/coach/utils/apply_user_component_actions.py` to return `Optional[ComponentConfig]` (mirror the return contract of `apply_coach_response_actions`).
+- `server/apps/coach/utils/apply_user_component_actions.py` — add return value plumbing
+- `server/apps/coach/serializers/coach_request_serializer.py` — change `message` field to `Optional[str]` / `allow_null=True`
+- `server/apps/coach/tests/test_process_message.py` — new or extended (check existing test layout under `apps/coach/tests/`)
 
 **Tests required to pass before push:**
 - [ ] `test_message_none_does_not_save_user_chatmessage`
@@ -354,8 +539,8 @@ Every code PR must satisfy these before push:
 **Spec section:** Core design decision 10.
 **Scope:** Update `get_recent_chat_messages_for_prompt` to render `component_config` as bracketed narrative text using `shown_videos` and the `Break` table as sources of truth. Bump default `count` from 5 to 10. DB rows unchanged — only LLM-facing strings differ.
 **Files likely touched:**
-- `server/apps/<coach>/utils/get_recent_chat_messages_for_prompt.py` (or wherever it lives)
-- Its tests
+- `server/apps/coach/utils/get_recent_chat_messages_for_prompt.py` — modify the serialization
+- `server/apps/coach/tests/test_get_recent_chat_messages_for_prompt.py` — new or extended (verify existing test location first)
 
 **Tests required to pass before push:**
 - [ ] `test_acked_session_video_serialized_as_bracketed_watched_text`
@@ -377,10 +562,10 @@ Every code PR must satisfy these before push:
 
 **Branch:** `casey/cpv-12-welcome-injection`
 **Spec section:** Core design decision 6.A.
-**Scope:** Rewrite `ensure_initial_message_exists` so that when `videos_enabled()` is `True`, it seeds a coach message with `text=""` and a `SESSION_VIDEO(welcome_session_intro)` `component_config`. When flag is `False`, preserve today's behavior (seed `INITIAL_MESSAGE` text). The `INITIAL_MESSAGE` constant stays — it's deleted in PR 24.
+**Scope:** Rewrite `ensure_initial_message_exists` so that when `settings.COACHING_PHASE_VIDEOS_ENABLED` is `True`, it seeds a coach message with `text=""` and a `SESSION_VIDEO(welcome_session_intro)` `component_config`. When flag is `False`, preserve today's behavior (seed `INITIAL_MESSAGE` text from `apps/chat_messages/constants/initial_messages.py`). Check the flag with `from django.conf import settings` — direct setting access, no wrapper helper. The `INITIAL_MESSAGE` constant stays — it's deleted in PR 24.
 **Files likely touched:**
-- `server/apps/chat_messages/utils/ensure_initial_message_exists.py`
-- Its tests
+- `server/apps/chat_messages/utils/ensure_initial_message_exists.py` — the file to modify
+- `server/apps/chat_messages/tests/test_ensure_initial_message_exists.py` — new or extended (verify existing test location first; `apps/chat_messages/tests/` should exist)
 
 **Tests required to pass before push:**
 - [ ] `test_flag_off_seeds_initial_message_text_only` (regression)
@@ -403,14 +588,14 @@ Every code PR must satisfy these before push:
 2. **Else if `is_first_phase_of_session(new_phase)` AND the entering session has an intro AND that intro is not in `shown_videos`** → attach a `SESSION_VIDEO(intro_key)` component config to the coach message this turn. The Continue button carries `[ACK(intro_key)]`.
 3. **Else** → no component attached. Normal transition.
 
-When the flag is `False`, this enrichment short-circuits — the handler behaves identically to today. The transition itself is unchanged in both branches.
+When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-circuits — the handler behaves identically to today. Check the flag with `from django.conf import settings` — direct setting access, no wrapper helper. The transition itself is unchanged in both branches.
 
 **Implementation note:** the handler ATTACHES the component to the coach message the LLM is producing this turn — it does not create a new message row. This is the existing message-with-component pattern. No multi-message response shape required.
 
 **Files likely touched:**
-- `server/apps/<coach>/handlers/transition_phase.py`
-- `server/apps/<coach>/utils/session_video_injection.py` (new — helpers shared with PR 14)
-- `server/apps/<coach>/handlers/__tests__/test_transition_phase.py`
+- `server/services/action_handler/actions/transition_phase.py` — extend. Current signature: `transition_phase(coach_state, params: TransitionPhaseParams, coach_message: ChatMessage) -> None`. Change return type to `Optional[ComponentConfig]` and return the attached component when one applies. Note: the existing handler doesn't return anything — `apply_coach_actions` in `services/action_handler/handler.py` already handles `Optional[ComponentConfig]` returns from other handlers, so this fits the existing contract.
+- `server/apps/coach_states/utils/session_video_helpers.py` — new module with the predicate helpers `should_emit_outro(old_phase) -> bool`, `outro_component_for(leaving_session) -> ComponentConfig`, `should_emit_intro(new_phase, shown_videos) -> bool`, `intro_component_for(entering_session) -> ComponentConfig`. **Place in `coach_states/utils/` because the logic reads the SESSIONS map (from `enums/coaching_phase.py`) and the `shown_videos` field on `CoachState`.** Reuse across PR 14.
+- `server/services/action_handler/tests/test_transition_phase_action.py` — extend existing test file (already at this path — mirror its current structure)
 
 **Tests required to pass before push:**
 - [ ] `test_transition_phase_attaches_outro_when_leaving_session_has_outro` — parametrized over every session with an outro
@@ -442,12 +627,13 @@ After stamping `ended_at`:
 
 This is what makes the post-break intro fire deterministically. The component return triggers PR 10's skip-LLM rule, so the LLM doesn't run this turn — the user must ack the intro first, then the LLM speaks in the new session on the next turn.
 
-When the flag is `False`, this enrichment short-circuits — the handler behaves like PR 8.
+When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-circuits — the handler behaves like PR 8. Check the flag with `from django.conf import settings` — direct setting access, no wrapper helper.
 
 **Files likely touched:**
-- `server/apps/<coach>/handlers/end_break.py` — extend
-- `server/apps/<coach>/utils/session_video_injection.py` — shared helpers from PR 13
-- `server/apps/<coach>/handlers/__tests__/test_end_break.py`
+- `server/services/action_handler/actions/end_break.py` — extend. Change return type from `None` to `Optional[ComponentConfig]`. Use the shared helpers from PR 13.
+- `server/apps/coach_states/utils/session_video_helpers.py` — already created in PR 13; reuse the intro helpers here
+- `server/services/action_handler/tests/test_end_break_action.py` — extend
+- **Optional consideration:** if `end_break.py` now returns a `ComponentConfig`, you may want to move the file to `services/action_handler/actions/persistent_components/end_break.py` for consistency with other component-returning actions. Not strictly required — the dispatcher doesn't care about file location.
 
 **Tests required to pass before push:**
 - [ ] `test_end_break_returns_intro_component_when_current_phase_is_session_first_phase_with_unacked_intro` — parametrized
@@ -470,10 +656,12 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 **Spec section:** Core design decision 9 + composer disable rule.
 **Scope:** Frontend reads `on_break: bool` from coach response + user-state endpoint. Composer is disabled when `on_break === true`. **No multi-message response handling needed** — the response shape is unchanged. The unacked-SESSION_VIDEO clause is added in PR 18.
 **Files likely touched:**
-- `client/src/hooks/useUserState.ts` — expose `on_break`
-- `client/src/hooks/useSendMessage.ts` — read `on_break` from response (composer state updates after each turn)
-- `client/src/components/chat/Composer.tsx` — disable on `on_break`
-- Tests for each
+- `client/src/hooks/use-coach-state.ts` — extend to expose `on_break` from the `/api/v1/user/me/coach-state` response (handles initial-load case)
+- `client/src/hooks/use-chat-messages.ts` (or wherever the `process-message` POST is wrapped) — read `on_break` from the coach response after each turn
+- `client/src/api/coach.ts` — update the response TS type to include `on_break: boolean`
+- `client/src/types/` — verify a `CoachResponse` type lives here; update it if so
+- **Composer location:** identify by grepping `client/src/pages/chat/components/` for the `<input>` or `<textarea>` used for chat input. Best candidates: `ChatControls.tsx` or `ChatInterface.tsx`. Wire the disabled prop to the `on_break` flag. **Record the actual file path in `Discoveries` when you find it** so the next agent doesn't have to re-discover.
+- `client/src/pages/chat/components/__tests__/` — vitest tests colocated here
 
 **Tests required to pass before push:**
 - [ ] `useUserState exposes on_break`
@@ -493,10 +681,11 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 **Spec section:** Core design decision 8 (card + modal shell only — no threshold gate, no action dispatch).
 **Scope:** Build the visual shell. New React component for `SESSION_VIDEO`: thin card with video name + `[Watch]` / `[Watch Again]` button (label derives from `shownVideos.includes(video_key)`). Clicking opens a modal containing the `<video>` element. Modal closes on Esc or backdrop click — no actions fire on close. **No Continue button yet, no threshold logic, no action dispatch.** This PR is testable in browser by clicking through Watch → modal opens → modal closes.
 **Files likely touched:**
-- `client/src/components/chat/components/SessionVideoCard.tsx` (new)
-- `client/src/components/chat/components/SessionVideoModal.tsx` (new) — shell only
-- `client/src/components/chat/components/registry.ts` (or wherever components are wired) — register SESSION_VIDEO
-- Tests
+- `client/src/pages/chat/components/coach-message-with-component/SessionVideoCard.tsx` — new (mirror `IntroCannedResponseComponent.tsx` for the wrapper shape; the card itself is custom)
+- `client/src/pages/chat/components/coach-message-with-component/SessionVideoModal.tsx` — new, shell only
+- `client/src/pages/chat/components/coach-message-with-component/CoachMessageWithComponent.tsx` — add a `case ComponentType.SESSION_VIDEO:` arm that renders `<SessionVideoCard ... />`. **This file IS the component registry** — there's no separate `registry.ts`.
+- `client/src/types/componentConfig.ts` — extend the `ComponentConfig` type to include the SESSION_VIDEO shape (`video_key: string`, etc.). Check the existing type definitions before adding.
+- `client/src/pages/chat/components/__tests__/SessionVideoCard.test.tsx` — new vitest tests (mirror `CoachMessageWithComponent.test.tsx` for setup)
 
 **Tests required to pass before push:**
 - [ ] `SessionVideoCard renders video name from registry`
@@ -521,10 +710,12 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 **Spec section:** Core design decision 8 (threshold-gated Continue) + 7 (action dispatch).
 **Scope:** Add the Continue button to `SessionVideoModal` with threshold-disabled state (20s before end for videos > 30s; 50% for videos ≤ 30s). Wire bundled action dispatch on Continue click (ACK for intros; ACK + START_BREAK for outros, with the `session_key` carried by the card's `component_config`). Esc / backdrop close still fires no action. Watch Again modal still has no Continue button.
 **Files likely touched:**
-- `client/src/components/chat/components/SessionVideoModal.tsx` — add Continue + threshold + dispatch
-- `client/src/hooks/useVideoThreshold.ts` (new) — encapsulate threshold logic
-- `client/src/api/chat.ts` — ensure send-message accepts `{ message: null, actions: [...] }`
-- Tests
+- `client/src/pages/chat/components/coach-message-with-component/SessionVideoModal.tsx` — add Continue + threshold + dispatch
+- `client/src/hooks/use-video-threshold.ts` — new (kebab-case to match `use-*.ts` convention)
+- `client/src/api/coach.ts` — ensure the process-message POST accepts `{ message: null, actions: [...] }` (the TS type should allow `message: string | null`)
+- `client/src/types/coachRequest.ts` — update if needed for the null-message case
+- `client/src/hooks/__tests__/use-video-threshold.test.ts` — new vitest unit test for the hook
+- `client/src/pages/chat/components/__tests__/SessionVideoModal.test.tsx` — new vitest tests
 
 **Tests required to pass before push:**
 - [ ] `Continue button rendered for active (unacked) modal`
@@ -541,7 +732,7 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 - [ ] `useVideoThreshold returns disabled before threshold` — unit test
 - [ ] Full frontend test suite green
 
-**Manual verification:** in browser with `videos_enabled=true` for a test user and a placeholder MP4 in the registry, walk through: Watch → modal opens → Continue disabled → scrub close to end (or wait) → Continue enables → click → modal closes → confirm API call fired with the correct actions.
+**Manual verification:** in browser with `COACHING_PHASE_VIDEOS_ENABLED=True` in local settings and a placeholder MP4 in the registry, walk through: Watch → modal opens → Continue disabled → scrub close to end (or wait) → Continue enables → click → modal closes → confirm API call fired with the correct actions.
 
 ---
 
@@ -551,11 +742,12 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 **Spec section:** Core design decisions 7 + 9 + composer disable rule.
 **Scope:** New React component for `SESSION_BREAK` — renders "I'm Ready" button that dispatches `{message: "I'm ready", actions: [END_BREAK()]}` (canned-response pattern, same as `IntroCannedResponseComponent`). Extend composer-disable hook with the unacked-SESSION_VIDEO clause.
 **Files likely touched:**
-- `client/src/components/chat/components/SessionBreakComponent.tsx` (new)
-- Component registry
-- `client/src/components/chat/Composer.tsx` (extend disable rule)
-- `client/src/hooks/useComposerDisabled.ts` (new or extend) — pin the rule in one place
-- Tests
+- `client/src/pages/chat/components/coach-message-with-component/SessionBreakComponent.tsx` — new (mirror `IntroCannedResponseComponent.tsx` exactly — it's the canned-response pattern)
+- `client/src/pages/chat/components/coach-message-with-component/CoachMessageWithComponent.tsx` — add `case ComponentType.SESSION_BREAK:` arm
+- **Composer file** (located in PR 15) — extend the disable rule to also fire when latest coach message is an unacked SESSION_VIDEO
+- `client/src/hooks/use-composer-disabled.ts` — new hook centralizing the disable logic (recommended — keeps the rule in one place for testability)
+- `client/src/hooks/__tests__/use-composer-disabled.test.ts` — new
+- `client/src/pages/chat/components/__tests__/SessionBreakComponent.test.tsx` — new
 
 **Tests required to pass before push:**
 - [ ] `SessionBreakComponent renders I'm Ready button`
@@ -595,10 +787,10 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 
 **Branch:** `casey/cpv-20-s3-upload-registry-urls`
 **Spec section:** Core design decision 5.
-**Scope:** Upload all 12 video files to the project's S3 bucket (same pattern as user images — match key prefix convention). Populate `SESSION_VIDEOS[video_key]["url"]` with the resulting S3 URL for each entry.
+**Scope:** Upload all 12 video files to the project's S3 bucket (same pattern as user images — match key prefix convention used by `apps/reference_images/` or `apps/identities/` image storage). Populate `SESSION_VIDEOS[video_key]["url"]` with the resulting S3 URL for each entry.
 **Files likely touched:**
-- `server/apps/<coach>/constants/session_videos.py` — fill in URLs
-- Upload script (one-off or committed) under `scripts/` or `aws/`
+- `server/apps/coach_states/constants/session_videos.py` — fill in URLs
+- Upload script — one-off bash or Python script. Place at the repo root or under an existing `scripts/` directory if one exists. Reference the existing S3 upload pattern by grepping for `boto3` or `s3.upload_file` in `server/apps/reference_images/` — mirror that.
 
 **Tests required to pass before push:**
 - [ ] All 12 S3 URLs respond `200 OK` to `curl -I` (smoke)
@@ -644,15 +836,18 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 
 ---
 
-## PR 22 — Flip flag in staging + prod (ops only — no code PR)
+## PR 22 — Flip flag to `True`
 
-**Branch:** none — Render dashboard env-var change only.
+**Branch:** `casey/cpv-22-flip-flag`
 **Spec section:** prerequisite for cleanup PRs.
-**Scope:** Set `COACHING_PHASE_VIDEOS_ENABLED=true` in the staging service environment, smoke test, then set the same in the production service environment, smoke test again. No code changes. No PR — this is a deploy ticket / dashboard change tracked here for sequencing.
+**Scope:** **One-line code change** flipping `COACHING_PHASE_VIDEOS_ENABLED = False` → `True` in `server/settings/common.py`. This matches the Summer Program pattern — the flag is hardcoded in the settings file, so flipping it is a PR + merge + deploy, not an env-var change in the Render dashboard. Smoke test in staging (post-merge auto-deploy) before merging to prod (or before promoting the build to prod if staging/prod are separate deploys).
+**Files likely touched:**
+- `server/settings/common.py` — the one-line flip
 
 **Verification required before marking complete:**
-- [ ] `COACHING_PHASE_VIDEOS_ENABLED=true` set in staging service env vars (verified via Render dashboard or API)
-- [ ] `COACHING_PHASE_VIDEOS_ENABLED=true` set in production service env vars (verified)
+- [ ] PR merged with single-line diff: `COACHING_PHASE_VIDEOS_ENABLED = False` → `True`
+- [ ] Staging auto-deploys the change; `GET /api/v1/core/public/coaching-phase-videos/` on staging returns `{"enabled": true}`
+- [ ] Production deploys the change; `GET /api/v1/core/public/coaching-phase-videos/` on prod returns `{"enabled": true}`
 - [ ] Staging smoke (manual):
   - [ ] Create a new test user → see welcome video card as first message
   - [ ] Walk through INTRODUCTION → first session boundary → see LLM transition message with intro card attached → ACK → LLM continues in new session
@@ -669,29 +864,42 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 
 ---
 
-## PR 23 — Remove flag plumbing
+## PR 23 — Remove flag plumbing (OPTIONAL — see notes)
 
 **Branch:** `casey/cpv-23-remove-flag-plumbing`
 **Spec section:** cleanup (not in spec).
-**Scope:** Now that the flag is permanently `true` in all environments, remove the conditional plumbing. Delete the `COACHING_PHASE_VIDEOS_ENABLED` Django setting. Delete the `videos_enabled()` helper. Collapse every `if videos_enabled():` branch to its on-branch (delete the dead off-branch). Remove `videos_enabled: bool` from the user-state endpoint response (frontend no longer needs it). Tests that asserted "flag off → old behavior" are deleted.
-**Files likely touched:**
-- `server/settings.py`
-- `server/apps/<core>/utils/feature_flags.py` — delete the helper
-- `server/apps/users/views/user_state.py` — remove field
-- `server/apps/<coach>/handlers/transition_phase.py` — collapse flag check
-- `server/apps/<coach>/handlers/end_break.py` — collapse flag check
-- `server/apps/chat_messages/utils/ensure_initial_message_exists.py` — collapse to on-branch
-- `server/apps/<coach>/utils/session_video_injection.py` — collapse flag check
 
-**Tests required to pass before push:**
+**Decision required before claiming this PR:** the Summer Program pattern we copied in PR 1 does **not** remove its flag after rollout — it stays in `settings/common.py` as a long-lived kill switch. Two options:
+
+- **Option A — keep the flag (default, matches Summer Program exactly).** Skip this PR entirely. The flag stays at `True`, the endpoint stays public, the `if settings.COACHING_PHASE_VIDEOS_ENABLED:` branches stay. If videos ever break in prod, ops can flip the boolean to `False` and redeploy in minutes. Cost: a handful of dead-looking `if` branches and an endpoint that always returns `{"enabled": true}`.
+- **Option B — remove the flag (clean cut).** Run this PR. Justified if we're confident we'll never want to disable the feature again. Delete the constant, the helper, the ViewSet, the URL route, the tests, and every `if settings.COACHING_PHASE_VIDEOS_ENABLED:` branch (collapsing to the on-branch). The `INITIAL_MESSAGE` constant (the off-branch in `ensure_initial_message_exists`) is then dead — PR 24 removes it.
+
+**If running Option B (scope of this PR):**
+- `server/settings/common.py` — delete the `COACHING_PHASE_VIDEOS_ENABLED` constant + comment
+- `server/apps/core/functions/public/get_coaching_phase_videos.py` — delete
+- `server/apps/core/functions/public/__init__.py` and `server/apps/core/functions/__init__.py` — drop the re-export (delete the file entirely if it becomes empty)
+- `server/apps/core/views/coaching_phase_videos_view_set.py` — delete
+- `server/apps/core/views/__init__.py` — drop the re-export
+- `server/apps/api_urls.py` — drop the `core/public/coaching-phase-videos` route registration
+- `server/apps/core/tests/test_get_coaching_phase_videos.py` — delete
+- `server/apps/core/tests/test_coaching_phase_videos_endpoint.py` — delete
+- `server/services/action_handler/actions/transition_phase.py` — collapse flag check, keep only the videos-on branch
+- `server/services/action_handler/actions/end_break.py` (or `actions/persistent_components/end_break.py` if you moved it in PR 14) — collapse flag check
+- `server/apps/chat_messages/utils/ensure_initial_message_exists.py` — collapse to on-branch
+- `server/apps/coach_states/utils/session_video_helpers.py` — collapse flag check (if it grew one)
+
+**Tests required to pass before push (Option B only):**
 - [ ] `grep -rn "COACHING_PHASE_VIDEOS_ENABLED" .` returns no hits
-- [ ] `grep -rn "videos_enabled" server/ client/src/` returns no hits
+- [ ] `grep -rn "get_coaching_phase_videos" .` returns no hits
+- [ ] `grep -rn "coaching-phase-videos" .` returns no hits in URL config / route files
 - [ ] Backend test suite green — all previously-flag-on tests now pass without conditional setup
 - [ ] Frontend test suite green
-- [ ] `test_user_state_response_no_longer_includes_videos_enabled_field` (positive removal test)
+- [ ] `GET /api/v1/core/public/coaching-phase-videos/` returns 404 (route removed) — verified via test or manual curl
 - [ ] Manual smoke in staging — full flow still works identically to PR 22's smoke
 
-**Manual verification:** repeat PR 22's staging smoke walkthrough — behavior must be identical. Confirm no regressions visible in browser dev-tools network tab.
+**Manual verification:** repeat PR 22's staging smoke walkthrough — behavior must be identical. Confirm `GET /api/v1/core/public/coaching-phase-videos/` is gone.
+
+**Recommendation:** default to **Option A** (skip this PR) unless we have a strong reason to remove the flag. Kill switches are cheap; rebuilding one under pressure is not.
 
 ---
 
@@ -701,8 +909,9 @@ When the flag is `False`, this enrichment short-circuits — the handler behaves
 **Spec section:** "Net surface area" — `ensure_initial_message_exists` rewrite says delete `INITIAL_MESSAGE`.
 **Scope:** Pure dead-code cleanup. The constant has been unreachable since PR 12's on-branch became the only branch in PR 23. Delete the constant, any dead imports referencing it, and any tests that asserted on its content. Keep this PR minimal — one constant, its imports, any tests using it.
 **Files likely touched:**
-- `server/apps/chat_messages/constants.py` — delete `INITIAL_MESSAGE` (and the file entirely if it becomes empty)
-- Any file with `from chat_messages.constants import INITIAL_MESSAGE` — drop the import
+- `server/apps/chat_messages/constants/initial_messages.py` — delete `INITIAL_MESSAGE` (the file also exports `INITIAL_MESSAGE_OLD` — keep `INITIAL_MESSAGE_OLD` unless explicitly told otherwise, since the docstring notes it's "preserved for reference")
+- `server/apps/chat_messages/constants/__init__.py` — drop the `INITIAL_MESSAGE` re-export and remove `"INITIAL_MESSAGE"` from `__all__`
+- Any file with `from apps.chat_messages.constants import INITIAL_MESSAGE` — drop the import
 - Any test using `INITIAL_MESSAGE` — delete the test (these only existed to assert the old welcome-text behavior)
 
 **Tests required to pass before push:**
