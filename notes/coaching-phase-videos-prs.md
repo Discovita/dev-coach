@@ -140,8 +140,8 @@ def my_action(
 |-----|-----------------------------------------------------------------------------|----------------------------------------------|--------|-------|-----|--------------|
 | 1   | Feature flag scaffold                                                       | `casey/cpv-01-feature-flag`                  | `[✓]`  | casey 2026-05-24 | [#89](https://github.com/Discovita/dev-coach/pull/89) merged `5e3919d` 2026-05-24 | — |
 | 2   | SESSIONS map + helpers                                                      | `casey/cpv-02-sessions-map`                  | `[✓]`  | casey 2026-05-24 | [#90](https://github.com/Discovita/dev-coach/pull/90) merged `f97336b` 2026-05-24 | — |
-| 3   | `CoachState.shown_videos` migration                                         | `casey/cpv-03-shown-videos-migration`        | `[👀]` | casey 2026-05-24 | [#91](https://github.com/Discovita/dev-coach/pull/91) | — |
-| 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[ ]`  | —     | —   | — |
+| 3   | `CoachState.shown_videos` migration                                         | `casey/cpv-03-shown-videos-migration`        | `[✓]`  | casey 2026-05-24 | [#91](https://github.com/Discovita/dev-coach/pull/91) merged `f9d439a` 2026-05-24 | — |
+| 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[~]`  | casey 2026-05-24 | —   | — |
 | 5   | Video registry + new enum values                                            | `casey/cpv-05-video-registry-enums`          | `[ ]`  | —     | —   | 2 |
 | 6   | `ACKNOWLEDGE_SESSION_VIDEO` handler                                         | `casey/cpv-06-ack-session-video-action`      | `[ ]`  | —     | —   | 3, 5 |
 | 7   | `START_BREAK` handler                                                       | `casey/cpv-07-start-break-action`            | `[ ]`  | —     | —   | 4, 5 |
@@ -962,3 +962,10 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 - **Pre-existing pending migration on `actions.timestamp`.** `python manage.py makemigrations --check --dry-run` flags `actions/0009_alter_action_timestamp.py` as unmade. Confirmed on `main` independently of this PR. PR 3's `coach_states` portion is clean; the `actions` drift is unrelated and not fixed here.
 - **`CoachStateSerializer` uses an explicit `fields` tuple** (not `fields = "__all__"`). New fields on `CoachState` must be added to that tuple manually or they won't appear over the API. Updated in this PR.
 - **No serializer test file existed for `coach_states`.** Created `test_coach_state_serializer.py` to assert `shown_videos` is exposed. Future serializer-shape assertions for this app should land in the same file.
+
+### 2026-05-24 — casey — PR 4
+
+- **Model file is `break_model.py`, not `break.py`.** `break` is a reserved keyword in Python, so `from apps.coach_states.models.break import Break` is a `SyntaxError`. Class name is still `Break`; callers should import via the package re-export: `from apps.coach_states.models import Break`. The plan's literal `break.py` filename was not workable.
+- **Admin smoke test can't fetch the rendered HTML.** `whitenoise.storage.CompressedManifestStaticFilesStorage` is the project's static-files backend; under pytest there's no manifest, so `{% static %}` lookups in the admin templates raise `ValueError: Missing staticfiles manifest entry`. `override_settings(STATICFILES_STORAGE=…)` didn't help because the staticfiles storage is cached. The PR 4 admin test asserts two cheaper things instead: (a) `admin.site.is_registered(Break)`, (b) `reverse("admin:coach_states_break_changelist")` resolves to a sane URL. The full render path will work in dev/prod once `collectstatic` has run.
+- **`Break.user` uses `related_name="breaks"`.** `user.breaks.filter(ended_at__isnull=True).exists()` is the canonical "on a break?" lookup (matches the `on_break` API field that PR 9 will expose).
+- **`coach_message` FK uses `on_delete=SET_NULL`.** A break survives the deletion of the coach message that anchored it — preserves the historical row for analytics/audit.
