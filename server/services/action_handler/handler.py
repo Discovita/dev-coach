@@ -53,6 +53,8 @@ ACTION_REGISTRY = {
     ActionType.PERSIST_I_AM_STATEMENTS_SUMMARY_COMPONENT.value: persist_i_am_statements_summary_component,
     ActionType.PERSIST_NEST_IDENTITIES.value: persist_nest_identities,
     ActionType.PERSIST_ARCHIVE_IDENTITY.value: persist_archive_identity,
+    # User-button-only actions (Coaching Phase Videos; LLM never emits them)
+    ActionType.ACKNOWLEDGE_SESSION_VIDEO.value: acknowledge_session_video,
 }
 
 

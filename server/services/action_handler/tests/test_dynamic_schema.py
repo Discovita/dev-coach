@@ -8,7 +8,7 @@ response models from lists of allowed action type strings.
 from django.test import SimpleTestCase
 from pydantic import BaseModel, ValidationError
 
-from enums.action_type import ActionType
+from enums.action_type import USER_BUTTON_ONLY_ACTIONS, ActionType
 from services.action_handler.utils.dynamic_schema import (
     ACTION_TYPE_TO_MODEL,
     build_dynamic_response_format,
@@ -63,13 +63,19 @@ class BuildDynamicResponseFormatTests(SimpleTestCase):
             self.assertIn(action_value, fields)
 
     def test_action_type_to_model_registry_completeness(self):
-        """Every ActionType that is in the handler registry should be in ACTION_TYPE_TO_MODEL."""
+        """Every LLM-callable ActionType in the handler registry must also be
+        in ACTION_TYPE_TO_MODEL. User-button-only actions are exempt — they
+        live in ACTION_REGISTRY so the dispatcher can route component-button
+        clicks, but they intentionally have no entry in ACTION_TYPE_TO_MODEL
+        because the LLM can't emit them."""
         from services.action_handler.handler import ACTION_REGISTRY
 
         for action_value in ACTION_REGISTRY:
             try:
                 action_type = ActionType(action_value)
             except ValueError:
+                continue
+            if action_type in USER_BUTTON_ONLY_ACTIONS:
                 continue
             self.assertIn(
                 action_type,

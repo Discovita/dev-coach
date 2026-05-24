@@ -2,6 +2,7 @@ from .accept_i_am_statement import accept_i_am_statement
 from .accept_identity import (
     accept_identity,  # Deprecated; auto update Identity state to ACCEPTED when moving to Identity Refinement
 )
+from .acknowledge_session_video import acknowledge_session_video
 from .accept_identity_commitment import accept_identity_commitment
 from .accept_identity_refinement import accept_identity_refinement
 from .accept_identity_visualization import accept_identity_visualization
@@ -96,4 +97,5 @@ __all__ = [
     "persist_i_am_statements_summary_component",
     "persist_nest_identities",
     "persist_archive_identity",
+    "acknowledge_session_video",
 ]
