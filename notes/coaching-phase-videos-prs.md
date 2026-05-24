@@ -138,7 +138,7 @@ def my_action(
 
 | #   | Title                                                                       | Branch                                       | Status | Claim | PR  | Logical deps |
 |-----|-----------------------------------------------------------------------------|----------------------------------------------|--------|-------|-----|--------------|
-| 1   | Feature flag scaffold                                                       | `casey/cpv-01-feature-flag`                  | `[ ]`  | —     | —   | — |
+| 1   | Feature flag scaffold                                                       | `casey/cpv-01-feature-flag`                  | `[👀]` | casey 2026-05-24 | [#89](https://github.com/Discovita/dev-coach/pull/89) | — |
 | 2   | SESSIONS map + helpers                                                      | `casey/cpv-02-sessions-map`                  | `[ ]`  | —     | —   | — |
 | 3   | `CoachState.shown_videos` migration                                         | `casey/cpv-03-shown-videos-migration`        | `[ ]`  | —     | —   | — |
 | 4   | `Break` model + migration                                                   | `casey/cpv-04-break-model`                   | `[ ]`  | —     | —   | — |
@@ -949,4 +949,10 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 
 > Append-only log. Add entries with date + your handle + what you found. The next agent should read this top-to-bottom before starting work.
 
-_(empty)_
+### 2026-05-24 — casey — PR 1
+
+- **Endpoint URL has no trailing slash.** The dev-coach `default_router` is `DefaultRouter(trailing_slash=False)`, so the public endpoint is `GET /api/v1/core/public/coaching-phase-videos` (not `…/`). This diverges from the spec text — the spec was written with a trailing slash matching the Summer Program reference, but in homeschool-backend the router uses `trailing_slash=True`. Match this convention in any FE fetch later.
+- **`pytest server/` from the repo root collects two pre-existing collection errors** (`apps/test_scenario/admin/test_scenario_admin.py` and `apps/test_scenario/models/test_scenario.py`) because they match `test_*.py` but aren't tests. The issue exists on `main` independently of this PR. Workaround when running the full suite: `pytest --ignore=apps/test_scenario/admin --ignore=apps/test_scenario/models --ignore=apps/test_scenario/views`. With those ignores, the full suite is 654 passing on this branch.
+- **Tests must run inside the backend container.** Test settings (`settings.test`) point at `LOCAL_DB_HOST=db` (the Docker compose hostname). Use: `COMPOSE_PROJECT_NAME=dev-coach-local docker compose --profile local -f docker/docker-compose.yml -f docker/docker-compose.local.yml exec backend pytest <path>`.
+- **`apps/core/functions/` did not exist before PR 1.** Created `__init__.py` for both `functions/` and `functions/public/`. The convention is to re-export from `apps.core.functions` (mirroring how `apps.core.views.__init__` aggregates).
+- **No frontend hook added.** Per the PR spec, backend handlers gate their own behavior on `settings.COACHING_PHASE_VIDEOS_ENABLED`. The endpoint exists for future FE wiring (e.g., banner outside chat) but nothing consumes it yet.
