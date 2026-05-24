@@ -291,3 +291,15 @@ VERSATILEIMAGEFIELD_SETTINGS = {
 CELERY_WORKER_CONCURRENCY = 1               # one fork, one Django copy
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 50      # recycle worker after N tasks
 CELERY_WORKER_MAX_MEMORY_PER_CHILD = 400000  # recycle if RSS exceeds ~400 MB (KB)
+
+#########################################
+# COACHING PHASE VIDEOS
+#########################################
+# Config for the Coaching Phase Videos feature (pre-recorded videos shown at
+# coaching session boundaries). Served publicly to the frontend via
+# GET /api/v1/core/public/coaching-phase-videos so the UI can decide whether
+# to expect / render video and break components.
+#
+# COACHING_PHASE_VIDEOS_ENABLED is the feature flag — flip it to control
+# visibility without an env-var change. Flipping is a code change + deploy.
+COACHING_PHASE_VIDEOS_ENABLED = False

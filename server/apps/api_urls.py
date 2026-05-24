@@ -13,7 +13,7 @@ from apps.authentication.views import AuthViewSet
 
 # Local Modules - Admin Viewsets
 from apps.coach.views import AdminCoachViewSet, CoachViewSet
-from apps.core.views import CoreViewSet
+from apps.core.views import CoachingPhaseVideosViewSet, CoreViewSet
 from apps.identities.views import (
     AdminIdentityImageChatViewSet,
     AdminIdentityViewSet,
@@ -35,6 +35,11 @@ brand_web_router = DefaultRouter(trailing_slash=False)  # brand web
 default_router.register(r"auth", AuthViewSet, basename="auth")
 default_router.register(r"prompts", PromptViewSet, basename="prompts")
 default_router.register(r"core", CoreViewSet, basename="core")
+default_router.register(
+    r"core/public/coaching-phase-videos",
+    CoachingPhaseVideosViewSet,
+    basename="core-public-coaching-phase-videos",
+)  # Public Coaching Phase Videos config (feature flag)
 default_router.register(r"coach", CoachViewSet, basename="coach")
 default_router.register(r"user", UserViewSet, basename="user")
 default_router.register(r"identities", IdentityViewSet, basename="identities")
