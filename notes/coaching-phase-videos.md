@@ -83,63 +83,93 @@ SESSION_VIDEOS = {
 
 Frontend `<video src>` streams directly from S3. HTTP range requests work, so basic seeking is supported. CloudFront later if mobile scrubbing is bad. Source files at `dev-coach/videos/`.
 
-### 6. Videos are server-injected — the LLM never invokes them
+### 6. Videos are server-injected via action handlers — the LLM never decides when
 
-This is the heart of the design. Videos are **not** an LLM tool. The server detects video-relevant moments deterministically and injects video cards as coach messages. The LLM has no awareness videos exist.
+This is the heart of the design. Videos are **not** an LLM tool. The server emits video cards deterministically by enriching the action handlers that already mark session boundaries (`transition_phase`, `END_BREAK`) and by seeding the very first one at chat creation. The LLM has no awareness videos exist as a feature.
 
-**Three injection points** in `server/apps/coach/functions/public/process_message.py` and `server/apps/chat_messages/utils/ensure_initial_message_exists.py`:
+**Three injection points — all in action handlers:**
 
 **A) Welcome injection — `ensure_initial_message_exists`:**
+
 Instead of seeding the hardcoded `INITIAL_MESSAGE` text, seed a coach message carrying a `SESSION_VIDEO` ComponentConfig for `welcome_session_intro`, with `text=""` (no greeting text on the card itself). The greeting ("Hi, I'm Leigh-Ann...") is produced by the LLM the first time it runs — which is after the user clicks Continue on the welcome video. The old `INITIAL_MESSAGE` constant is deleted.
 
-**B) Intro injection — in `process_message`, between `apply_user_component_actions` and `build_coach_prompt`:**
+**B) `transition_phase` handler enrichment:**
+
+After the phase transition runs, consult the `SESSIONS` map. The handler returns at most one component, which is **attached as the `component_config` of the LLM's coach response message** (existing message-with-component pattern — no new message row is created).
+
+Precedence: outro wins over intro when both would apply.
 
 ```python
-# If current_phase is the first phase of a session AND that session's intro
-# has not been acknowledged yet, inject the intro video card as the coach
-# response and skip the LLM call. (Fires after END_BREAK closes a break, and
-# for any first user message in a new session that hasn't seen its intro yet.)
-if pending_session_intro(coach_state):
-    coach_message = inject_session_intro_video(coach_state)
-    return success_response(coach_message)
+# pseudocode — inside transition_phase action handler, after phase change applied
+leaving_session  = session_of(old_phase)
+entering_session = session_of(new_phase)
+
+if is_last_phase_of_session(old_phase) and SESSIONS[leaving_session]["outro"]:
+    outro_key = SESSIONS[leaving_session]["outro"]
+    return SessionVideoComponent(
+        video_key=outro_key,
+        continue_actions=[
+            ACKNOWLEDGE_SESSION_VIDEO(outro_key),
+            START_BREAK(leaving_session),
+        ],
+    )
+
+if (is_first_phase_of_session(new_phase)
+    and SESSIONS[entering_session]["intro"]
+    and SESSIONS[entering_session]["intro"] not in coach_state.shown_videos):
+    intro_key = SESSIONS[entering_session]["intro"]
+    return SessionVideoComponent(
+        video_key=intro_key,
+        continue_actions=[ACKNOWLEDGE_SESSION_VIDEO(intro_key)],
+    )
+
+return None
 ```
 
-When the user clicks Continue on the intro card, the frontend dispatches `{message: null, actions: [ACK(intro_key)]}`. The server saves no user ChatMessage (see "process_message null-message contract" below), runs ACK, sees that the intro is now in `shown_videos`, falls through the gate, and the LLM finally runs in the new phase — producing the session's first prompt as a second consecutive coach message after the (now-acked) video card.
+The LLM's transition text and the video card live in the same `ChatMessage` row. The frontend renders them together in one bubble.
 
-**C) Outro injection — in `process_message`, immediately after `apply_coach_response_actions`:**
+**C) `END_BREAK` handler enrichment:**
+
+After stamping `ended_at`, check whether the user is now at the start of a new session whose intro hasn't been acked. If so, return the intro video component. The skip-LLM-on-component rule then fires — the LLM doesn't run this turn. The user acks the intro; the LLM speaks in the new session on the next turn.
 
 ```python
-# Capture old_phase BEFORE the LLM's actions run; capture new_phase after.
-# If the LLM's transition_phase moved us OUT of the last phase of a session that
-# has an outro, append a SECOND coach message carrying the outro video card.
-# The LLM's text response is KEPT as its in-prompt sign-off; the outro card
-# appears beneath it.
-if just_left_session_with_outro(old_phase, new_phase):
-    inject_session_outro_video(updated_coach_state, leaving_session=session_of(old_phase))
+# pseudocode — inside END_BREAK action handler, after ended_at stamped
+current_session = session_of(coach_state.current_phase)
+intro_key       = SESSIONS[current_session]["intro"]
+
+if (is_first_phase_of_session(coach_state.current_phase)
+    and intro_key
+    and intro_key not in coach_state.shown_videos):
+    return SessionVideoComponent(
+        video_key=intro_key,
+        continue_actions=[ACKNOWLEDGE_SESSION_VIDEO(intro_key)],
+    )
+
+return None
 ```
 
-The `leaving_session` argument is critical: by the time the outro is injected, `current_phase` has already moved into the *next* session, so the helper needs the session being left in order to look up the right outro video key and bake the correct `START_BREAK(session_key=...)` action into the card's Continue button.
-
-**process_message null-message contract:**
-- `message=None` (programmatic-only, from action-only button clicks like video Continue): no user ChatMessage is saved; user actions still apply; LLM is called only if no component_config was returned by user actions AND no intro gate fired.
+**`process_message` null-message contract:**
+- `message=None` (programmatic-only, from action-only button clicks like video Continue): no user ChatMessage is saved; user actions still apply; LLM is called only if no component_config was returned by user actions.
 - `message=""` (empty string): treated as a real user message — saved as a ChatMessage with empty content. The user shouldn't be able to send this through the UI, but if they do it's handled normally.
 - `message="any text"`: normal user message, saved as ChatMessage.
 
-**Skip-LLM rule** (after `apply_user_component_actions`): skip the LLM call iff (a) a `component_config` was returned by any user action (e.g., `START_BREAK` returning `SESSION_BREAK`), or (b) the intro gate fired. Otherwise call the LLM — even if no user message was added this turn. The LLM responds based on chat history alone, which works because of component serialization (see below).
+**Skip-LLM rule** (after `apply_user_component_actions`): skip the LLM call iff a `component_config` was returned by any user action (e.g., `END_BREAK` returning a `SESSION_VIDEO`, or `START_BREAK` returning a `SESSION_BREAK`). Otherwise call the LLM — even if no user message was added this turn. The LLM responds based on chat history alone, which works because of component serialization (see Decision 10).
 
 **What's NOT in this design:**
 - No `SHOW_SESSION_INTRO_VIDEO` / `SHOW_SESSION_OUTRO_VIDEO` actions
 - No per-session context key
 - No prompt edits, no gate paragraphs
+- **No pre-LLM intro gate or post-LLM outro hook in `process_message`** — handlers carry the logic
+- **No multi-message coach response shape** — coach responses remain a single coach message with optional component_config
 - The LLM has zero involvement with videos (it neither triggers them nor knows they exist as a feature — it just sees acknowledged-video markers in serialized chat history, see Decision 10)
 
 ### 7. Three user-button actions
 
-Only the user's button clicks invoke actions. The server injects the components; the user closes the loop. **All parameters are baked into the buttons by the server when constructing each card — the LLM never sets any of them.**
+Only the user's button clicks invoke actions. The server emits the components; the user closes the loop. **All parameters are baked into the buttons by the server when constructing each card — the LLM never sets any of them.**
 
 - `ACKNOWLEDGE_SESSION_VIDEO(video_key: str)` — appends `video_key` to `shown_videos`. Idempotent. Fires on the video modal's Continue button (see Decision 8 for button timing).
-- `START_BREAK(session_key: str)` — creates a `Break` row with `triggered_by_session = session_key`, returns a `SESSION_BREAK` ComponentConfig. Fires as the second action on the outro video's Continue button. The `session_key` identifies the session being left (NOT the user's current session, which has already advanced by this point — see Decision 6.C).
-- `END_BREAK()` — zero-param. Stamps `ended_at` on the user's single open `Break`. Fires as the only action on the break card's "I'm Ready" button.
+- `START_BREAK(session_key: str)` — creates a `Break` row with `triggered_by_session = session_key`, returns a `SESSION_BREAK` ComponentConfig. Fires as the second action on the outro video's Continue button. The `session_key` identifies the session being left (NOT the user's current session, which has already advanced by this point — see Decision 6.B).
+- `END_BREAK()` — zero-param. Stamps `ended_at` on the user's single open `Break`. May return a `SESSION_VIDEO` ComponentConfig for the new session's intro (see Decision 6.C). Fires as the only action on the break card's "I'm Ready" button.
 
 **Two dispatch patterns — distinct on purpose:**
 
@@ -148,11 +178,11 @@ Only the user's button clicks invoke actions. The server injects the components;
 
 **Button action chains:**
 
-- **Intro video** Continue → `{message: null, actions: [ACKNOWLEDGE_SESSION_VIDEO(video_key)]}`. The intro-injection hook stops firing because the key is now in `shown_videos`; the gate falls through and the LLM runs in the new phase. The LLM's response appears as a second consecutive coach message after the (now-acked) video card.
-- **Outro video** Continue → `{message: null, actions: [ACKNOWLEDGE_SESSION_VIDEO(video_key), START_BREAK(session_key)]}`. `START_BREAK` returns the `SESSION_BREAK` component config; the skip-LLM rule fires; the break card is saved as a third consecutive coach message after the LLM's transition text + the outro card.
-- **Break card "I'm Ready"** → `{message: "I'm ready", actions: [END_BREAK()]}`. Saves "I'm ready" as a user message, closes the break, and the intro-injection hook in the same `process_message` call injects the next session's intro card.
+- **Intro video** Continue → `{message: null, actions: [ACKNOWLEDGE_SESSION_VIDEO(video_key)]}`. ACK runs, returns no component, no skip-LLM trigger. The LLM runs in the (already-current) phase and produces the session's first prompt as the next coach message.
+- **Outro video** Continue → `{message: null, actions: [ACKNOWLEDGE_SESSION_VIDEO(video_key), START_BREAK(session_key)]}`. ACK runs. `START_BREAK` returns the `SESSION_BREAK` component config; the skip-LLM rule fires; the break card is saved as the next coach message.
+- **Break card "I'm Ready"** → `{message: "I'm ready", actions: [END_BREAK()]}`. Saves "I'm ready" as a user message. `END_BREAK` closes the break and returns the next session's intro video component. The skip-LLM rule fires; the intro card is saved as the next coach message.
 
-**Important: `transition_phase` runs ONCE per session boundary — when the LLM emits it before the outro plays.** It does not appear in any of the user-button chains. By the time the user is interacting with the outro or break card, `current_phase` already reflects the next session. This is what makes `START_BREAK` need an explicit `session_key` parameter (the session being left, not the current one).
+**Important: `transition_phase` runs ONCE per session boundary — when the LLM emits it.** It does not appear in any of the user-button chains. The handler attaches the outro card (when leaving a session that has one) or the intro card (when leaving a session without an outro and entering one with an intro) to the LLM's transition coach message. By the time the user is interacting with the outro or break card, `current_phase` already reflects the next session. This is what makes `START_BREAK` need an explicit `session_key` parameter (the session being left, not the current one).
 
 ### 8. UI: thin card + modal player with threshold-gated Continue button
 
@@ -196,7 +226,9 @@ class Break(models.Model):
 
 Because videos and breaks are server-injected and the LLM has no awareness of them, the chat history must carry enough narrative signal that the LLM can pick up the thread after a session boundary. Without this, the LLM is blind: it sees an unexplained "I'm ready" with no preceding question.
 
-**`get_recent_chat_messages_for_prompt` is updated to render `component_config` into bracketed textual descriptions when serializing for the LLM.** The DB row is unchanged; only the LLM-facing string representation changes. Suggested formats:
+**`get_recent_chat_messages_for_prompt` is updated to render `component_config` into bracketed textual descriptions when serializing for the LLM.** The DB row is unchanged; only the LLM-facing string representation changes. Coach messages that have both text AND a `component_config` (the common case for transition turns) are serialized with both: the LLM's text first, then the bracketed component description on a new line.
+
+Suggested formats:
 
 - Acked video: `[Showed user the "<video_name>" video. User watched it.]`
 - Unacked video: `[Showed user the "<video_name>" video. User has not watched it yet.]`
@@ -205,7 +237,7 @@ Because videos and breaks are server-injected and the LLM has no awareness of th
 
 `shown_videos` and the Break table are the sources of truth for acked/closed state at serialization time.
 
-**Also bump the default history `count` from 5 to 10.** A single session boundary can fill 3–5 slots with video/break/intro bubbles, leaving zero room for actual session content. 10 is a defensive minimum.
+**Also bump the default history `count` from 5 to 10.** A single session boundary can fill several slots with video/break/intro bubbles, leaving zero room for actual session content. 10 is a defensive minimum.
 
 This is the only piece of "LLM-aware" code in the design, and it's deliberately confined to a serialization helper. The LLM still has no actions, no context keys, and no awareness that videos exist as a feature — it just reads narration in chat history.
 
@@ -215,23 +247,24 @@ For Get-to-Know → Brainstorming. Other boundaries follow the same pattern.
 
 | # | Trigger | What happens | ChatMessage rows written | CoachState / Break delta |
 |---|---|---|---|---|
-| 0 | First-ever app open | `ensure_initial_message_exists` seeds welcome video card | COACH: `text=""`, SESSION_VIDEO(welcome_session_intro) | — |
-| 1 | User clicks Continue on welcome | Frontend `{message: null, actions: [ACK(welcome_session_intro)]}`. No user msg. ACK runs. Gate falls through. LLM runs in INTRODUCTION. | COACH: "Hi, I'm Leigh-Ann..." | `shown_videos += welcome_session_intro` |
-| ~ | Normal back-and-forth in INTRODUCTION | LLM converses with user, eventually emits `transition_phase(GET_TO_KNOW_YOU)` | (many USER/COACH rows) | `current_phase = GET_TO_KNOW_YOU` |
-| 2 | User's next typed message in GET_TO_KNOW_YOU | Gate fires: `pending_session_intro` TRUE. Skip LLM. Inject. | USER: "OK!", COACH: SESSION_VIDEO(get_to_know_session_intro) | — |
-| 3 | User clicks Continue on get-to-know intro | `{message: null, actions: [ACK]}`. No user msg. ACK runs. Gate falls through. LLM runs in GET_TO_KNOW_YOU. | COACH: "Now let me ask you about..." | `shown_videos += get_to_know_session_intro` |
-| ~ | Normal back-and-forth through GET_TO_KNOW_YOU + IDENTITY_WARMUP | LLM converses, eventually transitions to IDENTITY_BRAINSTORMING | (many USER/COACH rows) | `current_phase = IDENTITY_BRAINSTORMING` |
-| 4 | LLM transition turn (the boundary) | LLM responds with "Beautiful work, take a moment" + `transition_phase`. After `apply_coach_response_actions`, outro detection fires. Outro card injected as second coach message. | COACH: "Beautiful work...", COACH: SESSION_VIDEO(get_to_know_session_outro) | `current_phase = IDENTITY_BRAINSTORMING` |
-| 5 | User clicks Continue on outro | `{message: null, actions: [ACK(outro_key), START_BREAK("get_to_know_session")]}`. No user msg. ACK runs. START_BREAK returns SESSION_BREAK component → skip-LLM rule fires. | COACH: SESSION_BREAK | `shown_videos += outro`; Break row opens; `on_break = true`; composer disabled |
-| 6 | User clicks "I'm Ready" on break (maybe hours later) | `{message: "I'm ready", actions: [END_BREAK()]}`. User msg saved. END_BREAK closes break. Gate fires: `pending_session_intro` TRUE for brainstorming. Skip LLM. Inject. | USER: "I'm ready", COACH: SESSION_VIDEO(brainstorming_session_intro) | Break `ended_at` stamped; `on_break = false`; composer disabled (unacked video latest) |
-| 7 | User clicks Continue on brainstorming intro | `{message: null, actions: [ACK(brainstorming_session_intro)]}`. No user msg. ACK runs. Gate falls through. LLM runs in IDENTITY_BRAINSTORMING. | COACH: "Welcome to brainstorming!..." | `shown_videos += brainstorming intro`; composer re-enabled |
+| 0 | First-ever app open | `ensure_initial_message_exists` seeds welcome video card | COACH: `text=""`, component=`SESSION_VIDEO(welcome_session_intro)` | — |
+| 1 | User clicks Continue on welcome | Frontend `{message: null, actions: [ACK(welcome_session_intro)]}`. No user msg. ACK runs, returns no component. LLM runs in INTRODUCTION. | COACH: "Hi, I'm Leigh-Ann..." | `shown_videos += welcome_session_intro` |
+| ~ | Normal back-and-forth in INTRODUCTION | LLM converses with user | (many USER/COACH rows) | — |
+| 2 | LLM transition turn (INTRODUCTION → GET_TO_KNOW_YOU) | LLM emits text "Let's move on to getting to know you" + `transition_phase(GET_TO_KNOW_YOU)`. Handler: leaving `welcome_session` has no outro; entering `get_to_know_session` has unacked intro → **attaches** `SESSION_VIDEO(get_to_know_session_intro)` to the LLM's message. | COACH: `text="Let's move on..."`, component=`SESSION_VIDEO(get_to_know_session_intro)` | `current_phase = GET_TO_KNOW_YOU` |
+| 3 | User clicks Continue on get-to-know intro | `{message: null, actions: [ACK]}`. No user msg. ACK runs, returns no component. LLM runs in GET_TO_KNOW_YOU. | COACH: "Now let me ask you about..." | `shown_videos += get_to_know_session_intro` |
+| ~ | Normal back-and-forth through GET_TO_KNOW_YOU + IDENTITY_WARMUP | LLM converses | (many USER/COACH rows) | — |
+| 4 | LLM transition turn (IDENTITY_WARMUP → IDENTITY_BRAINSTORMING) | LLM emits text "Beautiful work, take a moment" + `transition_phase(IDENTITY_BRAINSTORMING)`. Handler: leaving `get_to_know_session` has outro → **attaches** `SESSION_VIDEO(get_to_know_session_outro)` to the LLM's message. | COACH: `text="Beautiful work..."`, component=`SESSION_VIDEO(get_to_know_session_outro)` | `current_phase = IDENTITY_BRAINSTORMING` |
+| 5 | User clicks Continue on outro | `{message: null, actions: [ACK(outro_key), START_BREAK("get_to_know_session")]}`. No user msg. ACK runs. START_BREAK returns SESSION_BREAK component → skip-LLM rule fires. | COACH: component=`SESSION_BREAK` | `shown_videos += outro`; Break row opens; `on_break = true`; composer disabled |
+| 6 | User clicks "I'm Ready" on break (maybe hours later) | `{message: "I'm ready", actions: [END_BREAK()]}`. User msg saved. END_BREAK closes break, sees `current_phase` is first phase of `brainstorming_session` with unacked intro → returns `SESSION_VIDEO(brainstorming_session_intro)`. Skip-LLM rule fires. | USER: "I'm ready"; COACH: component=`SESSION_VIDEO(brainstorming_session_intro)` | Break `ended_at` stamped; `on_break = false`; composer disabled (unacked video latest) |
+| 7 | User clicks Continue on brainstorming intro | `{message: null, actions: [ACK(brainstorming_session_intro)]}`. No user msg. ACK runs, returns no component. LLM runs in IDENTITY_BRAINSTORMING. | COACH: "Welcome to brainstorming!..." | `shown_videos += brainstorming intro`; composer re-enabled |
 | 8+ | Normal IDENTITY_BRAINSTORMING conversation | ... | ... | ... |
 
 **Key invariants:**
+- **At most one coach message per server response.** Coach messages may carry text + component together in a single row (steps 2, 4) — there is no multi-message response shape.
 - One user-message bubble per boundary ("I'm ready" at step 6). Everything else is coach-driven.
-- LLM is called at steps 1, 3, 4, 7 (and during normal conversation). LLM is *not* called at steps 0, 2, 5, 6.
-- Two or three consecutive coach messages per boundary is normal (steps 4–5, 6–7, 0–1).
-- The video DB rows from steps 0, 2, 4, 6 never change after the ACK — only `shown_videos` updates, and the frontend re-derives Watch vs Watch Again from that.
+- LLM is called at steps 1, 2, 3, 4, 7 (and during normal conversation). LLM is *not* called at steps 0, 5, 6.
+- Multiple consecutive coach messages between user-typed inputs is normal (steps 4 → 5; step 6 user msg → step 6 coach component → step 7 coach text).
+- The video DB rows never change after the ACK — only `shown_videos` updates, and the frontend re-derives Watch vs Watch Again from that.
 
 ## Sessions & videos
 
@@ -261,6 +294,8 @@ Files at `dev-coach/videos/` (renamed to match session keys). Number prefix = pl
 | Idea | Why rejected |
 |---|---|
 | LLM-driven `SHOW_SESSION_INTRO/OUTRO_VIDEO` actions | Server can derive video timing deterministically from phase transitions. Removes prompt-engineering surface and eliminates the hallucination risk entirely |
+| Pre-LLM intro gate / post-LLM outro hook in `process_message` | Earlier draft of this spec. Replaced by handler enrichment (`transition_phase`, `END_BREAK`) because handlers already own the deterministic boundary signal and avoid surgery on `process_message`'s core flow |
+| Multi-message coach response shape (response carries a list of coach messages) | Earlier draft of this spec. Not needed once the outro/intro card rides on the same `ChatMessage` row as the LLM's transition text via `component_config` |
 | Per-session context key + prompt gates | Not needed once videos are server-injected. The LLM never sees video state |
 | Narrative-only break / no break state | Break is a real, backend-tracked, soft-blocking concept |
 | `current_session` field on `CoachState` | Derivable from `current_phase` + `SESSIONS` map |
@@ -275,7 +310,7 @@ Files at `dev-coach/videos/` (renamed to match session keys). Number prefix = pl
 
 1. **Modal close behavior** — modal renders a Continue button that's disabled until 20s before the video ends (or the 50% mark for videos shorter than 30s). ACK fires on Continue click. Closing the modal early via Esc/backdrop is allowed and fires no action.
 2. **Video file naming** — files renamed on disk to match session keys (see Sessions & videos table above). Registry maps `video_key → {name, url}`; filename and key are kept in sync as a convention.
-3. **Response shape for outro turn** — `process_message` returns multiple coach messages when an outro is injected. The LLM's transition text and the outro video card are saved as two separate ChatMessage rows and both returned in the response. Frontend renders them in order. (See Decision 6.C and the lifecycle walkthrough.)
+3. **Outro turn response shape** — the outro card rides on the same `ChatMessage` as the LLM's transition text via `component_config`. The `transition_phase` action handler attaches the component when it runs; no new message row is created and no multi-message response shape is needed. See Decision 6.B and the lifecycle walkthrough.
 
 ## Edge cases explicitly out of scope for v1
 
@@ -291,24 +326,25 @@ Files at `dev-coach/videos/` (renamed to match session keys). Number prefix = pl
 | **Migration: `shown_videos`** | ArrayField on `CoachState` |
 | **Migration: `Break` model** | `user`, `started_at`, `ended_at`, `triggered_by_session`, `coach_message` |
 | **Video registry** | Static dict `video_key → { name, url }` |
-| **Server injection hooks** | `pending_session_intro`, `inject_session_intro_video`, `just_left_session_with_outro`, `inject_session_outro_video` — all wired into `process_message` (intro hook between user-action and LLM call; outro hook immediately after `apply_coach_response_actions` returns) |
-| **`process_message` null-message contract** | Accept `message: None` programmatically (no user ChatMessage saved; user actions still apply). `message=""` still treated as a real user message. Skip-LLM rule: skip iff user action returned a component_config OR intro gate fired. |
+| **`transition_phase` handler enrichment** | After phase change, consult `SESSIONS` map and return outro component (if leaving a session with an outro) or intro component (if leaving a session without an outro and entering one with an unacked intro). Outro wins over intro on precedence. Component attaches to the LLM's coach response message via existing `component_config` field. |
+| **`END_BREAK` handler enrichment** | After closing break, if `current_phase` is first phase of a session with an unacked intro, return the intro component. Triggers skip-LLM rule. |
 | **`ensure_initial_message_exists` rewrite** | Seed welcome video card (text="", no greeting) instead of `INITIAL_MESSAGE` text. Delete the `INITIAL_MESSAGE` constant. |
-| **`get_recent_chat_messages_for_prompt` rewrite** | Serialize `component_config` into bracketed descriptions for the LLM. Bump default count from 5 → 10. |
+| **`process_message` null-message contract** | Accept `message: None` programmatically (no user ChatMessage saved; user actions still apply). `message=""` still treated as a real user message. Skip-LLM rule: skip iff a user action returned a `component_config`. |
+| **`get_recent_chat_messages_for_prompt` rewrite** | Serialize `component_config` into bracketed descriptions for the LLM (including coach messages that have both text and a component). Bump default count from 5 → 10. |
 | **Action: `ACKNOWLEDGE_SESSION_VIDEO(video_key)`** | Appends to `shown_videos`; key set by server, not LLM |
 | **Action: `START_BREAK(session_key)`** | Creates Break row (`triggered_by_session = session_key`), returns SESSION_BREAK component. `session_key` is set by the server when building the outro card's button. |
-| **Action: `END_BREAK()`** | Stamps `ended_at` on open Break |
+| **Action: `END_BREAK()`** | Stamps `ended_at` on open Break, optionally returns intro video component (Decision 6.C) |
 | **ActionType enum** | 3 new values |
 | **ComponentType enum** | 2 new: `SESSION_VIDEO`, `SESSION_BREAK` |
 | **API field** | `on_break: bool` on coach response AND user-state endpoint |
-| **API response shape** | Coach response now returns a list of coach messages (to support outro injected alongside LLM text), not a single message |
 | **React: video card** | Thin card + modal player with threshold-gated Continue button (20s before end, or 50% for short videos); same component drives active (Watch) and persisted (Watch Again) state |
 | **React: break card** | "I'm Ready" button (canned-response pattern: dispatches `{message: "I'm ready", actions: [END_BREAK()]}`); composer disabled while open via `on_break` |
 | **React: composer disable rule** | Disable composer when latest coach message is an unacked SESSION_VIDEO, OR when `on_break === true` |
 | **S3 upload** | One-time upload of the 12 video files |
+| **Docs update** | Update `docs/docs/coach/phases.md`, `docs/docs/core-systems/action-handler/actions/transition-phase.md`, `docs/docs/core-systems/component-renderer/persistent-components.md`, plus new action docs for ACK / START_BREAK / END_BREAK. |
 | **Procedure doc** | NOP-style "Add a Session Video" Procedures MCP doc. First-class deliverable. |
 
-**Explicitly NOT in scope:** prompt edits, per-session context key, SHOW actions. The LLM is untouched (the serialization helper is a *read-side* shim, not a prompt edit).
+**Explicitly NOT in scope:** prompt edits, per-session context key, SHOW actions, pre-LLM gate / post-LLM hook in `process_message`, multi-message response shape. The LLM is untouched (the serialization helper is a *read-side* shim, not a prompt edit).
 
 ## Pointers to existing Procedures docs the next agent should read first
 
@@ -320,21 +356,13 @@ Files at `dev-coach/videos/` (renamed to match session keys). Number prefix = pl
 
 ## Next step in the workflow
 
-Hand this document to the **plan agent** as the spec. The lifecycle walkthrough above is the ground truth for the runtime flow; the Net surface area table is the ground truth for what to build.
+The PR breakdown lives at [`notes/coaching-phase-videos-prs.md`](./coaching-phase-videos-prs.md). The lifecycle walkthrough above is the ground truth for the runtime flow; the Net surface area table is the ground truth for what to build.
 
-Non-negotiable instructions for the plan agent:
+Non-negotiable instructions for implementation:
 
 1. Treat the session/video mapping as mutable data. Nothing outside the `SESSIONS` map / video registry should name specific videos or sessions.
 2. The plan must produce the "Add a Session Video" Procedures MCP doc alongside the code PRs.
 3. The break is part of the flow — not a stretch goal.
-4. **Do not add SHOW video actions, context keys, or prompt edits.** Videos are server-injected. The only LLM-facing change is the read-side serialization helper in `get_recent_chat_messages_for_prompt`.
+4. **Do not add SHOW video actions, context keys, prompt edits, pre/post-LLM injection hooks in `process_message`, or multi-message response shapes.** Videos are server-injected via action handlers. The only LLM-facing change is the read-side serialization helper in `get_recent_chat_messages_for_prompt`.
 5. Preserve the `message: None` vs `message: ""` distinction in `process_message` — `None` is programmatic-only, `""` is treated as a real user message.
-
-Likely PR decomposition (plan agent has final say). **Order matters** — later PRs depend on earlier ones:
-
-1. **Foundation:** `SESSIONS` map + helpers in `coaching_phase.py`, `shown_videos` migration on `CoachState`, `Break` model migration, video registry skeleton, new ActionType + ComponentType enum values.
-2. **User-button actions:** `ACKNOWLEDGE_SESSION_VIDEO`, `START_BREAK`, `END_BREAK` handlers (needed before injection helpers can wire buttons to them).
-3. **Server injection layer + process_message overhaul:** intro-injection + outro-injection helpers wired into `process_message`, `process_message` null-message contract + skip-LLM rule, `ensure_initial_message_exists` rewrite (delete `INITIAL_MESSAGE`), `get_recent_chat_messages_for_prompt` component serialization + count bump, `on_break` API field on coach response + user-state endpoint, multi-message response shape.
-4. **Frontend:** video card + modal player with threshold-gated Continue button + break card; composer disable wired to `on_break` AND unacked-video-is-latest; multi-message response handling.
-5. **Content:** S3 upload + populate the full video registry.
-6. **Docs:** the "Add a Session Video" Procedures MCP doc.
+6. The outro/intro card rides on the same `ChatMessage` row as the LLM's transition text via `component_config`. Do not introduce a list-of-coach-messages response shape.
