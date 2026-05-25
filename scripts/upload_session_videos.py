@@ -33,6 +33,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import os
 import sys
 from pathlib import Path
@@ -43,9 +44,20 @@ from botocore.exceptions import ClientError
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VIDEOS_DIR = REPO_ROOT / "videos"
 
-# Adjust sys.path so we can import the registry without a Django setup.
-sys.path.insert(0, str(REPO_ROOT / "server"))
-from apps.coach_states.constants.session_videos import SESSION_VIDEOS  # noqa: E402
+# Load SESSION_VIDEOS directly from the source file rather than importing via
+# `apps.coach_states.constants.session_videos` — the latter triggers
+# `apps/__init__.py`, which imports celery_config, which touches Django
+# settings. We don't want a Django bootstrap for an ops script. The registry
+# module itself is pure Python at top level (`from django.conf import settings`
+# is lazy — only `get_video_url` actually accesses settings, and this script
+# doesn't call it).
+_REGISTRY_PATH = (
+    REPO_ROOT / "server" / "apps" / "coach_states" / "constants" / "session_videos.py"
+)
+_spec = importlib.util.spec_from_file_location("_session_videos", _REGISTRY_PATH)
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
+SESSION_VIDEOS = _mod.SESSION_VIDEOS
 
 STAGING_BUCKET = "discovita-dev-coach-staging"
 PRODUCTION_BUCKET = "discovita-dev-coach-production"
