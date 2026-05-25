@@ -153,7 +153,7 @@ def my_action(
 | 13  | `transition_phase` handler enrichment — outro/intro auto-emit (flag-gated)  | `casey/cpv-13-transition-phase-enrichment`   | `[✓]`  | casey 2026-05-25 | [#101](https://github.com/Discovita/dev-coach/pull/101) merged `04310be` 2026-05-25 | 1, 2, 5 |
 | 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[✓]`  | casey 2026-05-25 | [#102](https://github.com/Discovita/dev-coach/pull/102) merged `939a882` 2026-05-25 | 1, 2, 5, 8 |
 | 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[✓]`  | casey 2026-05-25 | [#103](https://github.com/Discovita/dev-coach/pull/103) merged `3547967` 2026-05-25 | 9 |
-| 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[~]`  | casey 2026-05-25 | —   | 5 |
+| 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[👀]` | casey 2026-05-25 | [#105](https://github.com/Discovita/dev-coach/pull/105) | 5 |
 | 17  | FE: video modal threshold gate + action dispatch                            | `casey/cpv-17-fe-session-video-modal-action` | `[ ]`  | —     | —   | 6, 7, 16 |
 | 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[ ]`  | —     | —   | 8, 15, 17 |
 | 19  | Rename `dev-coach/videos/` files to match session keys                      | n/a — local-only (videos/ is gitignored)     | `[✓]`  | casey 2026-05-25 | n/a — no commit needed (see Discoveries 2026-05-25 PR 19) | — |
@@ -959,6 +959,18 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 ### 2026-05-25 — casey — PR 19
 
 - **No commit, no PR opened.** `videos/` is gitignored (see `.gitignore:64-65` — "Coaching session video source files (uploaded to S3, not committed)"). The 12 files at `videos/01-..` through `videos/12-..` are already named per the spec's "Sessions & videos" table — the renames happened locally at an earlier point (the historical `mv` commands are visible in `.claude/settings.local.json` permission grants). No code references the old or new filenames (only the spec docs do, which are authoritative-source). PR 20's upload script will reference these names directly. Marking the row `[✓]` with no PR.
+
+### 2026-05-25 — casey — PR 16
+
+- **Renderer's `children` is `<MarkdownRenderer content={message.content} />` — not a string.** `ChatMessages.tsx` passes the markdown element directly; the renderer doesn't have a `text` prop. To decide whether to show a coach-text bubble above the card (welcome / post-break cards have empty content, transition cards don't), `SessionVideoCard.extractContentString` inspects `children.props.content`. Brittle if the wrapping shape ever changes — a future refactor could push that decision back to `ChatMessages.tsx` and pass a clean prop, but for one consumer it's overkill today. Flagged in the PR body.
+- **Card visual mimics CoachMessage bubble styling** (lavender background, Montserrat, animate-fadeIn, rounded corners with the asymmetric `rounded-bl-[6px]`) so it visually reads as another coach message. Width is `max-w-[100%]` (vs `max-w-[75%]` for regular coach text) because the card carries video name + button on a single row and needs the extra horizontal room.
+- **shadcn `DialogContent` renders the X close button by default** (`showCloseButton={true}` default). Esc + backdrop close are handled by radix automatically. PR 16 takes all three close paths for free — no custom keyboard or click handlers needed.
+- **`<video controls preload="metadata">`** — `preload="metadata"` avoids streaming the full video on modal mount (just fetches enough for the player UI: duration, poster frame). The user clicks the native play control to start the actual stream. Total tax on opening the modal: tiny.
+- **Watch Again deviation from persistent-component convention.** Spec Decision 8 calls this out: persistent-component docs say to strip all buttons from historical components, but the Watch Again button stays because it's frontend-only (no actions dispatch). PR 21 (docs update) should document this exception in `core-systems/component-renderer/persistent-components.md`.
+- **`CoachState.shown_videos?: string[]` added to FE type.** Backend exposed it via `CoachStateSerializer` back in PR 3, but the FE type never reflected it. The card's Watch / Watch Again label derives from this, and PR 18's composer-disable unacked-video clause will read it too.
+- **Existing `CoachMessageWithComponent.test.tsx` needed a new vi.mock entry.** Adding a renderer arm requires a corresponding mock here, otherwise the renderer test imports the real component (which then tries to call `useCoachState` outside a QueryClient and fails). Pattern for future component PRs: copy an existing `vi.mock` block, swap the path + testid.
+- **`SessionVideoModal` only renders when the card's `open` state is true** (radix `Dialog` returns null when closed). Test asserts that with `screen.queryByTestId("session-video-modal")` before click → null, after click → present. After Esc → null again. Clean lifecycle.
+- **Frontend suite at 211 after PR 16** (was 200 after PR 15; net +11: 10 in new `SessionVideoCard.test.tsx` + 1 new arm test in `CoachMessageWithComponent.test.tsx`).
 
 ### 2026-05-25 — casey — PR 20
 
