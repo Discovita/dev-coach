@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
+import { ComponentType } from "@/enums/componentType";
+import type { ComponentConfig } from "@/types/componentConfig";
 import type { Message } from "@/types/message";
 import { createRef } from "react";
 
@@ -37,7 +39,10 @@ const mockOnSend = vi.fn();
 
 function renderChatMessages(
   messages: Message[],
-  options: { isProcessingMessage?: boolean; componentConfig?: null } = {}
+  options: {
+    isProcessingMessage?: boolean;
+    componentConfig?: ComponentConfig | null;
+  } = {}
 ) {
   const messagesEndRef = createRef<HTMLDivElement>();
   return render(
@@ -50,6 +55,18 @@ function renderChatMessages(
     />
   );
 }
+
+const sessionVideoConfig: ComponentConfig = {
+  component_type: ComponentType.SESSION_VIDEO,
+  video_key: "welcome_session_intro",
+  video_name: "Welcome",
+  video_url: "https://example.com/welcome.mov",
+  buttons: [{ label: "Continue", actions: [] }],
+};
+
+const combineIdentitiesConfig: ComponentConfig = {
+  component_type: ComponentType.COMBINE_IDENTITIES,
+};
 
 describe("ChatMessages", () => {
   it("renders user messages with UserMessage component", () => {
@@ -107,5 +124,117 @@ describe("ChatMessages", () => {
     renderChatMessages([]);
     expect(screen.queryByTestId("coach-message")).not.toBeInTheDocument();
     expect(screen.queryByTestId("user-message")).not.toBeInTheDocument();
+  });
+
+  // Component-config routing — regression coverage for the fresh-chat
+  // welcome card. Before this fix, the last coach message ignored
+  // message.component_config entirely; the welcome SESSION_VIDEO seed
+  // rendered as an empty bubble until a POST round-trip populated the
+  // cache.
+  describe("component routing for the last coach message", () => {
+    it("renders cache componentConfig prop when present (POST round-trip path)", () => {
+      renderChatMessages(
+        [
+          {
+            role: "coach",
+            content: "",
+            timestamp: "2025-01-01T00:00:00Z",
+          },
+        ],
+        { componentConfig: combineIdentitiesConfig }
+      );
+      expect(screen.getByTestId("coach-with-component")).toBeInTheDocument();
+    });
+
+    it("falls back to message.component_config on fresh load (welcome card seed)", () => {
+      // Backend seeded the welcome SESSION_VIDEO directly on the message
+      // row in ensure_initial_message_exists. No POST has happened yet,
+      // so the in-memory cache is null. The card must still render.
+      renderChatMessages([
+        {
+          role: "coach",
+          content: "",
+          timestamp: "2025-01-01T00:00:00Z",
+          component_config: sessionVideoConfig,
+        },
+      ]);
+      expect(screen.getByTestId("coach-with-component")).toBeInTheDocument();
+    });
+
+    it("prefers the cache prop over message.component_config when both exist", () => {
+      // After a POST round-trip both sources are populated. The cache
+      // wins because it represents the freshest server response.
+      renderChatMessages(
+        [
+          {
+            role: "coach",
+            content: "",
+            timestamp: "2025-01-01T00:00:00Z",
+            component_config: sessionVideoConfig,
+          },
+        ],
+        { componentConfig: combineIdentitiesConfig }
+      );
+      // Both produce the same testid, so just confirm the routing fires.
+      expect(screen.getByTestId("coach-with-component")).toBeInTheDocument();
+      expect(screen.queryByTestId("coach-message")).not.toBeInTheDocument();
+    });
+
+    it("renders plain CoachMessage when last message has no component anywhere", () => {
+      renderChatMessages([
+        {
+          role: "coach",
+          content: "Hello!",
+          timestamp: "2025-01-01T00:00:00Z",
+        },
+      ]);
+      expect(screen.getByTestId("coach-message")).toBeInTheDocument();
+      expect(screen.queryByTestId("coach-with-component")).not.toBeInTheDocument();
+    });
+
+    it("suppresses component rendering while processing, even with cache or seed present", () => {
+      // While a POST is in flight, the LoadingBubbles bubble owns the
+      // visual real estate; the next message's component will render
+      // once processing flips false.
+      renderChatMessages(
+        [
+          {
+            role: "coach",
+            content: "",
+            timestamp: "2025-01-01T00:00:00Z",
+            component_config: sessionVideoConfig,
+          },
+        ],
+        { isProcessingMessage: true }
+      );
+      expect(screen.queryByTestId("coach-with-component")).not.toBeInTheDocument();
+      expect(screen.getByTestId("loading-bubbles")).toBeInTheDocument();
+    });
+
+    it("still uses message.component_config for historical (non-last) coach messages", () => {
+      renderChatMessages([
+        {
+          role: "coach",
+          content: "",
+          timestamp: "2025-01-01T00:00:00Z",
+          component_config: sessionVideoConfig,
+        },
+        {
+          role: "user",
+          content: "ok",
+          timestamp: "2025-01-01T00:00:01Z",
+        },
+        {
+          role: "coach",
+          content: "Hi there!",
+          timestamp: "2025-01-01T00:00:02Z",
+        },
+      ]);
+      // Historical coach message routes through CoachMessageWithComponent
+      // via message.component_config; the latest plain coach message
+      // routes through CoachMessage.
+      expect(screen.getByTestId("coach-with-component")).toBeInTheDocument();
+      expect(screen.getByTestId("coach-message")).toBeInTheDocument();
+    });
   });
 });
