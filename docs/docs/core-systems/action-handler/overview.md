@@ -59,6 +59,18 @@ Most actions are logged to the [Action](../../database/models/action) model with
 
 > **Note**: Sentinel actions (`add_user_note`, `update_user_note`, `delete_user_note`) do **not** write to the Action table. They are called without a `coach_message` parameter and have no Action logging. Additionally, some handlers perform early returns on certain conditions (e.g., duplicate checks) and skip Action row creation in those cases.
 
+## User-Button-Only Actions
+
+A small set of actions are invoked **only** by user button clicks on coach-emitted components — never by the LLM. They are intentionally omitted from `models/CoachChatResponse.py` (the schema that constrains what the LLM can emit) so they cannot be hallucinated. The frontend constructs them by forwarding `config.buttons[i].actions` verbatim from the server-baked component config.
+
+The user-button-only actions today (all part of the Coaching Phase Videos feature):
+
+- [Acknowledge Session Video](actions/acknowledge-session-video) — fires from the video modal's Continue button at threshold.
+- [Start Break](actions/start-break) — fires as the second action on outro video Continue clicks; returns a `SESSION_BREAK` component.
+- [End Break](actions/end-break) — fires from the break card's "I'm Ready" button; may return the next session's intro `SESSION_VIDEO`.
+
+When a user action returns a `ComponentConfig`, the orchestrator skips the LLM call for that turn — the returned component becomes the coach response on its own (the **skip-LLM rule**, implemented in `apps/coach/functions/public/process_message.py`).
+
 For detailed information about action logging and retrieval, see the [Actions API Reference](../../api/endpoints/actions).
 
 ## Error Handling

@@ -155,10 +155,10 @@ def my_action(
 | 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[✓]`  | casey 2026-05-25 | [#103](https://github.com/Discovita/dev-coach/pull/103) merged `3547967` 2026-05-25 | 9 |
 | 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[✓]`  | casey 2026-05-25 | [#105](https://github.com/Discovita/dev-coach/pull/105) merged `359d521` 2026-05-25 | 5 |
 | 17  | FE: video modal threshold gate + action dispatch                            | `casey/cpv-17-fe-session-video-modal-action` | `[✓]`  | casey 2026-05-25 | [#106](https://github.com/Discovita/dev-coach/pull/106) merged `10ee479` 2026-05-25 | 6, 7, 16 |
-| 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[👀]` | casey 2026-05-25 | [#107](https://github.com/Discovita/dev-coach/pull/107) | 8, 15, 17 |
+| 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[✓]`  | casey 2026-05-25 | [#107](https://github.com/Discovita/dev-coach/pull/107) merged `a3ca05b` 2026-05-25 | 8, 15, 17 |
 | 19  | Rename `dev-coach/videos/` files to match session keys                      | n/a — local-only (videos/ is gitignored)     | `[✓]`  | casey 2026-05-25 | n/a — no commit needed (see Discoveries 2026-05-25 PR 19) | — |
 | 20  | S3 upload + populate registry URLs + ComponentConfig enrichment             | `casey/cpv-20-s3-upload-registry-urls`       | `[✓]`  | casey 2026-05-25 | [#104](https://github.com/Discovita/dev-coach/pull/104) merged `8309970` 2026-05-25 | 5, 19 |
-| 21  | Docs update — phases, transition-phase, persistent-components, new actions  | `casey/cpv-21-docs-update`                   | `[ ]`  | —     | —   | 2, 5, 6, 7, 8, 13, 14 |
+| 21  | Docs update — phases, transition-phase, persistent-components, new actions  | `casey/cpv-21-docs-update`                   | `[👀]` | casey 2026-05-25 | [#108](https://github.com/Discovita/dev-coach/pull/108) | 2, 5, 6, 7, 8, 13, 14 |
 | 22  | Flip flag to `True` (one-line code change)                                  | `casey/cpv-22-flip-flag`                     | `[ ]`  | —     | —   | 12–14, 18, 20, 21 |
 | 23  | Remove flag plumbing (OPTIONAL — default skip)                              | `casey/cpv-23-remove-flag-plumbing`          | `[ ]`  | —     | —   | 22 |
 | 24  | Delete `INITIAL_MESSAGE` constant                                           | `casey/cpv-24-delete-initial-message`        | `[ ]`  | —     | —   | 23 |
@@ -948,6 +948,15 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 ## Discoveries
 
 > Append-only log. Add entries with date + your handle + what you found. The next agent should read this top-to-bottom before starting work.
+
+### 2026-05-25 — casey — PR 21
+
+- **`docs/sidebars.ts` is the manual nav registry.** Docusaurus does not auto-discover new `.md` files; you must list them in `sidebars.ts` or they're shipped-but-not-linked. The three new action docs were added at the end of the Actions category. Pattern for future action docs: append to the `items:` array under the Action Handler → Actions category.
+- **`docusaurus build` is a free broken-link check.** Default `onBrokenLinks: "throw"` in modern Docusaurus catches any `[label](path)` whose target doesn't resolve at build time. Running the full build locally before pushing took ~22s and confirmed every internal link in the PR. Cheaper than a CI round-trip.
+- **Sidebar positions for the three new action docs: 21, 22, 23.** Highest existing was 20 (`update-user-note`). Sequential numbering keeps the sidebar order predictable without renumbering siblings. Not a hard rule — `sidebar_position` is mainly a tiebreaker within auto-generated sidebars; since we use explicit `items:` arrays in `sidebars.ts`, position is overridden by array order anyway.
+- **Watch Again deviation needs an explicit callout in the docs.** Without it, a future reviewer reading `persistent-components.md` would (correctly) flag `SessionVideoCard` for shipping with `buttons` in its historical state — the standard "strip all buttons" rule via `makeComponentDisplayOnly`. The new section calls it out, explains that the button is frontend-only (opens replay-mode modal, dispatches nothing), and locks it in as intentional. This is the kind of subtle convention deviation that gets quietly "fixed" otherwise.
+- **`component-config.md` exists but is not in `sidebars.ts`.** Pre-existing pattern (not touched by this PR). Worth flagging for a future docs cleanup PR.
+- **Spec is no longer the single source of truth for the framework.** Before this PR, the spec (`notes/coaching-phase-videos.md`) was the only place explaining the SESSIONS rollup, three injection points, and composer-disable rule. After this PR, the in-repo `docs/docs/...` files are the canonical reference (and sync to Procedures MCP). The spec stays as the architecture / design-decision record but no longer needs to be read to *operate* the system. PR 25 (the procedure for adding a video) is the only remaining doc deliverable.
 
 ### 2026-05-25 — casey — PR 18
 

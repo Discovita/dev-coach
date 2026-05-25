@@ -197,8 +197,70 @@ export function makeComponentDisplayOnly(config: ComponentConfig | null | undefi
 - **Action Patterns**: Reusable persistence action for all components
 - **Future Extensions**: Easy to add new persistent component types
 
+## Coaching Phase Videos — `SESSION_VIDEO` and `SESSION_BREAK`
+
+The Coaching Phase Videos feature adds two persistent component types. Unlike the `SHOW_XXX_COMPONENT` pattern above, **these components are server-injected** by action handlers — the LLM never decides when they appear. Their persistence does not require a separate `PERSIST_XXX_COMPONENT` action either; the `component_config` is written directly onto the coach `ChatMessage` at construction time.
+
+### `SESSION_VIDEO`
+
+**Renderer**: `client/src/pages/chat/components/coach-message-with-component/SessionVideoCard.tsx`
+
+A thin inline card (`<Video Name>` + a single button) that opens a modal player. The card persists in chat history with the same `component_config` row used for the active state — only the rendering differs.
+
+**Active state** (latest coach message, video not yet acknowledged):
+
+- Button label: **Watch** (derived from `!coachState.shown_videos.includes(video_key)`).
+- Click opens the modal. The modal renders a **Continue** button that is disabled until the video reaches a threshold (20s before the end for videos longer than 30s; the 50% mark for videos 30s or shorter). Click dispatches the bundled actions from `config.buttons[0].actions` (intro: `[ACK]`; outro: `[ACK, START_BREAK]`) and closes the modal.
+- Closing via Esc / backdrop / X is allowed and fires nothing — the card stays active and the user can re-open.
+
+**Persisted state** (historical card, or active card after acknowledgment):
+
+- Button label: **Watch Again** (same derivation, inverted).
+- Modal opens identically but renders **no Continue button**. Closing fires nothing.
+
+**Watch Again is an intentional deviation from the "strip all buttons" convention above.** The standard rule is that historical persistent components ship with `buttons: undefined` (via `makeComponentDisplayOnly`) so they cannot dispatch. For `SESSION_VIDEO` we keep the **Watch Again** button because it is frontend-only — it only opens the modal in replay mode; no actions fire. The deviation is documented here so future component reviewers don't try to "fix" it.
+
+**`component_config` shape** for `SESSION_VIDEO`:
+
+| Field         | Source                                                                                                |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| `video_key`   | The registry key (e.g., `"welcome_session_intro"`); used by the FE to look up `shown_videos`.        |
+| `video_name`  | Embedded server-side from `SESSION_VIDEOS[key]["name"]`; rendered as the card title.                  |
+| `video_url`   | Resolved server-side from `settings.AWS_STORAGE_BUCKET_NAME` + `SESSION_VIDEOS[key]["s3_key"]`. **Bucket-snapshot-locked**: persisted on the row at construction time, so a future bucket rename would need a backfill. |
+| `buttons[0]`  | A single **Continue** button whose `actions` are baked by the server (intro vs outro determines the chain). |
+
+### `SESSION_BREAK`
+
+**Renderer**: `client/src/pages/chat/components/coach-message-with-component/SessionBreakComponent.tsx`
+
+A canned-response card that mirrors `IntroCannedResponseComponent`: renders the coach text bubble plus a single **I'm Ready** button. Click dispatches `{message: button.label, actions: button.actions}` — the **canned-response pattern**. The button label ("I'm Ready") becomes a real user `ChatMessage` in chat history; the `END_BREAK()` action chain runs to close the break.
+
+This is **the only place in the video flow where a button click auto-fires a user-message bubble**. Video `SESSION_VIDEO` Continue uses the action-only pattern (`{message: null, ...}`) — no user bubble, because watching the video IS the user's contribution to that turn. The break "I'm Ready" is active intent and earns a bubble.
+
+The `component_config` carries the standard `buttons` array (a single button); no domain fields beyond that.
+
+### Composer-Disable Rule (`useComposerDisabled`)
+
+The chat composer disables when **any** of these are true:
+
+1. A message round-trip is in flight (`isProcessingMessage`).
+2. The user is on a between-session break (`coachState.on_break === true`).
+3. The **latest coach message** is a `SESSION_VIDEO` whose `video_key` is NOT in `coachState.shown_videos`.
+
+The rule is centralized in `client/src/hooks/use-composer-disabled.ts` and called by `ChatControls`. The two video-feature clauses are independent and additive — `on_break` covers the duration of the break, the unacked-video clause covers any video card that lands as the latest coach message (welcome card on first load, intro card after `end_break` emits one, etc.). They hand off cleanly across the break → intro boundary with no gap during which the composer would re-enable.
+
+The "latest coach message" lookup walks `chatMessages` from the tail and returns the first `role === "coach"` entry, so a trailing user message (the "I'm Ready" bubble after END_BREAK, for example) does not flip the gate off.
+
+### Server is the Source of Truth for Action Chains
+
+Both `SessionVideoCard` and `SessionBreakComponent` read `config.buttons[i].actions` verbatim from the server-baked `component_config` and forward them to `process_message` as-is. The frontend never decides whether `ACK` is followed by `START_BREAK`, never composes `END_BREAK()`, and never hardcodes a video key. Server-side builders (`session_video_helpers.intro_component_for` / `outro_component_for`, plus `start_break.py`) own the entire chain. If the chain ever extends (e.g. logging or a new follow-up), the frontend picks it up automatically.
+
 ## Related Documentation
 
 - [Component Renderer Overview](overview) - Base component system
 - [Action Handler System](../action-handler/overview) - Action execution framework
 - [Prompt Manager System](../prompt-manager/overview) - AI prompt management
+- [Transition Phase](../action-handler/actions/transition-phase) — session-boundary side effects that emit `SESSION_VIDEO` cards
+- [Acknowledge Session Video](../action-handler/actions/acknowledge-session-video) — fired by `SESSION_VIDEO` Continue
+- [Start Break](../action-handler/actions/start-break) — emits `SESSION_BREAK`
+- [End Break](../action-handler/actions/end-break) — fired by `SESSION_BREAK` "I'm Ready"; may emit a follow-up `SESSION_VIDEO`
