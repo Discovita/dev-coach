@@ -13,6 +13,7 @@ from models.components.ComponentConfig import ComponentConfig
 def build_coach_response_data(
     coach_message: str,
     final_prompt: str,
+    on_break: bool,
     component_config: ComponentConfig | None = None,
 ) -> Dict[str, Any]:
     """
@@ -21,11 +22,13 @@ def build_coach_response_data(
     This creates a dictionary containing:
     - The coach's response message
     - The prompt that was used to generate it
+    - The user's current break state
     - Any component configuration for UI interactions (optional)
 
     Args:
         coach_message: The message text from the coach
         final_prompt: The full prompt that was sent to the AI
+        on_break: Whether the user currently has an open Break row
         component_config: Optional component configuration for UI interactions
 
     Returns:
@@ -34,6 +37,7 @@ def build_coach_response_data(
     response_data = {
         "message": coach_message,
         "final_prompt": final_prompt,
+        "on_break": on_break,
     }
 
     if component_config:

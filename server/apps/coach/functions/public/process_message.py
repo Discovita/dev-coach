@@ -90,8 +90,13 @@ def process_message(
         log.debug(f"Updated Coach State: {updated_coach_state}")
         log.debug(f"Component Config: {component_config}")
 
+        on_break = user.breaks.filter(ended_at__isnull=True).exists()
+
         response_data = build_coach_response_data(
-            coach_response.message, coach_prompt, component_config
+            coach_response.message,
+            coach_prompt,
+            on_break,
+            component_config,
         )
         return True, response_data, None
 

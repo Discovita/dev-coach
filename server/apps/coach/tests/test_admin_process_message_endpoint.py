@@ -16,6 +16,7 @@ URL = "/api/v1/admin/coach/process-message-for-user"
 VALID_RESPONSE_DATA = {
     "message": "Hello from coach",
     "final_prompt": "You are a life coach.",
+    "on_break": False,
 }
 
 
