@@ -76,10 +76,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
     scrollToBottom();
   }, [displayedMessages, scrollToBottom]);
 
-  // Handler for sending a message
+  // Handler for sending a message.
+  //
+  // Coaching Phase Videos (PR 17): when `request.message` is `null`, the
+  // dispatch is programmatic-only (video Continue button → ACK actions
+  // without a user ChatMessage). Bypass the empty-string guard so the
+  // request still reaches the orchestrator.
   const handleSendMessage = useCallback(
     async (request: CoachRequest) => {
-      if (!request.message.trim() || updateStatus === "pending") return;
+      if (updateStatus === "pending") return;
+      if (request.message !== null && !request.message.trim()) return;
       await updateChatMessages(request);
     },
     [updateChatMessages, updateStatus]

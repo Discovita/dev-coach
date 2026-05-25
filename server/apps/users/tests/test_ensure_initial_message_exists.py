@@ -16,6 +16,7 @@ from apps.chat_messages.utils.ensure_initial_message_exists import (
     WELCOME_VIDEO_KEY,
 )
 from apps.users.models import User
+from enums.action_type import ActionType
 from enums.component_type import ComponentType
 from enums.message_role import MessageRole
 
@@ -161,6 +162,28 @@ class EnsureInitialMessageFlagGatedTests(TestCase):
             "https://test-bucket-foo.s3.amazonaws.com/"
             "media/session-videos/01-welcome-session-intro.mov",
         )
+
+    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
+    def test_flag_on_welcome_card_carries_continue_button_with_ack_action(self):
+        """PR 17: the welcome card's buttons[0] is a Continue button
+        whose only action is ACKNOWLEDGE_SESSION_VIDEO(welcome_session_intro).
+
+        Without this, the FE modal's Continue click has nothing to dispatch.
+        Welcome is intro-only — no START_BREAK — so the action list has length 1.
+        """
+        ensure_initial_message_exists(self.user)
+
+        only = ChatMessage.objects.get(user=self.user)
+        buttons = only.component_config["buttons"]
+        self.assertIsNotNone(buttons)
+        self.assertEqual(len(buttons), 1)
+        self.assertEqual(buttons[0]["label"], "Continue")
+        actions = buttons[0]["actions"]
+        self.assertEqual(len(actions), 1)
+        self.assertEqual(
+            actions[0]["action"], ActionType.ACKNOWLEDGE_SESSION_VIDEO.value
+        )
+        self.assertEqual(actions[0]["params"], {"video_key": WELCOME_VIDEO_KEY})
 
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
     def test_idempotent_when_initial_message_already_exists_flag_on(self):

@@ -104,11 +104,17 @@ export function useChatMessages() {
         chatMessagesKey,
         (old) => {
           const current = old ?? [];
-          const userMsg: Message = {
-            role: "user",
-            content: variables.message,
-            timestamp: new Date().toISOString(),
-          };
+          // PR 17: when `message: null` (programmatic-only dispatch from
+          // the video modal's Continue button), the backend skips saving a
+          // user ChatMessage. Mirror that here — no optimistic user bubble.
+          const userMsg: Message | null =
+            variables.message === null
+              ? null
+              : {
+                  role: "user",
+                  content: variables.message,
+                  timestamp: new Date().toISOString(),
+                };
           const coachMsg: Message | null = response.message
             ? {
                 role: "coach",
@@ -120,10 +126,11 @@ export function useChatMessages() {
           const last = current[current.length - 1];
           const hasUserAlready =
             !!last &&
+            userMsg !== null &&
             last.role === "user" &&
-            last.content === variables.message;
+            last.content === userMsg.content;
 
-          const next: Message[] = hasUserAlready
+          const next: Message[] = hasUserAlready || userMsg === null
             ? [...current]
             : [...current, userMsg];
 

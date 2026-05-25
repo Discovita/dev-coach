@@ -80,7 +80,11 @@ export const CoachMessageWithComponent: React.FC<
       );
     case ComponentType.SESSION_VIDEO:
       return (
-        <SessionVideoCard coachMessage={children} config={componentConfig} />
+        <SessionVideoCard
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+        />
       );
     default:
       return <>{children}</>;

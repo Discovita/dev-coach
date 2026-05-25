@@ -14,12 +14,11 @@ from django.conf import settings
 from apps.chat_messages.constants import INITIAL_MESSAGE
 from apps.chat_messages.models import ChatMessage
 from apps.chat_messages.utils.add_chat_message import add_chat_message
-from apps.coach_states.constants.session_videos import get_video, get_video_url
+from apps.coach_states.utils.session_video_helpers import intro_component_for
 from apps.users.models import User
 from enums.message_role import MessageRole
-from enums.component_type import ComponentType
-from models.components.ComponentConfig import ComponentConfig
 
+WELCOME_SESSION_KEY = "welcome_session"
 WELCOME_VIDEO_KEY = "welcome_session_intro"
 
 
@@ -45,12 +44,12 @@ def ensure_initial_message_exists(user: User) -> bool:
         return False
 
     if settings.COACHING_PHASE_VIDEOS_ENABLED:
-        component_config = ComponentConfig(
-            component_type=ComponentType.SESSION_VIDEO.value,
-            video_key=WELCOME_VIDEO_KEY,
-            video_name=get_video(WELCOME_VIDEO_KEY)["name"],
-            video_url=get_video_url(WELCOME_VIDEO_KEY),
-        )
+        # Re-use the shared session-video helper so the welcome card carries
+        # the same shape (name + url + Continue button with the ACK action)
+        # as every other intro card built by transition_phase / end_break.
+        # Critical for PR 17: without buttons[].actions, the modal's Continue
+        # click has nothing to dispatch.
+        component_config = intro_component_for(WELCOME_SESSION_KEY)
         message = add_chat_message(user, "", MessageRole.COACH)
         message.component_config = component_config.model_dump()
         message.save(update_fields=["component_config"])
