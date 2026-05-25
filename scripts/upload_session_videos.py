@@ -18,15 +18,17 @@ the `s3_key` field from each registry entry, then derives the local
 filename by stripping the `session-videos/` prefix and looking under
 `videos/` at the repo root.
 
-Required env vars:
-    AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY  — must have write access
-    AWS_REGION                                 — defaults to us-east-1
+Credentials (in priority order):
+    --profile <name>            Use the named AWS CLI profile from ~/.aws/credentials.
+    AWS_PROFILE env var         Same as above, via env.
+    AWS_ACCESS_KEY_ID + SECRET  Standard boto3 env-var pickup.
+    Region defaults to us-east-1 unless AWS_REGION is set or the profile
+    pins one.
 
 Usage:
     cd <repo root>
-    AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... \\
-        python scripts/upload_session_videos.py
-    python scripts/upload_session_videos.py --dry-run
+    python scripts/upload_session_videos.py --profile dev-coach --dry-run
+    python scripts/upload_session_videos.py --profile dev-coach
     python scripts/upload_session_videos.py --force --bucket staging
 """
 
@@ -39,7 +41,7 @@ import sys
 from pathlib import Path
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, NoCredentialsError, ProfileNotFound
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VIDEOS_DIR = REPO_ROOT / "videos"
@@ -105,6 +107,48 @@ def upload_one(
     return f"OK     uploaded   s3://{bucket}/{s3_key}"
 
 
+def build_s3_client(profile: str | None, region: str):
+    """Build an S3 client from a profile (preferred) or env-var creds.
+
+    Returns the client. Raises if no creds are usable so the caller can
+    print a clear hint instead of letting boto3 silently anonymize the
+    request and fail with 403 later.
+    """
+    try:
+        if profile:
+            session = boto3.Session(profile_name=profile, region_name=region)
+        else:
+            session = boto3.Session(region_name=region)
+    except ProfileNotFound as e:
+        print(f"ERROR: profile '{profile}' not found in ~/.aws/credentials")
+        print(f"  underlying: {e}")
+        sys.exit(2)
+
+    s3 = session.client("s3")
+    sts = session.client("sts")
+
+    # Preflight: prove we have creds AND can call AWS, before we touch S3
+    # and risk a confusing 403 from anonymous access.
+    try:
+        identity = sts.get_caller_identity()
+        print(
+            "AWS identity: "
+            f"Account={identity['Account']}  Arn={identity['Arn']}"
+        )
+    except NoCredentialsError:
+        print("ERROR: no AWS credentials found.")
+        print(
+            "  Hint: pass --profile dev-coach, or set AWS_PROFILE / "
+            "AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY in your shell."
+        )
+        sys.exit(2)
+    except ClientError as e:
+        print(f"ERROR: AWS preflight (sts.get_caller_identity) failed: {e}")
+        sys.exit(2)
+
+    return s3
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -112,6 +156,15 @@ def main() -> int:
         choices=["both", "staging", "production"],
         default="both",
         help="Which bucket(s) to upload to (default: both).",
+    )
+    parser.add_argument(
+        "--profile",
+        default=os.environ.get("AWS_PROFILE"),
+        help=(
+            "AWS CLI profile from ~/.aws/credentials. Defaults to the "
+            "AWS_PROFILE env var if set, else env-var creds "
+            "(AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY)."
+        ),
     )
     parser.add_argument(
         "--force",
@@ -132,15 +185,12 @@ def main() -> int:
         buckets = (PRODUCTION_BUCKET,)
 
     region = os.environ.get("AWS_REGION", "us-east-1")
-    s3 = boto3.client(
-        "s3",
-        region_name=region,
-        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
-    )
+    s3 = build_s3_client(args.profile, region)
 
-    print(f"region={region}  buckets={list(buckets)}  "
-          f"force={args.force}  dry_run={args.dry_run}")
+    print(
+        f"region={region}  profile={args.profile}  buckets={list(buckets)}  "
+        f"force={args.force}  dry_run={args.dry_run}"
+    )
     print(f"local source: {VIDEOS_DIR}")
     print()
 
