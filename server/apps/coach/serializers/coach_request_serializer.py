@@ -11,7 +11,18 @@ class CoachRequestSerializer(serializers.Serializer):
     - model_name: (Optional) The name of the AI model to use. If not provided, defaults to GPT-4o.
     """
 
-    message = serializers.CharField(help_text="User's message to the coach.")
+    message = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        help_text=(
+            "User's message to the coach. `null` is programmatic-only "
+            "(action-only button clicks like a video Continue button) — no "
+            "user ChatMessage is saved that turn. `\"\"` is treated as a real "
+            "(empty) user message. Omitting the field entirely is equivalent "
+            "to `null` and is only valid when `actions` is provided."
+        ),
+    )
     model_name = serializers.CharField(
         required=False,
         allow_blank=True,
