@@ -7,6 +7,7 @@ import type { CoachResponse } from "@/types/coachResponse";
 import type { CoachRequest } from "@/types/coachRequest";
 import type { Message } from "@/types/message";
 import type { ComponentConfig } from "@/types/componentConfig";
+import type { CoachState } from "@/types/coachState";
 import { makeComponentDisplayOnly } from "@/utils/componentConfig";
 
 /**
@@ -142,6 +143,17 @@ export function useChatMessages() {
       }
 
       queryClient.setQueryData(componentConfigKey, response.component || null);
+
+      // Coaching Phase Videos (PR 15): mirror on_break from the coach
+      // response into the coachState cache immediately so the composer
+      // disables/enables this paint, not on the next refetch. The
+      // invalidation below still triggers a refetch as confirmation.
+      if (response.on_break !== undefined) {
+        queryClient.setQueryData<CoachState | undefined>(
+          [...queryKeyPrefix, "coachState"],
+          (old) => (old ? { ...old, on_break: response.on_break } : old)
+        );
+      }
 
       queryClient.invalidateQueries({
         queryKey: [...queryKeyPrefix, "actions"],

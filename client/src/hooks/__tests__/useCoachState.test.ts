@@ -92,4 +92,40 @@ describe("useCoachState", () => {
 
     expect(result.current.coachState).toBeUndefined();
   });
+
+  // ---------------------------------------------------------------------
+  // PR 15 — Coaching Phase Videos: on_break exposure
+  // ---------------------------------------------------------------------
+
+  it("exposes on_break from the coach-state response", async () => {
+    vi.mocked(fetchCoachState).mockResolvedValue({
+      ...mockCoachState,
+      on_break: true,
+    });
+    const { wrapper } = createQueryWrapper();
+
+    const { result } = renderHook(() => useCoachState(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.coachState?.on_break).toBe(true);
+  });
+
+  it("exposes on_break=false when the backend reports no open break", async () => {
+    vi.mocked(fetchCoachState).mockResolvedValue({
+      ...mockCoachState,
+      on_break: false,
+    });
+    const { wrapper } = createQueryWrapper();
+
+    const { result } = renderHook(() => useCoachState(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.coachState?.on_break).toBe(false);
+  });
 });
