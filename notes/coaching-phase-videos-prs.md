@@ -148,8 +148,8 @@ def my_action(
 | 8   | `END_BREAK` handler (basic close)                                           | `casey/cpv-08-end-break-action`              | `[✓]`  | casey 2026-05-24 | [#96](https://github.com/Discovita/dev-coach/pull/96) merged `cbae253` 2026-05-24 | 4 |
 | 9   | `on_break` API field                                                        | `casey/cpv-09-on-break-api-field`            | `[✓]`  | casey 2026-05-24 | [#97](https://github.com/Discovita/dev-coach/pull/97) merged `5f624db` 2026-05-25 | 4 |
 | 10  | `process_message` null-message contract + skip-LLM-on-component rule        | `casey/cpv-10-null-message-contract`         | `[✓]`  | casey 2026-05-25 | [#98](https://github.com/Discovita/dev-coach/pull/98) merged `f8c81bc` 2026-05-25 | — |
-| 11  | History serialization + count bump (LLM read shim)                          | `casey/cpv-11-history-serialization`         | `[👀]` | casey 2026-05-25 | [#99](https://github.com/Discovita/dev-coach/pull/99) | 3, 4 |
-| 12  | Welcome injection (flag-gated)                                              | `casey/cpv-12-welcome-injection`             | `[ ]`  | —     | —   | 1, 5 |
+| 11  | History serialization + count bump (LLM read shim)                          | `casey/cpv-11-history-serialization`         | `[✓]`  | casey 2026-05-25 | [#99](https://github.com/Discovita/dev-coach/pull/99) merged `650813f` 2026-05-25 | 3, 4 |
+| 12  | Welcome injection (flag-gated)                                              | `casey/cpv-12-welcome-injection`             | `[~]`  | casey 2026-05-25 | —   | 1, 5 |
 | 13  | `transition_phase` handler enrichment — outro/intro auto-emit (flag-gated)  | `casey/cpv-13-transition-phase-enrichment`   | `[ ]`  | —     | —   | 1, 2, 5 |
 | 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[ ]`  | —     | —   | 1, 2, 5, 8 |
 | 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[ ]`  | —     | —   | 9 |
