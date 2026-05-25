@@ -145,6 +145,23 @@ class EnsureInitialMessageFlagGatedTests(TestCase):
         self.assertEqual(only.component_config["video_key"], WELCOME_VIDEO_KEY)
         self.assertEqual(WELCOME_VIDEO_KEY, "welcome_session_intro")
 
+    @override_settings(
+        COACHING_PHASE_VIDEOS_ENABLED=True,
+        AWS_STORAGE_BUCKET_NAME="test-bucket-foo",
+    )
+    def test_flag_on_component_config_embeds_video_name_and_video_url(self):
+        """PR 20: welcome card carries video_name + video_url so the FE
+        renders without its own registry lookup."""
+        ensure_initial_message_exists(self.user)
+
+        only = ChatMessage.objects.get(user=self.user)
+        self.assertEqual(only.component_config["video_name"], "Welcome")
+        self.assertEqual(
+            only.component_config["video_url"],
+            "https://test-bucket-foo.s3.amazonaws.com/"
+            "media/session-videos/01-welcome-session-intro.mov",
+        )
+
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
     def test_idempotent_when_initial_message_already_exists_flag_on(self):
         """Calling twice with the flag on does not create a second message."""

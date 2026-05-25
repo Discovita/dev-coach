@@ -220,6 +220,26 @@ class EndBreakSessionVideoEnrichmentTests(TestCase):
                 self.user_message.refresh_from_db()
                 self.assertIsNone(self.user_message.component_config)
 
+    @override_settings(
+        COACHING_PHASE_VIDEOS_ENABLED=True,
+        AWS_STORAGE_BUCKET_NAME="test-bucket-foo",
+    )
+    def test_returned_component_embeds_video_name_and_video_url(self):
+        """PR 20: the returned intro carries video_name + video_url so the
+        FE renders without its own registry lookup."""
+        self._set_phase_and_shown_videos(CoachingPhase.IDENTITY_BRAINSTORMING)
+        self._open_break(triggered_by_session="get_to_know_session")
+
+        result = end_break(self.coach_state, self.params, self.user_message)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.video_name, "Brainstorming Intro")
+        self.assertEqual(
+            result.video_url,
+            "https://test-bucket-foo.s3.amazonaws.com/"
+            "media/session-videos/04-brainstorming-session-intro.mov",
+        )
+
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
     def test_intro_button_carries_only_ack_with_intro_key(self):
         """Intro's Continue button is [ACK(intro_key)] — no START_BREAK."""
