@@ -52,6 +52,14 @@ vi.mock(
     ),
   })
 );
+vi.mock(
+  "@/pages/chat/components/coach-message-with-component/SessionVideoCard",
+  () => ({
+    SessionVideoCard: ({ coachMessage }: { coachMessage: React.ReactNode }) => (
+      <div data-testid="session-video-card">{coachMessage}</div>
+    ),
+  })
+);
 
 const mockOnSend = vi.fn();
 
@@ -101,6 +109,11 @@ describe("CoachMessageWithComponent", () => {
   it("renders IAmStatementsSummaryComponent for I_AM_STATEMENTS_SUMMARY", () => {
     renderWithConfig(ComponentType.I_AM_STATEMENTS_SUMMARY);
     expect(screen.getByTestId("iam-summary")).toBeInTheDocument();
+  });
+
+  it("renders SessionVideoCard for SESSION_VIDEO (PR 16)", () => {
+    renderWithConfig(ComponentType.SESSION_VIDEO);
+    expect(screen.getByTestId("session-video-card")).toBeInTheDocument();
   });
 
   it("renders children as fallback for unknown component type", () => {

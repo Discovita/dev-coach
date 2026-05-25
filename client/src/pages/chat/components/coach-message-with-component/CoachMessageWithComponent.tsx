@@ -8,6 +8,7 @@ import { NestIdentitiesConfirmation } from "@/pages/chat/components/coach-messag
 import { ArchiveIdentityConfirmation } from "@/pages/chat/components/coach-message-with-component/ArchiveIdentityConfirmation";
 import { SuggestIAmStatementComponent } from "@/pages/chat/components/coach-message-with-component/SuggestIAmStatementComponent";
 import { IAmStatementsSummaryComponent } from "@/pages/chat/components/coach-message-with-component/IAmStatementsSummaryComponent";
+import { SessionVideoCard } from "@/pages/chat/components/coach-message-with-component/SessionVideoCard";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -76,6 +77,10 @@ export const CoachMessageWithComponent: React.FC<
           disabled={disabled}
           testUserId={testUserId}
         />
+      );
+    case ComponentType.SESSION_VIDEO:
+      return (
+        <SessionVideoCard coachMessage={children} config={componentConfig} />
       );
     default:
       return <>{children}</>;
