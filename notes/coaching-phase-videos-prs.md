@@ -150,8 +150,8 @@ def my_action(
 | 10  | `process_message` null-message contract + skip-LLM-on-component rule        | `casey/cpv-10-null-message-contract`         | `[✓]`  | casey 2026-05-25 | [#98](https://github.com/Discovita/dev-coach/pull/98) merged `f8c81bc` 2026-05-25 | — |
 | 11  | History serialization + count bump (LLM read shim)                          | `casey/cpv-11-history-serialization`         | `[✓]`  | casey 2026-05-25 | [#99](https://github.com/Discovita/dev-coach/pull/99) merged `650813f` 2026-05-25 | 3, 4 |
 | 12  | Welcome injection (flag-gated)                                              | `casey/cpv-12-welcome-injection`             | `[✓]`  | casey 2026-05-25 | [#100](https://github.com/Discovita/dev-coach/pull/100) merged `f4d957b` 2026-05-25 | 1, 5 |
-| 13  | `transition_phase` handler enrichment — outro/intro auto-emit (flag-gated)  | `casey/cpv-13-transition-phase-enrichment`   | `[👀]` | casey 2026-05-25 | [#101](https://github.com/Discovita/dev-coach/pull/101) | 1, 2, 5 |
-| 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[ ]`  | —     | —   | 1, 2, 5, 8 |
+| 13  | `transition_phase` handler enrichment — outro/intro auto-emit (flag-gated)  | `casey/cpv-13-transition-phase-enrichment`   | `[✓]`  | casey 2026-05-25 | [#101](https://github.com/Discovita/dev-coach/pull/101) merged `04310be` 2026-05-25 | 1, 2, 5 |
+| 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[~]`  | casey 2026-05-25 | —   | 1, 2, 5, 8 |
 | 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[ ]`  | —     | —   | 9 |
 | 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[ ]`  | —     | —   | 5 |
 | 17  | FE: video modal threshold gate + action dispatch                            | `casey/cpv-17-fe-session-video-modal-action` | `[ ]`  | —     | —   | 6, 7, 16 |
