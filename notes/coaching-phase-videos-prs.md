@@ -153,11 +153,11 @@ def my_action(
 | 13  | `transition_phase` handler enrichment — outro/intro auto-emit (flag-gated)  | `casey/cpv-13-transition-phase-enrichment`   | `[✓]`  | casey 2026-05-25 | [#101](https://github.com/Discovita/dev-coach/pull/101) merged `04310be` 2026-05-25 | 1, 2, 5 |
 | 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[✓]`  | casey 2026-05-25 | [#102](https://github.com/Discovita/dev-coach/pull/102) merged `939a882` 2026-05-25 | 1, 2, 5, 8 |
 | 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[✓]`  | casey 2026-05-25 | [#103](https://github.com/Discovita/dev-coach/pull/103) merged `3547967` 2026-05-25 | 9 |
-| 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[ ]`  | —     | —   | 5 |
+| 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[~]`  | casey 2026-05-25 | —   | 5 |
 | 17  | FE: video modal threshold gate + action dispatch                            | `casey/cpv-17-fe-session-video-modal-action` | `[ ]`  | —     | —   | 6, 7, 16 |
 | 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[ ]`  | —     | —   | 8, 15, 17 |
 | 19  | Rename `dev-coach/videos/` files to match session keys                      | n/a — local-only (videos/ is gitignored)     | `[✓]`  | casey 2026-05-25 | n/a — no commit needed (see Discoveries 2026-05-25 PR 19) | — |
-| 20  | S3 upload + populate registry URLs + ComponentConfig enrichment             | `casey/cpv-20-s3-upload-registry-urls`       | `[👀]` | casey 2026-05-25 | [#104](https://github.com/Discovita/dev-coach/pull/104) | 5, 19 |
+| 20  | S3 upload + populate registry URLs + ComponentConfig enrichment             | `casey/cpv-20-s3-upload-registry-urls`       | `[✓]`  | casey 2026-05-25 | [#104](https://github.com/Discovita/dev-coach/pull/104) merged `8309970` 2026-05-25 | 5, 19 |
 | 21  | Docs update — phases, transition-phase, persistent-components, new actions  | `casey/cpv-21-docs-update`                   | `[ ]`  | —     | —   | 2, 5, 6, 7, 8, 13, 14 |
 | 22  | Flip flag to `True` (one-line code change)                                  | `casey/cpv-22-flip-flag`                     | `[ ]`  | —     | —   | 12–14, 18, 20, 21 |
 | 23  | Remove flag plumbing (OPTIONAL — default skip)                              | `casey/cpv-23-remove-flag-plumbing`          | `[ ]`  | —     | —   | 22 |

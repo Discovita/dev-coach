@@ -16,6 +16,15 @@ export interface CoachState {
   who_you_are: string[] | null;
   who_you_want_to_be: string[] | null;
   asked_questions: GetToKnowYouQuestions[] | null;
+  /**
+   * Coaching Phase Videos (PR 3 backend / PR 16 FE): list of session-video
+   * keys (e.g. `welcome_session_intro`) the user has acknowledged. The
+   * Watch / Watch Again label on the `SessionVideoCard` derives from
+   * whether `component.video_key` is in this list. PR 18's composer-
+   * disable rule also reads this to determine if the latest video card
+   * is acked.
+   */
+  shown_videos?: string[];
   metadata?: {
     [k: string]: unknown;
   };
