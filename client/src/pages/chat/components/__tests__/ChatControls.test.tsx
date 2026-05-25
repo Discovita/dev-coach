@@ -23,6 +23,27 @@ vi.mock("@/hooks/use-identities", () => ({
   useIdentities: vi.fn().mockReturnValue({ identities: [] }),
 }));
 
+// PR 18: useComposerDisabled (used by ChatControls) reads useChatMessages.
+// Stub it to an empty list so these tests stay focused on the on_break /
+// isProcessingMessage clauses — the unacked-SESSION_VIDEO clause has its
+// own dedicated coverage in useComposerDisabled.test.ts.
+vi.mock("@/hooks/use-chat-messages", () => ({
+  useChatMessages: vi.fn().mockReturnValue({
+    chatMessages: [],
+    componentConfig: null,
+    isLoading: false,
+    isError: false,
+    refetchChatMessages: vi.fn(),
+    updateChatMessages: vi.fn(),
+    updateStatus: "idle",
+    pendingMessage: undefined,
+    isPending: false,
+    isUpdateError: false,
+    resetChatMessages: vi.fn(),
+    resetStatus: "idle",
+  }),
+}));
+
 // The bulletin components are pure functions of coachState/identities;
 // stub them out so this test focuses on the composer disable rule.
 vi.mock("@/pages/chat/components/WarmupBulletin", () => ({

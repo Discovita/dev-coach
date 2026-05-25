@@ -8,6 +8,7 @@ import { RefinementBulletin } from "@/pages/chat/components/RefinementBulletin";
 import { CommitmentBulletin } from "@/pages/chat/components/CommitmentBulletin";
 import { useIdentities } from "@/hooks/use-identities";
 import { useCoachState } from "@/hooks/use-coach-state";
+import { useComposerDisabled } from "@/hooks/use-composer-disabled";
 
 interface ChatControlsProps {
   isProcessingMessage: boolean;
@@ -26,11 +27,10 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
   const { coachState } = useCoachState();
   const { identities } = useIdentities();
 
-  // Coaching Phase Videos (PR 15): composer is disabled while the user is
-  // on a between-session break. They must click "I'm Ready" on the break
-  // card (which fires END_BREAK) before they can type again. PR 18 adds
-  // the second disable clause for unacknowledged SESSION_VIDEO cards.
-  const composerDisabled = isProcessingMessage || coachState?.on_break === true;
+  // Coaching Phase Videos (PR 15 + PR 18): composer disables on
+  // `on_break === true` OR when the latest coach message is an
+  // unacknowledged SESSION_VIDEO. Centralized in `useComposerDisabled`.
+  const composerDisabled = useComposerDisabled(isProcessingMessage);
 
   /**
    * Resizes the textarea to fit content, up to a max height.
