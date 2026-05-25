@@ -389,3 +389,45 @@ For each identity, the coach guides clients through **three key questions**:
 ### Integration and Daily Application
 
 These visual representations serve as daily reminders of who the client truly is. By seeing themselves clearly in each identity, stepping into them becomes effortless. The artwork process concludes with clients visualizing all their identities coming to life, reinforcing that "this is who you are now."
+
+---
+
+## Coaching Sessions
+
+The phases above are the unit of coaching content. **Sessions** are a higher-level grouping that exists to mark natural pause points in the curriculum where Leigh Ann's pre-recorded videos play and the user can take a break before the next set of phases begins.
+
+Sessions are codified as metadata next to the `CoachingPhase` enum in `server/enums/coaching_phase.py`. The `SESSIONS` map names each session and lists the phases that belong to it, plus optional intro / outro video keys:
+
+| Session                  | Phases                                                  | Intro                                 | Outro                                  |
+| ------------------------ | ------------------------------------------------------- | ------------------------------------- | -------------------------------------- |
+| `welcome_session`        | INTRODUCTION                                            | `welcome_session_intro`               | —                                      |
+| `get_to_know_session`    | GET_TO_KNOW_YOU, IDENTITY_WARMUP                        | `get_to_know_session_intro`           | `get_to_know_session_outro`            |
+| `brainstorming_session`  | IDENTITY_BRAINSTORMING, BRAINSTORMING_REVIEW            | `brainstorming_session_intro`         | `brainstorming_session_outro`          |
+| `refinement_session`     | IDENTITY_REFINEMENT, ANYTHING_MISSING                   | `refinement_session_intro`            | `refinement_session_outro`             |
+| `commitment_session`     | IDENTITY_COMMITMENT                                     | `commitment_session_intro`            | `commitment_session_outro`             |
+| `i_am_session`           | I_AM_STATEMENT                                          | `i_am_session_intro`                  | `i_am_session_outro`                   |
+| `visualization_session`  | IDENTITY_VISUALIZATION                                  | `visualization_session_intro`         | —                                      |
+
+`welcome_session` and `visualization_session` are intentionally **intro-only** — no outro, no break (the first session opens the experience; the last one closes it).
+
+### How Sessions Trigger Videos and Breaks
+
+Videos and breaks are **server-injected by action handlers** — the LLM is never asked to decide when one plays and has no awareness this feature exists. The system has three injection points:
+
+1. **Welcome injection** — at first chat creation, `ensure_initial_message_exists` seeds a coach message carrying the `SESSION_VIDEO` component for `welcome_session_intro` (no greeting text on the card; the LLM produces its "Hi, I'm Leigh-Ann..." greeting on its first turn, which fires after the user clicks Continue on the welcome video).
+2. **Phase transitions** — the [`transition_phase`](/docs/core-systems/action-handler/actions/transition-phase) action handler, after applying the phase change, consults `SESSIONS` and attaches an outro card (if leaving a session that has one) or an intro card (if leaving a session without an outro and entering one with an unacked intro) to the LLM's transition coach message. Outro wins over intro on precedence.
+3. **End of break** — the [`end_break`](/docs/core-systems/action-handler/actions/end-break) action handler, after stamping `ended_at` on the user's open `Break`, returns the next session's intro `SESSION_VIDEO` if the new phase is the first of a session whose intro hasn't been acked.
+
+### Three User-Button Actions
+
+The user closes each loop with a button click:
+
+- [`acknowledge_session_video(video_key)`](/docs/core-systems/action-handler/actions/acknowledge-session-video) — fires from the video modal's Continue button at threshold.
+- [`start_break(session_key)`](/docs/core-systems/action-handler/actions/start-break) — fires as the second action on an outro Continue click; opens a `Break` row and returns a `SESSION_BREAK` card.
+- [`end_break()`](/docs/core-systems/action-handler/actions/end-break) — fires from the break card's "I'm Ready" button; closes the break and may emit the next session's intro.
+
+For component-rendering details — the thin video card + modal player, the `Watch` / `Watch Again` label switch, and the composer-disable rules — see [Persistent Components](/docs/core-systems/component-renderer/persistent-components).
+
+### Mutability
+
+The `SESSIONS` map and the `SESSION_VIDEOS` registry are treated as data, not code. Swapping a video, renaming a session, or adding a new one is an edit to those two structures plus an S3 upload — no migrations, no enum updates, no prompt edits, no frontend work. A walkthrough for the common case (swap one video) lives in the `procedure / dev-coach / coach / add-session-video` doc in the Procedures MCP server.

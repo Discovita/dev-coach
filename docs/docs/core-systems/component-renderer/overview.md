@@ -53,6 +53,8 @@ The frontend uses a "latest-only" approach for component rendering:
    - `ARCHIVE_IDENTITY` → `ArchiveIdentityConfirmation`
    - `SUGGEST_I_AM_STATEMENT` → `SuggestIAmStatementComponent`
    - `I_AM_STATEMENTS_SUMMARY` → `IAmStatementsSummaryComponent`
+   - `SESSION_VIDEO` → `SessionVideoCard` (Coaching Phase Videos — thin card + modal player with threshold-gated Continue)
+   - `SESSION_BREAK` → `SessionBreakComponent` (Coaching Phase Videos — canned-response card with "I'm Ready" button)
 4. **Rendering Logic**: Components are only rendered on the last coach message when not processing
 5. **Button Handling**: The `CoachMessageWithComponent` component automatically handles button clicks
 
@@ -118,6 +120,10 @@ switch (componentConfig.component_type) {
     return <SuggestIAmStatementComponent {...props} />;
   case ComponentType.I_AM_STATEMENTS_SUMMARY:
     return <IAmStatementsSummaryComponent {...props} />;
+  case ComponentType.SESSION_VIDEO:
+    return <SessionVideoCard {...props} />;
+  case ComponentType.SESSION_BREAK:
+    return <SessionBreakComponent {...props} />;
   default:
     return null;
 }
