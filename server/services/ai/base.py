@@ -21,7 +21,6 @@ from typing import Optional, Type, Union
 
 from pydantic import BaseModel
 
-from apps.chat_messages.models import ChatMessage
 from enums.ai import AIProvider
 from models.CoachChatResponse import CoachChatResponse
 from models.SentinelChatResponse import SentinelChatResponse
@@ -46,12 +45,18 @@ class AIService(ABC):
     def generate(
         self,
         coach_prompt: Optional[str],
-        chat_history: list[ChatMessage],
+        chat_history: list[str],
         response_format: Type[BaseModel],
         model,
         **kwargs,
     ) -> CoachChatResponse:
-        """Generate a coach response for the given prompt and chat history."""
+        """Generate a coach response for the given prompt and chat history.
+
+        `chat_history` is a list of LLM-facing strings (oldest → newest), as
+        produced by `get_recent_chat_messages_for_prompt`. PR 11 changed the
+        type from `list[ChatMessage]` to `list[str]` so that component-bearing
+        rows can carry their bracketed narration.
+        """
         pass
 
     @abstractmethod
