@@ -1,9 +1,18 @@
+from typing import Optional
+
+from django.conf import settings
 from django.utils import timezone
 
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
 from apps.coach_states.models import Break, CoachState
+from apps.coach_states.utils.session_video_helpers import (
+    intro_component_for,
+    should_emit_intro,
+)
 from enums.action_type import ActionType
+from enums.coaching_phase import session_of
+from models.components.ComponentConfig import ComponentConfig
 from services.action_handler.models import EndBreakParams
 from services.logger import configure_logging
 
@@ -14,9 +23,11 @@ def end_break(
     coach_state: CoachState,
     params: EndBreakParams,
     coach_message: ChatMessage,
-) -> None:
+) -> Optional[ComponentConfig]:
     """
-    Close the user's single open `Break` by stamping `ended_at = now()`.
+    Close the user's single open `Break` by stamping `ended_at = now()`,
+    and (PR 14) optionally return the SESSION_VIDEO intro for the new
+    session when the user has just returned from a between-session break.
 
     User-button-only action — fires on the break card's "I'm Ready" button.
     PR 7's START_BREAK enforces at-most-one-open-break-per-user, so this
@@ -24,11 +35,16 @@ def end_break(
     case as a no-op (defensive: a duplicate click on a stale break card
     shouldn't raise).
 
-    Intro-emission logic (returning a SESSION_VIDEO ComponentConfig when
-    `current_phase` is the first phase of a session with an unacked intro)
-    is **PR 14's** responsibility — this PR keeps the handler scope to the
-    basic close. Returns None so the skip-LLM rule does not fire from this
-    action alone.
+    Intro-emission (flag-gated by `settings.COACHING_PHASE_VIDEOS_ENABLED`):
+    after stamping `ended_at`, if `current_phase` is the first phase of a
+    session whose intro hasn't been acked yet, return a `SESSION_VIDEO`
+    `ComponentConfig` for that intro. The orchestrator's skip-LLM-on-
+    component rule then fires — the LLM doesn't run this turn. The
+    orchestrator (`apps/coach/functions/public/process_message.py`) is
+    responsible for creating the coach `ChatMessage` and persisting the
+    returned component_config on it; this handler does NOT touch
+    `coach_message.component_config` (the `coach_message` param here is
+    the USER's "I'm ready" message, not a coach message).
     """
     open_break = Break.objects.filter(
         user=coach_state.user, ended_at__isnull=True
@@ -63,4 +79,19 @@ def end_break(
         f"Closed break {open_break.id} for user {coach_state.user.id} "
         f"(triggered_by_session={open_break.triggered_by_session})"
     )
-    return None
+
+    if not settings.COACHING_PHASE_VIDEOS_ENABLED:
+        return None
+
+    if not should_emit_intro(
+        coach_state.current_phase, coach_state.shown_videos or []
+    ):
+        return None
+
+    component = intro_component_for(session_of(coach_state.current_phase))
+    log.debug(
+        f"Returning {component.component_type}({component.video_key}) after "
+        f"end_break for user {coach_state.user.id} at phase "
+        f"{coach_state.current_phase}"
+    )
+    return component
