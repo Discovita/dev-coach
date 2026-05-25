@@ -16,7 +16,6 @@ from typing import List, Optional, Type
 from openai import OpenAI
 from pydantic import BaseModel
 
-from apps.chat_messages.models import ChatMessage
 from enums.ai import AIModel, AIProvider
 from models.CoachChatResponse import CoachChatResponse
 from models.SentinelChatResponse import SentinelChatResponse
@@ -55,7 +54,7 @@ class OpenAIService(AIService):
     def generate(
         self,
         coach_prompt: str,
-        chat_history: List[ChatMessage],
+        chat_history: List[str],
         response_format: Type[BaseModel],
         model: AIModel,
         temperature: Optional[float] = 0.2,
@@ -67,6 +66,10 @@ class OpenAIService(AIService):
         Sends the coach prompt as a system message (chat history is omitted — it
         is already embedded in the prompt by the PromptManager) and returns a
         parsed CoachChatResponse.
+
+        `chat_history` is typed as `list[str]` after PR 11 — each string is
+        the LLM-facing rendering of a `ChatMessage`, with component-bearing
+        rows already turned into bracketed narration.
         """
         messages = build_messages(system_message=coach_prompt)
         completion = structured_completion(

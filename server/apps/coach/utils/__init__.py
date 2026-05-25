@@ -4,6 +4,7 @@ from .build_coach_prompt import build_coach_prompt
 from .build_coach_response_data import build_coach_response_data
 from .generate_coach_ai_response import generate_coach_ai_response
 from .get_recent_chat_messages_for_prompt import get_recent_chat_messages_for_prompt
+from .serialize_chat_message_for_prompt import serialize_chat_message_for_prompt
 
 __all__ = [
     "apply_coach_response_actions",
@@ -12,4 +13,5 @@ __all__ = [
     "build_coach_response_data",
     "generate_coach_ai_response",
     "get_recent_chat_messages_for_prompt",
+    "serialize_chat_message_for_prompt",
 ]
