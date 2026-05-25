@@ -287,7 +287,7 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
         self.assertEqual(
             result.video_url,
             "https://test-bucket-foo.s3.amazonaws.com/"
-            "session-videos/03-get-to-know-session-outro.mov",
+            "media/session-videos/03-get-to-know-session-outro.mov",
         )
         # Persisted too, so a chat reload renders the same URL.
         self.coach_message.refresh_from_db()
@@ -298,7 +298,7 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
         self.assertEqual(
             self.coach_message.component_config["video_url"],
             "https://test-bucket-foo.s3.amazonaws.com/"
-            "session-videos/03-get-to-know-session-outro.mov",
+            "media/session-videos/03-get-to-know-session-outro.mov",
         )
 
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)

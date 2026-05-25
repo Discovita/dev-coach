@@ -75,12 +75,17 @@ class TestSessionVideoEntryShape:
             assert isinstance(entry["name"], str)
             assert entry["name"].strip(), f"{key} has empty name"
 
-    def test_every_s3_key_is_under_session_videos_prefix(self):
-        """All S3 keys live under the `session-videos/` prefix."""
+    def test_every_s3_key_is_under_media_session_videos_prefix(self):
+        """All S3 keys live under the `media/session-videos/` prefix.
+
+        The `media/` parent prefix is the existing public-read scope on
+        the dev-coach buckets (matches user-image storage). Putting session
+        videos there avoids a bucket-policy change.
+        """
         for key, entry in SESSION_VIDEOS.items():
             assert isinstance(entry["s3_key"], str)
-            assert entry["s3_key"].startswith("session-videos/"), (
-                f"{key} s3_key does not start with 'session-videos/': "
+            assert entry["s3_key"].startswith("media/session-videos/"), (
+                f"{key} s3_key does not start with 'media/session-videos/': "
                 f"{entry['s3_key']!r}"
             )
 
@@ -129,7 +134,7 @@ class TestGetVideoUrl:
         url = get_video_url("welcome_session_intro")
         assert url == (
             "https://test-bucket-foo.s3.amazonaws.com/"
-            "session-videos/01-welcome-session-intro.mov"
+            "media/session-videos/01-welcome-session-intro.mov"
         )
 
     @override_settings(AWS_STORAGE_BUCKET_NAME="prod-bucket")

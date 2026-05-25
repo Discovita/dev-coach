@@ -237,7 +237,7 @@ class EndBreakSessionVideoEnrichmentTests(TestCase):
         self.assertEqual(
             result.video_url,
             "https://test-bucket-foo.s3.amazonaws.com/"
-            "session-videos/04-brainstorming-session-intro.mov",
+            "media/session-videos/04-brainstorming-session-intro.mov",
         )
 
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)

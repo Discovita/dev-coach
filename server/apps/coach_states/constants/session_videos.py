@@ -34,57 +34,57 @@ SESSION_VIDEOS: dict[str, SessionVideo] = {
     # welcome_session — intro only
     "welcome_session_intro": {
         "name": "Welcome",
-        "s3_key": "session-videos/01-welcome-session-intro.mov",
+        "s3_key": "media/session-videos/01-welcome-session-intro.mov",
     },
     # get_to_know_session
     "get_to_know_session_intro": {
         "name": "Get to Know You Intro",
-        "s3_key": "session-videos/02-get-to-know-session-intro.mov",
+        "s3_key": "media/session-videos/02-get-to-know-session-intro.mov",
     },
     "get_to_know_session_outro": {
         "name": "Get to Know You Outro",
-        "s3_key": "session-videos/03-get-to-know-session-outro.mov",
+        "s3_key": "media/session-videos/03-get-to-know-session-outro.mov",
     },
     # brainstorming_session
     "brainstorming_session_intro": {
         "name": "Brainstorming Intro",
-        "s3_key": "session-videos/04-brainstorming-session-intro.mov",
+        "s3_key": "media/session-videos/04-brainstorming-session-intro.mov",
     },
     "brainstorming_session_outro": {
         "name": "Brainstorming Outro",
-        "s3_key": "session-videos/05-brainstorming-session-outro.mov",
+        "s3_key": "media/session-videos/05-brainstorming-session-outro.mov",
     },
     # refinement_session
     "refinement_session_intro": {
         "name": "Refinement Intro",
-        "s3_key": "session-videos/06-refinement-session-intro.mov",
+        "s3_key": "media/session-videos/06-refinement-session-intro.mov",
     },
     "refinement_session_outro": {
         "name": "Refinement Outro",
-        "s3_key": "session-videos/07-refinement-session-outro.mov",
+        "s3_key": "media/session-videos/07-refinement-session-outro.mov",
     },
     # commitment_session
     "commitment_session_intro": {
         "name": "Commitment Intro",
-        "s3_key": "session-videos/08-commitment-session-intro.mov",
+        "s3_key": "media/session-videos/08-commitment-session-intro.mov",
     },
     "commitment_session_outro": {
         "name": "Commitment Outro",
-        "s3_key": "session-videos/09-commitment-session-outro.mov",
+        "s3_key": "media/session-videos/09-commitment-session-outro.mov",
     },
     # i_am_session
     "i_am_session_intro": {
         "name": "I Am Statement Intro",
-        "s3_key": "session-videos/10-i-am-session-intro.mov",
+        "s3_key": "media/session-videos/10-i-am-session-intro.mov",
     },
     "i_am_session_outro": {
         "name": "I Am Statement Outro",
-        "s3_key": "session-videos/11-i-am-session-outro.mov",
+        "s3_key": "media/session-videos/11-i-am-session-outro.mov",
     },
     # visualization_session — intro only
     "visualization_session_intro": {
         "name": "Visualization",
-        "s3_key": "session-videos/12-visualization-session-intro.mov",
+        "s3_key": "media/session-videos/12-visualization-session-intro.mov",
     },
 }
 

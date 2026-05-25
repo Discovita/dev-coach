@@ -159,7 +159,7 @@ class EnsureInitialMessageFlagGatedTests(TestCase):
         self.assertEqual(
             only.component_config["video_url"],
             "https://test-bucket-foo.s3.amazonaws.com/"
-            "session-videos/01-welcome-session-intro.mov",
+            "media/session-videos/01-welcome-session-intro.mov",
         )
 
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
