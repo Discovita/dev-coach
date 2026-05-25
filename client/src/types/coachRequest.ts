@@ -5,9 +5,16 @@ import type { ComponentAction } from "./componentConfig";
  */
 export interface CoachRequest {
   /**
-   * User's message
+   * User's message.
+   *
+   * Coaching Phase Videos (PR 10 backend / PR 17 FE): `null` is the
+   * programmatic-only contract — no user `ChatMessage` is saved, but the
+   * supplied `actions` still apply. Used by the video modal's Continue
+   * button which dispatches `{message: null, actions: [ACK(video_key)]}`
+   * (or with `START_BREAK` for outros). `""` is still treated as a real
+   * (empty) user message.
    */
-  message: string;
+  message: string | null;
   /**
    * Optional model name. If not provided, uses default.
    */

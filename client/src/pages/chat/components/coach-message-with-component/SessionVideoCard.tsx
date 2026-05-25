@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import type { ComponentConfig } from "@/types/componentConfig";
+import type {
+  ComponentAction,
+  ComponentConfig,
+} from "@/types/componentConfig";
+import type { CoachRequest } from "@/types/coachRequest";
 import { useCoachState } from "@/hooks/use-coach-state";
 import { CoachMessage } from "@/pages/chat/components/CoachMessage";
 import { SessionVideoModal } from "@/pages/chat/components/coach-message-with-component/SessionVideoModal";
 
 /**
- * Coaching Phase Videos — `SessionVideoCard` (PR 16 shell).
+ * Coaching Phase Videos — `SessionVideoCard` (PR 16 shell, PR 17 dispatch).
  *
  * Renders the thin video card the LLM (or the welcome / break flow)
  * emits inline in chat:
@@ -18,15 +22,12 @@ import { SessionVideoModal } from "@/pages/chat/components/coach-message-with-co
  *   - "Watch"        when the video_key has NOT been acknowledged
  *   - "Watch Again"  when it HAS been acknowledged
  *
- * Click → opens the modal player (`SessionVideoModal`). The modal in
- * PR 16 is shell-only: Esc / backdrop / X close it with no action
- * dispatch. PR 17 adds the threshold-gated Continue button + actions.
- *
- * If the coach message also carries text (the transition-turn case where
- * the LLM speaks AND a card is attached to the same row), it's rendered
- * above the card via a regular `<CoachMessage>` bubble. For the welcome
- * card + post-break intro card cases (`content === ""`), the text bubble
- * is suppressed and only the thin card renders.
+ * Click → opens the modal player (`SessionVideoModal`). For unacked
+ * videos the modal includes a threshold-gated Continue button that
+ * dispatches the bundled actions from `config.buttons[0].actions`
+ * (PR 17). For acked videos (Watch Again) the modal is replay-only —
+ * no Continue, no dispatch. Esc / backdrop / X close fires nothing in
+ * either case.
  *
  * Per spec Decision 8 — `Watch Again` keeps its button even on historical
  * cards because it's frontend-only (opens the same modal, no actions
@@ -36,6 +37,7 @@ import { SessionVideoModal } from "@/pages/chat/components/coach-message-with-co
 export interface SessionVideoCardProps {
   coachMessage: React.ReactNode;
   config: ComponentConfig;
+  onSendUserMessageToCoach: (request: CoachRequest) => void;
 }
 
 function extractContentString(node: React.ReactNode): string {
@@ -57,6 +59,7 @@ function extractContentString(node: React.ReactNode): string {
 export const SessionVideoCard: React.FC<SessionVideoCardProps> = ({
   coachMessage,
   config,
+  onSendUserMessageToCoach,
 }) => {
   const { coachState } = useCoachState();
   const [open, setOpen] = useState(false);
@@ -69,6 +72,15 @@ export const SessionVideoCard: React.FC<SessionVideoCardProps> = ({
     videoKey !== undefined &&
     Array.isArray(coachState?.shown_videos) &&
     coachState!.shown_videos!.includes(videoKey);
+
+  // The server bakes the right action chain into the card's first button:
+  // intros get [ACK]; outros get [ACK, START_BREAK]. The FE just forwards.
+  const continueActions: ComponentAction[] =
+    config.buttons?.[0]?.actions ?? [];
+
+  const handleContinue = (actions: ComponentAction[]) => {
+    onSendUserMessageToCoach({ message: null, actions });
+  };
 
   const textContent = extractContentString(coachMessage);
   const hasText = textContent.trim().length > 0;
@@ -109,11 +121,18 @@ export const SessionVideoCard: React.FC<SessionVideoCardProps> = ({
         </button>
       </div>
 
+      {/* `key` resets useVideoThreshold + the <video> element each time
+          the modal is reopened, so the Continue button starts disabled
+          again on a second view. */}
       <SessionVideoModal
+        key={open ? "open" : "closed"}
         open={open}
         onOpenChange={setOpen}
         videoName={videoName}
         videoUrl={videoUrl}
+        acknowledged={acknowledged}
+        actions={continueActions}
+        onContinue={handleContinue}
       />
     </div>
   );

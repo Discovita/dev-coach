@@ -10,6 +10,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { ActionType } from "@/enums/actionType";
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { ComponentType } from "@/enums/componentType";
 import { SessionVideoCard } from "@/pages/chat/components/coach-message-with-component/SessionVideoCard";
@@ -51,20 +52,37 @@ function buildConfig(overrides: Partial<ComponentConfig> = {}): ComponentConfig 
     video_name: "Welcome",
     video_url:
       "https://discovita-dev-coach-staging.s3.amazonaws.com/media/session-videos/01-welcome-session-intro.mov",
+    buttons: [
+      {
+        label: "Continue",
+        actions: [
+          {
+            action: ActionType.ACKNOWLEDGE_SESSION_VIDEO,
+            params: { video_key: "welcome_session_intro" },
+          },
+        ],
+      },
+    ],
     ...overrides,
   };
 }
 
 function renderCard(
   config: ComponentConfig = buildConfig(),
-  coachMessage: React.ReactNode = null
+  coachMessage: React.ReactNode = null,
+  onSendUserMessageToCoach = vi.fn()
 ) {
   const { wrapper: Wrapper } = createQueryWrapper();
-  return render(
+  const result = render(
     <Wrapper>
-      <SessionVideoCard coachMessage={coachMessage} config={config} />
+      <SessionVideoCard
+        coachMessage={coachMessage}
+        config={config}
+        onSendUserMessageToCoach={onSendUserMessageToCoach}
+      />
     </Wrapper>
   );
+  return { ...result, onSendUserMessageToCoach };
 }
 
 describe("SessionVideoCard — shell (PR 16)", () => {
@@ -137,22 +155,21 @@ describe("SessionVideoCard — shell (PR 16)", () => {
     expect(screen.queryByTestId("session-video-modal")).not.toBeInTheDocument();
   });
 
-  it("does NOT render a Continue button (PR 17 territory)", () => {
+  it("renders a Continue button inside the modal for unacked videos (PR 17)", () => {
     renderCard();
     fireEvent.click(screen.getByRole("button", { name: "Watch" }));
 
-    // Negative test that locks the PR 16 / PR 17 split.
-    expect(
-      screen.queryByRole("button", { name: /continue/i })
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("session-video-continue")).toBeInTheDocument();
   });
 
-  it("Watch button has no actions in component_config (no dispatch wiring yet)", () => {
-    // Asserts at the data-shape level that PR 16 doesn't ship any
-    // action plumbing on the card itself. PR 17 will add the modal's
-    // Continue button + bundled actions on the same component_config.
-    const config = buildConfig();
-    expect(config.buttons).toBeUndefined();
+  it("hides the Continue button on Watch Again (acked) modal", () => {
+    mockCoachState({ shown_videos: ["welcome_session_intro"] });
+    renderCard();
+    fireEvent.click(screen.getByRole("button", { name: "Watch Again" }));
+
+    expect(
+      screen.queryByTestId("session-video-continue")
+    ).not.toBeInTheDocument();
   });
 
   // --- Coach text passthrough ----------------------------------------
