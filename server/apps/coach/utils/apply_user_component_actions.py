@@ -15,7 +15,7 @@ from services.action_handler.handler import apply_component_actions
 
 def apply_user_component_actions(
     coach_state: CoachState,
-    user_chat_message: ChatMessage,
+    user_chat_message: Optional[ChatMessage],
     request_component_actions: Optional[List],
 ) -> Optional[ComponentConfig]:
     """
@@ -27,11 +27,14 @@ def apply_user_component_actions(
     Returns the ComponentConfig produced by the last action that returned one
     (e.g., START_BREAK → SESSION_BREAK, END_BREAK → SESSION_VIDEO for the
     next session's intro), or None. The orchestrator uses this to apply the
-    skip-LLM-on-component rule wired up in PR 10.
+    skip-LLM-on-component rule.
 
     Args:
         coach_state: The user's current coach state to update
-        user_chat_message: The chat message that triggered these actions
+        user_chat_message: The chat message that triggered these actions, or
+            `None` for programmatic-only turns (PR 10 null-message contract —
+            e.g. a video Continue button click). When `None`, the resulting
+            `Action` audit rows have `coach_message=NULL`.
         request_component_actions: List of actions to apply, or None if no actions
     """
     if not request_component_actions:

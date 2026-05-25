@@ -73,9 +73,17 @@ class Action(models.Model):
 
     coach_message = models.ForeignKey(
         ChatMessage,
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="triggered_actions",
-        help_text="The coach message that triggered this action.",
+        help_text=(
+            "ChatMessage that triggered this action. Typically the coach "
+            "message for LLM-emitted actions, or the user message for "
+            "user-button-driven actions. Nullable for programmatic-only "
+            "turns (`message=None` in `process_message`, e.g. the video "
+            "Continue button) where no triggering ChatMessage exists."
+        ),
     )
 
     test_scenario = models.ForeignKey(

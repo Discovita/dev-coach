@@ -30,13 +30,27 @@ class TestCoachRequestSerializer(SimpleTestCase):
         )
         self.assertTrue(s.is_valid(), s.errors)
 
-    def test_actions_only_without_message_is_invalid(self):
-        """message is a required field; actions alone fails field-level validation."""
+    def test_actions_only_without_message_is_valid(self):
+        """`actions` alone (programmatic-only turn) is valid under PR 10's null-message contract."""
         s = CoachRequestSerializer(
             data={"actions": [{"action": "accept_identity", "params": {}}]}
         )
+        self.assertTrue(s.is_valid(), s.errors)
+
+    def test_explicit_null_message_with_actions_is_valid(self):
+        """`{message: null, actions: [...]}` is the video Continue button shape."""
+        s = CoachRequestSerializer(
+            data={
+                "message": None,
+                "actions": [{"action": "accept_identity", "params": {}}],
+            }
+        )
+        self.assertTrue(s.is_valid(), s.errors)
+
+    def test_explicit_null_message_alone_is_invalid(self):
+        """`{message: null}` with no actions has no signal — reject."""
+        s = CoachRequestSerializer(data={"message": None})
         self.assertFalse(s.is_valid())
-        self.assertIn("message", s.errors)
 
     def test_empty_body_is_invalid(self):
         """Neither message nor actions → validation error."""
