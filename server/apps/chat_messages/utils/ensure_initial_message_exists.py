@@ -14,6 +14,7 @@ from django.conf import settings
 from apps.chat_messages.constants import INITIAL_MESSAGE
 from apps.chat_messages.models import ChatMessage
 from apps.chat_messages.utils.add_chat_message import add_chat_message
+from apps.coach_states.constants.session_videos import get_video, get_video_url
 from apps.users.models import User
 from enums.message_role import MessageRole
 from enums.component_type import ComponentType
@@ -47,6 +48,8 @@ def ensure_initial_message_exists(user: User) -> bool:
         component_config = ComponentConfig(
             component_type=ComponentType.SESSION_VIDEO.value,
             video_key=WELCOME_VIDEO_KEY,
+            video_name=get_video(WELCOME_VIDEO_KEY)["name"],
+            video_url=get_video_url(WELCOME_VIDEO_KEY),
         )
         message = add_chat_message(user, "", MessageRole.COACH)
         message.component_config = component_config.model_dump()

@@ -15,6 +15,7 @@ PR 13 and PR 14 share one source of truth for what a video card looks like.
 
 from typing import Iterable, Optional
 
+from apps.coach_states.constants.session_videos import get_video, get_video_url
 from enums.action_type import ActionType
 from enums.coaching_phase import (
     CoachingPhase,
@@ -100,6 +101,8 @@ def outro_component_for(leaving_session: str) -> ComponentConfig:
     return ComponentConfig(
         component_type=ComponentType.SESSION_VIDEO.value,
         video_key=outro_key,
+        video_name=get_video(outro_key)["name"],
+        video_url=get_video_url(outro_key),
         buttons=[
             ComponentButton(
                 label="Continue",
@@ -133,6 +136,8 @@ def intro_component_for(entering_session: str) -> ComponentConfig:
     return ComponentConfig(
         component_type=ComponentType.SESSION_VIDEO.value,
         video_key=intro_key,
+        video_name=get_video(intro_key)["name"],
+        video_url=get_video_url(intro_key),
         buttons=[
             ComponentButton(
                 label="Continue",

@@ -252,6 +252,12 @@ AWS_REGION = env("AWS_REGION")
 AWS_SES_REGION_NAME = env("AWS_SES_REGION_NAME")
 AWS_SES_REGION_ENDPOINT = env("AWS_SES_REGION_ENDPOINT")
 AWS_SES_SOURCE_EMAIL = env("AWS_SES_SOURCE_EMAIL")
+# Default S3 bucket used by the Coaching Phase Videos `get_video_url` helper
+# (see `apps/coach_states/constants/session_videos.py`). Per-env settings
+# override this via the same env var to point at the production bucket.
+AWS_STORAGE_BUCKET_NAME = env(
+    "STAGING_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-staging"
+)
 
 # Frontend URL for email links
 FRONTEND_URL = env("FRONTEND_URL", default="")

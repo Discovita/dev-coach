@@ -270,6 +270,37 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
             "get_to_know_session_intro",
         )
 
+    @override_settings(
+        COACHING_PHASE_VIDEOS_ENABLED=True,
+        AWS_STORAGE_BUCKET_NAME="test-bucket-foo",
+    )
+    def test_attached_component_embeds_video_name_and_video_url(self):
+        """PR 20: the attached SESSION_VIDEO carries video_name + video_url
+        from the registry so the FE renders without its own registry lookup."""
+        self._set_phase(CoachingPhase.IDENTITY_WARMUP)
+        params = TransitionPhaseParams(to_phase=CoachingPhase.IDENTITY_BRAINSTORMING)
+
+        result = transition_phase(self.coach_state, params, self.coach_message)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.video_name, "Get to Know You Outro")
+        self.assertEqual(
+            result.video_url,
+            "https://test-bucket-foo.s3.amazonaws.com/"
+            "session-videos/03-get-to-know-session-outro.mov",
+        )
+        # Persisted too, so a chat reload renders the same URL.
+        self.coach_message.refresh_from_db()
+        self.assertEqual(
+            self.coach_message.component_config["video_name"],
+            "Get to Know You Outro",
+        )
+        self.assertEqual(
+            self.coach_message.component_config["video_url"],
+            "https://test-bucket-foo.s3.amazonaws.com/"
+            "session-videos/03-get-to-know-session-outro.mov",
+        )
+
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
     def test_intro_button_carries_only_ack_with_intro_key(self):
         """Intro's Continue button is [ACK(intro_key)] — no START_BREAK."""

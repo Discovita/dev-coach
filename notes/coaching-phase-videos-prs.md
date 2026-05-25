@@ -152,12 +152,12 @@ def my_action(
 | 12  | Welcome injection (flag-gated)                                              | `casey/cpv-12-welcome-injection`             | `[✓]`  | casey 2026-05-25 | [#100](https://github.com/Discovita/dev-coach/pull/100) merged `f4d957b` 2026-05-25 | 1, 5 |
 | 13  | `transition_phase` handler enrichment — outro/intro auto-emit (flag-gated)  | `casey/cpv-13-transition-phase-enrichment`   | `[✓]`  | casey 2026-05-25 | [#101](https://github.com/Discovita/dev-coach/pull/101) merged `04310be` 2026-05-25 | 1, 2, 5 |
 | 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[✓]`  | casey 2026-05-25 | [#102](https://github.com/Discovita/dev-coach/pull/102) merged `939a882` 2026-05-25 | 1, 2, 5, 8 |
-| 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[👀]` | casey 2026-05-25 | [#103](https://github.com/Discovita/dev-coach/pull/103) | 9 |
+| 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[✓]`  | casey 2026-05-25 | [#103](https://github.com/Discovita/dev-coach/pull/103) merged `3547967` 2026-05-25 | 9 |
 | 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[ ]`  | —     | —   | 5 |
 | 17  | FE: video modal threshold gate + action dispatch                            | `casey/cpv-17-fe-session-video-modal-action` | `[ ]`  | —     | —   | 6, 7, 16 |
 | 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[ ]`  | —     | —   | 8, 15, 17 |
-| 19  | Rename `dev-coach/videos/` files to match session keys                      | `casey/cpv-19-rename-video-files`            | `[ ]`  | —     | —   | — |
-| 20  | S3 upload + populate registry URLs                                          | `casey/cpv-20-s3-upload-registry-urls`       | `[ ]`  | —     | —   | 5, 19 |
+| 19  | Rename `dev-coach/videos/` files to match session keys                      | n/a — local-only (videos/ is gitignored)     | `[✓]`  | casey 2026-05-25 | n/a — no commit needed (see Discoveries 2026-05-25 PR 19) | — |
+| 20  | S3 upload + populate registry URLs + ComponentConfig enrichment             | `casey/cpv-20-s3-upload-registry-urls`       | `[~]`  | casey 2026-05-25 | —   | 5, 19 |
 | 21  | Docs update — phases, transition-phase, persistent-components, new actions  | `casey/cpv-21-docs-update`                   | `[ ]`  | —     | —   | 2, 5, 6, 7, 8, 13, 14 |
 | 22  | Flip flag to `True` (one-line code change)                                  | `casey/cpv-22-flip-flag`                     | `[ ]`  | —     | —   | 12–14, 18, 20, 21 |
 | 23  | Remove flag plumbing (OPTIONAL — default skip)                              | `casey/cpv-23-remove-flag-plumbing`          | `[ ]`  | —     | —   | 22 |
@@ -948,6 +948,17 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 ## Discoveries
 
 > Append-only log. Add entries with date + your handle + what you found. The next agent should read this top-to-bottom before starting work.
+
+### 2026-05-25 — casey — PR ordering change (16 paused; running 19 → 20 → 16)
+
+- **FE needs `video_name` + `video_url` on `component_config` to render the SESSION_VIDEO card and modal.** Spec Decision 8 calls for the persisted shape to carry both fields, but PR 13/14 only embedded `video_key`. Doing PR 19 → PR 20 (with scope expansion) before PR 16 lets the FE read straight from `component_config` with zero FE registry. New order: 19 → 20 → 16 → 17 → 18 → 21 → ….
+- **PR 20 scope expanded** from "S3 upload + populate URLs" to also include: (a) `video_name?: str` + `video_url?: str` on the pydantic `ComponentConfig` model + FE TS mirror, (b) `session_video_helpers.intro_component_for` / `outro_component_for` embed both fields at construction time, (c) `ensure_initial_message_exists` welcome card seeded with both fields, (d) `get_video_url(video_key)` helper that joins `settings.AWS_STORAGE_BUCKET_NAME` with the registry's `s3_key` so the resolved URL matches the runtime env.
+- **Registry shape change.** Each `SESSION_VIDEOS` entry was `{name: str, url: str}` with empty url. After PR 20: `{name: str, s3_key: str}` where `s3_key` is the bucket-relative path (e.g. `session-videos/01-welcome-session-intro.mov`). URL resolution is runtime via the helper. Reasoning: staging and production live in different buckets (`discovita-dev-coach-staging` / `discovita-dev-coach-production`) — hardcoding either one in the registry would 404 in the other env.
+- **Upload script at `scripts/upload_session_videos.py`.** Top-level scripts/ directory. Uses `boto3` directly (not Django storages — it's ops tooling, not request-path). Idempotent: skips existing S3 keys unless `--force`. Uploads to **both** the staging and production buckets in a single run so the feature works everywhere after one operator session.
+
+### 2026-05-25 — casey — PR 19
+
+- **No commit, no PR opened.** `videos/` is gitignored (see `.gitignore:64-65` — "Coaching session video source files (uploaded to S3, not committed)"). The 12 files at `videos/01-..` through `videos/12-..` are already named per the spec's "Sessions & videos" table — the renames happened locally at an earlier point (the historical `mv` commands are visible in `.claude/settings.local.json` permission grants). No code references the old or new filenames (only the spec docs do, which are authoritative-source). PR 20's upload script will reference these names directly. Marking the row `[✓]` with no PR.
 
 ### 2026-05-24 — casey — PR 1
 

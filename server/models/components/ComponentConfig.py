@@ -72,6 +72,28 @@ class ComponentConfig(BaseModel):
             "Set by the server when constructing the card; never by the LLM."
         ),
     )
+    video_name: Optional[str] = Field(
+        default=None,
+        description=(
+            "For SESSION_VIDEO components: human-readable display name "
+            "(e.g. 'Welcome'). Embedded by the server from `SESSION_VIDEOS` "
+            "at construction so the frontend renders the card with no registry "
+            "lookup. Persisted to the ChatMessage `component_config` so a "
+            "chat refresh shows the same card."
+        ),
+    )
+    video_url: Optional[str] = Field(
+        default=None,
+        description=(
+            "For SESSION_VIDEO components: full HTTPS URL the player streams "
+            "from. Resolved via `get_video_url(video_key)` at construction "
+            "(joins the current env's S3 bucket with the registry's `s3_key`). "
+            "Persisted to the ChatMessage `component_config` so historical "
+            "rows replay against whichever bucket they were created in — "
+            "note: if the bucket name ever changes, persisted rows still "
+            "point at the old URL until rebuilt."
+        ),
+    )
     texts: Optional[List[ComponentText]] = Field(
         default=None,
         description="Optional list of text blocks to render before/after the coach message",

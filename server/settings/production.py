@@ -27,6 +27,9 @@ STATIC_ROOT = ".staticfiles"
 bucket_name = env(
     "PROD_AWS_STORAGE_BUCKET_NAME", default="discovita-dev-coach-production"
 )
+# Coaching Phase Videos `get_video_url` reads this; production points at
+# the production bucket so the SESSION_VIDEO card resolves the right URL.
+AWS_STORAGE_BUCKET_NAME = bucket_name
 custom_domain = f"{bucket_name}.s3.amazonaws.com"
 # S3 prefix under which all media is stored. Env-driven for symmetry with
 # staging and preview environments (defaults to the historical "media" so
