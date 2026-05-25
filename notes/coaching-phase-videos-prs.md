@@ -155,7 +155,7 @@ def my_action(
 | 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[✓]`  | casey 2026-05-25 | [#103](https://github.com/Discovita/dev-coach/pull/103) merged `3547967` 2026-05-25 | 9 |
 | 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[✓]`  | casey 2026-05-25 | [#105](https://github.com/Discovita/dev-coach/pull/105) merged `359d521` 2026-05-25 | 5 |
 | 17  | FE: video modal threshold gate + action dispatch                            | `casey/cpv-17-fe-session-video-modal-action` | `[✓]`  | casey 2026-05-25 | [#106](https://github.com/Discovita/dev-coach/pull/106) merged `10ee479` 2026-05-25 | 6, 7, 16 |
-| 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[~]`  | casey 2026-05-25 | —   | 8, 15, 17 |
+| 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[👀]` | casey 2026-05-25 | [#107](https://github.com/Discovita/dev-coach/pull/107) | 8, 15, 17 |
 | 19  | Rename `dev-coach/videos/` files to match session keys                      | n/a — local-only (videos/ is gitignored)     | `[✓]`  | casey 2026-05-25 | n/a — no commit needed (see Discoveries 2026-05-25 PR 19) | — |
 | 20  | S3 upload + populate registry URLs + ComponentConfig enrichment             | `casey/cpv-20-s3-upload-registry-urls`       | `[✓]`  | casey 2026-05-25 | [#104](https://github.com/Discovita/dev-coach/pull/104) merged `8309970` 2026-05-25 | 5, 19 |
 | 21  | Docs update — phases, transition-phase, persistent-components, new actions  | `casey/cpv-21-docs-update`                   | `[ ]`  | —     | —   | 2, 5, 6, 7, 8, 13, 14 |
@@ -948,6 +948,16 @@ When `settings.COACHING_PHASE_VIDEOS_ENABLED` is `False`, this enrichment short-
 ## Discoveries
 
 > Append-only log. Add entries with date + your handle + what you found. The next agent should read this top-to-bottom before starting work.
+
+### 2026-05-25 — casey — PR 18
+
+- **Composer-disable rule centralized in `useComposerDisabled(isProcessingMessage)`.** Both clauses (`on_break` + unacked-SESSION_VIDEO-is-latest) plus the processing-gate live in one hook, called once from `ChatControls`. Two clauses justified the indirection (one didn't, per PR 17's flag) — adding a third future clause means editing one place + adding one test.
+- **The "latest coach message" lookup ignores trailing user messages.** Pattern: walk `chatMessages` from the tail and return the first `role === "coach"` entry. Without this, a user message sent after an unacked SESSION_VIDEO card would silently make `messages[messages.length - 1]` be a user message, the SESSION_VIDEO check would fall through, and the gate would lift. There's no real flow that hits this (composer's disabled when the video is latest), but defensive-by-construction. Covered by the explicit "ignores trailing user messages" test.
+- **Spec says `latestMessage.component?.type`; the actual `Message` field is `component_config`.** Memory 55d9e273 is correct on semantics but uses the shorthand. The actual TS field name is `component_config` (a serialized dict via Pydantic on the backend). PR 18 reads `latestCoach.component_config?.component_type` — flagged here for future PRs reading that memory.
+- **`ChatControls.test.tsx` needed a `vi.mock` for `useChatMessages`.** Once `useComposerDisabled` reaches `useChatMessages` transitively, the old ChatControls tests trigger a real fetch (no global fetch stub in `tests/setup.ts`). Mocked it to return an empty `chatMessages: []` so the PR 15 on_break tests stay focused; unacked-video coverage lives in the dedicated `useComposerDisabled.test.ts`.
+- **`SessionBreakComponent` mirrors `IntroCannedResponseComponent` line-for-line.** Same lavender card, same button styling, same `{message: button.label, actions: button.actions}` dispatch — only the `data-testid` differs. The two components could probably share a base in a future refactor, but until there's a third canned-response variant the duplication is cheaper than the abstraction. Worth flagging if a fourth ever appears.
+- **2×2×2 truth-table via `it.each`** locks ANY-of semantics for the disable rule (disabled iff any of `on_break`, `unacked_video`, `processing` is true). If a future agent rewrites the rule and accidentally turns it into AND, exactly the four false→true rows in the table will fail. Cheap insurance for a rule whose business logic isn't visible from the code alone.
+- **Frontend at 256 after PR 18** (was 228, +28: 20 `useComposerDisabled` + 7 `SessionBreakComponent` + 1 renderer arm). Backend unchanged at 811 (FE-only PR).
 
 ### 2026-05-25 — casey — PR ordering change (16 paused; running 19 → 20 → 16)
 
