@@ -60,6 +60,14 @@ vi.mock(
     ),
   })
 );
+vi.mock(
+  "@/pages/chat/components/coach-message-with-component/SessionBreakComponent",
+  () => ({
+    SessionBreakComponent: ({ coachMessage }: { coachMessage: React.ReactNode }) => (
+      <div data-testid="session-break-component">{coachMessage}</div>
+    ),
+  })
+);
 
 const mockOnSend = vi.fn();
 
@@ -114,6 +122,11 @@ describe("CoachMessageWithComponent", () => {
   it("renders SessionVideoCard for SESSION_VIDEO (PR 16)", () => {
     renderWithConfig(ComponentType.SESSION_VIDEO);
     expect(screen.getByTestId("session-video-card")).toBeInTheDocument();
+  });
+
+  it("renders SessionBreakComponent for SESSION_BREAK (PR 18)", () => {
+    renderWithConfig(ComponentType.SESSION_BREAK);
+    expect(screen.getByTestId("session-break-component")).toBeInTheDocument();
   });
 
   it("renders children as fallback for unknown component type", () => {

@@ -9,6 +9,7 @@ import { ArchiveIdentityConfirmation } from "@/pages/chat/components/coach-messa
 import { SuggestIAmStatementComponent } from "@/pages/chat/components/coach-message-with-component/SuggestIAmStatementComponent";
 import { IAmStatementsSummaryComponent } from "@/pages/chat/components/coach-message-with-component/IAmStatementsSummaryComponent";
 import { SessionVideoCard } from "@/pages/chat/components/coach-message-with-component/SessionVideoCard";
+import { SessionBreakComponent } from "@/pages/chat/components/coach-message-with-component/SessionBreakComponent";
 
 export interface CoachMessageWithComponentProps {
   children: React.ReactNode;
@@ -84,6 +85,15 @@ export const CoachMessageWithComponent: React.FC<
           coachMessage={children}
           config={componentConfig}
           onSendUserMessageToCoach={onSendUserMessageToCoach}
+        />
+      );
+    case ComponentType.SESSION_BREAK:
+      return (
+        <SessionBreakComponent
+          coachMessage={children}
+          config={componentConfig}
+          onSendUserMessageToCoach={onSendUserMessageToCoach}
+          disabled={disabled}
         />
       );
     default:
