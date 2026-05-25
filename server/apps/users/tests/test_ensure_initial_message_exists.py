@@ -1,14 +1,22 @@
 """
 Tests for ensure_initial_message_exists utility.
+
+Covers both the legacy `INITIAL_MESSAGE`-text seed path (flag off) and the
+PR 12 SESSION_VIDEO welcome-card seed path (flag on, gated by
+`settings.COACHING_PHASE_VIDEOS_ENABLED`).
 """
 
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from apps.chat_messages.models import ChatMessage
 from apps.chat_messages.utils import ensure_initial_message_exists
+from apps.chat_messages.utils.ensure_initial_message_exists import (
+    WELCOME_VIDEO_KEY,
+)
 from apps.users.models import User
+from enums.component_type import ComponentType
 from enums.message_role import MessageRole
 
 
@@ -80,3 +88,83 @@ class EnsureInitialMessageExistsTests(TestCase):
 
         self.assertEqual(ChatMessage.objects.filter(user=self.user).count(), 1)
         self.assertEqual(ChatMessage.objects.filter(user=other_user).count(), 0)
+
+
+class EnsureInitialMessageFlagGatedTests(TestCase):
+    """
+    Test the PR 12 flag-gated behavior of `ensure_initial_message_exists`.
+
+    When `COACHING_PHASE_VIDEOS_ENABLED` is True, the seeded coach message
+    carries empty text and a `SESSION_VIDEO(welcome_session_intro)`
+    component_config (so the welcome video card renders as the first
+    message). When False, behavior matches the legacy `INITIAL_MESSAGE`
+    text seed.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="flag@example.com", password="testpass123"
+        )
+
+    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=False)
+    def test_flag_off_seeds_initial_message_text_only(self):
+        """Regression: flag off → first message is the legacy INITIAL_MESSAGE text."""
+        result = ensure_initial_message_exists(self.user)
+
+        self.assertTrue(result)
+        messages = ChatMessage.objects.filter(user=self.user)
+        self.assertEqual(messages.count(), 1)
+        only = messages.first()
+        self.assertEqual(only.role, MessageRole.COACH)
+        self.assertTrue(only.content)
+        self.assertIsNone(only.component_config)
+
+    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
+    def test_flag_on_seeds_session_video_welcome_card_with_empty_text(self):
+        """Flag on → first message has empty text + SESSION_VIDEO component_config."""
+        result = ensure_initial_message_exists(self.user)
+
+        self.assertTrue(result)
+        messages = ChatMessage.objects.filter(user=self.user)
+        self.assertEqual(messages.count(), 1)
+        only = messages.first()
+        self.assertEqual(only.role, MessageRole.COACH)
+        self.assertEqual(only.content, "")
+        self.assertIsNotNone(only.component_config)
+        self.assertEqual(
+            only.component_config["component_type"],
+            ComponentType.SESSION_VIDEO.value,
+        )
+
+    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
+    def test_flag_on_component_config_uses_welcome_session_intro_key(self):
+        """The welcome card's component_config carries the welcome_session_intro video_key."""
+        ensure_initial_message_exists(self.user)
+
+        only = ChatMessage.objects.get(user=self.user)
+        self.assertEqual(only.component_config["video_key"], WELCOME_VIDEO_KEY)
+        self.assertEqual(WELCOME_VIDEO_KEY, "welcome_session_intro")
+
+    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
+    def test_idempotent_when_initial_message_already_exists_flag_on(self):
+        """Calling twice with the flag on does not create a second message."""
+        first = ensure_initial_message_exists(self.user)
+        second = ensure_initial_message_exists(self.user)
+
+        self.assertTrue(first)
+        self.assertFalse(second)
+        self.assertEqual(
+            ChatMessage.objects.filter(user=self.user).count(), 1
+        )
+
+    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=False)
+    def test_idempotent_when_initial_message_already_exists_flag_off(self):
+        """Calling twice with the flag off does not create a second message."""
+        first = ensure_initial_message_exists(self.user)
+        second = ensure_initial_message_exists(self.user)
+
+        self.assertTrue(first)
+        self.assertFalse(second)
+        self.assertEqual(
+            ChatMessage.objects.filter(user=self.user).count(), 1
+        )

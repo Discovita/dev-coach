@@ -64,6 +64,14 @@ class ComponentConfig(BaseModel):
     component_type: str = Field(
         ..., description="Type of component to display (ComponentType value)"
     )
+    video_key: Optional[str] = Field(
+        default=None,
+        description=(
+            "For SESSION_VIDEO components: the registry key (e.g. "
+            "`welcome_session_intro`) identifying which video this card renders. "
+            "Set by the server when constructing the card; never by the LLM."
+        ),
+    )
     texts: Optional[List[ComponentText]] = Field(
         default=None,
         description="Optional list of text blocks to render before/after the coach message",
