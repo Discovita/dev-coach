@@ -26,6 +26,12 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
   const { coachState } = useCoachState();
   const { identities } = useIdentities();
 
+  // Coaching Phase Videos (PR 15): composer is disabled while the user is
+  // on a between-session break. They must click "I'm Ready" on the break
+  // card (which fires END_BREAK) before they can type again. PR 18 adds
+  // the second disable clause for unacknowledged SESSION_VIDEO cards.
+  const composerDisabled = isProcessingMessage || coachState?.on_break === true;
+
   /**
    * Resizes the textarea to fit content, up to a max height.
    * Called on input change and after sending a message.
@@ -111,11 +117,11 @@ export const ChatControls: React.FC<ChatControlsProps> = ({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          disabled={isProcessingMessage}
+          disabled={composerDisabled}
           rows={1}
           className="flex-grow pr-4 pl-4 border border-primary-light rounded-[24px] text-[15px] font-inherit mr-3 transition-a resize-none overflow-y-hidden min-h-[46px] max-h-[500px] leading-[1.5] focus:shadow-[0_0_0_3px_rgba(208,169,89,0.2)] focus:bg-gold-50 disabled:bg-gold-50 disabled:cursor-not-allowed placeholder:text-neutral-400 placeholder:opacity-80"
         />
-        <Button type="submit" disabled={isProcessingMessage}>
+        <Button type="submit" disabled={composerDisabled}>
           {isProcessingMessage ? "Sending..." : "Send"}
         </Button>
       </form>

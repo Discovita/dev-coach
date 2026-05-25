@@ -151,8 +151,8 @@ def my_action(
 | 11  | History serialization + count bump (LLM read shim)                          | `casey/cpv-11-history-serialization`         | `[✓]`  | casey 2026-05-25 | [#99](https://github.com/Discovita/dev-coach/pull/99) merged `650813f` 2026-05-25 | 3, 4 |
 | 12  | Welcome injection (flag-gated)                                              | `casey/cpv-12-welcome-injection`             | `[✓]`  | casey 2026-05-25 | [#100](https://github.com/Discovita/dev-coach/pull/100) merged `f4d957b` 2026-05-25 | 1, 5 |
 | 13  | `transition_phase` handler enrichment — outro/intro auto-emit (flag-gated)  | `casey/cpv-13-transition-phase-enrichment`   | `[✓]`  | casey 2026-05-25 | [#101](https://github.com/Discovita/dev-coach/pull/101) merged `04310be` 2026-05-25 | 1, 2, 5 |
-| 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[👀]` | casey 2026-05-25 | [#102](https://github.com/Discovita/dev-coach/pull/102) | 1, 2, 5, 8 |
-| 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[ ]`  | —     | —   | 9 |
+| 14  | `END_BREAK` handler enrichment — intro auto-emit (flag-gated)               | `casey/cpv-14-end-break-enrichment`          | `[✓]`  | casey 2026-05-25 | [#102](https://github.com/Discovita/dev-coach/pull/102) merged `939a882` 2026-05-25 | 1, 2, 5, 8 |
+| 15  | FE: `on_break` composer disable + read shape                                | `casey/cpv-15-fe-on-break-composer`          | `[~]`  | casey 2026-05-25 | —   | 9 |
 | 16  | FE: `SessionVideoCard` + modal shell                                        | `casey/cpv-16-fe-session-video-card`         | `[ ]`  | —     | —   | 5 |
 | 17  | FE: video modal threshold gate + action dispatch                            | `casey/cpv-17-fe-session-video-modal-action` | `[ ]`  | —     | —   | 6, 7, 16 |
 | 18  | FE: `SessionBreakComponent` + unacked-video composer rule                   | `casey/cpv-18-fe-session-break-composer`     | `[ ]`  | —     | —   | 8, 15, 17 |

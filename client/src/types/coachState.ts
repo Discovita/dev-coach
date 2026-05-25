@@ -20,4 +20,12 @@ export interface CoachState {
     [k: string]: unknown;
   };
   updated_at: string;
+  /**
+   * Coaching Phase Videos (PR 9): true while the user has an open `Break`
+   * row (between-session pause). Backend-derived from
+   * `Break.objects.filter(user=u, ended_at__isnull=True).exists()`. The
+   * chat composer disables when true so the user must click "I'm Ready"
+   * before typing.
+   */
+  on_break?: boolean;
 }
