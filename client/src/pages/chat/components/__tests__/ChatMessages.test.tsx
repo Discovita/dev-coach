@@ -192,10 +192,11 @@ describe("ChatMessages", () => {
       expect(screen.queryByTestId("coach-with-component")).not.toBeInTheDocument();
     });
 
-    it("suppresses component rendering while processing, even with cache or seed present", () => {
-      // While a POST is in flight, the LoadingBubbles bubble owns the
-      // visual real estate; the next message's component will render
-      // once processing flips false.
+    it("keeps server-seeded component visible during processing (no blink on Continue click)", () => {
+      // The welcome SESSION_VIDEO card is persisted on the message row.
+      // While the ACK click is in flight, the card must stay visible —
+      // blanking it makes the UI flicker as it disappears + reappears
+      // around the refetch. LoadingBubbles still appears beneath.
       renderChatMessages(
         [
           {
@@ -206,6 +207,28 @@ describe("ChatMessages", () => {
           },
         ],
         { isProcessingMessage: true }
+      );
+      expect(screen.getByTestId("coach-with-component")).toBeInTheDocument();
+      expect(screen.getByTestId("loading-bubbles")).toBeInTheDocument();
+    });
+
+    it("suppresses cache-only component while processing (legacy SHOW_XXX behavior)", () => {
+      // No message.component_config; component came from in-memory
+      // cache only (legacy SHOW_COMBINE_IDENTITIES-style flow). While
+      // a POST is in flight, blank it so it's clear the previous
+      // interactive choice is being processed.
+      renderChatMessages(
+        [
+          {
+            role: "coach",
+            content: "Pick one",
+            timestamp: "2025-01-01T00:00:00Z",
+          },
+        ],
+        {
+          isProcessingMessage: true,
+          componentConfig: combineIdentitiesConfig,
+        }
       );
       expect(screen.queryByTestId("coach-with-component")).not.toBeInTheDocument();
       expect(screen.getByTestId("loading-bubbles")).toBeInTheDocument();

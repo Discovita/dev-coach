@@ -87,6 +87,7 @@ export const SessionVideoModal: React.FC<SessionVideoModalProps> = ({
           data-testid="session-video-element"
           src={videoUrl}
           controls
+          autoPlay
           preload="metadata"
           className="w-full max-h-[70vh] bg-black"
           onTimeUpdate={(e) => {

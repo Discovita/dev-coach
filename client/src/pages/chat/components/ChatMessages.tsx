@@ -51,15 +51,17 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               let componentToRender = null;
 
               if (isLastCoachMessage) {
-                // Prefer the in-memory cache (`componentConfig`, set by
-                // `useChatMessages.onSuccess` after a POST). Fall back to
-                // `message.component_config` so server-seeded cards — the
-                // welcome SESSION_VIDEO on fresh chat load, post-END_BREAK
-                // intro cards on refresh, etc. — render before any API
-                // round-trip populates the cache.
-                componentToRender = !isProcessingMessage
-                  ? componentConfig || message.component_config || null
-                  : null;
+                // Prefer the in-memory cache when not processing (freshest
+                // server response). Fall through to `message.component_config`
+                // for server-seeded cards (welcome SESSION_VIDEO,
+                // post-END_BREAK intros) — those represent persisted
+                // history and stay visible even during in-flight requests,
+                // so clicking Continue doesn't blink the card out while
+                // we wait for the response.
+                componentToRender =
+                  (!isProcessingMessage && componentConfig) ||
+                  message.component_config ||
+                  null;
               } else {
                 // For all other coach messages, ONLY check message.component_config
                 componentToRender = message.component_config || null;

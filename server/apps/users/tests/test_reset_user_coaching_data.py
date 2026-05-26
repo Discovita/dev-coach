@@ -10,7 +10,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
-from apps.coach_states.models import CoachState
+from apps.coach_states.models import Break, CoachState
 from apps.identities.models import Identity
 from apps.user_notes.models import UserNote
 from apps.users.functions import reset_user_coaching_data
@@ -72,7 +72,19 @@ class ResetUserCoachingDataFunctionTests(TestCase):
         self.coach_state.who_you_are = ["Creative", "Ambitious"]
         self.coach_state.who_you_want_to_be = ["Leader"]
         self.coach_state.asked_questions = ["question1"]
+        # Coaching Phase Videos state — must be cleared on reset.
+        self.coach_state.shown_videos = [
+            "welcome_session_intro",
+            "get_to_know_session_intro",
+        ]
         self.coach_state.save()
+
+        # Coaching Phase Videos: pre-existing Break rows must be deleted
+        # on reset so a refreshed user never inherits `on_break=true`.
+        Break.objects.create(
+            user=self.user,
+            triggered_by_session="get_to_know_session",
+        )
 
     def test_deletes_all_chat_messages(self):
         """Test that all chat messages are deleted."""
@@ -124,6 +136,25 @@ class ResetUserCoachingDataFunctionTests(TestCase):
         self.assertEqual(self.coach_state.who_you_want_to_be, [])
         self.assertEqual(self.coach_state.asked_questions, [])
 
+    def test_resets_shown_videos(self):
+        """Coaching Phase Videos: shown_videos must be cleared so the welcome
+        card (and downstream intros/outros) re-fires on the reset chat."""
+        self.assertEqual(len(self.coach_state.shown_videos), 2)
+
+        reset_user_coaching_data(self.user)
+
+        self.coach_state.refresh_from_db()
+        self.assertEqual(self.coach_state.shown_videos, [])
+
+    def test_deletes_all_breaks(self):
+        """Coaching Phase Videos: Break rows must be deleted so the user
+        is not stuck `on_break=true` after a reset."""
+        self.assertEqual(Break.objects.filter(user=self.user).count(), 1)
+
+        reset_user_coaching_data(self.user)
+
+        self.assertEqual(Break.objects.filter(user=self.user).count(), 0)
+
     def test_handles_user_without_coach_state(self):
         """Test that function handles user without coach state gracefully."""
         user_no_state = User.objects.create_user(
@@ -162,11 +193,22 @@ class ResetUserCoachingDataFunctionTests(TestCase):
             state=IdentityState.ACCEPTED,
             category=IdentityCategory.PASSIONS,
         )
+        Break.objects.create(
+            user=other_user,
+            triggered_by_session="get_to_know_session",
+        )
+        other_state, _ = CoachState.objects.get_or_create(user=other_user)
+        other_state.shown_videos = ["welcome_session_intro"]
+        other_state.save()
 
         reset_user_coaching_data(self.user)
 
         self.assertEqual(ChatMessage.objects.filter(user=other_user).count(), 1)
         self.assertEqual(Identity.objects.filter(user=other_user).count(), 1)
+        # Coaching Phase Videos: per-user isolation of the new resets.
+        self.assertEqual(Break.objects.filter(user=other_user).count(), 1)
+        other_state.refresh_from_db()
+        self.assertEqual(other_state.shown_videos, ["welcome_session_intro"])
 
     def test_atomic_transaction(self):
         """Test that operation is atomic (all or nothing)."""
