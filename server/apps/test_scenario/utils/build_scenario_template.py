@@ -8,6 +8,7 @@ from apps.test_scenario.utils.build_user_template_section import (
     build_user_template_section,
 )
 from apps.test_scenario.utils.gather_actions_section import gather_actions_section
+from apps.test_scenario.utils.gather_breaks_section import gather_breaks_section
 from apps.test_scenario.utils.gather_chat_messages_section import (
     gather_chat_messages_section,
 )
@@ -64,5 +65,9 @@ def build_scenario_template(
     actions_section = gather_actions_section(user)
     if actions_section:
         template["actions"] = actions_section
+
+    breaks_section = gather_breaks_section(user)
+    if breaks_section:
+        template["breaks"] = breaks_section
 
     return template

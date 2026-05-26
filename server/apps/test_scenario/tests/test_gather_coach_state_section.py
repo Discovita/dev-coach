@@ -83,3 +83,27 @@ class TestGatherCoachStateSection(TestCase):
         result = gather_coach_state_section(self.user)
         self.assertIn("metadata", result)
         self.assertEqual(result["metadata"], {"key": "value"})
+
+    # ==================== Coaching Phase Videos ==================
+
+    def test_includes_shown_videos_when_present(self):
+        """Should include shown_videos when non-empty (PR 111)."""
+        cs = CoachState.objects.get(user=self.user)
+        cs.shown_videos = ["welcome_session_intro", "get_to_know_session_intro"]
+        cs.save()
+
+        result = gather_coach_state_section(self.user)
+        self.assertIn("shown_videos", result)
+        self.assertEqual(
+            result["shown_videos"],
+            ["welcome_session_intro", "get_to_know_session_intro"],
+        )
+
+    def test_omits_shown_videos_when_empty(self):
+        """Should omit shown_videos when empty (matches optional-field convention)."""
+        cs = CoachState.objects.get(user=self.user)
+        cs.shown_videos = []
+        cs.save()
+
+        result = gather_coach_state_section(self.user)
+        self.assertNotIn("shown_videos", result)

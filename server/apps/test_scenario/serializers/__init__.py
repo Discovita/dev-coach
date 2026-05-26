@@ -15,6 +15,7 @@ Exports:
 from apps.test_scenario.serializers.template_serializers import (
     ForbidExtraFieldsMixin,
     TemplateActionSerializer,
+    TemplateBreakSerializer,
     TemplateChatMessageSerializer,
     TemplateCoachStateSerializer,
     TemplateIdentitySerializer,
@@ -34,4 +35,5 @@ __all__ = [
     "TemplateChatMessageSerializer",
     "TemplateUserNoteSerializer",
     "TemplateActionSerializer",
+    "TemplateBreakSerializer",
 ]

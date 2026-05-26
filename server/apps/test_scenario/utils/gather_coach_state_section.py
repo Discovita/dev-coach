@@ -39,4 +39,9 @@ def gather_coach_state_section(user) -> dict | None:
         section["asked_questions"] = cs.asked_questions
     if getattr(cs, "metadata", None):
         section["metadata"] = cs.metadata
+    # Coaching Phase Videos: capture acknowledged video keys so a frozen
+    # scenario replays with the correct intro/outro cards still pending
+    # (or skipped) for the user's current_phase.
+    if getattr(cs, "shown_videos", None):
+        section["shown_videos"] = cs.shown_videos
     return section

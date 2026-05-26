@@ -7,6 +7,7 @@ See: apps/test_scenario/functions/__init__.py
 """
 
 from apps.test_scenario.utils.create_scenario_actions import create_scenario_actions
+from apps.test_scenario.utils.create_scenario_breaks import create_scenario_breaks
 from apps.test_scenario.utils.create_scenario_chat_messages import (
     create_scenario_chat_messages,
 )
@@ -34,6 +35,7 @@ def instantiate_test_scenario(
     create_coach_state: bool = False,
     create_user_notes: bool = False,
     create_actions: bool = False,
+    create_breaks: bool = False,
 ) -> dict:
     """
     Create all DB objects described by *scenario.template*.
@@ -49,6 +51,7 @@ def instantiate_test_scenario(
         create_coach_state: Whether to apply coach state from the template.
         create_user_notes: Whether to create user notes.
         create_actions: Whether to create actions.
+        create_breaks: Whether to create Coaching Phase Videos Break rows.
 
     Returns:
         A dict with keys ``user``, ``coach_state``, and ``email``.
@@ -83,6 +86,11 @@ def instantiate_test_scenario(
 
     if create_actions and template.get("actions") and created_user:
         create_scenario_actions(scenario, template, created_user, original_to_new_msg)
+
+    # Coaching Phase Videos: recreate Break rows after chat messages so
+    # the `coach_message` FK can resolve against the just-created messages.
+    if create_breaks and template.get("breaks") and created_user:
+        create_scenario_breaks(scenario, template, created_user, original_to_new_msg)
 
     return {
         "user": created_user,
