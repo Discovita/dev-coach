@@ -51,8 +51,15 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               let componentToRender = null;
 
               if (isLastCoachMessage) {
-                // For the last coach message, ONLY check the componentConfig prop (from cache)
-                componentToRender = !isProcessingMessage && componentConfig ? componentConfig : null;
+                // Prefer the in-memory cache (`componentConfig`, set by
+                // `useChatMessages.onSuccess` after a POST). Fall back to
+                // `message.component_config` so server-seeded cards — the
+                // welcome SESSION_VIDEO on fresh chat load, post-END_BREAK
+                // intro cards on refresh, etc. — render before any API
+                // round-trip populates the cache.
+                componentToRender = !isProcessingMessage
+                  ? componentConfig || message.component_config || null
+                  : null;
               } else {
                 // For all other coach messages, ONLY check message.component_config
                 componentToRender = message.component_config || null;
