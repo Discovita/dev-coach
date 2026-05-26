@@ -157,3 +157,56 @@ class TestValidateScenarioTemplate(TestCase):
     def test_minimal_valid_template_passes(self):
         errors = validate_scenario_template(MINIMAL_VALID_TEMPLATE)
         self.assertEqual(errors, [])
+
+    # ==================== Coaching Phase Videos (PR 111) ====================
+
+    def test_shown_videos_field_validates(self):
+        """coach_state.shown_videos accepts a list of strings."""
+        template = VALID_TEMPLATE.copy()
+        template["coach_state"] = {
+            **template["coach_state"],
+            "shown_videos": ["welcome_session_intro", "get_to_know_session_intro"],
+        }
+        errors = validate_scenario_template(template)
+        self.assertEqual(errors, [])
+
+    def test_breaks_section_validates(self):
+        """A well-formed breaks section is accepted."""
+        template = VALID_TEMPLATE.copy()
+        template["breaks"] = [
+            {"triggered_by_session": "get_to_know_session"},
+            {
+                "triggered_by_session": "brainstorming_session",
+                "ended_at": "2025-01-01T12:00:00Z",
+                "original_coach_message_id": "abc-123",
+            },
+        ]
+        errors = validate_scenario_template(template)
+        self.assertEqual(errors, [])
+
+    def test_extra_field_in_break(self):
+        """Unknown fields in a break entry trigger the ForbidExtraFields mixin."""
+        template = VALID_TEMPLATE.copy()
+        template["breaks"] = [
+            {"triggered_by_session": "get_to_know_session", "foo": "bar"},
+        ]
+        errors = validate_scenario_template(template)
+        self.assertTrue(
+            any(
+                e["section"].startswith("break") and "foo" in e["error"]
+                for e in errors
+            )
+        )
+
+    def test_missing_required_field_in_break(self):
+        """Omitting triggered_by_session produces a validation error."""
+        template = VALID_TEMPLATE.copy()
+        template["breaks"] = [{"ended_at": "2025-01-01T12:00:00Z"}]
+        errors = validate_scenario_template(template)
+        self.assertTrue(
+            any(
+                e["section"].startswith("break")
+                and "triggered_by_session" in e["error"]
+                for e in errors
+            )
+        )

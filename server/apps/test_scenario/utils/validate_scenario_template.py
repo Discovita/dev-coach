@@ -6,6 +6,7 @@ See: apps/test_scenario/utils/__init__.py
 
 from apps.test_scenario.serializers import (
     TemplateActionSerializer,
+    TemplateBreakSerializer,
     TemplateChatMessageSerializer,
     TemplateCoachStateSerializer,
     TemplateIdentitySerializer,
@@ -72,6 +73,7 @@ def validate_scenario_template(template: dict) -> list[dict[str, str]]:
         "chat_messages": ("chat_message", TemplateChatMessageSerializer),
         "user_notes": ("user_note", TemplateUserNoteSerializer),
         "actions": ("action", TemplateActionSerializer),
+        "breaks": ("break", TemplateBreakSerializer),
     }
 
     for key, serializer_cls in _SINGLE_SECTIONS.items():

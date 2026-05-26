@@ -102,6 +102,15 @@ class TemplateCoachStateSerializer(ForbidExtraFieldsMixin, serializers.Serialize
     metadata = serializers.DictField(
         required=False, help_text="Additional metadata for the coaching session."
     )
+    shown_videos = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        help_text=(
+            "Coaching Phase Videos: session-video keys the user has "
+            "acknowledged (e.g. 'welcome_session_intro'). Determines which "
+            "intro/outro cards are still pending vs already watched."
+        ),
+    )
 
 
 class TemplateIdentitySerializer(ForbidExtraFieldsMixin, serializers.Serializer):
@@ -196,4 +205,33 @@ class TemplateActionSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
         required=False,
         allow_blank=True,
         help_text="DEPRECATED: Use original_coach_message_id instead.",
+    )
+
+
+class TemplateBreakSerializer(ForbidExtraFieldsMixin, serializers.Serializer):
+    """
+    Validates individual break entries inside ``template.breaks``.
+
+    A Break row captures a between-session pause for the Coaching Phase
+    Videos feature. ``ended_at`` is null while the user is still on the
+    break and a datetime once they click "I'm Ready". The frontend's
+    ``on_break`` flag derives from whether any row has ``ended_at IS NULL``.
+    """
+
+    triggered_by_session = serializers.CharField(
+        help_text="Session key the user was leaving when the break opened (e.g. 'brainstorming_session'). Required."
+    )
+    started_at = serializers.DateTimeField(
+        required=False,
+        help_text="When the break opened. Preserved at instantiation so duration math stays sensible.",
+    )
+    ended_at = serializers.DateTimeField(
+        required=False,
+        allow_null=True,
+        help_text="When the user clicked 'I'm Ready'. Null while the break is still open.",
+    )
+    original_coach_message_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="ID of the original coach message carrying the SESSION_BREAK component (for robust linking during instantiation).",
     )

@@ -123,3 +123,24 @@ class CreateScenarioCoachStateTests(TestCase):
             self.scenario, template, self.user, {}
         )
         self.assertIsNotNone(result)
+
+    def test_applies_shown_videos_from_template(self):
+        """Coaching Phase Videos (PR 111): shown_videos in the template must
+        land on the instantiated CoachState so re-played scenarios skip the
+        already-acked intros/outros."""
+        template = {
+            "coach_state": {
+                "current_phase": CoachingPhase.INTRODUCTION,
+                "shown_videos": [
+                    "welcome_session_intro",
+                    "get_to_know_session_intro",
+                ],
+            }
+        }
+        result = create_scenario_coach_state(
+            self.scenario, template, self.user, {}
+        )
+        self.assertEqual(
+            result.shown_videos,
+            ["welcome_session_intro", "get_to_know_session_intro"],
+        )

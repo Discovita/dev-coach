@@ -95,5 +95,6 @@ def freeze_user_session(
         create_chat_messages=True,
         create_user_notes=True,
         create_actions=True,
+        create_breaks=True,
     )
     return scenario

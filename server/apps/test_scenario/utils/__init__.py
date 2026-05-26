@@ -15,6 +15,7 @@ Exports:
     gather_chat_messages_section: Gathers ChatMessages into a template section list and mapping.
     gather_user_notes_section: Gathers UserNotes into a template section list.
     gather_actions_section: Gathers Actions into a template section list.
+    gather_breaks_section: Gathers Coaching Phase Videos Break rows into a template section list.
 
     # Scenario creation utilities
     create_scenario_user: Creates a fresh test user from a template.
@@ -23,7 +24,8 @@ Exports:
     create_scenario_chat_messages: Creates ChatMessage objects from a template.
     create_scenario_user_notes: Creates UserNote objects from a template.
     create_scenario_actions: Creates Action objects from a template.
-    resolve_scenario_coach_message: Resolves the coach message to link to an action.
+    create_scenario_breaks: Creates Coaching Phase Videos Break rows from a template.
+    resolve_scenario_coach_message: Resolves the coach message to link to an action or break.
 
     # Image key utilities
     extract_s3_key_from_url: Extracts the S3 object key from a full URL.
@@ -56,6 +58,7 @@ from apps.test_scenario.utils.build_user_template_section import (
 
 # Template gather utilities
 from apps.test_scenario.utils.gather_actions_section import gather_actions_section
+from apps.test_scenario.utils.gather_breaks_section import gather_breaks_section
 from apps.test_scenario.utils.gather_chat_messages_section import (
     gather_chat_messages_section,
 )
@@ -67,6 +70,7 @@ from apps.test_scenario.utils.gather_user_notes_section import gather_user_notes
 
 # Scenario creation utilities
 from apps.test_scenario.utils.create_scenario_actions import create_scenario_actions
+from apps.test_scenario.utils.create_scenario_breaks import create_scenario_breaks
 from apps.test_scenario.utils.create_scenario_chat_messages import (
     create_scenario_chat_messages,
 )
@@ -115,6 +119,7 @@ __all__ = [
     "gather_chat_messages_section",
     "gather_user_notes_section",
     "gather_actions_section",
+    "gather_breaks_section",
     # Scenario creation utilities
     "create_scenario_user",
     "create_scenario_identities",
@@ -122,6 +127,7 @@ __all__ = [
     "create_scenario_chat_messages",
     "create_scenario_user_notes",
     "create_scenario_actions",
+    "create_scenario_breaks",
     "resolve_scenario_coach_message",
     # Image key utilities
     "extract_s3_key_from_url",
