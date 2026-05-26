@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Play } from "lucide-react";
 import type {
   ComponentAction,
   ComponentConfig,
@@ -97,13 +98,12 @@ export const SessionVideoCard: React.FC<SessionVideoCardProps> = ({
           backgroundColor: "var(--nv-pale-lavender, #eae6fb)",
         }}
       >
-        <span className="text-[18px] font-medium leading-[1.5] text-black">
-          {videoName}
-        </span>
+        {/* Circular play-icon "thumbnail" — visual signal that this card is a video. */}
         <button
           type="button"
+          aria-label={acknowledged ? "Watch video again" : "Watch video"}
           onClick={() => setOpen(true)}
-          className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
+          className="flex items-center justify-center w-10 h-10 rounded-full transition-colors cursor-pointer shrink-0"
           style={{
             backgroundColor: "var(--nv-royal-purple, #531e96)",
             color: "white",
@@ -117,6 +117,29 @@ export const SessionVideoCard: React.FC<SessionVideoCardProps> = ({
               "var(--nv-royal-purple, #531e96)";
           }}
         >
+          <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
+        </button>
+        <span className="text-[18px] font-medium leading-[1.5] text-black">
+          {videoName}
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
+          style={{
+            backgroundColor: "var(--nv-royal-purple, #531e96)",
+            color: "white",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "var(--nv-violet-blue, #6a5ffb)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "var(--nv-royal-purple, #531e96)";
+          }}
+        >
+          <Play className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true" />
           {acknowledged ? "Watch Again" : "Watch"}
         </button>
       </div>

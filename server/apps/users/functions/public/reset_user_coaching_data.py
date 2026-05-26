@@ -12,7 +12,7 @@ from django.db import transaction
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
 from apps.chat_messages.utils import ensure_initial_message_exists
-from apps.coach_states.models import CoachState
+from apps.coach_states.models import Break, CoachState
 from apps.identities.models import Identity
 from apps.user_notes.models import UserNote
 from apps.users.models import User
@@ -56,6 +56,12 @@ def reset_user_coaching_data(user: User) -> List[ChatMessage]:
     # Delete all actions for the user
     Action.objects.filter(user=user).delete()
 
+    # Coaching Phase Videos: delete all Break rows so a refreshed user
+    # never inherits `on_break=true` from the prior session. Also resets
+    # `triggered_by_session` history (not relied on elsewhere, but kept
+    # consistent — coaching data should look truly fresh post-reset).
+    Break.objects.filter(user=user).delete()
+
     # Reset the user's CoachState
     try:
         coach_state = CoachState.objects.get(user=user)
@@ -67,6 +73,11 @@ def reset_user_coaching_data(user: User) -> List[ChatMessage]:
         coach_state.who_you_are = []
         coach_state.who_you_want_to_be = []
         coach_state.asked_questions = []
+        # Coaching Phase Videos: clear acknowledged videos so the welcome
+        # card (and every subsequent intro/outro) re-fires on the reset
+        # chat — otherwise `transition_phase` / `end_break` would skip
+        # them because their keys are still in shown_videos.
+        coach_state.shown_videos = []
         coach_state.save()
     except CoachState.DoesNotExist:
         pass  # User may not have a CoachState yet
