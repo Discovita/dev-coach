@@ -308,4 +308,4 @@ CELERY_WORKER_MAX_MEMORY_PER_CHILD = 400000  # recycle if RSS exceeds ~400 MB (K
 #
 # COACHING_PHASE_VIDEOS_ENABLED is the feature flag — flip it to control
 # visibility without an env-var change. Flipping is a code change + deploy.
-COACHING_PHASE_VIDEOS_ENABLED = False
+COACHING_PHASE_VIDEOS_ENABLED = True
