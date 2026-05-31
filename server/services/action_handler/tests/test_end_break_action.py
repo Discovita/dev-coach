@@ -385,3 +385,201 @@ class EndBreakSessionVideoEnrichmentTests(TestCase):
                 self.assertEqual(
                     SESSIONS[entering_session]["intro"], expected_intro_key
                 )
+
+
+# ---------------------------------------------------------------------------
+# Closed-state component_config mutation
+# ---------------------------------------------------------------------------
+#
+# When END_BREAK runs, the original SESSION_BREAK message's
+# `component_config` is updated to record the close so the historical card
+# renders as a compact "Took a break · {duration}" line on the frontend
+# (and can't redispatch END_BREAK because `buttons` is stripped).
+
+
+class EndBreakClosedComponentConfigTests(TestCase):
+    """The original SESSION_BREAK message's component_config is mutated
+    on close so the frontend renders the historical compact card."""
+
+    def setUp(self):
+        self.user = create_test_user()
+        self.coach_state = self.user.coach_state
+        self.params = EndBreakParams()
+        # In production this is the USER's "I'm ready" message; it's
+        # what gets passed as `coach_message` to END_BREAK. The SESSION_BREAK
+        # message is linked separately via `Break.coach_message`.
+        self.user_message = create_test_chat_message(
+            self.user, role=MessageRole.USER, content="I'm ready"
+        )
+
+    def _seed_break_with_card(self):
+        """Create a SESSION_BREAK coach message + an open Break linked to it."""
+        break_msg = create_test_chat_message(
+            self.user,
+            role=MessageRole.COACH,
+            content="",
+        )
+        break_msg.component_config = {
+            "component_type": ComponentType.SESSION_BREAK.value,
+            "buttons": [
+                {
+                    "label": "I'm Ready",
+                    "actions": [{"action": "end_break", "params": {}}],
+                }
+            ],
+        }
+        break_msg.save(update_fields=["component_config"])
+        open_break = Break.objects.create(
+            user=self.user,
+            triggered_by_session="get_to_know_session",
+            coach_message=break_msg,
+        )
+        return break_msg, open_break
+
+    def test_marks_session_break_message_closed(self):
+        """`closed: true` lands on the original SESSION_BREAK message."""
+        break_msg, _open_break = self._seed_break_with_card()
+
+        end_break(self.coach_state, self.params, self.user_message)
+
+        break_msg.refresh_from_db()
+        self.assertTrue(break_msg.component_config.get("closed"))
+
+    def test_records_started_at_and_ended_at(self):
+        """Both timestamps are written as ISO-8601 strings (FE parses with Date.parse)."""
+        break_msg, open_break = self._seed_break_with_card()
+
+        end_break(self.coach_state, self.params, self.user_message)
+
+        open_break.refresh_from_db()
+        break_msg.refresh_from_db()
+        self.assertEqual(
+            break_msg.component_config["started_at"],
+            open_break.started_at.isoformat(),
+        )
+        self.assertEqual(
+            break_msg.component_config["ended_at"],
+            open_break.ended_at.isoformat(),
+        )
+
+    def test_strips_buttons_on_close(self):
+        """The closed card can't redispatch END_BREAK — buttons is nulled."""
+        break_msg, _open_break = self._seed_break_with_card()
+        self.assertIsNotNone(break_msg.component_config["buttons"])
+
+        end_break(self.coach_state, self.params, self.user_message)
+
+        break_msg.refresh_from_db()
+        self.assertIsNone(break_msg.component_config["buttons"])
+
+    def test_preserves_existing_component_config_fields(self):
+        """Mutation merges into existing config rather than replacing it
+        (so component_type and any other fields survive)."""
+        break_msg, _open_break = self._seed_break_with_card()
+
+        end_break(self.coach_state, self.params, self.user_message)
+
+        break_msg.refresh_from_db()
+        self.assertEqual(
+            break_msg.component_config["component_type"],
+            ComponentType.SESSION_BREAK.value,
+        )
+
+    def test_no_mutation_when_break_has_no_coach_message(self):
+        """A Break with `coach_message=None` (e.g. a manually-created test
+        scenario row) closes without raising. Nothing to mutate."""
+        Break.objects.create(
+            user=self.user,
+            triggered_by_session="get_to_know_session",
+            # coach_message defaults to None
+        )
+
+        # Should not raise.
+        end_break(self.coach_state, self.params, self.user_message)
+
+    def test_no_mutation_when_no_open_break(self):
+        """Duplicate-click safety: handler is a no-op when there's no
+        open break; no message in the DB should be touched."""
+        break_msg, _open_break = self._seed_break_with_card()
+        # Close the break first so the next call has nothing to do.
+        _open_break.ended_at = timezone.now()
+        _open_break.save(update_fields=["ended_at"])
+        # Reset the config to its pre-close state to verify it stays.
+        break_msg.component_config = {
+            "component_type": ComponentType.SESSION_BREAK.value,
+            "buttons": [
+                {"label": "I'm Ready", "actions": [{"action": "end_break", "params": {}}]},
+            ],
+        }
+        break_msg.save(update_fields=["component_config"])
+
+        end_break(self.coach_state, self.params, self.user_message)
+
+        break_msg.refresh_from_db()
+        self.assertNotIn("closed", break_msg.component_config)
+        self.assertIsNotNone(break_msg.component_config["buttons"])
+
+    def test_falls_back_to_most_recent_session_break_card_when_fk_missing(self):
+        """When `Break.coach_message_id` is None (the historic state for
+        Breaks opened before the orchestrator was taught to link them
+        retroactively), end_break walks back to the most recent
+        SESSION_BREAK coach message and mutates THAT to closed."""
+        # SESSION_BREAK card exists in chat history but the Break row
+        # doesn't reference it.
+        orphan_break_msg = create_test_chat_message(
+            self.user, role=MessageRole.COACH, content=""
+        )
+        orphan_break_msg.component_config = {
+            "component_type": ComponentType.SESSION_BREAK.value,
+            "buttons": [
+                {
+                    "label": "I'm Ready",
+                    "actions": [{"action": "end_break", "params": {}}],
+                }
+            ],
+        }
+        orphan_break_msg.save(update_fields=["component_config"])
+        Break.objects.create(
+            user=self.user,
+            triggered_by_session="get_to_know_session",
+            # coach_message intentionally left None
+        )
+
+        end_break(self.coach_state, self.params, self.user_message)
+
+        orphan_break_msg.refresh_from_db()
+        self.assertTrue(orphan_break_msg.component_config.get("closed"))
+        self.assertIsNone(orphan_break_msg.component_config["buttons"])
+
+    def test_fallback_ignores_already_closed_session_break_cards(self):
+        """If the only SESSION_BREAK card in history is already closed
+        (from a previous break in this user's history), the fallback
+        does NOT re-close it — nothing to mutate."""
+        # Closed historical break from a previous session
+        old_closed = create_test_chat_message(
+            self.user, role=MessageRole.COACH, content=""
+        )
+        old_closed.component_config = {
+            "component_type": ComponentType.SESSION_BREAK.value,
+            "closed": True,
+            "buttons": None,
+            "started_at": "2026-01-01T00:00:00+00:00",
+            "ended_at": "2026-01-01T00:30:00+00:00",
+        }
+        old_closed.save(update_fields=["component_config"])
+        # New Break opened with no FK
+        Break.objects.create(
+            user=self.user,
+            triggered_by_session="brainstorming_session",
+        )
+
+        end_break(self.coach_state, self.params, self.user_message)
+
+        old_closed.refresh_from_db()
+        # Original timestamps preserved — not overwritten.
+        self.assertEqual(
+            old_closed.component_config["started_at"], "2026-01-01T00:00:00+00:00"
+        )
+        self.assertEqual(
+            old_closed.component_config["ended_at"], "2026-01-01T00:30:00+00:00"
+        )

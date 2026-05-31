@@ -105,3 +105,32 @@ class ComponentConfig(BaseModel):
         default=None,
         description="Optional list of identities to display in the component",
     )
+    # Coaching Phase Videos — SESSION_BREAK historical state.
+    # When END_BREAK fires, the original SESSION_BREAK ChatMessage's
+    # component_config is mutated to record the close (and strip the
+    # I'm Ready button so historical rows can't redispatch). The
+    # frontend branches on `closed` to render a compact
+    # "Took a break · {duration}" display.
+    closed: Optional[bool] = Field(
+        default=None,
+        description=(
+            "For SESSION_BREAK components: True once the user has clicked "
+            "I'm Ready (END_BREAK fired). Drives the historical compact "
+            "rendering on the frontend."
+        ),
+    )
+    started_at: Optional[str] = Field(
+        default=None,
+        description=(
+            "For SESSION_BREAK components: ISO-8601 timestamp the break "
+            "opened. Set when END_BREAK fires (copied from `Break.started_at`)."
+        ),
+    )
+    ended_at: Optional[str] = Field(
+        default=None,
+        description=(
+            "For SESSION_BREAK components: ISO-8601 timestamp the user "
+            "clicked I'm Ready. Set when END_BREAK fires "
+            "(copied from `Break.ended_at`)."
+        ),
+    )

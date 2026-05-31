@@ -244,6 +244,20 @@ const TestScenarioCoachStateForm = ({
           placeholder="Select questions that have been asked"
         />
       </div>
+      <CoachStateListField
+        label="Shown Videos (Coaching Phase Videos)"
+        items={value.shown_videos || []}
+        onAdd={(item) =>
+          handleField("shown_videos", [...(value.shown_videos || []), item])
+        }
+        onDelete={(idx) =>
+          handleField(
+            "shown_videos",
+            (value.shown_videos || []).filter((_, i) => i !== idx)
+          )
+        }
+        placeholder="e.g. welcome_session_intro, get_to_know_session_outro"
+      />
     </div>
   );
 };

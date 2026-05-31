@@ -12,6 +12,8 @@ from apps.coach_states.utils.session_video_helpers import (
 )
 from enums.action_type import ActionType
 from enums.coaching_phase import session_of
+from enums.component_type import ComponentType
+from enums.message_role import MessageRole
 from models.components.ComponentConfig import ComponentConfig
 from services.action_handler.models import EndBreakParams
 from services.logger import configure_logging
@@ -59,6 +61,51 @@ def end_break(
 
     open_break.ended_at = timezone.now()
     open_break.save(update_fields=["ended_at"])
+
+    # Mutate the original SESSION_BREAK message's component_config so the
+    # historical card renders as a compact "Took a break · {duration}" line
+    # instead of the full active-break UI. Strip `buttons` so the closed
+    # card can't redispatch END_BREAK (mirrors the standard
+    # makeComponentDisplayOnly convention for persistent components).
+    #
+    # Primary lookup: `Break.coach_message` FK. Fallback: walk back to the
+    # most recent SESSION_BREAK card that isn't already closed. The
+    # fallback exists because START_BREAK runs BEFORE the orchestrator's
+    # skip-LLM rule creates the SESSION_BREAK coach message — so
+    # `Break.coach_message` is `None` for Breaks created before
+    # process_message.py was taught to link them retroactively. PR 7's
+    # one-open-break-per-user invariant means at most one SESSION_BREAK
+    # card with `closed != True` exists at any time, so the fallback is
+    # unambiguous.
+    break_msg: Optional[ChatMessage] = None
+    if open_break.coach_message_id:
+        break_msg = open_break.coach_message
+    else:
+        candidate = (
+            ChatMessage.objects.filter(
+                user=coach_state.user,
+                role=MessageRole.COACH,
+                component_config__component_type=ComponentType.SESSION_BREAK.value,
+            )
+            .order_by("-timestamp")
+            .first()
+        )
+        if (
+            candidate is not None
+            and (candidate.component_config or {}).get("closed") is not True
+        ):
+            break_msg = candidate
+
+    if break_msg is not None:
+        existing = break_msg.component_config or {}
+        break_msg.component_config = {
+            **existing,
+            "closed": True,
+            "started_at": open_break.started_at.isoformat(),
+            "ended_at": open_break.ended_at.isoformat(),
+            "buttons": None,
+        }
+        break_msg.save(update_fields=["component_config"])
 
     Action.objects.create(
         user=coach_state.user,

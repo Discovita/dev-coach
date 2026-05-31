@@ -116,8 +116,154 @@ describe("SessionBreakComponent (PR 18)", () => {
     expect(onSendUserMessageToCoach).not.toHaveBeenCalled();
   });
 
-  it("renders the coach message text alongside the button", () => {
-    renderCard(buildConfig(), false, <span>Take a moment.</span>);
+  it("renders coach message text above the card when content is non-empty", () => {
+    // Mirrors ChatMessages.tsx: passes a MarkdownRenderer-shaped element
+    // with a `content` prop. The component peeks at that prop to decide
+    // whether to render a coach bubble above the break card. Mirrors
+    // SessionVideoCard's `extractContentString` behavior.
+    const Fake = ({ content }: { content: string }) => (
+      <div data-testid="coach-text">{content}</div>
+    );
+    renderCard(buildConfig(), false, <Fake content="Take a moment." />);
     expect(screen.getByText("Take a moment.")).toBeInTheDocument();
+  });
+
+  it("suppresses the coach text bubble when content is empty (skip-LLM path)", () => {
+    // The skip-LLM path writes the break card with `content=""` (the
+    // component IS the turn). No coach bubble should render above the
+    // card in that case.
+    const Fake = ({ content }: { content: string }) => (
+      <div data-testid="coach-text">{content || "should-not-render"}</div>
+    );
+    renderCard(buildConfig(), false, <Fake content="" />);
+    expect(screen.queryByTestId("coach-text")).not.toBeInTheDocument();
+  });
+
+  // ----- Visual chrome (the "make it obvious you're on a break" pass) ---
+
+  it("renders the 'Time for a Break' heading", () => {
+    renderCard();
+    expect(screen.getByText("Time for a Break")).toBeInTheDocument();
+  });
+
+  it("renders the descriptive break copy", () => {
+    renderCard();
+    expect(
+      screen.getByText(/ready and rested/i)
+    ).toBeInTheDocument();
+  });
+
+  it("renders inside the break-card container", () => {
+    renderCard();
+    expect(screen.getByTestId("session-break-card")).toBeInTheDocument();
+  });
+
+  // ----- Closed (historical) state -------------------------------------
+
+  it("renders the compact closed marker when config.closed=true", () => {
+    renderCard(
+      buildConfig({
+        closed: true,
+        started_at: "2026-05-26T12:00:00Z",
+        ended_at: "2026-05-26T12:23:00Z",
+        buttons: undefined, // end_break strips buttons on close
+      })
+    );
+    expect(screen.getByTestId("session-break-card-closed")).toBeInTheDocument();
+    expect(screen.queryByTestId("session-break-card")).not.toBeInTheDocument();
+  });
+
+  it("does not render the I'm Ready button when closed", () => {
+    renderCard(
+      buildConfig({
+        closed: true,
+        started_at: "2026-05-26T12:00:00Z",
+        ended_at: "2026-05-26T12:10:00Z",
+        buttons: undefined,
+      })
+    );
+    expect(
+      screen.queryByRole("button", { name: "I'm Ready" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not render the heading or descriptive copy when closed", () => {
+    renderCard(
+      buildConfig({
+        closed: true,
+        started_at: "2026-05-26T12:00:00Z",
+        ended_at: "2026-05-26T12:10:00Z",
+        buttons: undefined,
+      })
+    );
+    expect(screen.queryByText("Time for a Break")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/ready and rested/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("formats duration in minutes for a multi-minute break", () => {
+    renderCard(
+      buildConfig({
+        closed: true,
+        started_at: "2026-05-26T12:00:00Z",
+        ended_at: "2026-05-26T12:23:00Z",
+        buttons: undefined,
+      })
+    );
+    expect(screen.getByText(/23 minutes/)).toBeInTheDocument();
+  });
+
+  it("formats duration as 'less than a minute' for a sub-minute break", () => {
+    renderCard(
+      buildConfig({
+        closed: true,
+        started_at: "2026-05-26T12:00:00Z",
+        ended_at: "2026-05-26T12:00:30Z",
+        buttons: undefined,
+      })
+    );
+    expect(screen.getByText(/less than a minute/)).toBeInTheDocument();
+  });
+
+  it("formats duration with hours and minutes for a long break", () => {
+    renderCard(
+      buildConfig({
+        closed: true,
+        started_at: "2026-05-26T12:00:00Z",
+        ended_at: "2026-05-26T14:30:00Z",
+        buttons: undefined,
+      })
+    );
+    expect(screen.getByText(/2h 30m/)).toBeInTheDocument();
+  });
+
+  it("renders 'Took a break' even when timestamps are missing (graceful)", () => {
+    // Defensive: an older closed break written before timestamps were
+    // captured (or a malformed row) should still render the marker
+    // without crashing.
+    renderCard(
+      buildConfig({
+        closed: true,
+        buttons: undefined,
+      })
+    );
+    expect(screen.getByText(/Took a break/)).toBeInTheDocument();
+  });
+
+  it("does not dispatch on click in closed state (no button to click)", () => {
+    const onSendUserMessageToCoach = vi.fn();
+    renderCard(
+      buildConfig({
+        closed: true,
+        started_at: "2026-05-26T12:00:00Z",
+        ended_at: "2026-05-26T12:10:00Z",
+        buttons: undefined,
+      }),
+      false,
+      null,
+      onSendUserMessageToCoach
+    );
+    expect(onSendUserMessageToCoach).not.toHaveBeenCalled();
   });
 });

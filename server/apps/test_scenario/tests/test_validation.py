@@ -210,3 +210,45 @@ class TestValidateScenarioTemplate(TestCase):
                 for e in errors
             )
         )
+
+    def test_chat_message_accepts_empty_content_with_component_config(self):
+        """Coaching Phase Videos: coach messages that carry only a
+        component (welcome SESSION_VIDEO, SESSION_BREAK from skip-LLM
+        path) have empty content. The validator must accept that — the
+        freeze path was 400-ing on legitimate chat history before this
+        was fixed."""
+        template = VALID_TEMPLATE.copy()
+        template["chat_messages"] = [
+            {
+                "role": "COACH",
+                "content": "",
+                "component_config": {
+                    "component_type": "session_video",
+                    "video_key": "welcome_session_intro",
+                },
+            },
+            {
+                "role": "COACH",
+                "content": "",
+                "component_config": {
+                    "component_type": "session_break",
+                    "buttons": [
+                        {
+                            "label": "I'm Ready",
+                            "actions": [{"action": "end_break", "params": {}}],
+                        }
+                    ],
+                },
+            },
+        ]
+        errors = validate_scenario_template(template)
+        self.assertEqual(errors, [])
+
+    def test_chat_message_accepts_empty_content_without_component_config(self):
+        """Empty content with no component is also valid — the serializer
+        doesn't enforce a 'must have content or component' rule (that's
+        a backend / orchestrator concern, not template validation)."""
+        template = VALID_TEMPLATE.copy()
+        template["chat_messages"] = [{"role": "USER", "content": ""}]
+        errors = validate_scenario_template(template)
+        self.assertEqual(errors, [])
