@@ -430,4 +430,4 @@ For component-rendering details — the thin video card + modal player, the `Wat
 
 ### Mutability
 
-The `SESSIONS` map and the `SESSION_VIDEOS` registry are treated as data, not code. Swapping a video, renaming a session, or adding a new one is an edit to those two structures plus an S3 upload — no migrations, no enum updates, no prompt edits, no frontend work. A walkthrough for the common case (swap one video) lives in the `procedure / dev-coach / coach / add-session-video` doc in the Procedures MCP server.
+The `SESSIONS` map and the `SESSION_VIDEOS` registry are treated as data, not code. Swapping a video, renaming a session, or adding a new one is an edit to those two structures plus an S3 upload — no migrations, no enum updates, no prompt edits, no frontend work. See [How to Add, Replace, Move, or Remove a Session Video](/docs/how-to/how-to-add-or-edit-a-session-video) for the step-by-step.

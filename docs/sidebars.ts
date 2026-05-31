@@ -236,6 +236,7 @@ const sidebars: SidebarsConfig = {
         "how-to/how-to-add-a-new-coach-phase",
         "how-to/how-to-add-a-new-coach-action",
         "how-to/how-to-add-a-new-persistent-component",
+        "how-to/how-to-add-or-edit-a-session-video",
         "how-to/identity-progression-system",
       ],
     },
