@@ -32,6 +32,36 @@ export interface TestScenarioCoachState {
   who_you_want_to_be?: string[];
   asked_questions?: GetToKnowYouQuestions[];
   current_identity?: string;
+  /**
+   * Coaching Phase Videos: session-video keys the user has acknowledged
+   * (e.g. `"welcome_session_intro"`). Determines which intro/outro cards
+   * the scenario replays as still-pending vs already-watched.
+   */
+  shown_videos?: string[];
+}
+
+export interface TestScenarioBreak {
+  /**
+   * Session key the user was leaving when the break opened
+   * (e.g. `"brainstorming_session"`). Required.
+   */
+  triggered_by_session: string;
+  /**
+   * Optional. When the break opened. Preserved at instantiation via
+   * `.update()` to bypass the model's `auto_now_add`.
+   */
+  started_at?: string;
+  /**
+   * Optional. When the user clicked "I'm Ready". Null/missing while the
+   * break is still open — drives the `on_break` flag.
+   */
+  ended_at?: string;
+  /**
+   * Optional. ID of the original coach message carrying the
+   * SESSION_BREAK component, for resolver-based re-linking during
+   * instantiation.
+   */
+  original_coach_message_id?: string;
 }
 
 export interface TestScenarioIdentity {
@@ -73,6 +103,11 @@ export interface TestScenarioTemplate {
   chat_messages?: TestScenarioChatMessage[];
   user_notes?: TestScenarioUserNote[];
   actions?: TestScenarioAction[];
+  /**
+   * Coaching Phase Videos: between-session Break rows the user has
+   * accumulated. Open breaks (no `ended_at`) drive `on_break=true`.
+   */
+  breaks?: TestScenarioBreak[];
 }
 
 export type TestScenario = {

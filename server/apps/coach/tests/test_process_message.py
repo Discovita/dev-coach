@@ -47,6 +47,12 @@ def _make_process_message_mocks():
         "final_prompt": "system_prompt",
         "on_break": False,
     })
+    # Mock the Break-linkage lookup the orchestrator does after the
+    # skip-LLM rule creates a SESSION_BREAK coach message. Default to "no
+    # open break to link" so tests that don't care don't trip over ORM
+    # calls against MagicMock users.
+    mocks["Break"] = MagicMock()
+    mocks["Break"].objects.filter.return_value.order_by.return_value.first.return_value = None
     return mocks
 
 
@@ -62,6 +68,7 @@ def _patches(m):
         patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
         patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
         patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+        patch(f"{PATCH_BASE}.Break", m["Break"]),
     ]
 
 
@@ -84,7 +91,7 @@ class TestProcessMessageHappyPath(SimpleTestCase):
         user = _make_user()
         p = _patches(merged)
 
-        with p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]:
+        with p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]:
             return process_message(user, "Hello", None, AIModel.GPT_4O)
 
     def test_success_returns_true(self):
@@ -127,6 +134,7 @@ class TestProcessMessageHappyPath(SimpleTestCase):
             patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
             patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
             patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+            patch(f"{PATCH_BASE}.Break", m["Break"]),
         ):
             process_message(user, "Hello", None, AIModel.GPT_4O)
 
@@ -149,6 +157,7 @@ class TestProcessMessageHappyPath(SimpleTestCase):
             patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
             patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
             patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+            patch(f"{PATCH_BASE}.Break", m["Break"]),
         ):
             process_message(user, "Hello", None, AIModel.GPT_4O)
 
@@ -172,6 +181,7 @@ class TestProcessMessageNullMessageContract(SimpleTestCase):
             patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
             patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
             patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+            patch(f"{PATCH_BASE}.Break", m["Break"]),
         ):
             return process_message(user, message, None, AIModel.GPT_4O)
 
@@ -205,6 +215,7 @@ class TestProcessMessageNullMessageContract(SimpleTestCase):
             patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
             patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
             patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+            patch(f"{PATCH_BASE}.Break", m["Break"]),
         ):
             process_message(user, None, actions_payload, AIModel.GPT_4O)
 
@@ -250,6 +261,7 @@ class TestProcessMessageSkipLlmRule(SimpleTestCase):
             patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
             patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
             patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+            patch(f"{PATCH_BASE}.Break", m["Break"]),
         ):
             return process_message(user, message, None, AIModel.GPT_4O)
 
@@ -315,6 +327,7 @@ class TestProcessMessageErrorHandling(SimpleTestCase):
             patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
             patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
             patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+            patch(f"{PATCH_BASE}.Break", m["Break"]),
         ):
             return process_message(user, "Hello", None, AIModel.GPT_4O)
 
@@ -340,3 +353,138 @@ class TestProcessMessageErrorHandling(SimpleTestCase):
         self.assertFalse(success)
         self.assertEqual(data, {})
         self.assertIsNotNone(error)
+
+
+# ---------------------------------------------------------------------------
+# Break.coach_message retroactive linkage (skip-LLM SESSION_BREAK path)
+# ---------------------------------------------------------------------------
+#
+# START_BREAK runs BEFORE the orchestrator's skip-LLM rule creates the
+# SESSION_BREAK coach message, so `Break.coach_message` is None at the
+# moment the Break row is created. The orchestrator must link them after
+# the message exists so END_BREAK can find the SESSION_BREAK card to
+# mutate to the closed state.
+
+
+class TestProcessMessageBreakLinkage:
+    """Pytest-style integration test: real DB models, only
+    `apply_user_component_actions` mocked to drive the skip-LLM path
+    with a SESSION_BREAK component."""
+
+    def test_links_open_break_to_new_session_break_message(self, db):
+        from unittest.mock import patch
+
+        from apps.chat_messages.models import ChatMessage
+        from apps.coach_states.models import Break
+        from apps.users.models import User
+        from enums.component_type import ComponentType
+        from models.components.ComponentConfig import ComponentConfig
+
+        user = User.objects.create_user(
+            email="break_linkage@test.com", password="testpass"
+        )
+        # Open Break with no coach_message — the historic state right
+        # after START_BREAK fires, before this fix linked them up.
+        open_break = Break.objects.create(
+            user=user,
+            triggered_by_session="get_to_know_session",
+        )
+        assert open_break.coach_message_id is None
+
+        # Drive the skip-LLM rule: have user-actions return a SESSION_BREAK.
+        session_break = ComponentConfig(
+            component_type=ComponentType.SESSION_BREAK.value
+        )
+        with patch(
+            f"{PATCH_BASE}.apply_user_component_actions",
+            return_value=session_break,
+        ):
+            success, _data, _err = process_message(
+                user, None, [{"action": "start_break", "params": {}}], AIModel.GPT_4O
+            )
+
+        assert success is True
+
+        # Break now references the just-created SESSION_BREAK coach message.
+        open_break.refresh_from_db()
+        assert open_break.coach_message_id is not None
+
+        # And that message IS the SESSION_BREAK card.
+        coach_msg: ChatMessage = open_break.coach_message
+        assert coach_msg.role == MessageRole.COACH
+        assert (
+            coach_msg.component_config["component_type"]
+            == ComponentType.SESSION_BREAK.value
+        )
+
+    def test_does_not_clobber_existing_coach_message_fk(self, db):
+        """If Break.coach_message is already set (newer flows where
+        START_BREAK already had a message to link to), the orchestrator
+        leaves the FK alone — guarded by `coach_message_id is None`."""
+        from unittest.mock import patch
+
+        from apps.chat_messages.models import ChatMessage
+        from apps.coach_states.models import Break
+        from apps.users.models import User
+        from enums.component_type import ComponentType
+        from models.components.ComponentConfig import ComponentConfig
+
+        user = User.objects.create_user(
+            email="break_no_clobber@test.com", password="testpass"
+        )
+        # Pre-existing coach message that the Break already links to.
+        existing_msg = ChatMessage.objects.create(
+            user=user, role=MessageRole.COACH, content="seeded"
+        )
+        open_break = Break.objects.create(
+            user=user,
+            triggered_by_session="brainstorming_session",
+            coach_message=existing_msg,
+        )
+
+        session_break = ComponentConfig(
+            component_type=ComponentType.SESSION_BREAK.value
+        )
+        with patch(
+            f"{PATCH_BASE}.apply_user_component_actions",
+            return_value=session_break,
+        ):
+            process_message(user, None, [{"action": "start_break", "params": {}}], AIModel.GPT_4O)
+
+        open_break.refresh_from_db()
+        assert open_break.coach_message_id == existing_msg.id
+
+    def test_does_not_link_for_non_session_break_skip_llm_components(self, db):
+        """SESSION_VIDEO (END_BREAK's intro emit) hits the same skip-LLM
+        branch — but the orchestrator should NOT touch any Break row for
+        that case. Only SESSION_BREAK triggers the linkage."""
+        from unittest.mock import patch
+
+        from apps.coach_states.models import Break
+        from apps.users.models import User
+        from enums.component_type import ComponentType
+        from models.components.ComponentConfig import ComponentConfig
+
+        user = User.objects.create_user(
+            email="break_video_skip@test.com", password="testpass"
+        )
+        # Open break (e.g., user just clicked I'm Ready, but for this test
+        # the skip-LLM component is SESSION_VIDEO, not SESSION_BREAK).
+        open_break = Break.objects.create(
+            user=user,
+            triggered_by_session="get_to_know_session",
+        )
+
+        session_video = ComponentConfig(
+            component_type=ComponentType.SESSION_VIDEO.value,
+            video_key="brainstorming_session_intro",
+        )
+        with patch(
+            f"{PATCH_BASE}.apply_user_component_actions",
+            return_value=session_video,
+        ):
+            process_message(user, None, [{"action": "end_break", "params": {}}], AIModel.GPT_4O)
+
+        open_break.refresh_from_db()
+        # FK untouched — Break.coach_message is still None.
+        assert open_break.coach_message_id is None

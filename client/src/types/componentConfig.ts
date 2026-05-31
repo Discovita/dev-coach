@@ -48,4 +48,15 @@ export interface ComponentConfig {
    * a refresh replays the same URL.
    */
   video_url?: string;
+  /**
+   * Coaching Phase Videos: SESSION_BREAK historical-state flag. Set by
+   * `end_break.py` on the original SESSION_BREAK message when the user
+   * clicks I'm Ready. Drives the compact "Took a break · {duration}"
+   * rendering in `SessionBreakComponent`.
+   */
+  closed?: boolean;
+  /** ISO-8601 break start (set with `closed`). */
+  started_at?: string;
+  /** ISO-8601 break end (set with `closed`). */
+  ended_at?: string;
 }

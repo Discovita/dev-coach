@@ -152,7 +152,16 @@ class TemplateChatMessageSerializer(ForbidExtraFieldsMixin, serializers.Serializ
     role = serializers.CharField(
         help_text="Role of the message sender (user or coach). Required."
     )
-    content = serializers.CharField(help_text="Content of the message. Required.")
+    content = serializers.CharField(
+        allow_blank=True,
+        help_text=(
+            "Content of the message. Empty string is valid for coach "
+            "messages where the component IS the turn — e.g. the welcome "
+            "SESSION_VIDEO card seeded by ensure_initial_message_exists, "
+            "or the SESSION_BREAK card the skip-LLM path writes via "
+            "process_message."
+        ),
+    )
     timestamp = serializers.DateTimeField(
         required=False, help_text="When the message was sent."
     )

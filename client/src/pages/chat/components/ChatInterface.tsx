@@ -4,6 +4,9 @@ import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { ConversationResetter } from "@/pages/chat/components/ConversationResetter";
+import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
+import { useProfile } from "@/hooks/use-profile";
+import { useUserTarget } from "@/context/UserTargetContext";
 import type { CoachRequest } from "@/types/coachRequest";
 
 interface ChatInterfaceProps {
@@ -21,6 +24,17 @@ interface ChatInterfaceProps {
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) => {
   // Reference to the end of the messages list for auto-scrolling
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Admin-only freeze-session button: targets the impersonated test
+  // user when inside a UserTargetProvider (TestChat), otherwise the
+  // logged-in user (regular /chat). Hidden for non-admins.
+  const { profile, isAdmin } = useProfile();
+  const { isImpersonating, targetUserId } = useUserTarget();
+  const freezeUserId = isImpersonating
+    ? targetUserId
+    : profile?.id
+      ? String(profile.id)
+      : null;
 
   // Get chat messages and updateChatMessages mutation from the custom hook
   const {
@@ -123,6 +137,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
       <div className="flex gap-2 p-2 border-t border-border bg-muted/50">
         <ConversationExporter />
         <ConversationResetter onResetSuccess={onResetSuccess} />
+        {isAdmin && freezeUserId && (
+          <TestScenarioSessionFreezer userId={freezeUserId} />
+        )}
       </div>
     </div>
   );

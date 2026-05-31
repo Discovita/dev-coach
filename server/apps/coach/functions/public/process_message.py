@@ -19,9 +19,10 @@ from apps.coach.utils import (
     generate_coach_ai_response,
     get_recent_chat_messages_for_prompt,
 )
-from apps.coach_states.models import CoachState
+from apps.coach_states.models import Break, CoachState
 from apps.users.models import User
 from enums.ai import AIModel
+from enums.component_type import ComponentType
 from enums.message_role import MessageRole
 from services.logger import configure_logging
 
@@ -99,6 +100,24 @@ def process_message(
             coach_message = add_chat_message(user, "", MessageRole.COACH)
             coach_message.component_config = user_component_config.model_dump()
             coach_message.save(update_fields=["component_config"])
+
+            # SESSION_BREAK: link the just-opened Break row to this coach
+            # message so END_BREAK can find the SESSION_BREAK card via
+            # `Break.coach_message` and mutate it to the closed state.
+            # Necessary because START_BREAK runs BEFORE this message is
+            # created (the orchestrator wires the FK retroactively).
+            if (
+                user_component_config.component_type
+                == ComponentType.SESSION_BREAK.value
+            ):
+                open_break = (
+                    Break.objects.filter(user=user, ended_at__isnull=True)
+                    .order_by("-started_at")
+                    .first()
+                )
+                if open_break is not None and open_break.coach_message_id is None:
+                    open_break.coach_message = coach_message
+                    open_break.save(update_fields=["coach_message"])
 
             log.debug(
                 f"Skip-LLM rule fired: user action returned "

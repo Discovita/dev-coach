@@ -11,6 +11,7 @@ import type {
   TestScenarioChatMessage,
   TestScenarioUserNote,
   TestScenarioAction,
+  TestScenarioBreak,
 } from "@/types/testScenario";
 import { CoachingPhase } from "@/enums/coachingPhase";
 import { IdentityCategory } from "@/enums/identityCategory";
@@ -21,6 +22,7 @@ import TestScenarioIdentitiesForm from "@/pages/test/components/TestScenarioIden
 import TestScenarioChatMessagesForm from "@/pages/test/components/TestScenarioChatMessagesForm";
 import TestScenarioUserNotesForm from "@/pages/test/components/TestScenarioUserNotesForm";
 import TestScenarioActionsForm from "@/pages/test/components/TestScenarioActionsForm";
+import TestScenarioBreaksForm from "@/pages/test/components/TestScenarioBreaksForm";
 
 interface TestScenarioEditorProps {
   scenario: TestScenario | null;
@@ -136,6 +138,18 @@ const TestScenarioEditor = ({
       return [];
     })()
   );
+  const [breaks, setBreaks] = useState<TestScenarioBreak[]>(
+    (() => {
+      if (
+        scenario?.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.breaks
+      ) {
+        return scenario.template.breaks as TestScenarioBreak[];
+      }
+      return [];
+    })()
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("general");
@@ -203,6 +217,16 @@ const TestScenarioEditor = ({
       } else {
         setActions([]);
       }
+
+      if (
+        scenario.template &&
+        typeof scenario.template === "object" &&
+        scenario.template.breaks
+      ) {
+        setBreaks(scenario.template.breaks as TestScenarioBreak[]);
+      } else {
+        setBreaks([]);
+      }
     } else {
       setName("");
       setDescription("");
@@ -213,6 +237,7 @@ const TestScenarioEditor = ({
       setChatMessages([]);
       setUserNotes([]);
       setActions([]);
+      setBreaks([]);
     }
   }, [scenario]);
 
@@ -265,6 +290,9 @@ const TestScenarioEditor = ({
       if (actions && actions.length > 0) {
         template.actions = actions;
       }
+      if (breaks && breaks.length > 0) {
+        template.breaks = breaks;
+      }
 
       onSave({
         name,
@@ -304,6 +332,7 @@ const TestScenarioEditor = ({
           <TabsTrigger value="chat_messages">Chat Messages</TabsTrigger>
           <TabsTrigger value="user_notes">User Notes</TabsTrigger>
           <TabsTrigger value="actions">Actions</TabsTrigger>
+          <TabsTrigger value="breaks">Breaks</TabsTrigger>
         </TabsList>
         <TabsContent value="general">
           <TestScenarioGeneralForm
@@ -351,6 +380,12 @@ const TestScenarioEditor = ({
           <TestScenarioActionsForm
             value={actions}
             onChange={setActions}
+          />
+        </TabsContent>
+        <TabsContent value="breaks">
+          <TestScenarioBreaksForm
+            value={breaks}
+            onChange={setBreaks}
           />
         </TabsContent>
       </Tabs>
