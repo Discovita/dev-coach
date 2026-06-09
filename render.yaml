@@ -150,7 +150,18 @@ services:
       #
       # ON_ERROR_STOP=1 (plus `set -e` above) makes a partial restore abort the
       # deploy loudly instead of silently migrating onto a half-loaded DB.
-      pg_dump "$STAGING_DB_URL" --no-owner --no-acl --clean --if-exists \
+      #
+      # Reset the schema before restoring instead of relying on the dump's
+      # --clean. The preview DB PERSISTS across deploys, so it accumulates
+      # objects the staging dump doesn't know about — e.g. coach_states_break,
+      # created here by a prior `migrate` of a PR migration not yet on staging.
+      # The dump's `DROP ... users_user_pkey` then fails under ON_ERROR_STOP
+      # because that leftover table's FK still depends on the PK. Dropping and
+      # recreating `public` guarantees a clean target regardless of prior state,
+      # so pg_dump no longer needs --clean.
+      psql "$PREVIEW_DATABASE_URL" -v ON_ERROR_STOP=1 \
+        -c 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;'
+      pg_dump "$STAGING_DB_URL" --no-owner --no-acl \
         --exclude-table-data='public.identities_identityimagechat' -f /tmp/staging-dump.sql
       psql "$PREVIEW_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/staging-dump.sql
       rm -f /tmp/staging-dump.sql
