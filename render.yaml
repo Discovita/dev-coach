@@ -30,7 +30,7 @@
 # defined here propagate to every preview environment automatically — unlike
 # per-service `sync: false` vars, which Render deliberately does NOT copy
 # into preview instances.
-#   - STAGING_DATABASE_URL    (full postgres:// URL of staging-coach-database)
+#   - STAGING_DB_URL    (full postgres:// URL of staging-coach-database)
 #   - DJANGO_SECRET_KEY       (any random string; previews don't need to share
 #                              with prod)
 #   - AWS_ACCESS_KEY_ID       (same as staging — see staging dashboard)
@@ -68,7 +68,7 @@ previews:
 #   PYTHON_VERSION              = 3.11.10
 #   DJANGO_SETTINGS_MODULE      = settings.previews
 #   DJANGO_SECRET_KEY           (random string)
-#   STAGING_DATABASE_URL        (full postgres:// URL of staging-coach-database)
+#   STAGING_DB_URL        (full postgres:// URL of staging-coach-database)
 #   AWS_ACCESS_KEY_ID           (same as staging)
 #   AWS_SECRET_ACCESS_KEY       (same as staging)
 #   AWS_REGION                  = us-east-1
@@ -136,19 +136,21 @@ services:
       #
       # --exclude-table-data on identities_identityimagechat: that table holds
       # Gemini multi-turn chat history with full-res images base64-encoded
-      # inline (~157 MB across a few rows, one row ~70 MB). Restoring a 70 MB
-      # COPY row into the basic-256mb preview Postgres exhausts memory and drops
-      # the connection mid-restore ("SSL error: unexpected eof while reading").
-      # Because pg_dump emits PRIMARY KEY / constraint statements AFTER all COPY
-      # data, a mid-COPY death leaves restored tables without their PKs, and the
-      # next `migrate` then fails creating FKs ("no unique constraint matching
-      # given keys for referenced table chat_messages_chatmessage"). We skip
-      # only this table's DATA — its schema is kept, and previews don't need the
-      # transient chat blobs.
+      # inline (~157 MB across a few rows, one row ~70 MB). It dwarfs the rest
+      # of the dump (next-biggest table is ~1.6 MB) and is the largest single
+      # point of failure in the transfer — it OOM'd the basic-256mb base plan
+      # (hence previewPlan: basic-1gb above), and even on 1gb it needlessly
+      # bloats and slows the restore. Previews don't need transient chat blobs,
+      # so we skip only this table's DATA (schema is kept). This also hardens
+      # against a partial restore: pg_dump emits PRIMARY KEY / constraint
+      # statements AFTER all COPY data, so any mid-COPY death leaves tables
+      # without their PKs and the next `migrate` fails building FKs ("no unique
+      # constraint matching given keys for referenced table
+      # chat_messages_chatmessage").
       #
       # ON_ERROR_STOP=1 (plus `set -e` above) makes a partial restore abort the
       # deploy loudly instead of silently migrating onto a half-loaded DB.
-      pg_dump "$STAGING_DATABASE_URL" --no-owner --no-acl --clean --if-exists \
+      pg_dump "$STAGING_DB_URL" --no-owner --no-acl --clean --if-exists \
         --exclude-table-data='public.identities_identityimagechat' -f /tmp/staging-dump.sql
       psql "$PREVIEW_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/staging-dump.sql
       rm -f /tmp/staging-dump.sql
