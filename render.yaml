@@ -30,7 +30,7 @@
 # defined here propagate to every preview environment automatically — unlike
 # per-service `sync: false` vars, which Render deliberately does NOT copy
 # into preview instances.
-#   - STAGING_DATABASE_URL    (full postgres:// URL of staging-coach-database)
+#   - STAGING_DB_URL    (full postgres:// URL of staging-coach-database)
 #   - DJANGO_SECRET_KEY       (any random string; previews don't need to share
 #                              with prod)
 #   - AWS_ACCESS_KEY_ID       (same as staging — see staging dashboard)
@@ -68,7 +68,7 @@ previews:
 #   PYTHON_VERSION              = 3.11.10
 #   DJANGO_SETTINGS_MODULE      = settings.previews
 #   DJANGO_SECRET_KEY           (random string)
-#   STAGING_DATABASE_URL        (full postgres:// URL of staging-coach-database)
+#   STAGING_DB_URL        (full postgres:// URL of staging-coach-database)
 #   AWS_ACCESS_KEY_ID           (same as staging)
 #   AWS_SECRET_ACCESS_KEY       (same as staging)
 #   AWS_REGION                  = us-east-1
@@ -114,6 +114,7 @@ services:
     #      "FATAL: the database system is starting up" — different from
     #      Connection refused. Need to wait both before AND after the dump.
     preDeployCommand: |
+      set -euo pipefail
       wait_for_db() {
         for i in 1 2 3 4 5 6 7 8; do
           if psql "$PREVIEW_DATABASE_URL" -c 'SELECT 1' >/dev/null 2>&1; then
@@ -129,12 +130,40 @@ services:
       wait_for_db
       # Dump staging to a local file first, then restore from the file. The
       # previous streaming `pg_dump | psql` approach kept two SSL connections
-      # open simultaneously and consistently dropped one of them mid-transfer
-      # (after ~11 tables of ~25), leaving the preview DB only partially
-      # populated. Buffering through a file means each connection only has to
-      # stay open for ONE side of the transfer.
-      pg_dump "$STAGING_DATABASE_URL" --no-owner --no-acl --clean --if-exists -f /tmp/staging-dump.sql
-      psql "$PREVIEW_DATABASE_URL" -f /tmp/staging-dump.sql
+      # open simultaneously and consistently dropped one of them mid-transfer.
+      # Buffering through a file means each connection only has to stay open
+      # for ONE side of the transfer.
+      #
+      # --exclude-table-data on identities_identityimagechat: that table holds
+      # Gemini multi-turn chat history with full-res images base64-encoded
+      # inline (~157 MB across a few rows, one row ~70 MB). It dwarfs the rest
+      # of the dump (next-biggest table is ~1.6 MB) and is the largest single
+      # point of failure in the transfer — it OOM'd the basic-256mb base plan
+      # (hence previewPlan: basic-1gb above), and even on 1gb it needlessly
+      # bloats and slows the restore. Previews don't need transient chat blobs,
+      # so we skip only this table's DATA (schema is kept). This also hardens
+      # against a partial restore: pg_dump emits PRIMARY KEY / constraint
+      # statements AFTER all COPY data, so any mid-COPY death leaves tables
+      # without their PKs and the next `migrate` fails building FKs ("no unique
+      # constraint matching given keys for referenced table
+      # chat_messages_chatmessage").
+      #
+      # ON_ERROR_STOP=1 (plus `set -e` above) makes a partial restore abort the
+      # deploy loudly instead of silently migrating onto a half-loaded DB.
+      #
+      # Reset the schema before restoring instead of relying on the dump's
+      # --clean. The preview DB PERSISTS across deploys, so it accumulates
+      # objects the staging dump doesn't know about — e.g. coach_states_break,
+      # created here by a prior `migrate` of a PR migration not yet on staging.
+      # The dump's `DROP ... users_user_pkey` then fails under ON_ERROR_STOP
+      # because that leftover table's FK still depends on the PK. Dropping and
+      # recreating `public` guarantees a clean target regardless of prior state,
+      # so pg_dump no longer needs --clean.
+      psql "$PREVIEW_DATABASE_URL" -v ON_ERROR_STOP=1 \
+        -c 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;'
+      pg_dump "$STAGING_DB_URL" --no-owner --no-acl \
+        --exclude-table-data='public.identities_identityimagechat' -f /tmp/staging-dump.sql
+      psql "$PREVIEW_DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/staging-dump.sql
       rm -f /tmp/staging-dump.sql
       wait_for_db
       python manage.py migrate --noinput
