@@ -6,6 +6,7 @@ import type { IdentityState } from "@/enums/identityState";
 import type { Identity } from "@/types/identity";
 import { Button } from "@/components/ui/button";
 import { IdentityEditForm } from "./components/IdentityEditForm";
+import { IdentityDeleteButton } from "./components/IdentityDeleteButton";
 import { CategoryPill } from "./components/CategoryPill";
 
 /**
@@ -111,17 +112,20 @@ export default function Identity() {
 					<span>Back to Identities</span>
 				</Link>
 				{!isEditing && (
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setIsEditing(true)}
-						className="gap-2"
-						aria-label="Edit identity"
-						title="Edit identity"
-					>
-						<Pencil className="h-4 w-4" />
-						Edit
-					</Button>
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setIsEditing(true)}
+							className="gap-2"
+							aria-label="Edit identity"
+							title="Edit identity"
+						>
+							<Pencil className="h-4 w-4" />
+							Edit
+						</Button>
+						<IdentityDeleteButton identity={identity} />
+					</div>
 				)}
 			</div>
 

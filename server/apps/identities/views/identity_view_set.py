@@ -13,7 +13,12 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.identities.functions.public import reorder_user_identities
+from apps.identities.functions.public import (
+    capture_identity_fields,
+    record_identity_delete_note,
+    record_identity_edit_note,
+    reorder_user_identities,
+)
 from apps.identities.models import Identity
 from apps.identities.serializers import (
     IdentitySerializer,
@@ -203,9 +208,12 @@ class IdentityViewSet(
         try:
             pk = kwargs.get("pk")
             identity = get_object_or_404(Identity, id=pk, user=request.user)
+            before = capture_identity_fields(identity)
             serializer = IdentitySerializer(identity, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            # Record a UserNote so the coach knows about edits made via the app.
+            record_identity_edit_note(request.user, before, identity)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ValidationError as e:
             log.error(f"Validation error during partial update: {e.detail}")
@@ -238,6 +246,8 @@ class IdentityViewSet(
         try:
             pk = kwargs.get("pk")
             identity = get_object_or_404(Identity, id=pk, user=request.user)
+            # Record a UserNote (before deletion, while the name is available).
+            record_identity_delete_note(request.user, identity)
             # Delete the image file if it exists
             if identity.image:
                 identity.image.delete()

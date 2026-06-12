@@ -15,7 +15,12 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from apps.identities.functions.public import reorder_user_identities
+from apps.identities.functions.public import (
+    capture_identity_fields,
+    record_identity_delete_note,
+    record_identity_edit_note,
+    reorder_user_identities,
+)
 from apps.identities.models import Identity
 from apps.identities.serializers import (
     IdentitySerializer,
@@ -85,12 +90,55 @@ class AdminIdentityViewSet(viewsets.GenericViewSet):
         # Remove identity_id from data before passing to serializer
         update_data = {k: v for k, v in request.data.items() if k != "identity_id"}
 
+        before = capture_identity_fields(identity)
         serializer = IdentitySerializer(identity, data=update_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # Record a UserNote against the identity's owner (the impersonated user).
+        record_identity_edit_note(identity.user, before, identity)
 
         log.info(f"Admin {request.user.id} updated identity {identity_id}")
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["DELETE"],
+        url_path="delete-identity",
+        permission_classes=[IsAdminUser],
+    )
+    def delete_identity(self, request):
+        """
+        Delete any identity (admin only).
+        DELETE /api/v1/admin/identities/delete-identity?identity_id=<id>
+
+        Used when an admin is impersonating a test user — the regular
+        DELETE /identities/{id} endpoint is scoped to request.user.
+
+        Returns: 204 No Content.
+        """
+        identity_id = request.query_params.get("identity_id")
+        if not identity_id:
+            return Response(
+                {"success": False, "error": "identity_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            identity = Identity.objects.get(id=identity_id)
+        except Identity.DoesNotExist:
+            return Response(
+                {"success": False, "error": "Identity not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Record a UserNote against the identity's owner before deletion.
+        record_identity_delete_note(identity.user, identity)
+        if identity.image:
+            identity.image.delete()
+        identity.delete()
+
+        log.info(f"Admin {request.user.id} deleted identity {identity_id}")
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
