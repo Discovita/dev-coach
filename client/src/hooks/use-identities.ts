@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchIdentities } from "@/api/user";
 import { fetchTestScenarioUserIdentities } from "@/api/testScenarioUser";
-import { reorderIdentities } from "@/api/identities";
+import { adminReorderIdentities, reorderIdentities } from "@/api/identities";
 import { useUserTarget } from "@/context/UserTargetContext";
 import type { Identity } from "@/types/identity";
 
@@ -13,9 +13,9 @@ import type { Identity } from "@/types/identity";
  * and which API endpoint to call. When inside a UserTargetProvider, fetches
  * from the admin test-user endpoint instead of /user/me/.
  *
- * Also exposes a `reorder` mutation (logged-in user only) that optimistically
- * updates the cached order so drag-to-reorder feels instant, then persists via
- * POST /identities/reorder.
+ * Also exposes a `reorder` mutation that optimistically updates the cached
+ * order so drag-to-reorder feels instant, then persists via the regular
+ * endpoint or the admin endpoint when impersonating a test user.
  *
  * Used in: Any component that needs to read the user's identities.
  */
@@ -40,7 +40,10 @@ export function useIdentities() {
 		string[],
 		{ previous: Identity[] | undefined }
 	>({
-		mutationFn: (orderedIds: string[]) => reorderIdentities(orderedIds),
+		mutationFn: (orderedIds: string[]) =>
+			isImpersonating
+				? adminReorderIdentities(targetUserId!, orderedIds)
+				: reorderIdentities(orderedIds),
 		onMutate: async (orderedIds: string[]) => {
 			// Optimistically apply the new order to the cache for an instant UI.
 			await queryClient.cancelQueries({ queryKey: identitiesKey });

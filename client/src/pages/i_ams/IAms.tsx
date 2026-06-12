@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useIdentities } from "@/hooks/use-identities";
-import { useUserTarget } from "@/context/UserTargetContext";
 import type { Identity } from "@/types/identity";
 import { Link } from "@tanstack/react-router";
 import { getArticle } from "@/utils/getArticle";
@@ -29,8 +28,9 @@ import { CSS } from "@dnd-kit/utilities";
  * Purpose:
  * - Displays the user's identities in a grid layout
  * - Drag-to-reorder: grab a card's handle to change the display order. The
- *   order persists (POST /identities/reorder) and applies to both /iams and
- *   /identities. Reordering is disabled while impersonating a test user.
+ *   order persists and applies to both /iams and /identities. Works for the
+ *   logged-in user and for an admin impersonating a test user (the hook routes
+ *   to the regular or admin reorder endpoint accordingly).
  *
  * Smoothness: the grid renders from local `items` state that we reorder
  * synchronously on drop, so dnd-kit animates into place without waiting on the
@@ -46,13 +46,7 @@ const DEFAULT_I_AM_STATEMENT =
  * page; only the grip handle initiates a drag, so clicking the card still
  * navigates as before.
  */
-function SortableIAmCard({
-	identity,
-	draggable,
-}: {
-	identity: Identity;
-	draggable: boolean;
-}) {
+function SortableIAmCard({ identity }: { identity: Identity }) {
 	const {
 		attributes,
 		listeners,
@@ -60,7 +54,7 @@ function SortableIAmCard({
 		transform,
 		transition,
 		isDragging,
-	} = useSortable({ id: identity.id ?? "", disabled: !draggable });
+	} = useSortable({ id: identity.id ?? "" });
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -74,18 +68,16 @@ function SortableIAmCard({
 			style={style}
 			className={`group/card relative ${isDragging ? "opacity-90" : ""}`}
 		>
-			{draggable && (
-				<button
-					type="button"
-					aria-label="Drag to reorder"
-					title="Drag to reorder"
-					className="absolute top-2.5 right-2.5 z-10 grid h-7 w-7 cursor-grab touch-none place-items-center rounded-lg border border-white/20 bg-black/45 text-white shadow-md backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-black/65 active:scale-95 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 opacity-100 md:opacity-0 md:group-hover/card:opacity-100 md:focus-visible:opacity-100"
-					{...attributes}
-					{...listeners}
-				>
-					<GripVertical className="h-[14px] w-[14px]" />
-				</button>
-			)}
+			<button
+				type="button"
+				aria-label="Drag to reorder"
+				title="Drag to reorder"
+				className="absolute top-2.5 right-2.5 z-10 grid h-7 w-7 cursor-grab touch-none place-items-center rounded-lg border border-white/20 bg-black/45 text-white shadow-md backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-black/65 active:scale-95 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 opacity-100 md:opacity-0 md:group-hover/card:opacity-100 md:focus-visible:opacity-100"
+				{...attributes}
+				{...listeners}
+			>
+				<GripVertical className="h-[14px] w-[14px]" />
+			</button>
 			<Link
 				to="/identities/$identityId"
 				params={{ identityId: identity.id ?? "" }}
@@ -122,7 +114,6 @@ function SortableIAmCard({
 
 export default function IAms() {
 	const { identities, isLoading, isError, reorderIdentities } = useIdentities();
-	const { isImpersonating } = useUserTarget();
 
 	// Local copy that drives the grid so a drop reorders instantly (smooth
 	// dnd-kit animation) without waiting on the network. We only adopt the
@@ -166,8 +157,6 @@ export default function IAms() {
 		);
 	}
 
-	// Only the logged-in user can persist a reorder (endpoint is user-scoped).
-	const draggable = !isImpersonating;
 	const ids = items.map((identity) => identity.id ?? "");
 
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -184,33 +173,24 @@ export default function IAms() {
 		reorderIdentities(reordered.map((identity) => identity.id ?? ""));
 	};
 
-	const grid = (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
-			{items.map((identity: Identity, index: number) => (
-				<SortableIAmCard
-					key={identity.id || `identity-${index}`}
-					identity={identity}
-					draggable={draggable}
-				/>
-			))}
-		</div>
-	);
-
 	return (
 		<div className="flex flex-col gap-[32px] bg-white">
-			{draggable ? (
-				<DndContext
-					sensors={sensors}
-					collisionDetection={closestCenter}
-					onDragEnd={handleDragEnd}
-				>
-					<SortableContext items={ids} strategy={rectSortingStrategy}>
-						{grid}
-					</SortableContext>
-				</DndContext>
-			) : (
-				grid
-			)}
+			<DndContext
+				sensors={sensors}
+				collisionDetection={closestCenter}
+				onDragEnd={handleDragEnd}
+			>
+				<SortableContext items={ids} strategy={rectSortingStrategy}>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
+						{items.map((identity: Identity, index: number) => (
+							<SortableIAmCard
+								key={identity.id || `identity-${index}`}
+								identity={identity}
+							/>
+						))}
+					</div>
+				</SortableContext>
+			</DndContext>
 		</div>
 	);
 }

@@ -80,33 +80,36 @@ export function IdentityEditForm({
 
 	return (
 		<div className="space-y-6">
-			<div className="space-y-2">
-				<Label htmlFor="identity-name">Name</Label>
-				<Input
-					id="identity-name"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-					placeholder="e.g. Creative Visionary"
-				/>
-			</div>
+			{/* Name + Category sit side by side on wider screens, stacked on small */}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="space-y-2">
+					<Label htmlFor="identity-name">Name</Label>
+					<Input
+						id="identity-name"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+						placeholder="e.g. Creative Visionary"
+					/>
+				</div>
 
-			<div className="space-y-2">
-				<Label htmlFor="identity-category">Category</Label>
-				<Select
-					value={category}
-					onValueChange={(v) => setCategory(v as IdentityCategory)}
-				>
-					<SelectTrigger id="identity-category" className="w-full">
-						<CategoryPill category={category} />
-					</SelectTrigger>
-					<SelectContent>
-						{Object.values(IdentityCategory).map((cat) => (
-							<SelectItem key={cat} value={cat}>
-								<CategoryPill category={cat} />
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<div className="space-y-2">
+					<Label htmlFor="identity-category">Category</Label>
+					<Select
+						value={category}
+						onValueChange={(v) => setCategory(v as IdentityCategory)}
+					>
+						<SelectTrigger id="identity-category" className="w-full">
+							<CategoryPill category={category} />
+						</SelectTrigger>
+						<SelectContent>
+							{Object.values(IdentityCategory).map((cat) => (
+								<SelectItem key={cat} value={cat}>
+									<CategoryPill category={cat} />
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 
 			<div className="space-y-2">

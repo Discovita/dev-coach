@@ -59,6 +59,36 @@ export async function reorderIdentities(
 }
 
 /**
+ * Reorder another user's identities (admin only).
+ * Used when impersonating a test user, since the regular reorder endpoint is
+ * scoped to the logged-in user.
+ * Calls POST /admin/identities/reorder
+ *
+ * @param userId - The user whose identities to reorder
+ * @param orderedIds - Identity IDs in the desired display order (first = top)
+ * @returns The user's identities in the new order
+ */
+export async function adminReorderIdentities(
+	userId: string,
+	orderedIds: string[],
+): Promise<Identity[]> {
+	log.debug(`Admin reordering identities for user ${userId}`, orderedIds);
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/identities/reorder`,
+		{
+			method: "POST",
+			body: JSON.stringify({ user_id: userId, ordered_ids: orderedIds }),
+		},
+	);
+	if (!response.ok) {
+		const errorText = await response.text();
+		log.error(`Failed to admin-reorder identities: ${errorText}`);
+		throw new Error("Failed to reorder identities");
+	}
+	return response.json();
+}
+
+/**
  * Update any identity (admin only, partial update).
  * Used for updating test user identities from admin pages.
  * PATCH /api/v1/admin/identities/update-identity
