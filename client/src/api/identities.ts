@@ -68,7 +68,7 @@ export async function reorderIdentities(
  */
 export async function adminUpdateIdentity(
 	identityId: string,
-	data: Partial<Identity>,
+	data: UpdateIdentityRequest,
 ): Promise<Identity> {
 	log.debug(`Admin updating identity ${identityId}`, data);
 	const response = await authFetch(
