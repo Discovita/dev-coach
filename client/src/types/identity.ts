@@ -38,10 +38,20 @@ export interface Identity {
 }
 
 /**
- * Request payload for updating an identity's scene details.
+ * Request payload for partially updating an identity. All fields are
+ * optional — only the provided keys are changed (PATCH semantics).
  */
 export interface UpdateIdentityRequest {
+	/** Identity name/title */
+	name?: string;
+	/** I Am statement (null clears it) */
+	i_am_statement?: string | null;
+	/** Category bucket */
+	category?: IdentityCategory;
+	/** Scene: clothing/attire for visualization */
 	clothing?: string | null;
+	/** Scene: mood/feeling for visualization */
 	mood?: string | null;
+	/** Scene: setting/environment for visualization */
 	setting?: string | null;
 }
