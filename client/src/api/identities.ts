@@ -89,6 +89,46 @@ export async function adminReorderIdentities(
 }
 
 /**
+ * Delete one of the authenticated user's identities.
+ * Calls DELETE /identities/{id}
+ *
+ * @param identityId - The ID of the identity to delete
+ */
+export async function deleteIdentity(identityId: string): Promise<void> {
+	log.debug(`Deleting identity ${identityId}`);
+	const response = await authFetch(
+		`${COACH_BASE_URL}/identities/${identityId}`,
+		{ method: "DELETE" },
+	);
+	if (!response.ok) {
+		const errorText = await response.text();
+		log.error(`Failed to delete identity: ${errorText}`);
+		throw new Error("Failed to delete identity");
+	}
+}
+
+/**
+ * Delete any identity (admin only).
+ * Used when impersonating a test user, since the regular delete endpoint is
+ * scoped to the logged-in user.
+ * Calls DELETE /admin/identities/delete-identity?identity_id={id}
+ *
+ * @param identityId - The ID of the identity to delete
+ */
+export async function adminDeleteIdentity(identityId: string): Promise<void> {
+	log.debug(`Admin deleting identity ${identityId}`);
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/identities/delete-identity?identity_id=${identityId}`,
+		{ method: "DELETE" },
+	);
+	if (!response.ok) {
+		const errorText = await response.text();
+		log.error(`Failed to admin-delete identity: ${errorText}`);
+		throw new Error("Failed to delete identity");
+	}
+}
+
+/**
  * Update any identity (admin only, partial update).
  * Used for updating test user identities from admin pages.
  * PATCH /api/v1/admin/identities/update-identity
