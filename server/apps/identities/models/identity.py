@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import Max
 
 from apps.core.models import ImageMixin
 from apps.users.models import User
@@ -82,6 +83,14 @@ class Identity(ImageMixin, models.Model):
         choices=IdentityCategory.choices,
         help_text="Category this identity belongs to.",
     )
+    order = models.PositiveIntegerField(
+        default=0,
+        db_index=True,
+        help_text=(
+            "User-controlled display order (ascending). New identities are "
+            "appended to the end; ties break on created_at."
+        ),
+    )
     created_at = models.DateTimeField(
         auto_now_add=True, help_text="Timestamp when the identity was created."
     )
@@ -96,6 +105,19 @@ class Identity(ImageMixin, models.Model):
         help_text="Test scenario this identity is associated with (for test data isolation).",
     )
 
+    def save(self, *args, **kwargs):
+        """
+        On creation, append the identity to the end of the user's order
+        (max existing order + 1) unless an explicit order was provided.
+        This preserves "earliest created first" as the default ordering.
+        """
+        if self._state.adding and self.order == 0:
+            max_order = Identity.objects.filter(user_id=self.user_id).aggregate(
+                max_order=Max("order")
+            )["max_order"]
+            self.order = 0 if max_order is None else max_order + 1
+        super().save(*args, **kwargs)
+
     def __str__(self):
         """
         String representation of the identity for admin/debugging.
@@ -105,3 +127,4 @@ class Identity(ImageMixin, models.Model):
     class Meta:
         verbose_name = "Identity"
         verbose_name_plural = "Identities"
+        ordering = ["order", "created_at"]

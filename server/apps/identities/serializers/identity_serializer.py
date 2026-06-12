@@ -32,6 +32,9 @@ class IdentitySerializer(serializers.ModelSerializer):
             "notes",
             "category",
             "image",
+            "order",
             "created_at",
             "updated_at",
         )
+        # order is managed via the dedicated reorder endpoint, not direct writes
+        read_only_fields = ("order",)

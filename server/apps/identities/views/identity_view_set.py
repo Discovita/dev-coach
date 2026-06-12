@@ -13,8 +13,12 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.identities.functions.public import reorder_user_identities
 from apps.identities.models import Identity
-from apps.identities.serializers import IdentitySerializer
+from apps.identities.serializers import (
+    IdentitySerializer,
+    ReorderIdentitiesRequestSerializer,
+)
 from enums.identity_state import IdentityState
 from services.logger import configure_logging
 from services.pdf import PDFService
@@ -342,6 +346,52 @@ class IdentityViewSet(
             )
         except Exception as e:
             log.error(f"Error deleting image: {str(e)}", exc_info=True)
+            return Response(
+                {"success": False, "error": "Server error", "detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="reorder",
+    )
+    def reorder(self, request):
+        """
+        Reorder the authenticated user's identities.
+        POST /api/v1/identities/reorder/
+        Body: { "ordered_ids": [uuid, uuid, ...] }  (first = shown first)
+        Returns: 200 OK with the user's identities in the new order.
+        """
+        try:
+            serializer = ReorderIdentitiesRequestSerializer(
+                data=request.data, context={"user": request.user}
+            )
+            serializer.is_valid(raise_exception=True)
+
+            reorder_user_identities(
+                user=request.user,
+                ordered_ids=serializer.validated_data["ordered_ids"],
+            )
+
+            identities = self.get_queryset()
+            log.info(f"Reordered identities for user {request.user.id}")
+            return Response(
+                IdentitySerializer(identities, many=True).data,
+                status=status.HTTP_200_OK,
+            )
+        except ValidationError as e:
+            log.error(f"Validation error reordering identities: {e.detail}")
+            return Response(
+                {
+                    "success": False,
+                    "error": "Validation error",
+                    "detail": e.detail if hasattr(e, "detail") else str(e),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            log.error(f"Error reordering identities: {str(e)}", exc_info=True)
             return Response(
                 {"success": False, "error": "Server error", "detail": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
