@@ -156,3 +156,71 @@ class ReorderEndpointTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class AdminReorderEndpointTests(APITestCase):
+    """Tests for POST /api/v1/admin/identities/reorder (admin impersonation)."""
+
+    URL = "/api/v1/admin/identities/reorder"
+
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="testpass123", is_staff=True
+        )
+        self.target = User.objects.create_user(
+            email="target@example.com", password="testpass123"
+        )
+        self.client.force_authenticate(user=self.admin)
+        self.a = _make_identity(self.target, "A")
+        self.b = _make_identity(self.target, "B")
+        self.c = _make_identity(self.target, "C")
+
+    def test_admin_reorders_target_users_identities(self):
+        response = self.client.post(
+            self.URL,
+            {
+                "user_id": str(self.target.id),
+                "ordered_ids": [str(self.c.id), str(self.a.id), str(self.b.id)],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([item["name"] for item in response.data], ["C", "A", "B"])
+
+        self.a.refresh_from_db()
+        self.b.refresh_from_db()
+        self.c.refresh_from_db()
+        self.assertEqual((self.c.order, self.a.order, self.b.order), (0, 1, 2))
+
+    def test_missing_user_id_is_rejected(self):
+        response = self.client.post(
+            self.URL,
+            {"ordered_ids": [str(self.a.id)]},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_rejects_identity_not_owned_by_target_user(self):
+        other = User.objects.create_user(
+            email="other@example.com", password="testpass123"
+        )
+        other_identity = _make_identity(other, "Not Theirs")
+        response = self.client.post(
+            self.URL,
+            {
+                "user_id": str(self.target.id),
+                "ordered_ids": [str(self.a.id), str(other_identity.id)],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_non_admin_is_forbidden(self):
+        self.client.force_authenticate(user=self.target)
+        response = self.client.post(
+            self.URL,
+            {"user_id": str(self.target.id), "ordered_ids": [str(self.a.id)]},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

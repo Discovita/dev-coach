@@ -15,9 +15,14 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
+from apps.identities.functions.public import reorder_user_identities
 from apps.identities.models import Identity
-from apps.identities.serializers import IdentitySerializer
+from apps.identities.serializers import (
+    IdentitySerializer,
+    ReorderIdentitiesRequestSerializer,
+)
 from apps.reference_images.models import ReferenceImage
+from apps.users.functions import get_user_identities
 from permissions import IsAdminUser
 from services.image_generation.orchestration import generate_identity_image
 from services.logger import configure_logging
@@ -86,6 +91,61 @@ class AdminIdentityViewSet(viewsets.GenericViewSet):
 
         log.info(f"Admin {request.user.id} updated identity {identity_id}")
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["POST"],
+        url_path="reorder",
+        permission_classes=[IsAdminUser],
+    )
+    def reorder(self, request):
+        """
+        Reorder a specific user's identities (admin only).
+        POST /api/v1/admin/identities/reorder
+
+        Used when an admin is impersonating a test user — the regular
+        /identities/reorder endpoint is scoped to request.user, so admins need
+        this to reorder the impersonated user's identities.
+
+        Body (JSON):
+        - user_id: UUID of the user whose identities to reorder
+        - ordered_ids: identity IDs in the desired display order (first = top)
+
+        Returns: 200 OK with the user's identities in the new order.
+        """
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response(
+                {"success": False, "error": "user_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            target_user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"success": False, "error": f"User with id {user_id} not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = ReorderIdentitiesRequestSerializer(
+            data=request.data, context={"user": target_user}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        reorder_user_identities(
+            user=target_user,
+            ordered_ids=serializer.validated_data["ordered_ids"],
+        )
+
+        log.info(
+            f"Admin {request.user.id} reordered identities for user {target_user.id}"
+        )
+        identities = get_user_identities(target_user)
+        return Response(
+            IdentitySerializer(identities, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(
         detail=False,
