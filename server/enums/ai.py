@@ -43,6 +43,9 @@ class AIModel(models.TextChoices):
     CLAUDE_3_5_SONNET = "claude-3-5-sonnet-latest", "Claude 3.5 Sonnet"
     CLAUDE_3_5_HAIKU = "claude-3-5-haiku-latest", "Claude 3.5 Haiku"
 
+    # OpenAI GPT-5 model (reasoning-capable; structured outputs supported)
+    GPT_5_4 = "gpt-5.4", "GPT-5.4"
+
     # OpenAI GPT models
     GPT_4_1 = "gpt-4.1", "GPT-4.1"
     GPT_4_5_PREVIEW = "gpt-4.5-preview", "GPT-4.5 Preview"
@@ -69,6 +72,7 @@ class AIModel(models.TextChoices):
         ]
 
         openai_models = [
+            cls.GPT_5_4,
             cls.GPT_4_1,
             cls.GPT_4_5_PREVIEW,
             cls.O3_MINI,
@@ -100,6 +104,7 @@ class AIModel(models.TextChoices):
         except ValueError:
             # Try some common aliases
             name_map = {
+                "gpt-5.4": cls.GPT_5_4,
                 "claude-3.7-sonnet": cls.CLAUDE_3_7_SONNET,
                 "claude-3.5-sonnet": cls.CLAUDE_3_5_SONNET,
                 "claude-3.5-haiku": cls.CLAUDE_3_5_HAIKU,
@@ -173,11 +178,19 @@ class AIModel(models.TextChoices):
         """
         Get the AIModel from a string, or return the default model if not provided.
         This is useful for endpoints where the user may or may not specify a model.
-        Default is GPT_4O.
+        Default is the configured ``DEFAULT_AI_MODEL`` setting (env-driven),
+        falling back to GPT_4O when unset. This lets a single setting flip the
+        coach model per-environment without code changes.
         """
-        if not model_name:
-            return cls.GPT_4O
-        return cls.from_string(model_name)
+        if model_name:
+            return cls.from_string(model_name)
+
+        from django.conf import settings
+
+        configured = getattr(settings, "DEFAULT_AI_MODEL", None)
+        if configured:
+            return cls.from_string(configured)
+        return cls.GPT_4O
 
 
 # -----------------------------------------------------------------------------
@@ -187,6 +200,7 @@ class AIModel(models.TextChoices):
 # Set of model names that support structured outputs.
 # Used in: AIModel.supports_structured_outputs
 STRUCTURED_OUTPUT_MODELS: Set[str] = {
+    "gpt-5.4",
     "gpt-4.1",
     "gpt-4.5-preview",
     "o1",
@@ -200,6 +214,7 @@ STRUCTURED_OUTPUT_MODELS: Set[str] = {
 # Set of model names that require max_completion_tokens parameter.
 # Used in: AIModel.get_token_param_name
 COMPLETION_TOKEN_MODELS: Set[str] = {
+    "gpt-5",
     "gpt-4.1",
     "o1",
     "o1-mini",
@@ -213,6 +228,8 @@ COMPLETION_TOKEN_MODELS: Set[str] = {
 # Default token limits for each model.
 # Used in: AIModel.get_default_token_limit
 DEFAULT_TOKEN_LIMITS: Dict[str, int] = {
+    # GPT-5.4 supports up to 128k output tokens (1.05M context window).
+    "gpt-5.4": 128000,
     "gpt-4.1": 32768,
     "gpt-4.5-preview": 16384,
     "o3-mini": 100000,

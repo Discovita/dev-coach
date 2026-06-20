@@ -22,8 +22,9 @@ from enums.ai import AIModel
 
 log = logging.getLogger(__name__)
 
-# o-series model name fragments that do not accept 'temperature' or 'top_p'.
-_O_SERIES_TAGS = ("o1", "o3", "o4-mini")
+# Model name fragments for reasoning families that do not accept a custom
+# 'temperature' / 'top_p' (o-series and the GPT-5 line).
+_NO_TEMPERATURE_TAGS = ("o1", "o3", "o4-mini", "gpt-5")
 
 
 def structured_completion(
@@ -77,10 +78,15 @@ def structured_completion(
         token_param: max_tokens,
     }
 
-    # o-series models reject 'temperature'; skip it for those families.
-    is_o_series = any(tag in model_str for tag in _O_SERIES_TAGS)
-    if not is_o_series and temperature is not None:
+    # Reasoning families (o-series, GPT-5) reject 'temperature'; skip it.
+    is_reasoning = any(tag in model_str for tag in _NO_TEMPERATURE_TAGS)
+    if not is_reasoning and temperature is not None:
         params["temperature"] = temperature
+
+    # GPT-5 accepts a 'reasoning_effort' control. Default it low for
+    # latency-sensitive coach turns; a caller-supplied value wins.
+    if "gpt-5" in model_str and "reasoning_effort" not in kwargs:
+        params["reasoning_effort"] = "low"
 
     for key, value in kwargs.items():
         if key not in params:
