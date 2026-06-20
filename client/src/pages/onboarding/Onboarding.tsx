@@ -29,8 +29,6 @@ type Step = "appearance" | "photos";
  * generation later, which is why we encourage (but don't require) them now.
  * Reuses the same components the account page uses, so anything set here is
  * editable later from the account page.
- *
- * NOTE: framing copy below is intentionally lightweight — refine before launch.
  */
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -91,11 +89,12 @@ export default function Onboarding() {
                 How should we picture you?
               </h1>
               <p className="mt-3 text-[15px] leading-relaxed text-black/70">
-                Before you meet your coach, tell us how you&rsquo;d like to be
-                portrayed in the images generated for you throughout the program.
-                We recommend setting this now &mdash; image generation stays locked
-                until it&rsquo;s filled out &mdash; but you can skip ahead and do it
-                later from your account.
+                Part of designing your new life is creating personalized images of
+                you. These details tell us how to portray you &mdash; so those
+                images actually look like you. It takes just a minute, and you can
+                change any of it later if you want. If you&rsquo;re excited to just
+                get started, you can skip for now &mdash; just know image generation
+                stays locked until this is filled out.
               </p>
 
               <div className="mt-6">
@@ -131,13 +130,13 @@ export default function Onboarding() {
           ) : (
             <>
               <h1 className="mt-1 text-[26px] font-medium text-black">
-                Add a few photos of yourself
+                Now add a few photos of you
               </h1>
               <p className="mt-3 text-[15px] leading-relaxed text-black/70">
-                Real photos help your generated images actually look like you. Add
-                up to five &mdash; the tips below get you the best results. You can
-                update these anytime from your account, or skip for now and come
-                back later.
+                A few real photos help us generate images that genuinely look like
+                you. Add up to five &mdash; the tips below get you the best results.
+                Like everything here, you can update these anytime from your
+                account, or skip for now and come back later.
               </p>
 
               <div className="mt-6">
@@ -167,7 +166,7 @@ export default function Onboarding() {
                     onClick={goToChat}
                     className="nv-gradient-button text-white"
                   >
-                    Go to my coach
+                    Let&rsquo;s Go!
                   </Button>
                 </div>
               </div>
