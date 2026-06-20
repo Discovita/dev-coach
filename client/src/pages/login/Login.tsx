@@ -178,7 +178,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         className="text-sm text-muted-foreground hover:underline"
-                        onClick={() => console.log("Forgot password")}
+                        onClick={() => navigate({ to: "/forgot-password" })}
                       >
                         Forgot password?
                       </button>

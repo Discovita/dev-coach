@@ -2,6 +2,8 @@
 Endpoint tests for POST /api/v1/auth/register/.
 """
 
+from unittest.mock import patch
+
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -75,6 +77,14 @@ class RegisterEndpointTests(APITestCase):
             "email": "new@example.com",
             "password": "TestPass1!",
         }
+        # Registration sends a verification email via SES; mock the seam.
+        patcher = patch(
+            "apps.authentication.functions.public.register_user"
+            ".send_verification_email",
+            return_value=True,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_successful_registration(self):
         """Valid payload creates user and returns tokens."""

@@ -4,6 +4,8 @@ import {
   register as registerApi,
   forgotPassword as forgotPasswordApi,
   resetPassword as resetPasswordApi,
+  verifyEmail as verifyEmailApi,
+  resendVerification as resendVerificationApi,
   logout as logoutApi,
 } from "@/api/auth";
 import {
@@ -89,6 +91,16 @@ export function useAuth() {
     mutationFn: resetPasswordApi,
   });
 
+  // Verify email mutation
+  const verifyEmailMutation = useMutation<AuthResponse, unknown, string>({
+    mutationFn: verifyEmailApi,
+  });
+
+  // Resend verification mutation
+  const resendVerificationMutation = useMutation<AuthResponse, unknown, string>({
+    mutationFn: resendVerificationApi,
+  });
+
   // Logout mutation
   const logoutMutation = useMutation<void, unknown, void>({
     mutationFn: logoutApi,
@@ -107,6 +119,10 @@ export function useAuth() {
     forgotPasswordStatus: forgotPasswordMutation.status,
     resetPassword: resetPasswordMutation.mutateAsync,
     resetPasswordStatus: resetPasswordMutation.status,
+    verifyEmail: verifyEmailMutation.mutateAsync,
+    verifyEmailStatus: verifyEmailMutation.status,
+    resendVerification: resendVerificationMutation.mutateAsync,
+    resendVerificationStatus: resendVerificationMutation.status,
     logout: logoutMutation.mutateAsync,
     logoutStatus: logoutMutation.status,
   };

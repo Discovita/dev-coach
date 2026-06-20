@@ -108,6 +108,10 @@ class User(AbstractUser):
     )
 
     # Email verification fields
+    is_email_verified = models.BooleanField(
+        default=False,
+        help_text="Whether the user has confirmed ownership of their email address.",
+    )
     verification_token = models.CharField(
         max_length=100, blank=True, help_text="Token for email verification"
     )

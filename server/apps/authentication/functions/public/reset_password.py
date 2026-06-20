@@ -44,7 +44,10 @@ def reset_password(token: str, new_password: str) -> dict:
         log.warning("Reset attempt with expired token for user %s", user.email)
         raise TokenExpiredError(AuthErrorMessages.VERIFICATION_EXPIRED)
 
+    # Completing a reset proves the user controls the email, so treat it as
+    # verified too (clearing the single-use token either way).
     user.set_password(new_password)
+    user.is_email_verified = True
     user.verification_token = ""
     user.email_verification_sent_at = None
     user.save()

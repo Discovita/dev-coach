@@ -13,11 +13,17 @@ from apps.authentication.functions.public import (
     forgot_password,
     login_user,
     register_user,
+    resend_verification,
     reset_password,
+    verify_email,
 )
 from apps.authentication.functions.public.reset_password import (
     TokenExpiredError,
     TokenInvalidError,
+)
+from apps.authentication.functions.public.verify_email import (
+    VerificationExpiredError,
+    VerificationInvalidError,
 )
 from apps.authentication.serializers import LoginSerializer, RegisterSerializer
 from apps.authentication.utils import (
@@ -39,6 +45,8 @@ class AuthViewSet(viewsets.GenericViewSet):
     - POST /api/v1/auth/login/
     - POST /api/v1/auth/forgot-password/
     - POST /api/v1/auth/reset-password/
+    - POST /api/v1/auth/verify-email/
+    - POST /api/v1/auth/resend-verification/
     """
 
     # ------------------------------------------------------------------
@@ -148,4 +156,54 @@ class AuthViewSet(viewsets.GenericViewSet):
             return error_response(str(e))
         except Exception:
             log.exception("Unexpected error in reset-password")
+            return error_response(AuthErrorMessages.UNEXPECTED_ERROR)
+
+    # ------------------------------------------------------------------
+    # POST /api/v1/auth/verify-email/
+    # ------------------------------------------------------------------
+    @decorators.action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[AllowAny],
+        url_path="verify-email",
+    )
+    def verify_email(self, request: Request) -> Response:
+        """POST /api/v1/auth/verify-email/  — Confirm an email address."""
+        token = request.data.get("token")
+        if not token:
+            return error_response(AuthErrorMessages.VERIFICATION_INVALID)
+
+        try:
+            result = verify_email(token)
+            return success_response(result)
+        except VerificationInvalidError as e:
+            return error_response(str(e))
+        except VerificationExpiredError as e:
+            return error_response(str(e))
+        except Exception:
+            log.exception("Unexpected error in verify-email")
+            return error_response(AuthErrorMessages.UNEXPECTED_ERROR)
+
+    # ------------------------------------------------------------------
+    # POST /api/v1/auth/resend-verification/
+    # ------------------------------------------------------------------
+    @decorators.action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[AllowAny],
+        url_path="resend-verification",
+    )
+    def resend_verification(self, request: Request) -> Response:
+        """POST /api/v1/auth/resend-verification/  — Re-send a verify email."""
+        email = request.data.get("email")
+        if not email:
+            return error_response(AuthErrorMessages.INVALID_EMAIL_FORMAT)
+
+        try:
+            result = resend_verification(email)
+            return success_response(
+                {"message": result["message"], "email_sent": result["email_sent"]}
+            )
+        except Exception:
+            log.exception("Unexpected error in resend-verification for %s", email)
             return error_response(AuthErrorMessages.UNEXPECTED_ERROR)

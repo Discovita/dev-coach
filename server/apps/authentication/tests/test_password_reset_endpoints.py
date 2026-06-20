@@ -31,12 +31,7 @@ class ForgotPasswordEndpointTests(APITestCase):
         ".send_password_reset_email",
         return_value=True,
     )
-    @patch(
-        "apps.authentication.functions.public.forgot_password"
-        ".generate_verification_token",
-        return_value="tok",
-    )
-    def test_existing_email_returns_success(self, _mock_gen, _mock_send):
+    def test_existing_email_returns_success(self, _mock_send):
         """Known email should return 200 with success message."""
         response = self.client.post(
             self.url, {"email": "forgot@example.com"}, format="json"
@@ -57,12 +52,7 @@ class ForgotPasswordEndpointTests(APITestCase):
         ".send_password_reset_email",
         return_value=False,
     )
-    @patch(
-        "apps.authentication.functions.public.forgot_password"
-        ".generate_verification_token",
-        return_value="tok",
-    )
-    def test_email_send_failure_returns_400(self, _mock_gen, _mock_send):
+    def test_email_send_failure_returns_400(self, _mock_send):
         """SES failure should return 400."""
         response = self.client.post(
             self.url, {"email": "forgot@example.com"}, format="json"
@@ -93,6 +83,8 @@ class ResetPasswordEndpointTests(APITestCase):
         self.assertTrue(response.data["success"])
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("NewPass1!"))
+        # Completing a reset proves email ownership.
+        self.assertTrue(self.user.is_email_verified)
 
     def test_missing_token_returns_400(self):
         """Request without token should return 400."""
