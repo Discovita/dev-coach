@@ -26,13 +26,21 @@ class UserAdmin(BaseUserAdmin):
         "email",
         "first_name",
         "last_name",
+        "is_email_verified",
         "is_staff",
         "is_active",
         "is_superuser",
         "created_at",
         "test_scenario_display",
     )
-    list_filter = ("is_staff", "is_active", "is_superuser", "test_scenario")
+    list_filter = (
+        "is_email_verified",
+        "is_staff",
+        "is_active",
+        "is_superuser",
+        "test_scenario",
+    )
+    actions = ("mark_email_verified", "mark_email_unverified")
     search_fields = ("email", "first_name", "last_name", "test_scenario__name")
     fieldsets = (
         (None, {"fields": ("email", "password")}),
@@ -52,7 +60,13 @@ class UserAdmin(BaseUserAdmin):
         ("Important dates", {"fields": ("last_login", "created_at", "updated_at")}),
         (
             "Verification",
-            {"fields": ("verification_token", "email_verification_sent_at")},
+            {
+                "fields": (
+                    "is_email_verified",
+                    "verification_token",
+                    "email_verification_sent_at",
+                )
+            },
         ),
         (
             "Appearance Preferences",
@@ -112,3 +126,15 @@ class UserAdmin(BaseUserAdmin):
 
     test_scenario_display.short_description = "Test Scenario"
     test_scenario_display.admin_order_field = "test_scenario__name"
+
+    @admin.action(description="Mark selected users as email verified")
+    def mark_email_verified(self, request, queryset):
+        """Bulk-mark the selected users' email addresses as verified."""
+        updated = queryset.update(is_email_verified=True)
+        self.message_user(request, f"Marked {updated} user(s) as email verified.")
+
+    @admin.action(description="Mark selected users as email NOT verified")
+    def mark_email_unverified(self, request, queryset):
+        """Bulk-mark the selected users' email addresses as not verified."""
+        updated = queryset.update(is_email_verified=False)
+        self.message_user(request, f"Marked {updated} user(s) as email not verified.")
