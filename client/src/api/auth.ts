@@ -4,6 +4,8 @@ import {
   LOGIN,
   FORGOT_PASSWORD,
   RESET_PASSWORD,
+  VERIFY_EMAIL,
+  RESEND_VERIFICATION,
 } from "@/constants/api";
 import {
   type RegisterCredentials,
@@ -137,6 +139,34 @@ export async function resetPassword(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(creds),
+  });
+  return response.json();
+}
+
+/**
+ * Confirm an email address with a verification token.
+ */
+export async function verifyEmail(token: string): Promise<AuthResponse> {
+  const verifyEmailUrl = `${COACH_BASE_URL}${VERIFY_EMAIL}`;
+  const response = await fetch(verifyEmailUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+  return response.json();
+}
+
+/**
+ * Re-send the verification email for an unverified account.
+ */
+export async function resendVerification(
+  email: string
+): Promise<AuthResponse> {
+  const resendUrl = `${COACH_BASE_URL}${RESEND_VERIFICATION}`;
+  const response = await fetch(resendUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
   });
   return response.json();
 }

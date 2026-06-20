@@ -6,7 +6,6 @@ Initiate the password-reset flow by generating a token and sending an email.
 
 from apps.authentication.utils import (
     AuthErrorMessages,
-    generate_verification_token,
     send_password_reset_email,
 )
 from apps.users.models import User
@@ -40,7 +39,7 @@ def forgot_password(email: str) -> dict:
         log.info("Forgot-password for non-existent email %s", email)
         return {"message": _GENERIC_MESSAGE, "email_sent": False}
 
-    generate_verification_token(user)
+    # send_password_reset_email generates and persists the token itself.
     email_sent = send_password_reset_email(user)
 
     if not email_sent:

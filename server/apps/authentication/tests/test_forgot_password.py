@@ -29,15 +29,9 @@ class ForgotPasswordTests(TestCase):
         ".send_password_reset_email",
         return_value=True,
     )
-    @patch(
-        "apps.authentication.functions.public.forgot_password"
-        ".generate_verification_token",
-        return_value="abc123",
-    )
-    def test_existing_email_sends_reset(self, mock_gen, mock_send):
-        """Should generate a token and send the email for known users."""
+    def test_existing_email_sends_reset(self, mock_send):
+        """Should send the reset email for known users (token gen lives in the send)."""
         result = forgot_password("forgot@example.com")
-        mock_gen.assert_called_once_with(self.user)
         mock_send.assert_called_once_with(self.user)
         self.assertEqual(result["message"], "Password reset email sent")
         self.assertTrue(result["email_sent"])
@@ -47,12 +41,7 @@ class ForgotPasswordTests(TestCase):
         ".send_password_reset_email",
         return_value=False,
     )
-    @patch(
-        "apps.authentication.functions.public.forgot_password"
-        ".generate_verification_token",
-        return_value="abc123",
-    )
-    def test_email_failure_raises_runtime_error(self, mock_gen, mock_send):
+    def test_email_failure_raises_runtime_error(self, mock_send):
         """Should raise RuntimeError when SES send fails."""
         with self.assertRaises(RuntimeError) as ctx:
             forgot_password("forgot@example.com")

@@ -26,7 +26,7 @@ extend-ignore =
 # dynamic dispatch — these are intentional patterns, not accidental star imports.
 per-file-ignores =
     */ai_service_factory.py: E402
-    */settings/*.py: F401, F403, F405
+    */settings/*.py: E402, F401, F403, F405
     */action_handler/*.py: F403, F405
     */prompt_manager/utils/__init__.py: F403, F405
     */prompt_manager/utils/context/__init__.py: F403, F405
