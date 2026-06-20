@@ -34,8 +34,8 @@ export default function VerifyEmailPage() {
       .then((response) => {
         if (response.success) {
           setStatus("success");
-          // Verification logs the user in — drop them straight into the app.
-          setTimeout(() => navigate({ to: "/chat" }), 1500);
+          // Verification logs the user in — send them through onboarding first.
+          setTimeout(() => navigate({ to: "/onboarding" }), 1500);
         } else {
           setStatus("error");
         }
@@ -89,7 +89,7 @@ export default function VerifyEmailPage() {
                 You&rsquo;re all set — taking you in…
               </p>
               <Link
-                to="/chat"
+                to="/onboarding"
                 className="mt-6 inline-block text-[color:var(--nv-violet-blue)] underline"
               >
                 Continue

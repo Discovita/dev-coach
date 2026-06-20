@@ -1,44 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
 import type { UserAppearance } from "@/types/userAppearance";
-import { GenderSelector } from "./GenderSelector";
-import { SkinToneSelector } from "./SkinToneSelector";
-import { HairColorSelector } from "./HairColorSelector";
-import { EyeColorSelector } from "./EyeColorSelector";
-import { HeightSelector } from "./HeightSelector";
-import { BuildSelector } from "./BuildSelector";
-import { AgeRangeSelector } from "./AgeRangeSelector";
+import {
+  AppearanceFields,
+  APPEARANCE_FIELDS,
+  appearanceEquals,
+  countFilledFields,
+  getMissingFields,
+} from "./AppearanceFields";
 import { Button } from "@/components/ui/button";
 import { Save, Check, AlertCircle } from "lucide-react";
-import { Gender } from "@/enums/appearance/gender";
-import { BUILDS_BY_GENDER } from "@/enums/appearance/build";
-
-/**
- * List of all appearance fields that are required for image generation.
- * Used for validation and progress tracking.
- */
-const APPEARANCE_FIELDS: (keyof UserAppearance)[] = [
-  "gender",
-  "skin_tone",
-  "hair_color",
-  "eye_color",
-  "height",
-  "build",
-  "age_range",
-];
-
-/**
- * Human-readable labels for each appearance field.
- * Used in validation messages.
- */
-const FIELD_LABELS: Record<keyof UserAppearance, string> = {
-  gender: "Gender",
-  skin_tone: "Skin Tone",
-  hair_color: "Hair Color",
-  eye_color: "Eye Color",
-  height: "Height",
-  build: "Build",
-  age_range: "Age",
-};
 
 interface AppearanceSelectorProps {
   /** Current saved appearance from the user profile */
@@ -50,48 +20,11 @@ interface AppearanceSelectorProps {
 }
 
 /**
- * Checks if an appearance field has a valid value (not null/undefined).
- */
-function hasValue(value: unknown): boolean {
-  return value !== null && value !== undefined;
-}
-
-/**
- * Counts how many appearance fields have values.
- */
-function countFilledFields(appearance: UserAppearance | null): number {
-  if (!appearance) return 0;
-  return APPEARANCE_FIELDS.filter((field) => hasValue(appearance[field])).length;
-}
-
-/**
- * Gets the list of missing (unfilled) field labels.
- */
-function getMissingFields(appearance: UserAppearance | null): string[] {
-  if (!appearance) return APPEARANCE_FIELDS.map((f) => FIELD_LABELS[f]);
-  return APPEARANCE_FIELDS.filter((field) => !hasValue(appearance[field])).map(
-    (f) => FIELD_LABELS[f]
-  );
-}
-
-/**
- * Checks if two appearance objects are equal (for dirty state detection).
- */
-function appearanceEquals(
-  a: UserAppearance | null,
-  b: UserAppearance | null
-): boolean {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  return APPEARANCE_FIELDS.every((field) => a[field] === b[field]);
-}
-
-/**
  * AppearanceSelector Component
  * ----------------------------
- * Container component for all user appearance selectors.
- * Displays badge selectors for gender, skin tone, hair color, eye color,
- * height, build, and age range preferences.
+ * Account-page container around {@link AppearanceFields}. Adds the card chrome,
+ * heading, validation warning, progress indicator, and an explicit
+ * "Save Preferences" button on top of the bare selectors.
  *
  * Features:
  * - Local state for unsaved changes
@@ -101,7 +34,7 @@ function appearanceEquals(
  * - Success feedback after saving
  *
  * These settings are saved to the User model and apply to all identity image generations.
- * 
+ *
  * Used in: Account page for appearance customization.
  */
 export function AppearanceSelector({
@@ -134,30 +67,9 @@ export function AppearanceSelector({
   const isComplete = filledCount === APPEARANCE_FIELDS.length;
   const isDirty = !appearanceEquals(localAppearance, appearance);
 
-  // Handle field change - updates local state only
-  const handleChange = <K extends keyof UserAppearance>(
-    field: K,
-    value: UserAppearance[K]
-  ) => {
-    setLocalAppearance((prev) => {
-      const updated = {
-        ...prev,
-        [field]: value,
-      };
-      
-      // If gender changed, check if current build is still valid
-      // Clear build if it's not valid for the new gender
-      if (field === "gender" && prev.build) {
-        const newGender = value as Gender;
-        const validBuilds = BUILDS_BY_GENDER[newGender] || BUILDS_BY_GENDER[Gender.PERSON];
-        if (!validBuilds.includes(prev.build)) {
-          updated.build = undefined;
-        }
-      }
-      
-      return updated;
-    });
-    // Clear success indicator when user makes changes
+  // Update local state when a field changes; clear the success indicator.
+  const handleChange = (next: UserAppearance) => {
+    setLocalAppearance(next);
     setShowSaveSuccess(false);
   };
 
@@ -201,43 +113,7 @@ export function AppearanceSelector({
       )}
 
       {/* Selectors */}
-      <div className="space-y-6">
-        <GenderSelector
-          value={localAppearance.gender}
-          onChange={(value) => handleChange("gender", value)}
-        />
-
-        <SkinToneSelector
-          value={localAppearance.skin_tone}
-          onChange={(value) => handleChange("skin_tone", value)}
-        />
-
-        <HairColorSelector
-          value={localAppearance.hair_color}
-          onChange={(value) => handleChange("hair_color", value)}
-        />
-
-        <EyeColorSelector
-          value={localAppearance.eye_color}
-          onChange={(value) => handleChange("eye_color", value)}
-        />
-
-        <HeightSelector
-          value={localAppearance.height}
-          onChange={(value) => handleChange("height", value)}
-        />
-
-        <BuildSelector
-          value={localAppearance.build}
-          onChange={(value) => handleChange("build", value)}
-          gender={localAppearance.gender}
-        />
-
-        <AgeRangeSelector
-          value={localAppearance.age_range}
-          onChange={(value) => handleChange("age_range", value)}
-        />
-      </div>
+      <AppearanceFields value={localAppearance} onChange={handleChange} />
 
       {/* Footer with progress and save button */}
       <div className="flex items-center justify-between pt-4 border-t">

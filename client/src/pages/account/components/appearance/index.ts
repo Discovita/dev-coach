@@ -4,6 +4,15 @@
  */
 
 export { AppearanceSelector } from "./AppearanceSelector";
+export {
+  AppearanceFields,
+  APPEARANCE_FIELDS,
+  FIELD_LABELS,
+  countFilledFields,
+  getMissingFields,
+  appearanceEquals,
+  applyAppearanceChange,
+} from "./AppearanceFields";
 export { BadgeSelector } from "./BadgeSelector";
 export type { BadgeOption } from "./BadgeSelector";
 export { GenderSelector } from "./GenderSelector";
