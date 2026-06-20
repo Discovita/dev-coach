@@ -309,3 +309,13 @@ CELERY_WORKER_MAX_MEMORY_PER_CHILD = 400000  # recycle if RSS exceeds ~400 MB (K
 # COACHING_PHASE_VIDEOS_ENABLED is the feature flag — flip it to control
 # visibility without an env-var change. Flipping is a code change + deploy.
 COACHING_PHASE_VIDEOS_ENABLED = True
+
+#########################################
+# COACH AI MODEL
+#########################################
+# Default LLM used for the coach when a request doesn't specify one. Resolved
+# by AIModel.get_or_default() (request model_name wins, then this setting, then
+# a hardcoded gpt-4o fallback). Read from the environment so any environment can
+# override without a code change; the default makes gpt-5.4 the coach model
+# across all environments.
+DEFAULT_AI_MODEL = env("DEFAULT_AI_MODEL", default="gpt-5.4")
