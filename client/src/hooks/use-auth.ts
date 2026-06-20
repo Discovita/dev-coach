@@ -91,9 +91,14 @@ export function useAuth() {
     mutationFn: resetPasswordApi,
   });
 
-  // Verify email mutation
+  // Verify email mutation — verifying logs the user in, so cache the user.
   const verifyEmailMutation = useMutation<AuthResponse, unknown, string>({
     mutationFn: verifyEmailApi,
+    onSuccess: (data) => {
+      if (data && data.user) {
+        setUserDataInCache(data.user);
+      }
+    },
   });
 
   // Resend verification mutation

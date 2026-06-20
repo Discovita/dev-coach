@@ -47,14 +47,11 @@ class RegisterUserTests(TestCase):
         user = User.objects.get(email="new@example.com")
         self.assertEqual(result["user_id"], user.id)
 
-    def test_returns_jwt_tokens(self):
-        """Result should contain refresh and access tokens."""
+    def test_does_not_return_tokens(self):
+        """Registration must NOT log the user in — no tokens until verified."""
         result = register_user(email="new@example.com", password="TestPass1!")
-        self.assertIn("tokens", result)
-        self.assertIn("refresh", result["tokens"])
-        self.assertIn("access", result["tokens"])
-        self.assertTrue(len(result["tokens"]["refresh"]) > 0)
-        self.assertTrue(len(result["tokens"]["access"]) > 0)
+        self.assertNotIn("tokens", result)
+        self.assertTrue(result["email_sent"])
 
     def test_password_is_hashed(self):
         """Stored password should be hashed, not plaintext."""

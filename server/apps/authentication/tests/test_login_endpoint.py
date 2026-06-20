@@ -17,6 +17,8 @@ class LoginSerializerTests(TestCase):
         self.user = User.objects.create_user(
             email="login@example.com", password="TestPass1!"
         )
+        self.user.is_email_verified = True
+        self.user.save()
 
     def test_valid_credentials_pass(self):
         """Correct email/password should validate and attach user."""
@@ -25,6 +27,15 @@ class LoginSerializerTests(TestCase):
         )
         self.assertTrue(serializer.is_valid(), serializer.errors)
         self.assertEqual(serializer.validated_data["user"], self.user)
+
+    def test_unverified_email_rejected(self):
+        """A correct password but unverified email should fail validation."""
+        self.user.is_email_verified = False
+        self.user.save()
+        serializer = LoginSerializer(
+            data={"email": "login@example.com", "password": "TestPass1!"}
+        )
+        self.assertFalse(serializer.is_valid())
 
     def test_wrong_password_rejected(self):
         """Wrong password should fail validation."""
@@ -59,6 +70,8 @@ class LoginEndpointTests(APITestCase):
         self.user = User.objects.create_user(
             email="login@example.com", password="TestPass1!"
         )
+        self.user.is_email_verified = True
+        self.user.save()
 
     def test_successful_login(self):
         """Valid credentials return tokens."""
@@ -71,6 +84,18 @@ class LoginEndpointTests(APITestCase):
         self.assertTrue(response.data["success"])
         self.assertIn("tokens", response.data)
         self.assertEqual(response.data["user_id"], self.user.id)
+
+    def test_unverified_email_returns_400(self):
+        """An unverified account cannot log in."""
+        self.user.is_email_verified = False
+        self.user.save()
+        response = self.client.post(
+            self.url,
+            {"email": "login@example.com", "password": "TestPass1!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.data["success"])
 
     def test_wrong_password_returns_400(self):
         """Invalid password returns 400."""

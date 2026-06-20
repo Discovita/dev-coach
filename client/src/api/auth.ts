@@ -145,6 +145,7 @@ export async function resetPassword(
 
 /**
  * Confirm an email address with a verification token.
+ * On success the backend returns tokens, so we log the user straight in.
  */
 export async function verifyEmail(token: string): Promise<AuthResponse> {
   const verifyEmailUrl = `${COACH_BASE_URL}${VERIFY_EMAIL}`;
@@ -153,7 +154,14 @@ export async function verifyEmail(token: string): Promise<AuthResponse> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
   });
-  return response.json();
+  const data: AuthResponse = await response.json();
+  if (data.tokens) {
+    setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
+    setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
+    const user = await fetchUserComplete();
+    return { ...data, user };
+  }
+  return data;
 }
 
 /**

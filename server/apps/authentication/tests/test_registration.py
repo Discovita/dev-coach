@@ -87,14 +87,15 @@ class RegisterEndpointTests(APITestCase):
         self.addCleanup(patcher.stop)
 
     def test_successful_registration(self):
-        """Valid payload creates user and returns tokens."""
+        """Valid payload creates an unverified user and does NOT log them in."""
         response = self.client.post(self.url, self.valid_payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["success"])
-        self.assertIn("tokens", response.data)
+        self.assertNotIn("tokens", response.data)
         self.assertIn("user_id", response.data)
-        self.assertTrue(User.objects.filter(email="new@example.com").exists())
+        user = User.objects.get(email="new@example.com")
+        self.assertFalse(user.is_email_verified)
 
     def test_duplicate_email_returns_400(self):
         """Existing email should return 400."""

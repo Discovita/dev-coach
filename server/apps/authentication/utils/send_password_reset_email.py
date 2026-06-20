@@ -39,21 +39,20 @@ def send_password_reset_email(user: User) -> bool:
 
         token = generate_verification_token(user)
         reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+        context = {
+            "reset_url": reset_url,
+            "expiry_hours": TOKEN_EXPIRY_HOURS,
+            "logo_url": f"{settings.FRONTEND_URL}/neovita_logo_small.png",
+        }
 
-        html_content = render_to_string(
-            "password_reset_email.html",
-            {"reset_url": reset_url, "expiry_hours": TOKEN_EXPIRY_HOURS},
-        )
-        text_content = render_to_string(
-            "password_reset_email.txt",
-            {"reset_url": reset_url, "expiry_hours": TOKEN_EXPIRY_HOURS},
-        )
+        html_content = render_to_string("password_reset_email.html", context)
+        text_content = render_to_string("password_reset_email.txt", context)
 
         ses.send_email(
             Source=settings.AWS_SES_SOURCE_EMAIL,
             Destination={"ToAddresses": [user.email]},
             Message={
-                "Subject": {"Data": "Reset Your Password - Discovita"},
+                "Subject": {"Data": "Reset your NeoVita password"},
                 "Body": {
                     "Text": {"Data": text_content},
                     "Html": {"Data": html_content},

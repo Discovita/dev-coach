@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ type Status = "verifying" | "success" | "error" | "no-token";
  */
 export default function VerifyEmailPage() {
   const { verifyEmail, resendVerification } = useAuth();
+  const navigate = useNavigate();
   const token = useMemo(
     () => new URLSearchParams(window.location.search).get("token") ?? "",
     []
@@ -30,9 +31,17 @@ export default function VerifyEmailPage() {
     if (!token || ranRef.current) return;
     ranRef.current = true; // guard against StrictMode double-invoke
     verifyEmail(token)
-      .then((response) => setStatus(response.success ? "success" : "error"))
+      .then((response) => {
+        if (response.success) {
+          setStatus("success");
+          // Verification logs the user in — drop them straight into the app.
+          setTimeout(() => navigate({ to: "/chat" }), 1500);
+        } else {
+          setStatus("error");
+        }
+      })
       .catch(() => setStatus("error"));
-  }, [token, verifyEmail]);
+  }, [token, verifyEmail, navigate]);
 
   async function handleResend() {
     if (!resendEmail) return;
@@ -77,13 +86,13 @@ export default function VerifyEmailPage() {
                 Email verified
               </h1>
               <p className="mt-3 text-[16px] text-black/70">
-                Thanks for confirming your email address.
+                You&rsquo;re all set — taking you in…
               </p>
               <Link
-                to="/login"
+                to="/chat"
                 className="mt-6 inline-block text-[color:var(--nv-violet-blue)] underline"
               >
-                Continue to login
+                Continue
               </Link>
             </>
           )}

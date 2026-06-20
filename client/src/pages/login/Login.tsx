@@ -35,11 +35,13 @@ export default function LoginPage() {
   const { profile } = useProfile();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
     onSubmit: async ({ value }) => {
       setErrorMessage(null);
+      setUnverifiedEmail(null);
       try {
         const response = await login({
           email: value.email,
@@ -57,6 +59,9 @@ export default function LoginPage() {
                   `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`
               )
               .join("; ");
+          }
+          if (typeof errorMsg === "string" && /verify your email/i.test(errorMsg)) {
+            setUnverifiedEmail(value.email);
           }
           setErrorMessage(errorMsg || "Login failed. Please try again.");
         }
@@ -209,6 +214,22 @@ export default function LoginPage() {
                   <p className="text-sm text-destructive text-center">
                     {errorMessage}
                   </p>
+                  {unverifiedEmail && (
+                    <p className="mt-1 text-sm text-center">
+                      <button
+                        type="button"
+                        className="text-[color:var(--nv-violet-blue)] underline"
+                        onClick={() =>
+                          navigate({
+                            to: "/check-email",
+                            search: { email: unverifiedEmail },
+                          })
+                        }
+                      >
+                        Resend verification email
+                      </button>
+                    </p>
+                  )}
                 </div>
               )}
 
