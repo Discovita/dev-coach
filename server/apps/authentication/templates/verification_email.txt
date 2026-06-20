@@ -1,13 +1,12 @@
-Welcome to Discovita!
+Confirm your email — NeoVita
 
+Welcome to NeoVita! Confirm your email address to activate your account and
+start your journey.
 
-Thanks for signing up. Please verify your email address by clicking the link below:
-
+Verify your email address:
 {{ verify_url }}
 
-This link will expire in {{ expiry_hours }} hours.
+This link expires in {{ expiry_hours }} hours. If you didn't create a NeoVita
+account, you can safely ignore this email.
 
-If you didn't create an account with Discovita, you can safely ignore this email.
-
-Best regards,
-The Discovita Team 
+— NeoVita

@@ -4,9 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useProfile } from "@/hooks/use-profile";
 
 /**
  * Signup Route (/signup)
@@ -29,7 +28,6 @@ const nvLogoLarge = "/neovita_logo_large.png";
 
 export default function Signup() {
   const { register } = useAuth();
-  const { profile } = useProfile();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -43,7 +41,8 @@ export default function Signup() {
           password: value.password,
         });
         if (response.success) {
-          // Redirect handled by the useEffect below when profile cache updates
+          // Registration no longer logs you in — verify your email first.
+          navigate({ to: "/check-email", search: { email: value.email } });
         } else {
           let errorMsg = response.error;
           if (typeof errorMsg === "object" && errorMsg !== null) {
@@ -63,13 +62,6 @@ export default function Signup() {
       }
     },
   });
-
-  // Redirect after successful registration when profile is available
-  useEffect(() => {
-    if (!profile) return;
-
-    navigate({ to: "/chat" });
-  }, [profile, navigate]);
 
   return (
     <div className="h-screen w-screen bg-[var(--nv-lilac-white)]">

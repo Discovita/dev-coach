@@ -35,6 +35,9 @@ class VerifyEmailFunctionTests(TestCase):
         self.assertEqual(self.user.verification_token, "")
         self.assertIsNone(self.user.email_verification_sent_at)
         self.assertIn("verified", result["message"].lower())
+        # Verifying logs the user in.
+        self.assertIn("tokens", result)
+        self.assertIn("access", result["tokens"])
 
     def test_invalid_token_raises(self):
         with self.assertRaises(VerificationInvalidError):
@@ -69,6 +72,7 @@ class VerifyEmailEndpointTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["success"])
+        self.assertIn("tokens", response.data)
         self.user.refresh_from_db()
         self.assertTrue(self.user.is_email_verified)
 

@@ -20,9 +20,11 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(help_text="User's password.")
 
     def validate(self, data: dict) -> dict:
-        """Authenticate credentials. Raises ValidationError on failure."""
+        """Authenticate credentials and require a verified email."""
         user = authenticate(email=data["email"], password=data["password"])
         if not user:
             raise serializers.ValidationError(AuthErrorMessages.INVALID_CREDENTIALS)
+        if not user.is_email_verified:
+            raise serializers.ValidationError(AuthErrorMessages.EMAIL_NOT_VERIFIED)
         data["user"] = user
         return data

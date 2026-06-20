@@ -39,21 +39,20 @@ def send_verification_email(user: User) -> bool:
 
         token = generate_verification_token(user)
         verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+        context = {
+            "verify_url": verify_url,
+            "expiry_hours": TOKEN_EXPIRY_HOURS,
+            "logo_url": f"{settings.FRONTEND_URL}/neovita_logo_small.png",
+        }
 
-        html_content = render_to_string(
-            "verification_email.html",
-            {"verify_url": verify_url, "expiry_hours": TOKEN_EXPIRY_HOURS},
-        )
-        text_content = render_to_string(
-            "verification_email.txt",
-            {"verify_url": verify_url, "expiry_hours": TOKEN_EXPIRY_HOURS},
-        )
+        html_content = render_to_string("verification_email.html", context)
+        text_content = render_to_string("verification_email.txt", context)
 
         ses.send_email(
             Source=settings.AWS_SES_SOURCE_EMAIL,
             Destination={"ToAddresses": [user.email]},
             Message={
-                "Subject": {"Data": "Verify Your Email - Discovita"},
+                "Subject": {"Data": "Verify your NeoVita email"},
                 "Body": {
                     "Text": {"Data": text_content},
                     "Html": {"Data": html_content},
