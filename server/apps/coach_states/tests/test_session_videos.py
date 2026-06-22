@@ -54,9 +54,10 @@ class TestSessionVideosCoverage:
                 expected.add(meta["outro"])
         assert set(SESSION_VIDEOS.keys()) == expected
 
-    def test_total_video_count_is_twelve(self):
-        """Sanity check on the documented 12-video set."""
-        assert len(SESSION_VIDEOS) == 12
+    def test_total_video_count_is_eleven(self):
+        """Sanity check on the video set: 12 originals minus the removed
+        get-to-know intro (the coach introduces that phase itself)."""
+        assert len(SESSION_VIDEOS) == 11
 
 
 # ---------------------------------------------------------------------------

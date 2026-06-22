@@ -36,11 +36,8 @@ SESSION_VIDEOS: dict[str, SessionVideo] = {
         "name": "Welcome",
         "s3_key": "media/session-videos/01-welcome-session-intro.mov",
     },
-    # get_to_know_session
-    "get_to_know_session_intro": {
-        "name": "Get to Know You Intro",
-        "s3_key": "media/session-videos/02-get-to-know-session-intro.mov",
-    },
+    # get_to_know_session — outro only (no intro; the coach introduces the
+    # phase itself, so video 02 was removed)
     "get_to_know_session_outro": {
         "name": "Get to Know You Outro",
         "s3_key": "media/session-videos/03-get-to-know-session-outro.mov",
