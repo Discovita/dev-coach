@@ -35,6 +35,13 @@ SECRET_KEY = env.str("DJANGO_SECRET_KEY", default="insecuresecretkeydjangoai5496
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Gate for the automated coach eval harness HTTP endpoint (POST /api/v1/eval/run).
+# Unset (None) => follow DEBUG (on locally/dev, off in production). Set
+# EVAL_HARNESS_ENABLED=true/false to override in any environment. The endpoint
+# runs the real coach pipeline (OpenAI cost) and creates throwaway users, so it
+# is off in production by default.
+EVAL_HARNESS_ENABLED = os.environ.get("EVAL_HARNESS_ENABLED")
+
 # Allow all hosts
 ALLOWED_HOSTS = ["*"]
 

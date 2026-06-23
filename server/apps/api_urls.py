@@ -12,7 +12,7 @@ from rest_framework.routers import DefaultRouter
 from apps.authentication.views import AuthViewSet
 
 # Local Modules - Admin Viewsets
-from apps.coach.views import AdminCoachViewSet, CoachViewSet
+from apps.coach.views import AdminCoachViewSet, CoachViewSet, EvalViewSet
 from apps.core.views import CoachingPhaseVideosViewSet, CoreViewSet
 from apps.identities.views import (
     AdminIdentityImageChatViewSet,
@@ -41,6 +41,7 @@ default_router.register(
     basename="core-public-coaching-phase-videos",
 )  # Public Coaching Phase Videos config (feature flag)
 default_router.register(r"coach", CoachViewSet, basename="coach")
+default_router.register(r"eval", EvalViewSet, basename="eval")
 default_router.register(r"user", UserViewSet, basename="user")
 default_router.register(r"identities", IdentityViewSet, basename="identities")
 default_router.register(

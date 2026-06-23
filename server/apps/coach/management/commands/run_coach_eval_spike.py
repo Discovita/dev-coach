@@ -58,6 +58,7 @@ from apps.coach.eval.harness import (
     DEFAULT_JUDGE_MODEL,
     DEFAULT_USER_BOT_MODEL,
     Transcript,
+    assemble_eval_report,
     chat_history_transcript,
     drive_eval,
     judge_transcript,
@@ -277,15 +278,6 @@ class Command(BaseCommand):
             )
 
             final_phase = run.final_phase
-            transition_reached = final_phase in GOAL_PHASES
-
-            base_report = {
-                "scenario": scenario_label,
-                "persona": persona.persona_id,
-                "coach_model": coach_model.value,
-                "prompt_version": version_label,
-                "turns": len(run.user_turns),
-            }
 
             def _emit(report: dict) -> None:
                 self.stdout.write("\n" + "=" * 70)
@@ -305,17 +297,22 @@ class Command(BaseCommand):
                         f"(saved run -> {options['save_run']})"
                     ))
 
-            # A pipeline failure (e.g. the coach returning malformed JSON) is an
-            # ERROR, not a coaching-quality result. Skip the judge so an infra
-            # hiccup never gets laundered into a fake low score.
+            # The report shape is assembled in the harness so the CLI and the API
+            # endpoint never drift. A pipeline failure (e.g. malformed JSON) is an
+            # ERROR, not a coaching-quality result — the judge is skipped so an
+            # infra hiccup never gets laundered into a fake low score.
+            _report_kwargs = dict(
+                scenario_label=scenario_label,
+                persona_id=persona.persona_id,
+                coach_model_value=coach_model.value,
+                start_phase=start_phase,
+                rubric_version=rubric_version,
+                pinned=prompt_version is not None,
+                run=run,
+                goal_phases=GOAL_PHASES,
+            )
             if run.run_error is not None:
-                _emit({
-                    **base_report,
-                    "status": "error",
-                    "error": run.run_error,
-                    "actions": run.actions,
-                    "final_coach_state": run.final_coach_state,
-                })
+                _emit(assemble_eval_report(**_report_kwargs))
                 self.stdout.write(self.style.ERROR(
                     "RESULT: ERROR — pipeline failure; judge skipped"
                 ))
@@ -329,37 +326,12 @@ class Command(BaseCommand):
                 targeted_checks=targeted_checks,
                 context=prior,
             )
-
-            # Quality (rubric), targeted checks, and progression are reported as
-            # SEPARATE outcomes, never AND-ed together. A high-quality conversation
-            # that simply didn't transition within the turn budget is NOT a
-            # failure — it's a non-transition, which is its own signal.
-            report = {
-                **base_report,
-                "status": "ok",
-                "quality": {
-                    "passed": verdict.passed,
-                    "score": verdict.score,
-                    "rubric_source": {
-                        "phase": start_phase,
-                        "prompt_version": rubric_version,
-                        "pinned": prompt_version is not None,
-                    },
-                    "criteria": [c.model_dump() for c in verdict.criteria],
-                    "reasoning": verdict.reasoning,
-                },
-                "progression": {
-                    "start_phase": start_phase,
-                    "final_phase": final_phase,
-                    "transitioned": final_phase != start_phase,
-                    "reached_goal_phase": transition_reached,
-                },
-                "actions": run.actions,
-                "final_coach_state": run.final_coach_state,
-            }
-            if targeted_checks:
-                report["targeted_checks"] = [c.model_dump() for c in verdict.targeted_checks]
-            _emit(report)
+            # Quality (rubric), targeted checks, and progression are SEPARATE
+            # outcomes, never AND-ed — a high-quality conversation that simply
+            # didn't transition is a non-transition, not a failure.
+            _emit(assemble_eval_report(
+                **_report_kwargs, verdict=verdict, targeted_checks=targeted_checks
+            ))
 
             # Independent outcomes — quality is the judge's call against the
             # phase prompt; targeted checks are explicit assertions; progression

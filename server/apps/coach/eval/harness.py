@@ -573,3 +573,163 @@ def judge_transcript(
         temperature=0.0,
     )
     return completion.choices[0].message.parsed
+
+
+# --- report assembly + one-call orchestration ---------------------------------
+
+
+class EvalError(Exception):
+    """A recoverable eval setup problem (e.g. no prompt for the phase)."""
+
+
+def assemble_eval_report(
+    *,
+    scenario_label: str,
+    persona_id: str,
+    coach_model_value: str,
+    start_phase: str,
+    rubric_version: Optional[int],
+    pinned: bool,
+    run: DriveResult,
+    verdict: Optional["JudgeVerdict"] = None,
+    targeted_checks: Optional[List[str]] = None,
+    goal_phases: Optional[set] = None,
+) -> dict:
+    """Build the canonical eval report dict (shared by the CLI command and the API
+    endpoint so the shape never drifts).
+
+    A pipeline failure (run.run_error set) yields a `status: error` report with no
+    judge result. Otherwise `verdict` is required and the full quality/progression/
+    targeted-checks report is produced. `goal_phases` (optional) drives the
+    informational `reached_goal_phase` flag; None leaves it null.
+    """
+    base = {
+        "scenario": scenario_label,
+        "persona": persona_id,
+        "coach_model": coach_model_value,
+        "prompt_version": rubric_version,
+        "turns": len(run.user_turns),
+    }
+    if run.run_error is not None:
+        return {
+            **base,
+            "status": "error",
+            "error": run.run_error,
+            "actions": run.actions,
+            "final_coach_state": run.final_coach_state,
+        }
+    final_phase = run.final_phase
+    report = {
+        **base,
+        "status": "ok",
+        "quality": {
+            "passed": verdict.passed,
+            "score": verdict.score,
+            "rubric_source": {
+                "phase": start_phase,
+                "prompt_version": rubric_version,
+                "pinned": pinned,
+            },
+            "criteria": [c.model_dump() for c in verdict.criteria],
+            "reasoning": verdict.reasoning,
+        },
+        "progression": {
+            "start_phase": start_phase,
+            "final_phase": final_phase,
+            "transitioned": final_phase != start_phase,
+            "reached_goal_phase": (
+                final_phase in goal_phases if goal_phases else None
+            ),
+        },
+        "actions": run.actions,
+        "final_coach_state": run.final_coach_state,
+    }
+    if targeted_checks:
+        report["targeted_checks"] = [c.model_dump() for c in verdict.targeted_checks]
+    return report
+
+
+def run_phase_eval(
+    *,
+    persona_id: str = "casey",
+    scenario_name: Optional[str] = None,
+    coach_model: AIModel,
+    prompt_version: Optional[int] = None,
+    checks: Optional[List[str]] = None,
+    max_turns: int = 20,
+    cold_phase: str = "get_to_know_you",
+    cold_email: str = "coach-eval-api@testscenario.com",
+    harness_client=None,
+) -> dict:
+    """Run ONE eval end-to-end and return the report dict — no CLI, no I/O.
+
+    Seeds a throwaway user (cold at `cold_phase`, or hydrated from a frozen
+    TestScenario when `scenario_name` is given), drives the conversation with the
+    user-bot, judges it against the phase's derived rubric + targeted checks, and
+    always deletes the throwaway user. This is the callable the API endpoint wraps
+    so the harness can be driven without a management command.
+
+    Raises TestScenario.DoesNotExist for an unknown scenario, FileNotFoundError
+    for an unknown persona, and EvalError when the phase has no active prompt.
+    """
+    from services.ai.ai_service_factory import AIServiceFactory  # local: avoids import cost at module load
+
+    if harness_client is None:
+        harness_client = AIServiceFactory.create(DEFAULT_USER_BOT_MODEL).client
+    persona = load_persona(persona_id)
+
+    if scenario_name:
+        user, cleanup_email, start_phase = seed_scenario_user(scenario_name)
+        prior = chat_history_transcript(user)
+        scenario_label = scenario_name
+    else:
+        user = seed_cold_user(cold_email, cold_phase)
+        cleanup_email = cold_email
+        start_phase = cold_phase
+        prior = []
+        scenario_label = f"cold {cold_phase}"
+
+    try:
+        prompt_versions = (
+            {start_phase: prompt_version} if prompt_version is not None else None
+        )
+        rubric_body, rubric_version = load_phase_prompt_body(start_phase, prompt_version)
+        if not rubric_body:
+            raise EvalError(
+                f"No active coach prompt for phase '{start_phase}'"
+                + (f" at version {prompt_version}" if prompt_version else "")
+            )
+        targeted_checks = load_targeted_checks(start_phase, checks)
+        run = drive_eval(
+            user,
+            coach_model=coach_model,
+            prompt_versions=prompt_versions,
+            start_phase=start_phase,
+            max_turns=max_turns,
+            harness_client=harness_client,
+            persona=persona,
+            prior=prior,
+        )
+        verdict = None
+        if run.run_error is None:
+            verdict = judge_transcript(
+                harness_client,
+                phase=start_phase,
+                rubric_body=rubric_body,
+                transcript=run.transcript,
+                targeted_checks=targeted_checks,
+                context=prior,
+            )
+        return assemble_eval_report(
+            scenario_label=scenario_label,
+            persona_id=persona_id,
+            coach_model_value=coach_model.value,
+            start_phase=start_phase,
+            rubric_version=rubric_version,
+            pinned=prompt_version is not None,
+            run=run,
+            verdict=verdict,
+            targeted_checks=targeted_checks,
+        )
+    finally:
+        User.objects.filter(email=cleanup_email).delete()
