@@ -30,9 +30,10 @@ export const StudioUnlockAnimation: React.FC<{ onDismiss: () => void }> = ({
       }}
     >
       <DialogPrimitive.Portal>
-        {/* Transparent overlay: keeps the modal behavior (focus trap,
-            click-outside) without dimming the chat behind it. */}
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-transparent" />
+        {/* Soft overlay: a light fade + blur (not a heavy dark dim) so the
+            chat stays recognizable behind it but the modal is clearly the
+            focus and the user understands they must click Continue. */}
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-white/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0" />
         <DialogPrimitive.Content
           className="fixed top-1/2 left-1/2 z-50 grid w-full max-w-sm -translate-x-1/2 -translate-y-1/2 justify-items-center gap-4 rounded-xl border bg-background p-7 text-center shadow-2xl outline-none ring-1 ring-black/5 duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
         >
