@@ -101,23 +101,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
       );
   }, [chatMessages, isPending, pendingMessage]);
 
-  // Scroll to bottom when messages change
+  // Keep the view pinned to the latest message. Use an INSTANT jump, not a
+  // smooth scroll: a single message turn fires several rapid updates
+  // (optimistic user message → loading bubble → the response, which can
+  // collapse a card and add a new one), and an animated scroll chasing a list
+  // whose height is changing under it is what made the chat feel jerky. A
+  // single instant pin is stable. `displayedMessages` already derives from
+  // `chatMessages`, so one effect covers both; `isProcessingMessage` re-pins
+  // when the loading bubble appears/disappears.
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
   }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatMessages, scrollToBottom]);
-
-  // Scroll to bottom when optimistic user message is added
-  // This ensures the UI scrolls for both server and optimistic updates
-  useEffect(() => {
-    scrollToBottom();
-  }, [displayedMessages, scrollToBottom]);
+  }, [displayedMessages, updateStatus, scrollToBottom]);
 
   // Handler for sending a message.
   //
