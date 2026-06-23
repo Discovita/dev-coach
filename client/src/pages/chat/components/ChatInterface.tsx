@@ -1,7 +1,10 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { ChatControls } from "@/pages/chat/components/ChatControls";
+import { VisualizationChatGate } from "@/pages/chat/components/VisualizationChatGate";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
+import { useCoachState } from "@/hooks/use-coach-state";
+import { isCoachingComplete } from "@/lib/studio-lock";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { ConversationResetter } from "@/pages/chat/components/ConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
@@ -30,6 +33,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
   // logged-in user (regular /chat). Hidden for non-admins.
   const { profile, isAdmin } = useProfile();
   const { isImpersonating, targetUserId } = useUserTarget();
+
+  // Once coaching is complete (visualization phase reached AND the
+  // visualization intro video acknowledged), the coach does nothing, so the
+  // composer is replaced with a panel pointing the user to the Studio. Gating
+  // on the intro-video ack — not the phase alone — keeps this from firing
+  // before the I-Am outro video, the break, and the intro video have played.
+  const { coachState } = useCoachState();
+  const coachingComplete = isCoachingComplete(coachState);
   const freezeUserId = isImpersonating
     ? targetUserId
     : profile?.id
@@ -130,10 +141,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
         componentConfig={componentConfig}
         onSendUserMessageToCoach={handleSendMessage}
       />
-      <ChatControls
-        isProcessingMessage={updateStatus === "pending"}
-        onSendMessage={handleSendMessage}
-      />
+      {coachingComplete ? (
+        <VisualizationChatGate />
+      ) : (
+        <ChatControls
+          isProcessingMessage={updateStatus === "pending"}
+          onSendMessage={handleSendMessage}
+        />
+      )}
       <div className="flex gap-2 p-2 border-t border-border bg-muted/50">
         <ConversationExporter />
         <ConversationResetter onResetSuccess={onResetSuccess} />
