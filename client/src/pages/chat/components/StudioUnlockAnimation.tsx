@@ -1,48 +1,36 @@
-import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 /**
  * StudioUnlockAnimation
  *
- * Full-screen, one-time takeover that plays when the user finishes the
- * identity visualization intro video (coaching complete). The Studio icon
- * appears with a padlock; the shackle pops open and swings, the lock falls
- * away and fades, and the icon lights up — "Your Studio is unlocked."
+ * One-time modal that plays when the user finishes the identity visualization
+ * intro video (coaching complete). The Studio icon appears with a padlock; the
+ * shackle pops open and swings, the lock falls away and fades, and the icon
+ * lights up — "Your Studio is unlocked."
  *
- * There is intentionally NO Studio link here. Dismissing (Continue) reveals
- * the VisualizationChatGate underneath, which carries the actual
- * "Go to the Studio" button.
+ * A regular centered modal (same Dialog primitive / dim backdrop as the rest
+ * of the app) — NOT a full-screen takeover. There is intentionally NO Studio
+ * link here. Dismissing (Continue / Escape / backdrop) reveals the
+ * VisualizationChatGate underneath, which carries the "Go to the Studio"
+ * button.
  *
- * The motion is a faithful port of the approved standalone prototype; the
- * keyframes live in the scoped <style> below.
+ * The motion is a faithful port of the approved prototype; the keyframes live
+ * in the scoped <style> below. The modal entrance is Radix's standard
+ * zoom/fade.
  */
 export const StudioUnlockAnimation: React.FC<{ onDismiss: () => void }> = ({
   onDismiss,
 }) => {
-  const continueRef = useRef<HTMLButtonElement>(null);
-
-  // Allow Escape to dismiss, and focus the Continue button once it appears.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDismiss();
-    };
-    window.addEventListener("keydown", onKey);
-    const t = setTimeout(() => continueRef.current?.focus(), 2400);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      clearTimeout(t);
-    };
-  }, [onDismiss]);
-
-  return createPortal(
-    <div
-      className="suo-backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Your Studio is unlocked"
+  return (
+    <Dialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onDismiss();
+      }}
     >
-      <style>{STYLES}</style>
-      <div className="suo-scrim">
+      <DialogContent showCloseButton={false} className="sm:max-w-md">
+        <style>{STYLES}</style>
         <div className="suo-stage">
           <div className="suo-halo" />
           <div className="suo-badge">
@@ -67,7 +55,7 @@ export const StudioUnlockAnimation: React.FC<{ onDismiss: () => void }> = ({
               <path
                 className="suo-shackle"
                 d="M18 42 V22 a12 12 0 0 1 24 0 V42"
-                stroke="#c7cbd4"
+                stroke="#94a3b8"
                 strokeWidth="5"
                 strokeLinecap="round"
               />
@@ -77,99 +65,64 @@ export const StudioUnlockAnimation: React.FC<{ onDismiss: () => void }> = ({
                 width="36"
                 height="30"
                 rx="6"
-                fill="#3a3f4b"
-                stroke="#c7cbd4"
+                fill="#e2e8f0"
+                stroke="#94a3b8"
                 strokeWidth="3"
               />
-              <circle cx="30" cy="47" r="4" fill="#c7cbd4" />
-              <rect x="28.5" y="49" width="3" height="8" rx="1.5" fill="#c7cbd4" />
+              <circle cx="30" cy="47" r="4" fill="#64748b" />
+              <rect x="28.5" y="49" width="3" height="8" rx="1.5" fill="#64748b" />
             </svg>
           </div>
         </div>
 
-        <div className="suo-reveal">
-          <h1>Your Studio is unlocked</h1>
-          <p>You've finished building your identities. Time to bring them to life.</p>
-          <button
-            ref={continueRef}
-            type="button"
-            className="suo-continue"
-            onClick={onDismiss}
-          >
+        <div className="suo-reveal flex flex-col items-center text-center gap-2">
+          <DialogTitle className="text-xl text-[color:var(--nv-royal-purple)]">
+            Your Studio is unlocked
+          </DialogTitle>
+          <DialogDescription className="max-w-xs">
+            You've finished building your identities. Time to bring them to life.
+          </DialogDescription>
+          <Button type="button" className="mt-3" onClick={onDismiss}>
             Continue
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   );
 };
 
 const STYLES = `
-  .suo-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background: radial-gradient(1200px 600px at 50% -10%, #1b1f2a, #0f1115);
-    animation: suo-fadein 0.3s ease-out both;
-  }
-  @keyframes suo-fadein { from { opacity: 0; } to { opacity: 1; } }
-
-  .suo-scrim {
-    position: relative;
-    width: 380px;
-    max-width: 92vw;
-    background: #1a1d24;
-    border: 1px solid #2a2f3a;
-    border-radius: 20px;
-    padding: 40px 32px 32px;
-    text-align: center;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
-    overflow: hidden;
-    color: #e7e9ee;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    animation: suo-modalIn 0.45s cubic-bezier(.16,1,.3,1) both;
-  }
-  @keyframes suo-modalIn {
-    from { opacity: 0; transform: translateY(12px) scale(0.96); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
   .suo-stage { position: relative; width: 132px; height: 132px; margin: 8px auto 4px; }
 
   .suo-badge {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: rgba(124, 92, 255, 0.18);
-    border: 1px solid rgba(124,92,255,0.35);
+    background: var(--nv-pale-lavender, #eae6fb);
+    border: 1px solid rgba(83, 30, 150, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #b9a8ff;
+    color: var(--nv-royal-purple, #531e96);
     animation: suo-badgeUnlock 0.8s ease-out 1.95s both;
   }
   .suo-badge svg { width: 56px; height: 56px; }
   @keyframes suo-badgeUnlock {
-    0%   { filter: grayscale(0.6) brightness(0.8); transform: scale(1); }
-    35%  { filter: grayscale(0) brightness(1.25); transform: scale(1.12); box-shadow: 0 0 0 0 #7c5cff; }
-    100% { filter: grayscale(0) brightness(1.05); transform: scale(1); box-shadow: 0 0 36px 2px rgba(124,92,255,0.45); }
+    0%   { filter: grayscale(0.6) brightness(1.05); transform: scale(1); }
+    35%  { filter: grayscale(0) brightness(1); transform: scale(1.12); box-shadow: 0 0 0 0 rgba(106,95,251,0.6); }
+    100% { filter: grayscale(0) brightness(1); transform: scale(1); box-shadow: 0 0 34px 2px rgba(106,95,251,0.45); }
   }
 
   .suo-halo {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 2px solid #7c5cff;
+    border: 2px solid var(--nv-violet-blue, #6a5ffb);
     opacity: 0;
     animation: suo-halo 0.9s ease-out 2.0s both;
   }
   @keyframes suo-halo {
-    0%   { opacity: 0.7; transform: scale(1); }
+    0%   { opacity: 0.6; transform: scale(1); }
     100% { opacity: 0;   transform: scale(1.6); }
   }
 
@@ -199,32 +152,9 @@ const STYLES = `
     100% { transform: translate(-46%, 90%) rotate(22deg); opacity: 0; }
   }
 
-  .suo-scrim h1 { font-size: 21px; margin: 22px 0 6px; letter-spacing: -0.01em; }
-  .suo-scrim p  { color: #9aa0ad; font-size: 14px; line-height: 1.5; margin: 0 0 22px; }
   .suo-reveal { opacity: 0; animation: suo-fadeUp 0.5s ease-out 2.25s both; }
   @keyframes suo-fadeUp {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
-  }
-  .suo-continue {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #7c5cff;
-    color: white;
-    border: none;
-    font-weight: 600;
-    font-size: 15px;
-    padding: 12px 26px;
-    border-radius: 12px;
-    cursor: pointer;
-  }
-  .suo-continue:hover { filter: brightness(1.08); }
-
-  @media (prefers-reduced-motion: reduce) {
-    .suo-backdrop, .suo-scrim, .suo-badge, .suo-halo, .suo-reveal { animation: none; }
-    .suo-lock { display: none; }
-    .suo-reveal { opacity: 1; }
-    .suo-badge { filter: none; }
   }
 `;
