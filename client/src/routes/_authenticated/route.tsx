@@ -8,17 +8,20 @@ import { ImpersonationTargetBridge } from "@/components/ImpersonationTargetBridg
  * - Folder name starts with '_' to exclude from URL path
  * - Wraps child routes in AuthLayout and renders <Outlet />
  * - ImpersonationProvider enables global admin impersonation state
- * - ImpersonationTargetBridge bridges ImpersonationContext → UserTargetProvider
+ * - ImpersonationTargetBridge bridges ImpersonationContext → UserTargetProvider.
+ *   It wraps AuthLayout (not just the Outlet) so the chrome — sidebar /
+ *   mobile footer — also reflects the impersonated user's coach state
+ *   (e.g. the Studio lock), matching the impersonated content below it.
  */
 export const Route = createFileRoute("/_authenticated")({
   component: function AuthenticatedLayout() {
     return (
       <ImpersonationProvider>
-        <AuthLayout>
-          <ImpersonationTargetBridge>
+        <ImpersonationTargetBridge>
+          <AuthLayout>
             <Outlet />
-          </ImpersonationTargetBridge>
-        </AuthLayout>
+          </AuthLayout>
+        </ImpersonationTargetBridge>
       </ImpersonationProvider>
     );
   },
