@@ -194,10 +194,10 @@ scenarios.
 
 - **Built:** the full loop (seed → drive → judge → report); persona files +
   loading; component-aware driving; phase-scoped prompt-version pinning; the
-  `build_eval_scenario` chain builder (dry-run by default, opt-in freeze).
-- **Planned:** seeding the eval directly from a frozen scenario (`--from-scenario`),
-  baseline-vs-candidate diffing with replay, rubrics derived from `Prompt.body` +
-  targeted checks, and a `run_coach_eval` MCP tool. See the
+  `build_eval_scenario` chain builder (dry-run by default, opt-in freeze); seeding
+  the eval directly from a frozen scenario (`--from-scenario`).
+- **Planned:** baseline-vs-candidate diffing with replay, rubrics derived from
+  `Prompt.body` + targeted checks, and a `run_coach_eval` MCP tool. See the
   [Roadmap](/docs/testing/eval-harness/roadmap).
 
 ## Related Documentation
