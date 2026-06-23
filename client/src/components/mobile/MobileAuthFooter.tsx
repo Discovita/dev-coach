@@ -25,7 +25,7 @@ export default function MobileAuthFooter() {
     },
     { to: "/chat", label: "Chat", icon: "/ai-bubble-white.svg" },
     { to: "/iams", label: "I Am's", icon: "/list.svg" },
-    { to: "/images", label: "Images", icon: "/brush.svg" },
+    { to: "/studio", label: "Studio", icon: "/brush.svg" },
   ];
 
   return (

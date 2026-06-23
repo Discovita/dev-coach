@@ -279,7 +279,7 @@ export default function AuthLayout({ children }: { children?: ReactNode }) {
       icon: "/users-round.svg",
     },
     { to: "/iams", label: "I Am's", icon: "/list.svg" },
-    { to: "/images", label: "Images", icon: "/brush.svg" },
+    { to: "/studio", label: "Studio", icon: "/brush.svg" },
   ];
 
   const bottomItems: Array<NavItem> = [

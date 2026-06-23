@@ -21,7 +21,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 
 /**
- * Images Page
+ * Studio Page
  * -----------
  * Page for generating identity images.
  * Allows users to:
@@ -30,7 +30,7 @@ import { AnimatePresence, motion } from "framer-motion";
  * 3. Generate and save identity images
  * 4. Edit generated images with follow-up prompts
  */
-export default function Images() {
+export default function Studio() {
   const queryClient = useQueryClient();
   const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
   const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(null);

@@ -20,9 +20,9 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
 import { Route as CheckEmailIndexRouteImport } from './routes/check-email/index'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedStudioIndexRouteImport } from './routes/_authenticated/studio/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications/index'
-import { Route as AuthenticatedImagesIndexRouteImport } from './routes/_authenticated/images/index'
 import { Route as AuthenticatedIdentitiesIndexRouteImport } from './routes/_authenticated/identities/index'
 import { Route as AuthenticatedIamsIndexRouteImport } from './routes/_authenticated/iams/index'
 import { Route as AuthenticatedHelpIndexRouteImport } from './routes/_authenticated/help/index'
@@ -87,6 +87,12 @@ const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStudioIndexRoute =
+  AuthenticatedStudioIndexRouteImport.update({
+    id: '/studio/',
+    path: '/studio/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/settings/',
@@ -97,12 +103,6 @@ const AuthenticatedNotificationsIndexRoute =
   AuthenticatedNotificationsIndexRouteImport.update({
     id: '/notifications/',
     path: '/notifications/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedImagesIndexRoute =
-  AuthenticatedImagesIndexRouteImport.update({
-    id: '/images/',
-    path: '/images/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedIdentitiesIndexRoute =
@@ -181,9 +181,9 @@ export interface FileRoutesByFullPath {
   '/help': typeof AuthenticatedHelpIndexRoute
   '/iams': typeof AuthenticatedIamsIndexRoute
   '/identities': typeof AuthenticatedIdentitiesIndexRoute
-  '/images': typeof AuthenticatedImagesIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/studio': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -205,9 +205,9 @@ export interface FileRoutesByTo {
   '/help': typeof AuthenticatedHelpIndexRoute
   '/iams': typeof AuthenticatedIamsIndexRoute
   '/identities': typeof AuthenticatedIdentitiesIndexRoute
-  '/images': typeof AuthenticatedImagesIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/studio': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -232,9 +232,9 @@ export interface FileRoutesById {
   '/_authenticated/help/': typeof AuthenticatedHelpIndexRoute
   '/_authenticated/iams/': typeof AuthenticatedIamsIndexRoute
   '/_authenticated/identities/': typeof AuthenticatedIdentitiesIndexRoute
-  '/_authenticated/images/': typeof AuthenticatedImagesIndexRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/_authenticated/studio/': typeof AuthenticatedStudioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -258,9 +258,9 @@ export interface FileRouteTypes {
     | '/help'
     | '/iams'
     | '/identities'
-    | '/images'
     | '/notifications'
     | '/settings'
+    | '/studio'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -282,9 +282,9 @@ export interface FileRouteTypes {
     | '/help'
     | '/iams'
     | '/identities'
-    | '/images'
     | '/notifications'
     | '/settings'
+    | '/studio'
   id:
     | '__root__'
     | '/'
@@ -308,9 +308,9 @@ export interface FileRouteTypes {
     | '/_authenticated/help/'
     | '/_authenticated/iams/'
     | '/_authenticated/identities/'
-    | '/_authenticated/images/'
     | '/_authenticated/notifications/'
     | '/_authenticated/settings/'
+    | '/_authenticated/studio/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -405,6 +405,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/studio/': {
+      id: '/_authenticated/studio/'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof AuthenticatedStudioIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/settings'
@@ -417,13 +424,6 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/images/': {
-      id: '/_authenticated/images/'
-      path: '/images'
-      fullPath: '/images'
-      preLoaderRoute: typeof AuthenticatedImagesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/identities/': {
@@ -526,9 +526,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHelpIndexRoute: typeof AuthenticatedHelpIndexRoute
   AuthenticatedIamsIndexRoute: typeof AuthenticatedIamsIndexRoute
   AuthenticatedIdentitiesIndexRoute: typeof AuthenticatedIdentitiesIndexRoute
-  AuthenticatedImagesIndexRoute: typeof AuthenticatedImagesIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
+  AuthenticatedStudioIndexRoute: typeof AuthenticatedStudioIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -541,9 +541,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHelpIndexRoute: AuthenticatedHelpIndexRoute,
   AuthenticatedIamsIndexRoute: AuthenticatedIamsIndexRoute,
   AuthenticatedIdentitiesIndexRoute: AuthenticatedIdentitiesIndexRoute,
-  AuthenticatedImagesIndexRoute: AuthenticatedImagesIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
+  AuthenticatedStudioIndexRoute: AuthenticatedStudioIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
