@@ -1,10 +1,15 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { ChatControls } from "@/pages/chat/components/ChatControls";
 import { VisualizationChatGate } from "@/pages/chat/components/VisualizationChatGate";
+import { StudioUnlockAnimation } from "@/pages/chat/components/StudioUnlockAnimation";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useCoachState } from "@/hooks/use-coach-state";
 import { isCoachingComplete } from "@/lib/studio-lock";
+import {
+  hasSeenStudioUnlock,
+  markStudioUnlockSeen,
+} from "@/lib/studio-unlock-seen";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { ConversationResetter } from "@/pages/chat/components/ConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
@@ -46,6 +51,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
     : profile?.id
       ? String(profile.id)
       : null;
+
+  // One-time Studio unlock takeover: plays the moment coaching completes
+  // (visualization intro video acknowledged), then never again for this user.
+  // The animation carries no Studio link — dismissing it reveals the
+  // VisualizationChatGate below, which has the "Go to the Studio" button.
+  // Keyed by the displayed user's id (freezeUserId) so it works under
+  // impersonation too.
+  const [showUnlock, setShowUnlock] = useState(false);
+  useEffect(() => {
+    if (coachingComplete && !hasSeenStudioUnlock(freezeUserId)) {
+      setShowUnlock(true);
+    }
+  }, [coachingComplete, freezeUserId]);
 
   // Get chat messages and updateChatMessages mutation from the custom hook
   const {
@@ -134,6 +152,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
 
   return (
     <div className="_ChatInterface flex flex-col h-full rounded-md overflow-hidden shadow-md bg-background transition-shadow hover:shadow-lg dark:rounded-none">
+      {showUnlock && (
+        <StudioUnlockAnimation
+          onDismiss={() => {
+            markStudioUnlockSeen(freezeUserId);
+            setShowUnlock(false);
+          }}
+        />
+      )}
       <ChatMessages
         messages={displayedMessages}
         isProcessingMessage={updateStatus === "pending"}
