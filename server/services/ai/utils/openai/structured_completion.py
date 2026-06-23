@@ -16,7 +16,7 @@ import logging
 from typing import List, Optional, Type
 
 from openai.types.chat import ChatCompletionMessageParam, ParsedChatCompletion
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from enums.ai import AIModel
 
@@ -25,6 +25,44 @@ log = logging.getLogger(__name__)
 # Model name fragments for reasoning families that do not accept a custom
 # 'temperature' / 'top_p' (o-series and the GPT-5 line).
 _NO_TEMPERATURE_TAGS = ("o1", "o3", "o4-mini", "gpt-5")
+
+
+def _log_malformed_structured_output(exc: Exception, model_str: str) -> None:
+    """Capture the FULL raw LLM output when structured-output parsing fails.
+
+    The model very occasionally returns content that fails schema validation
+    (e.g. the intermittent 'trailing characters' malformed-JSON glitch). When
+    that happens `.parse()` raises a pydantic ``ValidationError`` and the raw
+    model output is otherwise lost — the exception's string repr truncates it.
+
+    The complete content is still available in ``ValidationError.errors()[*]
+    ['input']`` (the repr truncates; the structured errors retain the whole
+    string), so we recover and log it at ERROR with a stable, greppable marker
+    (``MALFORMED_STRUCTURED_OUTPUT``). This is intentionally capture-only — it
+    does not retry or recover — so the next occurrence is fully diagnosable.
+    """
+    if not isinstance(exc, ValidationError):
+        return
+
+    raw = None
+    try:
+        for err in exc.errors():
+            candidate = err.get("input")
+            if isinstance(candidate, str):
+                raw = candidate
+                break
+        first_msg = exc.errors()[0].get("msg") if exc.errors() else str(exc)
+    except Exception:  # never let diagnostic logging mask the real error
+        first_msg = str(exc)
+
+    log.error(
+        "MALFORMED_STRUCTURED_OUTPUT model=%s error=%s raw_len=%s\n"
+        "----- BEGIN RAW LLM OUTPUT -----\n%s\n----- END RAW LLM OUTPUT -----",
+        model_str,
+        first_msg,
+        len(raw) if raw is not None else "unknown",
+        raw if raw is not None else "<could not recover raw content from exception>",
+    )
 
 
 def structured_completion(
@@ -103,5 +141,13 @@ def structured_completion(
             )
             log.warning(f"Token param error — retrying with {alt_param}")
             params[alt_param] = params.pop(token_param)
-            return client.beta.chat.completions.parse(**params)
+            try:
+                return client.beta.chat.completions.parse(**params)
+            except Exception as retry_exc:
+                _log_malformed_structured_output(retry_exc, model_str)
+                raise
+        # Capture the full raw LLM output on schema-validation failures (the
+        # intermittent malformed-JSON glitch) before re-raising, so we can
+        # diagnose it the next time it happens.
+        _log_malformed_structured_output(e, model_str)
         raise
