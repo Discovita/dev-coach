@@ -11,6 +11,7 @@ from django.test import SimpleTestCase
 
 from apps.coach.functions.public.process_message import process_message
 from enums.ai import AIModel
+from enums.coaching_phase import CoachingPhase
 from enums.message_role import MessageRole
 
 PATCH_BASE = "apps.coach.functions.public.process_message"
@@ -306,6 +307,91 @@ class TestProcessMessageSkipLlmRule(SimpleTestCase):
         m["generate_coach_ai_response"].assert_called_once()
         m["apply_coach_response_actions"].assert_called_once()
         self.assertEqual(data["message"], "Coach reply")
+
+
+class TestProcessMessageVisualizationNoOp(SimpleTestCase):
+    """Identity Visualization is a no-op coaching phase: the coach does not
+    converse, so the LLM is skipped and no coach message is written."""
+
+    def _run(self, m, message="Hello"):
+        user = _make_user()
+        with (
+            patch(f"{PATCH_BASE}.ensure_initial_message_exists", m["ensure_initial_message_exists"]),
+            patch(f"{PATCH_BASE}.add_chat_message", m["add_chat_message"]),
+            patch(f"{PATCH_BASE}.CoachState", m["CoachState"]),
+            patch(f"{PATCH_BASE}.apply_user_component_actions", m["apply_user_component_actions"]),
+            patch(f"{PATCH_BASE}.build_coach_prompt", m["build_coach_prompt"]),
+            patch(f"{PATCH_BASE}.get_recent_chat_messages_for_prompt", m["get_recent_chat_messages_for_prompt"]),
+            patch(f"{PATCH_BASE}.generate_coach_ai_response", m["generate_coach_ai_response"]),
+            patch(f"{PATCH_BASE}.apply_coach_response_actions", m["apply_coach_response_actions"]),
+            patch(f"{PATCH_BASE}.build_coach_response_data", m["build_coach_response_data"]),
+            patch(f"{PATCH_BASE}.Break", m["Break"]),
+        ):
+            return process_message(user, message, None, AIModel.GPT_4O)
+
+    def test_skips_llm_in_visualization_phase(self):
+        """In identity_visualization the LLM is never built or called."""
+        m = _make_process_message_mocks()
+        m["coach_state"].current_phase = CoachingPhase.IDENTITY_VISUALIZATION.value
+
+        success, _data, error = self._run(m)
+
+        self.assertTrue(success)
+        self.assertIsNone(error)
+        m["build_coach_prompt"].assert_not_called()
+        m["generate_coach_ai_response"].assert_not_called()
+        m["apply_coach_response_actions"].assert_not_called()
+
+    def test_no_coach_message_written_in_visualization(self):
+        """Only the user message is saved — no empty coach reply bubble."""
+        m = _make_process_message_mocks()
+        m["coach_state"].current_phase = CoachingPhase.IDENTITY_VISUALIZATION.value
+
+        self._run(m, message="Hello")
+
+        # add_chat_message is called once (the user message) and never for a
+        # COACH reply.
+        roles = [c.args[2] for c in m["add_chat_message"].call_args_list]
+        self.assertEqual(roles, [MessageRole.USER])
+
+    def test_response_is_empty_noop_payload(self):
+        """The returned payload carries an empty message and no component."""
+        m = _make_process_message_mocks()
+        m["coach_state"].current_phase = CoachingPhase.IDENTITY_VISUALIZATION.value
+
+        self._run(m)
+
+        kwargs = m["build_coach_response_data"].call_args.kwargs
+        self.assertEqual(kwargs["coach_message"], "")
+        self.assertEqual(kwargs["final_prompt"], "")
+        self.assertIsNone(kwargs["component_config"])
+
+    def test_user_component_actions_still_run_in_visualization(self):
+        """The visualization intro video ACK must still be processed even
+        though the LLM is skipped."""
+        m = _make_process_message_mocks()
+        m["coach_state"].current_phase = CoachingPhase.IDENTITY_VISUALIZATION.value
+
+        self._run(m)
+
+        m["apply_user_component_actions"].assert_called_once()
+
+    def test_component_skip_llm_rule_takes_precedence(self):
+        """If a user action returns a component (e.g. END_BREAK → intro video)
+        while already in visualization, that component is still returned —
+        the no-op guard does not swallow it."""
+        m = _make_process_message_mocks()
+        m["coach_state"].current_phase = CoachingPhase.IDENTITY_VISUALIZATION.value
+        component = MagicMock()
+        component.component_type = "session_video"
+        component.model_dump.return_value = {"component_type": "session_video"}
+        m["apply_user_component_actions"] = MagicMock(return_value=component)
+
+        success, _data, _err = self._run(m)
+
+        self.assertTrue(success)
+        builder_kwargs = m["build_coach_response_data"].call_args.kwargs
+        self.assertIs(builder_kwargs["component_config"], component)
 
 
 class TestProcessMessageErrorHandling(SimpleTestCase):

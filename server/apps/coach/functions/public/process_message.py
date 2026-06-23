@@ -22,6 +22,7 @@ from apps.coach.utils import (
 from apps.coach_states.models import Break, CoachState
 from apps.users.models import User
 from enums.ai import AIModel
+from enums.coaching_phase import CoachingPhase
 from enums.component_type import ComponentType
 from enums.message_role import MessageRole
 from services.logger import configure_logging
@@ -135,6 +136,22 @@ def process_message(
                 final_prompt="",
                 on_break=on_break,
                 component_config=user_component_config,
+            )
+            return True, response_data, None
+
+        # Identity Visualization is a no-op coaching phase: the coach does not
+        # converse here. The user's work happens in the Studio (which unlocks
+        # at this phase), and the chat composer is replaced client-side with a
+        # "Go to the Studio" prompt. Skip the LLM entirely so no coach message
+        # is generated. User component actions above (e.g. acknowledging the
+        # visualization intro video) have already run.
+        if coach_state.current_phase == CoachingPhase.IDENTITY_VISUALIZATION.value:
+            on_break = user.breaks.filter(ended_at__isnull=True).exists()
+            response_data = build_coach_response_data(
+                coach_message="",
+                final_prompt="",
+                on_break=on_break,
+                component_config=None,
             )
             return True, response_data, None
 
