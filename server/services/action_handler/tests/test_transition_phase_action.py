@@ -248,27 +248,7 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
             actions[1].params, {"session_key": "get_to_know_session"}
         )
 
-    # --- Intro emission --------------------------------------------------
-
-    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
-    def test_attaches_intro_when_leaving_session_has_no_outro_and_entering_has_intro(
-        self,
-    ):
-        """INTRODUCTION → GET_TO_KNOW_YOU: welcome has no outro; emit get_to_know intro."""
-        self._set_phase(CoachingPhase.INTRODUCTION)
-        params = TransitionPhaseParams(to_phase=CoachingPhase.GET_TO_KNOW_YOU)
-
-        result = transition_phase(self.coach_state, params, self.coach_message)
-
-        self.assertIsInstance(result, ComponentConfig)
-        self.assertEqual(result.component_type, ComponentType.SESSION_VIDEO.value)
-        self.assertEqual(result.video_key, "get_to_know_session_intro")
-
-        self.coach_message.refresh_from_db()
-        self.assertEqual(
-            self.coach_message.component_config["video_key"],
-            "get_to_know_session_intro",
-        )
+    # --- Outro emission --------------------------------------------------
 
     @override_settings(
         COACHING_PHASE_VIDEOS_ENABLED=True,
@@ -301,24 +281,6 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
             "media/session-videos/03-get-to-know-session-outro.mov",
         )
 
-    @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
-    def test_intro_button_carries_only_ack_with_intro_key(self):
-        """Intro's Continue button is [ACK(intro_key)] — no START_BREAK."""
-        self._set_phase(CoachingPhase.INTRODUCTION)
-        params = TransitionPhaseParams(to_phase=CoachingPhase.GET_TO_KNOW_YOU)
-
-        result = transition_phase(self.coach_state, params, self.coach_message)
-
-        self.assertIsNotNone(result)
-        actions = result.buttons[0].actions
-        self.assertEqual(len(actions), 1)
-        self.assertEqual(
-            actions[0].action, ActionType.ACKNOWLEDGE_SESSION_VIDEO.value
-        )
-        self.assertEqual(
-            actions[0].params, {"video_key": "get_to_know_session_intro"}
-        )
-
     # --- No-emit cases ---------------------------------------------------
 
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
@@ -334,13 +296,13 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
         self.assertIsNone(self.coach_message.component_config)
 
     @override_settings(COACHING_PHASE_VIDEOS_ENABLED=True)
-    def test_no_intro_when_entering_session_intro_already_in_shown_videos(self):
-        """If the entering session's intro is already acked, don't re-emit."""
-        self.coach_state.shown_videos = ["get_to_know_session_intro"]
+    def test_no_video_for_introduction_to_get_to_know(self):
+        """INTRODUCTION → GET_TO_KNOW_YOU: welcome has no outro and
+        get_to_know has no intro video, so nothing is attached. (The coach
+        introduces the get-to-know phase itself.)"""
         self._set_phase(CoachingPhase.INTRODUCTION)
-        self.coach_state.save()
-
         params = TransitionPhaseParams(to_phase=CoachingPhase.GET_TO_KNOW_YOU)
+
         result = transition_phase(self.coach_state, params, self.coach_message)
 
         self.assertIsNone(result)
@@ -413,12 +375,12 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
         coach_message row carries the same component_config in DB so the
         history serializer (PR 11) renders it on subsequent turns.
         """
-        self._set_phase(CoachingPhase.INTRODUCTION)
+        self._set_phase(CoachingPhase.IDENTITY_WARMUP)
         coach_response = CoachChatResponse(
-            message="Let's move on to getting to know you.",
+            message="Beautiful work — let's bring these to life.",
             transition_phase=TransitionPhaseAction(
                 params=TransitionPhaseParams(
-                    to_phase=CoachingPhase.GET_TO_KNOW_YOU
+                    to_phase=CoachingPhase.IDENTITY_BRAINSTORMING
                 )
             ),
         )
@@ -428,20 +390,20 @@ class TransitionPhaseSessionVideoEnrichmentTests(TestCase):
         )
 
         self.assertEqual(
-            updated_state.current_phase, CoachingPhase.GET_TO_KNOW_YOU
+            updated_state.current_phase, CoachingPhase.IDENTITY_BRAINSTORMING
         )
         self.assertIsInstance(component_config, ComponentConfig)
         self.assertEqual(
             component_config.component_type, ComponentType.SESSION_VIDEO.value
         )
         self.assertEqual(
-            component_config.video_key, "get_to_know_session_intro"
+            component_config.video_key, "get_to_know_session_outro"
         )
 
         self.coach_message.refresh_from_db()
         self.assertEqual(
             self.coach_message.component_config["video_key"],
-            "get_to_know_session_intro",
+            "get_to_know_session_outro",
         )
         self.assertEqual(
             self.coach_message.component_config["component_type"],

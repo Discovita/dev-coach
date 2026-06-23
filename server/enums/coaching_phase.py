@@ -73,7 +73,9 @@ SESSIONS: dict[str, SessionMeta] = {
     },
     "get_to_know_session": {
         "phases": [CoachingPhase.GET_TO_KNOW_YOU, CoachingPhase.IDENTITY_WARMUP],
-        "intro": "get_to_know_session_intro",
+        # No intro video: the coach introduces this phase itself. (The
+        # Introduction-phase transition is the lead-in to get-to-know.)
+        "intro": None,
         "outro": "get_to_know_session_outro",
     },
     "brainstorming_session": {
