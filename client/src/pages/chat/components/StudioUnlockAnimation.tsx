@@ -1,5 +1,10 @@
+import { useEffect } from "react";
+import confetti from "canvas-confetti";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button } from "@/components/ui/button";
+
+// On-brand palette — only the app's purples, no rainbow.
+const CONFETTI_PURPLES = ["#531e96", "#6a5ffb", "#7c5cff", "#aaa2fb"];
 
 /**
  * StudioUnlockAnimation
@@ -22,6 +27,25 @@ import { Button } from "@/components/ui/button";
 export const StudioUnlockAnimation: React.FC<{ onDismiss: () => void }> = ({
   onDismiss,
 }) => {
+  // Fire a purple confetti burst at the unlock beat — timed to when the lock
+  // falls away and the icon lights up (~1.9s into the sequence). Two quick
+  // bursts give it a fuller pop. Respects reduced-motion.
+  useEffect(() => {
+    const fire = (particleCount: number, opts: confetti.Options) =>
+      confetti({
+        particleCount,
+        colors: CONFETTI_PURPLES,
+        origin: { x: 0.5, y: 0.5 },
+        disableForReducedMotion: true,
+        ...opts,
+      });
+    const t1 = setTimeout(() => {
+      fire(90, { spread: 100, startVelocity: 40 });
+      fire(40, { spread: 60, scalar: 0.8, startVelocity: 28 });
+    }, 1900);
+    return () => clearTimeout(t1);
+  }, []);
+
   return (
     <DialogPrimitive.Root
       open
