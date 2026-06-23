@@ -32,12 +32,14 @@ The core loop and the scenario-building tooling are in place.
 - **Observability** — per-turn coach-state snapshots (mirroring the admin Coach
   State viewer) and the coach's action log, surfaced inline and in the report.
   Quality and progression are reported as separate outcomes (not AND-ed).
+- **Seed evals from a frozen scenario** — `--from-scenario "<name>"` hydrates a
+  built starting state (real prior history) and picks the eval up from that
+  scenario's phase instead of fresh-seeding. Prior history feeds the user-bot for
+  continuity and the judge as context (not scored); only new actions are reported.
+  See [Running Evals → Seeding from a frozen scenario](/docs/testing/eval-harness/running-evals#seeding-from-a-frozen-scenario).
 
 ## Planned
 
-- **Seed evals from a frozen scenario** — `--from-scenario "<name>"` on the eval so
-  it picks a phase up from a built starting state (real prior history) instead of
-  fresh-seeding. This is the next step.
 - **Rubric derived from `Prompt.body`** ("did the Coach do what this prompt
   instructs?") plus a per-run list of **targeted checks** — the
   "phase X does Y and I hate it" cases.

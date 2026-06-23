@@ -187,6 +187,26 @@ def coach_state_snapshot(coach_state) -> dict:
     return snap
 
 
+def chat_history_transcript(user) -> Transcript:
+    """Build a (role, text) transcript from a user's stored chat history.
+
+    Maps coach/user ChatMessage rows in chronological order; skips blank-text
+    cards (e.g. the welcome video card, whose text is ""). Used to give the
+    user-bot conversational continuity — and the judge prior context — when an
+    eval is seeded from a frozen scenario's real history rather than a cold start.
+    """
+    rows = ChatMessage.objects.filter(
+        user=user, role__in=(MessageRole.USER, MessageRole.COACH)
+    ).order_by("timestamp")
+    out: Transcript = []
+    for m in rows:
+        text = (m.content or "").strip()
+        if not text:
+            continue
+        out.append(("coach" if m.role == MessageRole.COACH else "user", text))
+    return out
+
+
 def collect_new_actions(user, seen_ids: set) -> list:
     """Return the Action rows for this user not already in seen_ids (i.e. the
     actions the coach took on the latest turn), recording their ids into seen_ids.

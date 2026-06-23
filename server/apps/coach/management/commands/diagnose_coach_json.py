@@ -18,9 +18,15 @@ This command replicates the exact coach generation call:
 Run it many times to catch the intermittent failure and see precisely what the
 model appended.
 
+The minimal default seed (a 2-message history) has historically failed to
+reproduce the glitch. Pass --from-scenario "<name>" to instead build the prompt
+from a frozen TestScenario's REAL history (the condition under which the glitch
+has actually been observed); the --message is appended as the latest user turn.
+
 Usage:
     python manage.py diagnose_coach_json --iterations 30
     python manage.py diagnose_coach_json --phase get_to_know_you --message "yeah, sounds good — i'm Casey."
+    python manage.py diagnose_coach_json --from-scenario "[Auto] Casey @ get_to_know_you" --iterations 30
 """
 
 import json
@@ -33,6 +39,10 @@ from pydantic import ValidationError
 from apps.chat_messages.utils import add_chat_message
 from apps.coach.utils import build_coach_prompt
 from apps.coach_states.models import CoachState
+from apps.test_scenario.functions.admin.instantiate_test_scenario import (
+    instantiate_test_scenario,
+)
+from apps.test_scenario.models import TestScenario
 from enums.ai import AIModel
 from enums.message_role import MessageRole
 from services.ai.ai_service_factory import AIServiceFactory
@@ -54,6 +64,18 @@ class Command(BaseCommand):
             type=str,
             default="Sounds good! I'm Casey — go ahead and ask me whatever you'd like.",
             help="The latest user message to seed into the prompt's recent history.",
+        )
+        parser.add_argument(
+            "--from-scenario",
+            type=str,
+            default=None,
+            metavar="NAME",
+            help=(
+                "Build the prompt from a frozen TestScenario's real history "
+                "(by exact name) instead of the minimal default seed. The "
+                "--message is appended as the latest user turn. This is the "
+                "condition under which the glitch has actually reproduced."
+            ),
         )
         parser.add_argument(
             "--dump-all",
@@ -81,10 +103,46 @@ class Command(BaseCommand):
         add_chat_message(user, message, MessageRole.USER)
         return user
 
+    def _seed_from_scenario(self, name: str, message: str) -> tuple:
+        """Hydrate a frozen TestScenario and append `message` as the latest user
+        turn, so build_coach_prompt produces the same prompt the eval hit when the
+        glitch fired. Returns (user, cleanup_email)."""
+        scenario = TestScenario.objects.get(name=name)
+        result = instantiate_test_scenario(
+            scenario,
+            create_user=True,
+            create_chat_messages=True,
+            create_identities=True,
+            create_coach_state=True,
+            create_user_notes=True,
+            create_actions=True,
+            create_breaks=True,
+        )
+        user = result["user"]
+        add_chat_message(user, message, MessageRole.USER)
+        return user, result["email"]
+
     def handle(self, *args, **options):
         iterations = options["iterations"]
         model = AIModel.get_or_default(options["coach_model"])
-        user = self._seed(options["phase"], options["message"])
+        scenario_name = options["from_scenario"]
+        if scenario_name:
+            try:
+                user, cleanup_email = self._seed_from_scenario(
+                    scenario_name, options["message"]
+                )
+            except TestScenario.DoesNotExist:
+                names = list(
+                    TestScenario.objects.order_by("name").values_list("name", flat=True)
+                )
+                self.stderr.write(self.style.ERROR(
+                    f"No TestScenario named '{scenario_name}'. Available:\n  "
+                    + "\n  ".join(names or ["(none)"])
+                ))
+                return
+        else:
+            user = self._seed(options["phase"], options["message"])
+            cleanup_email = DIAG_EMAIL
 
         coach_prompt, response_format = build_coach_prompt(user, model)
         rf_param = type_to_response_format_param(response_format)
@@ -101,8 +159,9 @@ class Command(BaseCommand):
         if "gpt-5" in model.value:
             params["reasoning_effort"] = "low"
 
+        seed_label = f"scenario '{scenario_name}'" if scenario_name else f"phase {options['phase']}"
         self.stdout.write(self.style.HTTP_INFO(
-            f"Model: {model.value} | phase: {options['phase']} | "
+            f"Model: {model.value} | seed: {seed_label} | "
             f"iterations: {iterations} | response_format: {response_format.__name__}"
         ))
 
@@ -149,4 +208,4 @@ class Command(BaseCommand):
                 f"malformed: {malformed}/{iterations}  |  finish_reasons: {finish_reasons}"
             )
         finally:
-            User.objects.filter(email=DIAG_EMAIL).delete()
+            User.objects.filter(email=cleanup_email).delete()

@@ -16,25 +16,33 @@ the loop is component-aware — it clicks through any video/break gates by
 replaying their button actions. Shared pieces live in apps/coach/eval/harness.py.
 
 Runs against the LIVE local database so it exercises whatever prompts are
-currently active (i.e. the ones you just edited). It creates a throwaway
-`@testscenario.com` user and deletes it on exit unless --keep is passed.
+currently active (i.e. the ones you just edited).
+
+By default it creates a throwaway `@testscenario.com` user seeded cold at the
+get_to_know_you phase. Pass --from-scenario "<name>" to instead hydrate a frozen
+TestScenario (real prior history, built via build_eval_scenario) and pick the
+eval up from that scenario's phase. Either way the throwaway user is deleted on
+exit unless --keep is passed.
 
 Usage:
     python manage.py run_coach_eval_spike
     python manage.py run_coach_eval_spike --persona casey --max-turns 10 --keep
     python manage.py run_coach_eval_spike --coach-model gpt-4o --prompt-version 10
+    python manage.py run_coach_eval_spike --from-scenario "[Auto] Casey @ start of get_to_know_you"
 """
 
 import json
-from typing import List
+from typing import List, Optional, Tuple
 
 from django.core.management.base import BaseCommand
 from pydantic import BaseModel, Field
 
+from apps.actions.models import Action
 from apps.coach.eval.harness import (
     DEFAULT_JUDGE_MODEL,
     DEFAULT_USER_BOT_MODEL,
     Transcript,
+    chat_history_transcript,
     coach_state_snapshot,
     collect_new_actions,
     load_persona,
@@ -45,6 +53,10 @@ from apps.coach.eval.harness import (
 )
 from apps.coach.functions.public.process_message import process_message
 from apps.coach_states.models import CoachState
+from apps.test_scenario.functions.admin.instantiate_test_scenario import (
+    instantiate_test_scenario,
+)
+from apps.test_scenario.models import TestScenario
 from django.contrib.auth import get_user_model
 from enums.ai import AIModel
 from enums.coaching_phase import CoachingPhase
@@ -124,6 +136,18 @@ class Command(BaseCommand):
             ),
         )
         parser.add_argument(
+            "--from-scenario",
+            type=str,
+            default=None,
+            metavar="NAME",
+            help=(
+                "Seed from a frozen TestScenario (by exact name) — real prior "
+                "history — and pick the eval up from that scenario's phase, "
+                "instead of cold-seeding a fresh user at get_to_know_you. Build "
+                "scenarios with build_eval_scenario."
+            ),
+        )
+        parser.add_argument(
             "--keep",
             action="store_true",
             help="Keep the throwaway test user instead of deleting it on exit.",
@@ -138,11 +162,48 @@ class Command(BaseCommand):
         coach_state.save(update_fields=["current_phase"])
         return user
 
+    def _seed_from_scenario(self, name: str) -> Tuple[User, str, str]:
+        """Hydrate a frozen TestScenario and return (user, email, start_phase).
+
+        Full hydration (chat history, identities, coach state, notes, actions,
+        breaks) so the eval resumes from real prior history. The start phase is
+        whatever the scenario's coach state was frozen at. Raises
+        TestScenario.DoesNotExist if no scenario has that exact name.
+        """
+        scenario = TestScenario.objects.get(name=name)
+        result = instantiate_test_scenario(
+            scenario,
+            create_user=True,
+            create_chat_messages=True,
+            create_identities=True,
+            create_coach_state=True,
+            create_user_notes=True,
+            create_actions=True,
+            create_breaks=True,
+        )
+        user = result["user"]
+        start_phase = CoachState.objects.get(user=user).current_phase
+        return user, result["email"], start_phase
+
     # --- judge ----------------------------------------------------------------
-    def _judge(self, client, transcript: Transcript) -> JudgeVerdict:
+    def _judge(
+        self,
+        client,
+        transcript: Transcript,
+        context: Optional[Transcript] = None,
+    ) -> JudgeVerdict:
         convo = render_transcript(transcript, you_label="CLIENT")
+        context_block = ""
+        if context:
+            ctx = render_transcript(context, you_label="CLIENT")
+            context_block = (
+                "PRIOR CONVERSATION (context only — do NOT score these messages; "
+                "they predate the phase under evaluation. Use them only to know "
+                f"what the client already shared):\n\n{ctx}\n\n"
+            )
         system = (
-            f"{RUBRIC}\n\nHere is the full transcript:\n\n{convo}\n\n"
+            f"{RUBRIC}\n\n{context_block}"
+            f"Transcript to evaluate:\n\n{convo}\n\n"
             "Return your structured verdict."
         )
         completion = structured_completion(
@@ -160,23 +221,63 @@ class Command(BaseCommand):
         coach_model = AIModel.get_or_default(options["coach_model"])
         persona = load_persona(options["persona"])
         harness_client = AIServiceFactory.create(DEFAULT_USER_BOT_MODEL).client
+        scenario_name = options["from_scenario"]
 
-        # Phase-scoped version pin: only applies while the user is in START_PHASE.
+        # Seed cold (fresh user at get_to_know_you) or from a frozen scenario
+        # (real prior history; phase = whatever it was frozen at). `prior` is the
+        # scenario's chat history — given to the user-bot for continuity and to
+        # the judge as context, but NOT itself scored.
+        prior: Transcript = []
+        if scenario_name:
+            try:
+                user, cleanup_email, start_phase = self._seed_from_scenario(scenario_name)
+            except TestScenario.DoesNotExist:
+                names = list(
+                    TestScenario.objects.order_by("name").values_list("name", flat=True)
+                )
+                self.stderr.write(self.style.ERROR(
+                    f"No TestScenario named '{scenario_name}'. Available:\n  "
+                    + "\n  ".join(names or ["(none)"])
+                ))
+                return
+            prior = chat_history_transcript(user)
+            scenario_label = scenario_name
+        else:
+            user = self._seed_user()
+            cleanup_email = SPIKE_EMAIL
+            start_phase = START_PHASE.value
+            scenario_label = "get_to_know_you_spike"
+
+        # The rubric is hard-coded for get_to_know_you. Seeding from a different
+        # phase still runs, but warn that quality scores aren't phase-matched yet
+        # (phase-derived rubrics are the next roadmap item).
+        if start_phase != START_PHASE.value:
+            self.stdout.write(self.style.WARNING(
+                f"NOTE: rubric is get_to_know_you-specific, but this scenario "
+                f"starts at '{start_phase}'. Quality scores may not be meaningful; "
+                f"progression still is."
+            ))
+
+        # Phase-scoped version pin: only applies while the user is in start_phase.
         prompt_version = options["prompt_version"]
         prompt_versions = (
-            {START_PHASE.value: prompt_version} if prompt_version is not None else None
+            {start_phase: prompt_version} if prompt_version is not None else None
         )
         version_label = prompt_version if prompt_version is not None else "latest"
 
         self.stdout.write(self.style.HTTP_INFO(
             f"Persona: {persona.name} | coach: {coach_model.value} "
-            f"| {START_PHASE.value} prompt: v{version_label} "
+            f"| start: {start_phase} (v{version_label}) "
+            f"| seed: {scenario_label} "
             f"| user-bot: {DEFAULT_USER_BOT_MODEL.value} | judge: {DEFAULT_JUDGE_MODEL.value}"
         ))
 
-        user = self._seed_user()
         transcript: Transcript = []
-        seen_action_ids: set = set()
+        # Prior-history actions exist on the hydrated user; record their ids so
+        # collect_new_actions only reports what the coach does DURING this eval.
+        seen_action_ids: set = set(
+            Action.objects.filter(user=user).values_list("id", flat=True)
+        )
         all_actions: list = []
         transition_reached = False
         run_error = None
@@ -196,7 +297,7 @@ class Command(BaseCommand):
                     )
                 else:
                     user_msg = user_bot_reply(
-                        harness_client, DEFAULT_USER_BOT_MODEL, persona, transcript
+                        harness_client, DEFAULT_USER_BOT_MODEL, persona, prior + transcript
                     )
                     transcript.append(("user", user_msg))
                     self.stdout.write(self.style.WARNING(f"\nCLIENT: {user_msg}"))
@@ -223,7 +324,7 @@ class Command(BaseCommand):
                         "  ↳ actions: " + ", ".join(a["action"] for a in acts)
                     ))
 
-                if coach_state.current_phase != START_PHASE.value:
+                if coach_state.current_phase != start_phase:
                     transition_reached = coach_state.current_phase in GOAL_PHASES
                     self.stdout.write(self.style.HTTP_INFO(
                         f"\n[phase transitioned to: {coach_state.current_phase}]"
@@ -234,7 +335,7 @@ class Command(BaseCommand):
             final_phase = final_coach_state["current_phase"]
 
             base_report = {
-                "scenario": "get_to_know_you_spike",
+                "scenario": scenario_label,
                 "persona": persona.persona_id,
                 "coach_model": coach_model.value,
                 "prompt_version": version_label,
@@ -263,7 +364,7 @@ class Command(BaseCommand):
                 ))
                 return
 
-            verdict = self._judge(harness_client, transcript)
+            verdict = self._judge(harness_client, transcript, context=prior)
 
             # Quality (LLM rubric) and progression (phase movement) are reported
             # SEPARATELY and never AND-ed together. A high-quality conversation
@@ -279,9 +380,9 @@ class Command(BaseCommand):
                     "reasoning": verdict.reasoning,
                 },
                 "progression": {
-                    "start_phase": START_PHASE.value,
+                    "start_phase": start_phase,
                     "final_phase": final_phase,
-                    "transitioned": final_phase != START_PHASE.value,
+                    "transitioned": final_phase != start_phase,
                     "reached_goal_phase": transition_reached,
                 },
                 "actions": all_actions,
@@ -295,14 +396,14 @@ class Command(BaseCommand):
                 f"QUALITY:     {'PASS' if verdict.passed else 'FAIL'}  "
                 f"(judge score {verdict.score}/5)"
             ))
-            if final_phase != START_PHASE.value:
-                prog = f"{START_PHASE.value} -> {final_phase}"
+            if final_phase != start_phase:
+                prog = f"{start_phase} -> {final_phase}"
             else:
                 prog = f"did not transition (still {final_phase})"
             self.stdout.write(self.style.HTTP_INFO(f"PROGRESSION: {prog}"))
         finally:
             if not options["keep"]:
-                User.objects.filter(email=SPIKE_EMAIL).delete()
+                User.objects.filter(email=cleanup_email).delete()
                 self.stdout.write("\n(cleaned up throwaway user)")
             else:
-                self.stdout.write(f"\n(kept throwaway user: {SPIKE_EMAIL})")
+                self.stdout.write(f"\n(kept throwaway user: {cleanup_email})")

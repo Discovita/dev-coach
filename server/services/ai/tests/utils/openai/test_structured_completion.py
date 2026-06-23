@@ -2,10 +2,11 @@
 Tests for services/ai/utils/openai/structured_completion.py
 """
 
+import json
 from unittest.mock import MagicMock
 
 from django.test import SimpleTestCase
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from enums.ai import AIModel
 from services.ai.utils.openai.structured_completion import structured_completion
@@ -16,6 +17,22 @@ def _mock_completion(parsed_obj=None):
     completion = MagicMock()
     completion.choices[0].message.parsed = parsed_obj or MagicMock()
     return completion
+
+
+class _Probe(BaseModel):
+    """Tiny schema standing in for a structured response_format."""
+
+    message: str
+
+
+def _validation_error_from_json(raw: str) -> ValidationError:
+    """Produce the SAME ValidationError that .parse() raises on bad JSON, so its
+    errors()[*]['input'] carries the full raw string the salvage path recovers."""
+    try:
+        _Probe.model_validate_json(raw)
+    except ValidationError as e:
+        return e
+    raise AssertionError("expected the JSON to fail validation")
 
 
 class TestStructuredCompletion(SimpleTestCase):
@@ -176,3 +193,50 @@ class TestStructuredCompletion(SimpleTestCase):
         )
         call_kwargs = client.beta.chat.completions.parse.call_args[1]
         self.assertEqual(call_kwargs["seed"], 42)
+
+    def test_salvages_duplicated_json_object(self):
+        """The duplicated-JSON glitch (a valid object emitted twice) is salvaged:
+        the first object is decoded and re-validated, no retry, no raise."""
+        obj = {"message": "Where did you grow up?"}
+        duplicated = json.dumps(obj) + "\n" + json.dumps(obj)
+        client = MagicMock()
+        client.beta.chat.completions.parse.side_effect = _validation_error_from_json(
+            duplicated
+        )
+        result = structured_completion(
+            client=client,
+            messages=[],
+            model=AIModel.GPT_4O,
+            response_format=_Probe,
+        )
+        self.assertEqual(client.beta.chat.completions.parse.call_count, 1)
+        self.assertEqual(result.choices[0].message.parsed, _Probe(**obj))
+
+    def test_salvages_single_object_with_trailing_garbage(self):
+        """A valid first object followed by non-JSON trailing text is salvaged."""
+        client = MagicMock()
+        client.beta.chat.completions.parse.side_effect = _validation_error_from_json(
+            '{"message":"hi"}\nthanks!'
+        )
+        result = structured_completion(
+            client=client,
+            messages=[],
+            model=AIModel.GPT_4O,
+            response_format=_Probe,
+        )
+        self.assertEqual(result.choices[0].message.parsed.message, "hi")
+
+    def test_reraises_when_first_object_not_schema_valid(self):
+        """If the first JSON object doesn't satisfy the schema, it's genuinely
+        malformed — re-raise rather than salvage."""
+        client = MagicMock()
+        client.beta.chat.completions.parse.side_effect = _validation_error_from_json(
+            '{"wrong_field":1}\n{"wrong_field":1}'
+        )
+        with self.assertRaises(ValidationError):
+            structured_completion(
+                client=client,
+                messages=[],
+                model=AIModel.GPT_4O,
+                response_format=_Probe,
+            )

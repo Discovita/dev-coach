@@ -73,12 +73,42 @@ cd server \
 | `--max-turns N` | `20` | Cap on steps before the run stops. The run also stops early when the phase transitions. |
 | `--coach-model NAME` | configured `DEFAULT_AI_MODEL` (e.g. `gpt-5.4`) | Override the **coach** model under test. Any id from `server/enums/ai.py`. |
 | `--prompt-version N` | latest active | Pin the phase-under-test prompt to a specific version. This is how you run before/after — see [Prompt Version Pinning](/docs/testing/eval-harness/prompt-versioning). |
+| `--from-scenario NAME` | off (cold-seed) | Hydrate a frozen [TestScenario](/docs/testing/eval-harness/scenario-chain) by exact name (real prior history) and pick the eval up from that scenario's phase, instead of cold-seeding a fresh user at `get_to_know_you`. |
 | `--keep` | off | Keep the throwaway test user instead of deleting it. |
 
-> The spike currently fresh-seeds `get_to_know_you`. Seeding an eval directly from
-> a frozen scenario (`--from-scenario`) is planned — see the
-> [Roadmap](/docs/testing/eval-harness/roadmap). To create those frozen scenarios
-> today, use the [scenario builder](/docs/testing/eval-harness/scenario-chain).
+## Seeding from a frozen scenario
+
+By default the spike cold-seeds a fresh user at `get_to_know_you` with no history.
+`--from-scenario` instead instantiates a named [TestScenario](/docs/testing/eval-harness/scenario-chain)
+— full hydration (chat history, identities, coach state, notes, actions, breaks)
+— so the eval resumes from **real prior history**, exactly like opening that
+scenario in the admin Test Scenario tools.
+
+```bash
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_spike \
+    --from-scenario "[Auto] Casey @ get_to_know_you"
+```
+
+What changes when you seed from a scenario:
+
+- **Start phase is the scenario's phase** — read from the hydrated coach state,
+  not hard-coded. The version pin (`--prompt-version`) applies to that phase.
+- **Prior history feeds the user-bot** so it continues the conversation naturally,
+  and is given to the judge as **context only** — prior coach turns are *not*
+  scored (they predate the phase under test).
+- **Only new actions are reported** — actions baked into the scenario are excluded
+  from the action log so you see just what the Coach did during this run.
+- The throwaway user (a fresh copy of the scenario's user) is still deleted on
+  exit unless `--keep` is passed; your saved scenario is never mutated.
+
+Build these scenarios with the [scenario builder](/docs/testing/eval-harness/scenario-chain).
+If the name doesn't exist, the command prints the available scenario names.
+
+> **Rubric caveat:** the spike's rubric is `get_to_know_you`-specific. Seeding from
+> a different-phase scenario still runs (and progression is meaningful), but the
+> quality score won't be phase-matched yet — the command prints a warning. Phase-derived
+> rubrics are the [next roadmap item](/docs/testing/eval-harness/roadmap).
 
 ## Before / after comparison
 
