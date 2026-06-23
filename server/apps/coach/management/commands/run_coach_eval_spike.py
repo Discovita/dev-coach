@@ -9,11 +9,18 @@ assembly from the DB + real coach LLM):
     seed user at a phase
         -> user-bot (LLM persona) drives the conversation
         -> coach responds via process_message (the same code path the API uses)
-        -> judge (deterministic checks + LLM rubric) returns a verdict
+        -> judge returns a verdict against the phase's own prompt + targeted checks
 
 The persona is loaded from a markdown file (see apps/coach/eval/personas/), and
 the loop is component-aware — it clicks through any video/break gates by
 replaying their button actions. Shared pieces live in apps/coach/eval/harness.py.
+
+The rubric is DERIVED LIVE from the phase's coach Prompt.body — the judge is
+asked "did the coach follow these instructions?" — so it tracks the prompt
+automatically and works for any phase, with nothing to hand-maintain. On top of
+that, per-phase targeted checks (explicit pass/fail assertions in
+apps/coach/eval/checks/<phase>.md, plus any --check flags) are evaluated and
+reported separately.
 
 Runs against the LIVE local database so it exercises whatever prompts are
 currently active (i.e. the ones you just edited).
@@ -29,6 +36,7 @@ Usage:
     python manage.py run_coach_eval_spike --persona casey --max-turns 10 --keep
     python manage.py run_coach_eval_spike --coach-model gpt-4o --prompt-version 10
     python manage.py run_coach_eval_spike --from-scenario "[Auto] Casey @ start of get_to_know_you"
+    python manage.py run_coach_eval_spike --check "Never asks more than one question per message"
 """
 
 import json
@@ -46,6 +54,8 @@ from apps.coach.eval.harness import (
     coach_state_snapshot,
     collect_new_actions,
     load_persona,
+    load_phase_prompt_body,
+    load_targeted_checks,
     pending_component,
     primary_button_actions,
     render_transcript,
@@ -75,22 +85,20 @@ GOAL_PHASES = {
     CoachingPhase.IDENTITY_BRAINSTORMING.value,
 }
 
-RUBRIC = (
-    "You are evaluating the COACH's performance in a 'get to know you' phase of "
-    "an identity coaching conversation. Judge ONLY the coach's messages "
-    "(role=coach). Criteria:\n"
-    "1. Warmth & rapport: the coach is warm, encouraging, and conversational.\n"
-    "2. One thing at a time: the coach does not interrogate with multiple "
-    "stacked questions in a single message.\n"
-    "3. Curiosity & follow-up: the coach builds on what the client said rather "
-    "than asking generic, disconnected questions.\n"
-    "4. Stays on task: the coach is genuinely getting to know the client (their "
-    "life, values, aspirations) and does not derail or hallucinate facts the "
-    "client never said.\n"
-    "5. Forward motion: by the end the coach is moving the client toward the "
-    "next step rather than looping endlessly.\n"
-    "Pass only if the coach is clearly competent across these. Be a strict but "
-    "fair judge."
+# How to judge — the WHAT (the criteria) is derived live from the phase's own
+# Prompt.body at runtime; this only frames HOW to apply it.
+JUDGE_FRAMING = (
+    "You are a strict but fair judge evaluating a COACH in an identity coaching "
+    "conversation. Judge ONLY the coach's messages (role=coach).\n\n"
+    "The standard is the coach's OWN phase instructions, shown below. Decide "
+    "whether the coach actually FOLLOWED them in the transcript. Focus on "
+    "behavioral and conversational adherence — IGNORE output formatting, JSON, "
+    "and action/tool mechanics (those are enforced elsewhere and are not your "
+    "concern). Placeholders like {curly_braces} in the instructions are filled "
+    "with live data at runtime; judge the intent behind them, not the literal "
+    "placeholder.\n\n"
+    "Derive the key behavioral expectations from the instructions yourself, score "
+    "the coach on each as a criterion, and give an overall pass/fail + 1-5 score."
 )
 
 
@@ -100,12 +108,25 @@ class CriterionScore(BaseModel):
     note: str
 
 
+class CheckResult(BaseModel):
+    """Verdict on one explicit, hand-authored targeted check."""
+
+    check: str = Field(description="The targeted check being evaluated (echoed).")
+    passed: bool
+    note: str
+
+
 class JudgeVerdict(BaseModel):
     """LLM-as-judge verdict over the full transcript."""
 
     passed: bool = Field(description="Overall pass/fail for the coach.")
     score: int = Field(description="Overall quality score 1-5.")
-    criteria: List[CriterionScore]
+    criteria: List[CriterionScore] = Field(
+        description="Criteria derived from the phase instructions, each scored."
+    )
+    targeted_checks: List[CheckResult] = Field(
+        description="One result per supplied targeted check; empty if none given."
+    )
     reasoning: str
 
 
@@ -131,8 +152,19 @@ class Command(BaseCommand):
             type=int,
             default=None,
             help=(
-                f"Pin the {START_PHASE.value} prompt to a specific version "
-                "(for before/after comparisons). Defaults to the latest active."
+                "Pin the phase-under-test prompt to a specific version (for "
+                "before/after comparisons). Defaults to the latest active. The "
+                "derived rubric uses this same version's body."
+            ),
+        )
+        parser.add_argument(
+            "--check",
+            action="append",
+            default=None,
+            metavar="ASSERTION",
+            help=(
+                "Add a one-off targeted check (repeatable), evaluated in addition "
+                "to the per-phase checks file (apps/coach/eval/checks/<phase>.md)."
             ),
         )
         parser.add_argument(
@@ -189,7 +221,11 @@ class Command(BaseCommand):
     def _judge(
         self,
         client,
+        *,
+        phase: str,
+        rubric_body: str,
         transcript: Transcript,
+        targeted_checks: Optional[List[str]] = None,
         context: Optional[Transcript] = None,
     ) -> JudgeVerdict:
         convo = render_transcript(transcript, you_label="CLIENT")
@@ -201,8 +237,20 @@ class Command(BaseCommand):
                 "they predate the phase under evaluation. Use them only to know "
                 f"what the client already shared):\n\n{ctx}\n\n"
             )
+        checks_block = ""
+        if targeted_checks:
+            numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(targeted_checks))
+            checks_block = (
+                "TARGETED CHECKS — in addition to the rubric, evaluate each of "
+                "these explicit requirements as a hard yes/no and return a verdict "
+                "+ note for each in `targeted_checks` (echo the check text "
+                f"verbatim):\n{numbered}\n\n"
+            )
         system = (
-            f"{RUBRIC}\n\n{context_block}"
+            f"{JUDGE_FRAMING}\n\n"
+            f"--- BEGIN {phase} PHASE INSTRUCTIONS ---\n{rubric_body}\n"
+            f"--- END {phase} PHASE INSTRUCTIONS ---\n\n"
+            f"{checks_block}{context_block}"
             f"Transcript to evaluate:\n\n{convo}\n\n"
             "Return your structured verdict."
         )
@@ -248,27 +296,32 @@ class Command(BaseCommand):
             start_phase = START_PHASE.value
             scenario_label = "get_to_know_you_spike"
 
-        # The rubric is hard-coded for get_to_know_you. Seeding from a different
-        # phase still runs, but warn that quality scores aren't phase-matched yet
-        # (phase-derived rubrics are the next roadmap item).
-        if start_phase != START_PHASE.value:
-            self.stdout.write(self.style.WARNING(
-                f"NOTE: rubric is get_to_know_you-specific, but this scenario "
-                f"starts at '{start_phase}'. Quality scores may not be meaningful; "
-                f"progression still is."
-            ))
-
         # Phase-scoped version pin: only applies while the user is in start_phase.
         prompt_version = options["prompt_version"]
         prompt_versions = (
             {start_phase: prompt_version} if prompt_version is not None else None
         )
-        version_label = prompt_version if prompt_version is not None else "latest"
+
+        # The rubric IS the phase's own prompt body (the same version the coach
+        # runs), so it tracks the prompt automatically and works for any phase.
+        # Targeted checks layer explicit assertions on top.
+        rubric_body, rubric_version = load_phase_prompt_body(start_phase, prompt_version)
+        if not rubric_body:
+            self.stderr.write(self.style.ERROR(
+                f"No active coach prompt for phase '{start_phase}'"
+                + (f" at version {prompt_version}" if prompt_version else "")
+                + " — cannot derive a rubric. Aborting."
+            ))
+            if not options["keep"]:
+                User.objects.filter(email=cleanup_email).delete()
+            return
+        targeted_checks = load_targeted_checks(start_phase, options["check"])
+        version_label = rubric_version if rubric_version is not None else "?"
 
         self.stdout.write(self.style.HTTP_INFO(
             f"Persona: {persona.name} | coach: {coach_model.value} "
-            f"| start: {start_phase} (v{version_label}) "
-            f"| seed: {scenario_label} "
+            f"| start: {start_phase} (prompt v{version_label}) "
+            f"| seed: {scenario_label} | targeted-checks: {len(targeted_checks)} "
             f"| user-bot: {DEFAULT_USER_BOT_MODEL.value} | judge: {DEFAULT_JUDGE_MODEL.value}"
         ))
 
@@ -364,18 +417,30 @@ class Command(BaseCommand):
                 ))
                 return
 
-            verdict = self._judge(harness_client, transcript, context=prior)
+            verdict = self._judge(
+                harness_client,
+                phase=start_phase,
+                rubric_body=rubric_body,
+                transcript=transcript,
+                targeted_checks=targeted_checks,
+                context=prior,
+            )
 
-            # Quality (LLM rubric) and progression (phase movement) are reported
-            # SEPARATELY and never AND-ed together. A high-quality conversation
+            # Quality (rubric), targeted checks, and progression are reported as
+            # SEPARATE outcomes, never AND-ed together. A high-quality conversation
             # that simply didn't transition within the turn budget is NOT a
             # failure — it's a non-transition, which is its own signal.
-            _emit({
+            report = {
                 **base_report,
                 "status": "ok",
                 "quality": {
                     "passed": verdict.passed,
                     "score": verdict.score,
+                    "rubric_source": {
+                        "phase": start_phase,
+                        "prompt_version": rubric_version,
+                        "pinned": prompt_version is not None,
+                    },
                     "criteria": [c.model_dump() for c in verdict.criteria],
                     "reasoning": verdict.reasoning,
                 },
@@ -387,15 +452,29 @@ class Command(BaseCommand):
                 },
                 "actions": all_actions,
                 "final_coach_state": final_coach_state,
-            })
+            }
+            if targeted_checks:
+                report["targeted_checks"] = [c.model_dump() for c in verdict.targeted_checks]
+            _emit(report)
 
-            # Two independent outcomes — quality is the judge's call; progression
+            # Independent outcomes — quality is the judge's call against the
+            # phase prompt; targeted checks are explicit assertions; progression
             # is informational (phase movement within the turn budget).
             q_style = self.style.SUCCESS if verdict.passed else self.style.ERROR
             self.stdout.write(q_style(
                 f"QUALITY:     {'PASS' if verdict.passed else 'FAIL'}  "
-                f"(judge score {verdict.score}/5)"
+                f"(judge score {verdict.score}/5, vs {start_phase} prompt v{version_label})"
             ))
+            if targeted_checks:
+                passed = sum(1 for c in verdict.targeted_checks if c.passed)
+                total = len(verdict.targeted_checks)
+                c_style = self.style.SUCCESS if passed == total else self.style.ERROR
+                self.stdout.write(c_style(
+                    f"CHECKS:      {passed}/{total} passed"
+                ))
+                for c in verdict.targeted_checks:
+                    mark = "✓" if c.passed else "✗"
+                    self.stdout.write(self.style.HTTP_INFO(f"  {mark} {c.check}"))
             if final_phase != start_phase:
                 prog = f"{start_phase} -> {final_phase}"
             else:

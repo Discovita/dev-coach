@@ -72,8 +72,9 @@ cd server \
 | `--persona NAME` | `casey` | Persona file to drive the user-bot (filename stem in `apps/coach/eval/personas/`). See [Personas](/docs/testing/eval-harness/personas). |
 | `--max-turns N` | `20` | Cap on steps before the run stops. The run also stops early when the phase transitions. |
 | `--coach-model NAME` | configured `DEFAULT_AI_MODEL` (e.g. `gpt-5.4`) | Override the **coach** model under test. Any id from `server/enums/ai.py`. |
-| `--prompt-version N` | latest active | Pin the phase-under-test prompt to a specific version. This is how you run before/after — see [Prompt Version Pinning](/docs/testing/eval-harness/prompt-versioning). |
+| `--prompt-version N` | latest active | Pin the phase-under-test prompt to a specific version. This is how you run before/after — see [Prompt Version Pinning](/docs/testing/eval-harness/prompt-versioning). The derived rubric uses this same version's body. |
 | `--from-scenario NAME` | off (cold-seed) | Hydrate a frozen [TestScenario](/docs/testing/eval-harness/scenario-chain) by exact name (real prior history) and pick the eval up from that scenario's phase, instead of cold-seeding a fresh user at `get_to_know_you`. |
+| `--check ASSERTION` | none | Add a one-off [targeted check](#rubric--targeted-checks) (repeatable), evaluated on top of the per-phase checks file. |
 | `--keep` | off | Keep the throwaway test user instead of deleting it. |
 
 ## Seeding from a frozen scenario
@@ -105,10 +106,40 @@ What changes when you seed from a scenario:
 Build these scenarios with the [scenario builder](/docs/testing/eval-harness/scenario-chain).
 If the name doesn't exist, the command prints the available scenario names.
 
-> **Rubric caveat:** the spike's rubric is `get_to_know_you`-specific. Seeding from
-> a different-phase scenario still runs (and progression is meaningful), but the
-> quality score won't be phase-matched yet — the command prints a warning. Phase-derived
-> rubrics are the [next roadmap item](/docs/testing/eval-harness/roadmap).
+## Rubric & targeted checks
+
+The judge scores the coach against **two** standards, reported separately.
+
+**1. The derived rubric (quality).** There is no hand-written rubric. The judge is
+handed the phase's own coach `Prompt.body` — the *same version the coach ran* (so
+`--prompt-version` pins both) — and asked *"did the coach follow these
+instructions?"* It derives the salient behavioral criteria from the body itself
+and scores each. This means:
+
+- The rubric **tracks the prompt automatically** — edit the prompt (or pin a
+  different version) and the standard moves with it. Nothing to maintain in
+  lockstep, and it works for **any phase**.
+- Only the phase **`Prompt.body`** is used — the appended action/JSON mechanics,
+  global system context, and chat history are deliberately excluded, so the judge
+  evaluates coaching behavior, not output plumbing.
+
+**2. Targeted checks.** Explicit, hand-authored pass/fail assertions — the "this
+phase must do X / must never do Y" cases you care about, including things the
+prompt may not spell out. They come from two places, merged:
+
+- A per-phase file at `apps/coach/eval/checks/<phase>.md` — one check per line;
+  blank lines and `#` comments ignored, a leading `-`/`*` bullet stripped.
+- Any `--check "…"` flags (repeatable) for one-off cases.
+
+```bash
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_spike \
+    --check "The coach addresses the client by name at least once"
+```
+
+Each check gets its own `passed` + `note`. Checks are reported as their **own
+outcome** (`CHECKS: n/m passed`) — never folded into the quality score — so a
+failed assertion is visible even when overall quality passes.
 
 ## Before / after comparison
 
@@ -135,12 +166,13 @@ The version pin is **phase-scoped** (details:
   "scenario": "get_to_know_you_spike",
   "persona": "casey",
   "coach_model": "gpt-5.4",
-  "prompt_version": "latest",
+  "prompt_version": 6,
   "turns": 10,
   "quality": {
     "passed": true,
     "score": 5,
-    "criteria": [ { "name": "Warmth & rapport", "passed": true, "note": "..." } ],
+    "rubric_source": { "phase": "get_to_know_you", "prompt_version": 6, "pinned": false },
+    "criteria": [ { "name": "Single Question Per Response", "passed": true, "note": "..." } ],
     "reasoning": "..."
   },
   "progression": {
@@ -149,6 +181,10 @@ The version pin is **phase-scoped** (details:
     "transitioned": false,
     "reached_goal_phase": false
   },
+  "targeted_checks": [
+    { "check": "The coach never asks more than one question in a single message.", "passed": true, "note": "..." },
+    { "check": "The coach addresses the client by name at least once", "passed": false, "note": "..." }
+  ],
   "actions": [
     {
       "action": "update_asked_questions",
@@ -166,15 +202,20 @@ The version pin is **phase-scoped** (details:
 }
 ```
 
-The report keeps **quality** and **progression** as separate, independent
-outcomes — they are never combined into one verdict:
+The report keeps **quality**, **targeted checks**, and **progression** as
+separate, independent outcomes — they are never combined into one verdict:
 
-- `quality` — the LLM-judge verdict (overall pass, 1–5 score, per-criterion
-  results, reasoning). This is the coaching-quality call.
+- `quality` — the LLM-judge verdict against the [derived rubric](#rubric--targeted-checks)
+  (overall pass, 1–5 score, per-criterion results, reasoning). `rubric_source`
+  records which phase + prompt version the standard came from, and whether it was
+  pinned. This is the coaching-quality call.
 - `progression` — phase movement: whether the coach transitioned and whether it
   reached a goal phase. **Reported independently of quality** — a 5/5 conversation
   that didn't transition within the turn budget is a *non-transition*, not a
   failure. (Some phases legitimately run long; raise `--max-turns` if needed.)
+- `targeted_checks` — one `passed` + `note` per [targeted check](#rubric--targeted-checks)
+  (omitted entirely when none are defined). A failed check stands on its own and
+  is **not** folded into the quality score.
 - `actions` — every action the coach took that run, from the
   [Action table](/docs/database/models/action): e.g. which get-to-know-you
   questions it recorded (`update_asked_questions`), identity creates, phase
@@ -182,8 +223,9 @@ outcomes — they are never combined into one verdict:
 - `final_coach_state` — a snapshot mirroring the admin Coach State viewer (phase,
   identity focus, who-you-are, asked questions, shown videos, current identity).
 
-The run also prints two terminal lines — `QUALITY: PASS (5/5)` and
-`PROGRESSION: get_to_know_you -> …` — so the two outcomes are never conflated.
+The run also prints terminal summary lines — `QUALITY: PASS (5/5, …)`,
+`CHECKS: n/m passed` (when checks are defined), and `PROGRESSION:
+get_to_know_you -> …` — so the outcomes are never conflated.
 
 Per-turn, the live output also shows a `↳ actions: …` line whenever the coach
 takes actions, so you can watch the coach state evolve as the conversation runs.
