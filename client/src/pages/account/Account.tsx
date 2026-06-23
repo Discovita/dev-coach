@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useUpdateProfile } from "@/hooks/use-update-profile";
 import { useUserAppearance } from "@/hooks/use-user-appearance";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import { useQuery } from "@tanstack/react-query";
@@ -46,6 +47,7 @@ export default function Account() {
   const viewedProfile = isImpersonating ? impersonatedProfile : profile;
 
   const { appearance, updateAppearance, isUpdating } = useUserAppearance(viewedUserId);
+  const { updateProfile } = useUpdateProfile();
 
   const handleLogout = async () => {
     try {
@@ -79,7 +81,16 @@ export default function Account() {
 
         {/* Account tab — account info + sign out */}
         <TabsContent value="account" className="space-y-6">
-          <AccountInformation profile={viewedProfile ?? null} />
+          <AccountInformation
+            profile={viewedProfile ?? null}
+            onSave={
+              isImpersonating
+                ? undefined
+                : async (updates) => {
+                    await updateProfile(updates);
+                  }
+            }
+          />
 
           {/* Logout Section — hidden when impersonating */}
           {!isImpersonating && (
