@@ -25,11 +25,17 @@ differencing two absolute scores).
 Shares all the machinery (seeding, drive loop, judge) with run_coach_eval_spike
 via apps/coach/eval/harness.py.
 
+Versions default the way you'd want: candidate = the LATEST active version (what
+the coach actually runs), baseline = the version right before it. So a bare run
+compares "previous vs latest". Override either with --baseline-version /
+--candidate-version (e.g. to diff against an older version).
+
 Usage:
+    python manage.py run_coach_eval_diff                          # latest-1 vs latest
+    python manage.py run_coach_eval_diff --baseline-version 4     # v4 vs latest
     python manage.py run_coach_eval_diff --baseline-version 10 --candidate-version 11
-    python manage.py run_coach_eval_diff --candidate-version 11   # baseline = latest
     python manage.py run_coach_eval_diff --from-scenario "[Auto] Casey @ get_to_know_you" \
-        --baseline-version 10 --candidate-version 11 --out /tmp/diff.json
+        --out /tmp/diff.json
 """
 
 import json
@@ -43,6 +49,7 @@ from apps.coach.eval.harness import (
     DEFAULT_JUDGE_MODEL,
     DEFAULT_USER_BOT_MODEL,
     Transcript,
+    active_prompt_versions,
     chat_history_transcript,
     drive_eval,
     judge_transcript,
@@ -102,13 +109,16 @@ class Command(BaseCommand):
             "--baseline-version",
             type=int,
             default=None,
-            help="Baseline prompt version. Defaults to the latest active.",
+            help=(
+                "Baseline prompt version (the OLD one). Defaults to the version "
+                "right before the candidate (i.e. latest-1)."
+            ),
         )
         parser.add_argument(
             "--candidate-version",
             type=int,
             default=None,
-            help="Candidate prompt version. Defaults to the latest active.",
+            help="Candidate prompt version (the NEW one). Defaults to the latest active.",
         )
         parser.add_argument(
             "--from-scenario",
@@ -145,6 +155,45 @@ class Command(BaseCommand):
             return user, email, start_phase, chat_history_transcript(user)
         user = seed_cold_user(DIFF_EMAIL, DEFAULT_START_PHASE.value)
         return user, DIFF_EMAIL, DEFAULT_START_PHASE.value, []
+
+    def _resolve_versions(self, phase, baseline_version, candidate_version):
+        """Resolve baseline/candidate to concrete version numbers.
+
+        Candidate defaults to the LATEST active version (what the coach actually
+        runs); baseline defaults to the version right before the candidate. Returns
+        (baseline_v, candidate_v), or None (after printing why) if a version is
+        missing or there's nothing below the candidate to diff against.
+        """
+        versions = active_prompt_versions(phase)  # newest first
+        if not versions:
+            self.stderr.write(self.style.ERROR(
+                f"No active coach prompt for phase '{phase}'."
+            ))
+            return None
+        candidate_v = candidate_version if candidate_version is not None else versions[0]
+        if candidate_v not in versions:
+            self.stderr.write(self.style.ERROR(
+                f"Candidate version v{candidate_v} not found for phase '{phase}'. "
+                f"Active versions: {versions}"
+            ))
+            return None
+        if baseline_version is not None:
+            if baseline_version not in versions:
+                self.stderr.write(self.style.ERROR(
+                    f"Baseline version v{baseline_version} not found for phase "
+                    f"'{phase}'. Active versions: {versions}"
+                ))
+                return None
+            return baseline_version, candidate_v
+        lower = [v for v in versions if v < candidate_v]
+        if not lower:
+            self.stderr.write(self.style.ERROR(
+                f"No version below candidate v{candidate_v} for phase '{phase}' "
+                f"(active versions: {versions}). Create a newer prompt version or "
+                "pass --baseline-version explicitly."
+            ))
+            return None
+        return lower[0], candidate_v  # lower[0] is the largest below candidate
 
     def _make_emit(self, label):
         def emit(kind: str, text: str) -> None:
@@ -238,13 +287,6 @@ class Command(BaseCommand):
         baseline_version = options["baseline_version"]
         candidate_version = options["candidate_version"]
 
-        if baseline_version == candidate_version:
-            self.stdout.write(self.style.WARNING(
-                "NOTE: baseline and candidate resolve to the same version "
-                f"({baseline_version if baseline_version is not None else 'latest'}) "
-                "— the diff will only reflect coach/user-bot nondeterminism."
-            ))
-
         cleanup_emails = set()
         try:
             # --- Baseline: drive fresh with the user-bot ----------------------
@@ -260,17 +302,32 @@ class Command(BaseCommand):
                 ))
                 return
             cleanup_emails.add(email)
+
+            # Resolve versions now that we know the phase. Candidate defaults to
+            # the LATEST active version (what the coach actually runs); baseline
+            # defaults to the version right before it. v1 is never a default.
+            resolved = self._resolve_versions(
+                start_phase, baseline_version, candidate_version
+            )
+            if resolved is None:
+                return
+            baseline_v, candidate_v = resolved
+            if baseline_v == candidate_v:
+                self.stdout.write(self.style.WARNING(
+                    f"NOTE: baseline and candidate are both v{baseline_v} — the diff "
+                    "will only reflect coach/user-bot nondeterminism."
+                ))
             targeted_checks = load_targeted_checks(start_phase, options["check"])
 
             self.stdout.write(self.style.HTTP_INFO(
                 f"Diff | persona: {persona.name} | coach: {coach_model.value} "
                 f"| phase: {start_phase} | seed: {scenario_name or 'cold get_to_know_you'} "
-                f"| baseline v{baseline_version or 'latest'} vs candidate "
-                f"v{candidate_version or 'latest'} | checks: {len(targeted_checks)}"
+                f"| baseline v{baseline_v} vs candidate v{candidate_v} "
+                f"| checks: {len(targeted_checks)}"
             ))
 
             baseline = self._run_side(
-                label="baseline", version=baseline_version, user=user,
+                label="baseline", version=baseline_v, user=user,
                 start_phase=start_phase, prior=prior, coach_model=coach_model,
                 max_turns=max_turns, harness_client=harness_client,
                 targeted_checks=targeted_checks, persona=persona, replay_turns=None,
@@ -283,7 +340,7 @@ class Command(BaseCommand):
             user, email, start_phase, prior = self._seed(scenario_name)
             cleanup_emails.add(email)
             candidate = self._run_side(
-                label="candidate", version=candidate_version, user=user,
+                label="candidate", version=candidate_v, user=user,
                 start_phase=start_phase, prior=prior, coach_model=coach_model,
                 max_turns=max_turns, harness_client=harness_client,
                 targeted_checks=targeted_checks, persona=None, replay_turns=user_turns,
@@ -292,7 +349,7 @@ class Command(BaseCommand):
                 return
 
             # --- Pairwise comparison over the two transcripts -----------------
-            candidate_body, _ = load_phase_prompt_body(start_phase, candidate_version)
+            candidate_body, _ = load_phase_prompt_body(start_phase, candidate_v)
             pairwise = self._pairwise(
                 harness_client,
                 phase=start_phase,

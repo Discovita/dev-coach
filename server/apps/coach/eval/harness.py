@@ -248,6 +248,22 @@ def load_phase_prompt_body(
     return prompt.body, prompt.version
 
 
+def active_prompt_versions(phase: str) -> List[int]:
+    """Return the active coach-prompt version numbers for `phase`, newest first.
+
+    The coach pipeline always runs the latest (highest) version; this just
+    enumerates what exists so the diff command can resolve "latest" and "the one
+    before latest" as defaults.
+    """
+    return list(
+        Prompt.objects.filter(
+            prompt_type=PromptType.COACH, coaching_phase=phase, is_active=True
+        )
+        .order_by("-version")
+        .values_list("version", flat=True)
+    )
+
+
 def load_targeted_checks(
     phase: str, extra: Optional[List[str]] = None
 ) -> List[str]:

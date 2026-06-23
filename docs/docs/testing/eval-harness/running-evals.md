@@ -204,12 +204,20 @@ The version pin is **phase-scoped** (details:
 **baseline** version with the user-bot, **replays the same user turns** against the
 **candidate** version, then reports the delta.
 
+Versions default the way you'd want: **candidate = the latest active version** (the
+one the coach actually runs), **baseline = the version right before it**. So a bare
+run compares "previous vs latest" — exactly the common case after you publish a new
+version. Override either flag to diff against an older version.
+
 ```bash
+# Previous vs latest (the usual case — no version flags needed):
 docker exec dev-coach-local-backend-1 \
   python manage.py run_coach_eval_diff \
-    --from-scenario "[Auto] Casey @ get_to_know_you" \
-    --baseline-version 10 --candidate-version 11 \
-    --out /tmp/diff.json
+    --from-scenario "[Auto] Casey @ get_to_know_you" --out /tmp/diff.json
+
+# Or pin specific versions:
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_diff --baseline-version 4 --candidate-version 6
 ```
 
 It reports four things:
@@ -227,10 +235,12 @@ It reports four things:
   reasoning. This is the most reliable signal — comparing two transcripts directly
   beats differencing two absolute scores.
 
-Flags: `--baseline-version` / `--candidate-version` (both default to latest active;
-a warning fires if they resolve equal), `--from-scenario`, `--persona`,
-`--coach-model` (one model for both runs — the prompt is the variable), `--check`,
-`--max-turns`, `--out PATH`, `--keep`.
+Flags: `--candidate-version` (defaults to latest active), `--baseline-version`
+(defaults to the version right before the candidate), `--from-scenario`,
+`--persona`, `--coach-model` (one model for both runs — the prompt is the
+variable), `--check`, `--max-turns`, `--out PATH`, `--keep`. If there's no version
+below the candidate (only one exists), it errors and asks you to pass
+`--baseline-version`.
 
 > **One sample, live coach.** Replay fixes the *user* turns, but the coach is still
 > a live LLM and the pairwise judge has mild position bias — one diff is a single
