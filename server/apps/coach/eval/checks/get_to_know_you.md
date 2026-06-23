@@ -12,3 +12,4 @@
 - The coach never invents or assumes facts about the client that the client did not actually say.
 - The coach builds on what the client just shared rather than asking generic, disconnected questions.
 - The coach does not begin Identity work (brainstorming or naming identities) during this phase.
+- The coach never re-asks or re-opens a topic already covered in the Asked-Questions list, even in reworded form.
