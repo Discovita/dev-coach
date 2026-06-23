@@ -4,7 +4,7 @@ import { VisualizationChatGate } from "@/pages/chat/components/VisualizationChat
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useCoachState } from "@/hooks/use-coach-state";
-import { CoachingPhase } from "@/enums/coachingPhase";
+import { isCoachingComplete } from "@/lib/studio-lock";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { ConversationResetter } from "@/pages/chat/components/ConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
@@ -34,11 +34,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
   const { profile, isAdmin } = useProfile();
   const { isImpersonating, targetUserId } = useUserTarget();
 
-  // Identity visualization is a no-op coaching phase: the coach does nothing,
-  // so the composer is replaced with a panel pointing the user to the Studio.
+  // Once coaching is complete (visualization phase reached AND the
+  // visualization intro video acknowledged), the coach does nothing, so the
+  // composer is replaced with a panel pointing the user to the Studio. Gating
+  // on the intro-video ack — not the phase alone — keeps this from firing
+  // before the I-Am outro video, the break, and the intro video have played.
   const { coachState } = useCoachState();
-  const inVisualization =
-    coachState?.current_phase === CoachingPhase.IDENTITY_VISUALIZATION;
+  const coachingComplete = isCoachingComplete(coachState);
   const freezeUserId = isImpersonating
     ? targetUserId
     : profile?.id
@@ -139,7 +141,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
         componentConfig={componentConfig}
         onSendUserMessageToCoach={handleSendMessage}
       />
-      {inVisualization ? (
+      {coachingComplete ? (
         <VisualizationChatGate />
       ) : (
         <ChatControls
