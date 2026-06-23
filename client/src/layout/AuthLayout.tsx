@@ -2,10 +2,13 @@ import { useRouterState, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FlaskConical, ScrollText, Shield, Users } from "lucide-react";
+import { FlaskConical, Lock, ScrollText, Shield, Users } from "lucide-react";
+import { toast } from "sonner";
 import MobileAuthHeader from "@/components/mobile/MobileAuthHeader";
 import MobileAuthFooter from "@/components/mobile/MobileAuthFooter";
 import { useProfile } from "@/hooks/use-profile";
+import { useCoachState } from "@/hooks/use-coach-state";
+import { isStudioLocked, STUDIO_LOCKED_MESSAGE } from "@/lib/studio-lock";
 import type { NavItem } from "@/types/navItem";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 
@@ -87,7 +90,7 @@ function SidebarContent({
       </div>
 
       <nav className="flex-1 flex flex-col gap-6 pt-6 px-3">
-        {navItems.map(({ to, label, icon }) => {
+        {navItems.map(({ to, label, icon, locked }) => {
           const isActive = pathname === to || pathname.startsWith(to + "/");
           const isChatIcon = icon === "/ai-bubble-white.svg";
           const iconSrc = isChatIcon
@@ -105,6 +108,10 @@ function SidebarContent({
               key={to}
               type="button"
               onClick={() => {
+                if (locked) {
+                  toast(STUDIO_LOCKED_MESSAGE);
+                  return;
+                }
                 navigate({ to });
               }}
               className={
@@ -114,11 +121,16 @@ function SidebarContent({
                   : "bg-[var(--nv-lilac-white)] ring-1 ring-[#b8b8b8]/60 hover:bg-[var(--nv-pale-lavender)] hover:ring-[var(--nv-royal-purple)]/30")
               }
             >
-              <img
-                src={iconSrc}
-                alt=""
-                className={`w-6 h-6 flex-shrink-0 ${iconFilter}`}
-              />
+              <span className="relative flex-shrink-0">
+                <img
+                  src={iconSrc}
+                  alt=""
+                  className={`w-6 h-6 ${iconFilter} ${locked ? "opacity-50" : ""}`}
+                />
+                {locked && (
+                  <Lock className="absolute -bottom-1 -right-1 w-3.5 h-3.5 text-[color:var(--nv-royal-purple)]" />
+                )}
+              </span>
               <AnimatePresence initial={false}>
                 {(expanded || isMobile) && (
                   <motion.span
@@ -270,6 +282,8 @@ export default function AuthLayout({ children }: { children?: ReactNode }) {
   const pathname = routerState.location.pathname;
   const navigate = useNavigate();
   const { isAdmin } = useProfile();
+  const { coachState } = useCoachState();
+  const studioLocked = isStudioLocked(coachState);
 
   const navItems: Array<NavItem> = [
     { to: "/chat", label: "AI Coach", icon: "/ai-bubble-white.svg" },
@@ -279,7 +293,7 @@ export default function AuthLayout({ children }: { children?: ReactNode }) {
       icon: "/users-round.svg",
     },
     { to: "/iams", label: "I Am's", icon: "/list.svg" },
-    { to: "/studio", label: "Studio", icon: "/brush.svg" },
+    { to: "/studio", label: "Studio", icon: "/brush.svg", locked: studioLocked },
   ];
 
   const bottomItems: Array<NavItem> = [

@@ -1,5 +1,8 @@
 import { useRouterState, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import type { NavItem } from "@/types/navItem";
+import { useCoachState } from "@/hooks/use-coach-state";
+import { isStudioLocked, STUDIO_LOCKED_MESSAGE } from "@/lib/studio-lock";
 import MobileFooterNavItemActive from "./MobileFooterNavItemActive";
 import MobileFooterNavItemInactive from "./MobileFooterNavItemInactive";
 
@@ -16,6 +19,8 @@ export default function MobileAuthFooter() {
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
   const navigate = useNavigate();
+  const { coachState } = useCoachState();
+  const studioLocked = isStudioLocked(coachState);
 
   const navItems: Array<NavItem> = [
     {
@@ -25,7 +30,7 @@ export default function MobileAuthFooter() {
     },
     { to: "/chat", label: "Chat", icon: "/ai-bubble-white.svg" },
     { to: "/iams", label: "I Am's", icon: "/list.svg" },
-    { to: "/studio", label: "Studio", icon: "/brush.svg" },
+    { to: "/studio", label: "Studio", icon: "/brush.svg", locked: studioLocked },
   ];
 
   return (
@@ -36,12 +41,18 @@ export default function MobileAuthFooter() {
           "linear-gradient(220deg, var(--nv-royal-purple, #531E96) -34.16%, var(--nv-violet-blue, #6A5FFB) 50%)",
       }}
     >
-      {navItems.map(({ to, label, icon }) => {
+      {navItems.map(({ to, label, icon, locked }) => {
         const isActive = pathname === to || pathname.startsWith(to + "/");
         // Chat icon: always use white icon
         const iconSrc = icon;
 
-        const handleClick = () => navigate({ to });
+        const handleClick = () => {
+          if (locked) {
+            toast(STUDIO_LOCKED_MESSAGE);
+            return;
+          }
+          navigate({ to });
+        };
 
         return isActive ? (
           <MobileFooterNavItemActive
@@ -55,6 +66,7 @@ export default function MobileAuthFooter() {
             key={to}
             icon={iconSrc}
             label={label}
+            locked={locked}
             onClick={handleClick}
           />
         );
