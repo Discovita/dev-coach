@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -9,85 +9,92 @@ import { Button } from "@/components/ui/button";
  * shackle pops open and swings, the lock falls away and fades, and the icon
  * lights up — "Your Studio is unlocked."
  *
- * A regular centered modal (same Dialog primitive / dim backdrop as the rest
- * of the app) — NOT a full-screen takeover. There is intentionally NO Studio
- * link here. Dismissing (Continue / Escape / backdrop) reveals the
+ * Deliberately a light popover that floats over the chat with a TRANSPARENT
+ * backdrop, so the chat window stays fully visible behind it — we are not
+ * taking the user out of the chat, just surfacing a moment. There is no Studio
+ * link here; dismissing (Continue / Escape / click-outside) reveals the
  * VisualizationChatGate underneath, which carries the "Go to the Studio"
  * button.
  *
- * The motion is a faithful port of the approved prototype; the keyframes live
- * in the scoped <style> below. The modal entrance is Radix's standard
- * zoom/fade.
+ * The lock motion is a faithful port of the approved prototype (scoped
+ * keyframes below); the card entrance is Radix's standard zoom/fade.
  */
 export const StudioUnlockAnimation: React.FC<{ onDismiss: () => void }> = ({
   onDismiss,
 }) => {
   return (
-    <Dialog
+    <DialogPrimitive.Root
       open
       onOpenChange={(next) => {
         if (!next) onDismiss();
       }}
     >
-      <DialogContent showCloseButton={false} className="sm:max-w-md">
-        <style>{STYLES}</style>
-        <div className="suo-stage">
-          <div className="suo-halo" />
-          <div className="suo-badge">
-            {/* studio (brush) icon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08" />
-              <path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z" />
-            </svg>
-          </div>
-
-          {/* lock sitting on top of the badge */}
-          <div className="suo-lock">
-            <svg viewBox="0 0 60 72" fill="none">
-              <path
-                className="suo-shackle"
-                d="M18 42 V22 a12 12 0 0 1 24 0 V42"
-                stroke="#94a3b8"
-                strokeWidth="5"
+      <DialogPrimitive.Portal>
+        {/* Transparent overlay: keeps the modal behavior (focus trap,
+            click-outside) without dimming the chat behind it. */}
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-transparent" />
+        <DialogPrimitive.Content
+          className="fixed top-1/2 left-1/2 z-50 grid w-full max-w-sm -translate-x-1/2 -translate-y-1/2 justify-items-center gap-4 rounded-xl border bg-background p-7 text-center shadow-2xl outline-none ring-1 ring-black/5 duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
+        >
+          <style>{STYLES}</style>
+          <div className="suo-stage">
+            <div className="suo-halo" />
+            <div className="suo-badge">
+              {/* studio (brush) icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
                 strokeLinecap="round"
-              />
-              <rect
-                x="12"
-                y="34"
-                width="36"
-                height="30"
-                rx="6"
-                fill="#e2e8f0"
-                stroke="#94a3b8"
-                strokeWidth="3"
-              />
-              <circle cx="30" cy="47" r="4" fill="#64748b" />
-              <rect x="28.5" y="49" width="3" height="8" rx="1.5" fill="#64748b" />
-            </svg>
-          </div>
-        </div>
+                strokeLinejoin="round"
+              >
+                <path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08" />
+                <path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z" />
+              </svg>
+            </div>
 
-        <div className="suo-reveal flex flex-col items-center text-center gap-2">
-          <DialogTitle className="text-xl text-[color:var(--nv-royal-purple)]">
-            Your Studio is unlocked
-          </DialogTitle>
-          <DialogDescription className="max-w-xs">
-            You've finished building your identities. Time to bring them to life.
-          </DialogDescription>
-          <Button type="button" className="mt-3" onClick={onDismiss}>
-            Continue
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            {/* lock sitting on top of the badge */}
+            <div className="suo-lock">
+              <svg viewBox="0 0 60 72" fill="none">
+                <path
+                  className="suo-shackle"
+                  d="M18 42 V22 a12 12 0 0 1 24 0 V42"
+                  stroke="#94a3b8"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                />
+                <rect
+                  x="12"
+                  y="34"
+                  width="36"
+                  height="30"
+                  rx="6"
+                  fill="#e2e8f0"
+                  stroke="#94a3b8"
+                  strokeWidth="3"
+                />
+                <circle cx="30" cy="47" r="4" fill="#64748b" />
+                <rect x="28.5" y="49" width="3" height="8" rx="1.5" fill="#64748b" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="suo-reveal flex flex-col items-center text-center gap-2">
+            <DialogPrimitive.Title className="text-xl font-semibold text-[color:var(--nv-royal-purple)]">
+              Your Studio is unlocked
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Description className="text-sm text-muted-foreground max-w-xs">
+              You've finished building your identities. Time to bring them to life.
+            </DialogPrimitive.Description>
+            <Button type="button" className="mt-3" onClick={onDismiss}>
+              Continue
+            </Button>
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 };
 
