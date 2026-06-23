@@ -202,9 +202,10 @@ scenarios.
   loading; component-aware driving; phase-scoped prompt-version pinning; the
   `build_eval_scenario` chain builder (dry-run by default, opt-in freeze); seeding
   the eval directly from a frozen scenario (`--from-scenario`); rubrics derived
-  live from the phase `Prompt.body` + per-phase targeted checks.
-- **Planned:** baseline-vs-candidate diffing with replay and a `run_coach_eval`
-  MCP tool. See the [Roadmap](/docs/testing/eval-harness/roadmap).
+  live from the phase `Prompt.body` + per-phase targeted checks; replay mode
+  (`--save-run` / `--replay`) to re-run the exact user turns against a new prompt.
+- **Planned:** baseline-vs-candidate diffing (over replayed turns) and a
+  `run_coach_eval` MCP tool. See the [Roadmap](/docs/testing/eval-harness/roadmap).
 
 ## Related Documentation
 

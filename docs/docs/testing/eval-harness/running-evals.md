@@ -75,6 +75,8 @@ cd server \
 | `--prompt-version N` | latest active | Pin the phase-under-test prompt to a specific version. This is how you run before/after — see [Prompt Version Pinning](/docs/testing/eval-harness/prompt-versioning). The derived rubric uses this same version's body. |
 | `--from-scenario NAME` | off (cold-seed) | Hydrate a frozen [TestScenario](/docs/testing/eval-harness/scenario-chain) by exact name (real prior history) and pick the eval up from that scenario's phase, instead of cold-seeding a fresh user at `get_to_know_you`. |
 | `--check ASSERTION` | none | Add a one-off [targeted check](#rubric--targeted-checks) (repeatable), evaluated on top of the per-phase checks file. |
+| `--save-run PATH` | off | Write the run (recorded user turns + full report) to a JSON artifact for later [`--replay`](#replay-a-run) or inspection. |
+| `--replay PATH` | off | [Replay](#replay-a-run) the user turns from a saved artifact instead of generating new ones with the user-bot. |
 | `--keep` | off | Keep the throwaway test user instead of deleting it. |
 
 ## Seeding from a frozen scenario
@@ -141,20 +143,55 @@ Each check gets its own `passed` + `note`. Checks are reported as their **own
 outcome** (`CHECKS: n/m passed`) — never folded into the quality score — so a
 failed assertion is visible even when overall quality passes.
 
+## Replay a run
+
+Every eval drives a *fresh* conversation, so two runs differ both by whatever you
+changed **and** by user-bot randomness. Replay removes the second variable: it
+records one run's exact user turns and feeds them back verbatim, so a re-run
+differs only by the prompt/model.
+
+```bash
+# 1. Record a run (note --save-run):
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_spike --prompt-version 10 --save-run /tmp/v10.json
+
+# 2. Replay those same turns against a new version:
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_spike --replay /tmp/v10.json --prompt-version 11
+```
+
+- The artifact is the **full report plus the recorded `user_turns`** (and the
+  transcript + seed). It's written for both successful and errored runs.
+- On replay, the artifact's **persona, scenario seed, coach model, and prompt
+  version are used as defaults** — pass the flags to override. The common case is
+  overriding `--prompt-version` to test a new version on identical turns.
+- Component gates (videos/breaks) are still clicked through dynamically; only the
+  typed user turns are replayed. If the recorded turns run out before the phase
+  transitions, the run stops (`[replay exhausted after N user turns]`).
+- The coach is still a live LLM, so its *replies* can vary run-to-run — replay
+  fixes the **user** side, not coach sampling. For a rigorous read, replay a few
+  times or lean on the targeted checks (which are deterministic assertions).
+
 ## Before / after comparison
 
-A change is only meaningful relative to a baseline.
+A change is only meaningful relative to a baseline. Use replay so the prompt is
+the only variable:
 
-1. **Baseline** against the old prompt version (say v10):
+1. **Baseline** against the old version, recording the turns:
    ```bash
    docker exec dev-coach-local-backend-1 \
-     python manage.py run_coach_eval_spike --prompt-version 10
+     python manage.py run_coach_eval_spike --prompt-version 10 --save-run /tmp/v10.json
    ```
 2. **Create the new prompt version** (e.g. via the `dev-coach-docs` MCP server's
    `create_new_coach_prompt` tool — it auto-assigns the next version).
-3. **Candidate** against the new version (`--prompt-version 11`).
-4. **Compare the two reports** — deterministic outcome + the judge's per-criterion
-   scores and reasoning.
+3. **Candidate** — replay the *same* turns against the new version:
+   ```bash
+   docker exec dev-coach-local-backend-1 \
+     python manage.py run_coach_eval_spike --replay /tmp/v10.json --prompt-version 11
+   ```
+4. **Compare the two reports** — quality score + per-criterion reasoning, targeted
+   checks, and progression. (An automated baseline↔candidate *diff* command is the
+   [next roadmap item](/docs/testing/eval-harness/roadmap).)
 
 The version pin is **phase-scoped** (details:
 [Prompt Version Pinning](/docs/testing/eval-harness/prompt-versioning)).
