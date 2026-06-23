@@ -104,13 +104,19 @@ them.
    and immune to LLM flakiness. Examples: did `current_phase` advance to an
    expected phase? Was a disallowed action emitted? These catch most regressions.
 2. **LLM-as-judge rubric** — for qualitative behavior the deterministic layer
-   cannot see: warmth, asking one thing at a time, building on what the client
-   said, not hallucinating facts, moving the conversation forward.
+   cannot see. The rubric is **derived live from the phase's own coach
+   `Prompt.body`** (the same version the coach ran): the judge is asked "did the
+   coach follow these instructions?" and derives the criteria from the body
+   itself, so it tracks the prompt automatically and needs no maintenance. On top
+   of that, hand-authored **targeted checks** (per-phase files + `--check` flags)
+   assert specific "must do X / must never do Y" behaviors. See
+   [Running Evals → Rubric & targeted checks](/docs/testing/eval-harness/running-evals#rubric--targeted-checks).
 
-These two are reported as **separate, independent outcomes** — `quality` (the
-judge's verdict) and `progression` (phase movement) — never AND-ed into a single
-pass/fail. A 5/5 conversation that simply didn't transition within the turn budget
-is a *non-transition*, not a failure; conflating the two hides the real signal.
+These are reported as **separate, independent outcomes** — `quality` (the judge's
+verdict against the derived rubric), `targeted_checks` (explicit assertions), and
+`progression` (phase movement) — never AND-ed into a single pass/fail. A 5/5
+conversation that simply didn't transition within the turn budget is a
+*non-transition*, not a failure; conflating them hides the real signal.
 
 Because LLM output is non-deterministic, a single run is one sample. Rigorous
 suites run each scenario several times and report a pass *rate*.
@@ -195,10 +201,10 @@ scenarios.
 - **Built:** the full loop (seed → drive → judge → report); persona files +
   loading; component-aware driving; phase-scoped prompt-version pinning; the
   `build_eval_scenario` chain builder (dry-run by default, opt-in freeze); seeding
-  the eval directly from a frozen scenario (`--from-scenario`).
-- **Planned:** baseline-vs-candidate diffing with replay, rubrics derived from
-  `Prompt.body` + targeted checks, and a `run_coach_eval` MCP tool. See the
-  [Roadmap](/docs/testing/eval-harness/roadmap).
+  the eval directly from a frozen scenario (`--from-scenario`); rubrics derived
+  live from the phase `Prompt.body` + per-phase targeted checks.
+- **Planned:** baseline-vs-candidate diffing with replay and a `run_coach_eval`
+  MCP tool. See the [Roadmap](/docs/testing/eval-harness/roadmap).
 
 ## Related Documentation
 

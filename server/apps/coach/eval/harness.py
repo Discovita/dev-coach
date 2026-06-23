@@ -17,9 +17,11 @@ from pydantic import BaseModel, Field
 from apps.actions.models import Action
 from apps.chat_messages.models import ChatMessage
 from apps.coach_states.serializers.coach_state_serializer import CoachStateSerializer
+from apps.prompts.models import Prompt
 from enums.ai import AIModel
 from enums.component_type import ComponentType
 from enums.message_role import MessageRole
+from enums.prompt_type import PromptType
 from services.ai.utils.openai import structured_completion
 
 # Component types that genuinely GATE the conversation — the client must click a
@@ -33,6 +35,9 @@ GATE_COMPONENT_TYPES = {
 
 # Persona markdown files live alongside this module.
 PERSONA_DIR = Path(__file__).resolve().parent / "personas"
+
+# Per-phase targeted-check files (one assertion per line) live here.
+CHECKS_DIR = Path(__file__).resolve().parent / "checks"
 
 # Models for the harness itself (NOT the coach under test). The user-bot is
 # cheap; the judge is the stronger model. The coach uses its configured default.
@@ -205,6 +210,58 @@ def chat_history_transcript(user) -> Transcript:
             continue
         out.append(("coach" if m.role == MessageRole.COACH else "user", text))
     return out
+
+
+def load_phase_prompt_body(
+    phase: str, version: Optional[int] = None
+) -> Tuple[str, Optional[int]]:
+    """Return (body, version) of the coach Prompt for `phase` — the SAME row the
+    coach pipeline uses (see PromptManager.create_chat_prompt).
+
+    With `version`, pin that exact version; otherwise the latest active. This raw
+    body — the phase's coaching instructions, placeholders intact — IS the live
+    rubric: the judge checks whether the coach followed it, so the rubric tracks
+    the prompt automatically and never needs separate maintenance. The appended
+    action/JSON mechanics, global system context, and recent messages are NOT part
+    of `body` and are intentionally excluded from the rubric. Returns ("", None)
+    if no matching prompt exists.
+    """
+    qs = Prompt.objects.filter(
+        prompt_type=PromptType.COACH, coaching_phase=phase, is_active=True
+    )
+    if version is not None:
+        qs = qs.filter(version=version)
+    prompt = qs.order_by("-version").first()
+    if not prompt:
+        return "", None
+    return prompt.body, prompt.version
+
+
+def load_targeted_checks(
+    phase: str, extra: Optional[List[str]] = None
+) -> List[str]:
+    """Load the per-phase targeted checks plus any `extra` (command-line) checks.
+
+    Targeted checks are explicit, hand-authored pass/fail assertions ("phase X
+    must do Y / must never do Z") — deliberately separate from the prompt-derived
+    rubric. The per-phase file lives at apps/coach/eval/checks/<phase>.md: one
+    check per line; blank lines and lines starting with '#' are ignored, and a
+    single leading '-'/'*' bullet is stripped.
+    """
+    checks: List[str] = []
+    path = CHECKS_DIR / f"{phase}.md"
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            if s[0] in "-*":
+                s = s[1:].strip()
+            if s:
+                checks.append(s)
+    if extra:
+        checks.extend(c.strip() for c in extra if c and c.strip())
+    return checks
 
 
 def collect_new_actions(user, seen_ids: set) -> list:

@@ -37,12 +37,16 @@ The core loop and the scenario-building tooling are in place.
   scenario's phase instead of fresh-seeding. Prior history feeds the user-bot for
   continuity and the judge as context (not scored); only new actions are reported.
   See [Running Evals → Seeding from a frozen scenario](/docs/testing/eval-harness/running-evals#seeding-from-a-frozen-scenario).
+- **Rubric derived from `Prompt.body`** — the rubric IS the phase's own coach
+  prompt body (the same version the coach runs); the judge is asked "did the coach
+  follow these instructions?", so it tracks the prompt automatically and works for
+  any phase with nothing to hand-maintain. Plus per-phase **targeted checks**
+  (explicit pass/fail assertions in `apps/coach/eval/checks/<phase>.md`, plus
+  `--check` flags) reported as their own outcome. See
+  [Running Evals → Rubric & targeted checks](/docs/testing/eval-harness/running-evals#rubric--targeted-checks).
 
 ## Planned
 
-- **Rubric derived from `Prompt.body`** ("did the Coach do what this prompt
-  instructs?") plus a per-run list of **targeted checks** — the
-  "phase X does Y and I hate it" cases.
 - **Baseline ↔ candidate diff** — run two prompt versions and report the delta
   (deterministic outcome + per-criterion rubric scores).
 - **Replay mode** — reuse a baseline run's exact user turns against the candidate
