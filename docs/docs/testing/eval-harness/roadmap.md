@@ -56,6 +56,11 @@ The core loop and the scenario-building tooling are in place.
   (fixed/regressed), progression, and a **pairwise** judge that compares the two
   transcripts directly. See
   [Running Evals → Diffing two versions](/docs/testing/eval-harness/running-evals#diffing-two-versions).
+- **`run_coach_eval` MCP tool** — the `dev-coach-docs` MCP server exposes a
+  `run_coach_eval` tool that POSTs to a new `POST /api/v1/eval/run` backend
+  endpoint, so the edit-prompt → eval → iterate loop runs without shelling into
+  Django. (Single-eval; a diff tool can follow.) See
+  [Running Evals → From the MCP server](/docs/testing/eval-harness/running-evals#from-the-mcp-server).
 
 ## Planned
 
@@ -64,8 +69,7 @@ The core loop and the scenario-building tooling are in place.
   a baseline is generated once and re-judged cheaply when requirements change. See
   the caching model in the
   [Overview](/docs/testing/eval-harness/overview#transcript-vs-judgment-the-caching-model).
-- **`run_coach_eval` MCP tool** — on the `dev-coach-docs` MCP server, so the
-  edit-prompt → eval → iterate loop runs without manual command invocation.
+- **`run_coach_eval_diff` MCP tool** — expose the baseline↔candidate diff over MCP too.
 - **Suites & k-run pass rates** — multiple scenarios per phase, and repeated runs to
   handle LLM non-determinism instead of single-sample pass/fail.
 

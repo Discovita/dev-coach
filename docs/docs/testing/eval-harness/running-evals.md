@@ -247,6 +247,35 @@ below the candidate (only one exists), it errors and asks you to pass
 > data point. For a decision, run it a few times and weigh the targeted checks
 > (deterministic) alongside the pairwise trend.
 
+## From the MCP server
+
+You don't have to shell into Django to run a single eval — the `dev-coach-docs`
+MCP server exposes a **`run_coach_eval`** tool. It POSTs to a backend endpoint
+that runs the same loop and returns the report, so the edit-prompt → eval →
+iterate cycle works straight from the MCP client (e.g. alongside
+`create_new_coach_prompt`).
+
+**Backend endpoint:** `POST /api/v1/eval/run` (auth: `X-Api-Key` or admin, same as
+the prompts API). Body fields mirror the command: `persona`, `from_scenario`,
+`coach_model`, `prompt_version`, `checks`, `max_turns`. It returns the report JSON
+(same shape as below). The call is **synchronous** — it holds the connection open
+for the few minutes the eval takes — and the MCP tool uses a long timeout to match.
+
+**Gating:** the endpoint runs the real coach pipeline (OpenAI cost) and creates a
+throwaway user, so it's **on in local/dev (DEBUG) and off in production** by
+default. Override per environment with the `EVAL_HARNESS_ENABLED=true|false` env var.
+
+```bash
+# What the MCP tool does under the hood:
+curl -X POST http://localhost:8000/api/v1/eval/run \
+  -H "X-Api-Key: $DEV_COACH_API_KEY" -H "Content-Type: application/json" \
+  -d '{"from_scenario":"[Auto] Casey @ get_to_know_you","prompt_version":6,"max_turns":12}'
+```
+
+> The MCP server (`~/Programming/MCP/dev-coach/`) loads tools at startup, so after
+> adding/updating a tool you must **restart the MCP server** (reconnect it in the
+> client) before the new tool appears.
+
 ## Reading the report
 
 ```json

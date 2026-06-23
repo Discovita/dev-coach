@@ -10,9 +10,11 @@ Exports:
 from .admin_coach_request_serializer import AdminCoachRequestSerializer
 from .coach_request_serializer import CoachRequestSerializer
 from .coach_response_serializer import CoachResponseSerializer
+from .eval_run_serializer import EvalRunSerializer
 
 __all__ = [
     "AdminCoachRequestSerializer",
     "CoachRequestSerializer",
     "CoachResponseSerializer",
+    "EvalRunSerializer",
 ]

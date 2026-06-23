@@ -206,9 +206,11 @@ scenarios.
   the eval directly from a frozen scenario (`--from-scenario`); rubrics derived
   live from the phase `Prompt.body` + per-phase targeted checks; replay mode
   (`--save-run` / `--replay`) to re-run the exact user turns against a new prompt;
-  baseline↔candidate diffing (`run_coach_eval_diff`) with a pairwise judge.
-- **Planned:** transcript caching, a `run_coach_eval` MCP tool, and suites /
-  k-run pass rates. See the [Roadmap](/docs/testing/eval-harness/roadmap).
+  baseline↔candidate diffing (`run_coach_eval_diff`) with a pairwise judge; a
+  `run_coach_eval` MCP tool (over `POST /api/v1/eval/run`) so evals run without
+  shelling into Django.
+- **Planned:** transcript caching, an MCP diff tool, and suites / k-run pass
+  rates. See the [Roadmap](/docs/testing/eval-harness/roadmap).
 
 ## Related Documentation
 
