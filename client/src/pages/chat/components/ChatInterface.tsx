@@ -1,10 +1,15 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { ChatControls } from "@/pages/chat/components/ChatControls";
 import { VisualizationChatGate } from "@/pages/chat/components/VisualizationChatGate";
+import { StudioUnlockAnimation } from "@/pages/chat/components/StudioUnlockAnimation";
 import { ChatMessages } from "@/pages/chat/components/ChatMessages";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useCoachState } from "@/hooks/use-coach-state";
 import { isCoachingComplete } from "@/lib/studio-lock";
+import {
+  hasSeenStudioUnlock,
+  markStudioUnlockSeen,
+} from "@/lib/studio-unlock-seen";
 import { ConversationExporter } from "@/pages/chat/components/ConversationExporter";
 import { ConversationResetter } from "@/pages/chat/components/ConversationResetter";
 import { TestScenarioSessionFreezer } from "@/pages/test/components/TestScenarioSessionFreezer";
@@ -47,6 +52,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
       ? String(profile.id)
       : null;
 
+  // One-time Studio unlock takeover: plays the moment coaching completes
+  // (visualization intro video acknowledged), then never again for this user.
+  // The animation carries no Studio link — dismissing it reveals the
+  // VisualizationChatGate below, which has the "Go to the Studio" button.
+  // Keyed by the displayed user's id (freezeUserId) so it works under
+  // impersonation too.
+  const [showUnlock, setShowUnlock] = useState(false);
+  useEffect(() => {
+    if (coachingComplete && !hasSeenStudioUnlock(freezeUserId)) {
+      setShowUnlock(true);
+    }
+  }, [coachingComplete, freezeUserId]);
+
   // Get chat messages and updateChatMessages mutation from the custom hook
   const {
     chatMessages,
@@ -83,23 +101,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
       );
   }, [chatMessages, isPending, pendingMessage]);
 
-  // Scroll to bottom when messages change
+  // Keep the view pinned to the latest message. Use an INSTANT jump, not a
+  // smooth scroll: a single message turn fires several rapid updates
+  // (optimistic user message → loading bubble → the response, which can
+  // collapse a card and add a new one), and an animated scroll chasing a list
+  // whose height is changing under it is what made the chat feel jerky. A
+  // single instant pin is stable. `displayedMessages` already derives from
+  // `chatMessages`, so one effect covers both; `isProcessingMessage` re-pins
+  // when the loading bubble appears/disappears.
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
   }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatMessages, scrollToBottom]);
-
-  // Scroll to bottom when optimistic user message is added
-  // This ensures the UI scrolls for both server and optimistic updates
-  useEffect(() => {
-    scrollToBottom();
-  }, [displayedMessages, scrollToBottom]);
+  }, [displayedMessages, updateStatus, scrollToBottom]);
 
   // Handler for sending a message.
   //
@@ -134,6 +150,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onResetSuccess }) 
 
   return (
     <div className="_ChatInterface flex flex-col h-full rounded-md overflow-hidden shadow-md bg-background transition-shadow hover:shadow-lg dark:rounded-none">
+      {showUnlock && (
+        <StudioUnlockAnimation
+          onDismiss={() => {
+            markStudioUnlockSeen(freezeUserId);
+            setShowUnlock(false);
+          }}
+        />
+      )}
       <ChatMessages
         messages={displayedMessages}
         isProcessingMessage={updateStatus === "pending"}
