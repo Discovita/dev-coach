@@ -29,14 +29,16 @@ export const StudioUnlockAnimation: React.FC<{ onDismiss: () => void }> = ({
 }) => {
   // Fire a purple confetti burst at the unlock beat — timed to when the lock
   // falls away and the icon lights up (~1.9s into the sequence). Two quick
-  // bursts give it a fuller pop. Respects reduced-motion.
+  // bursts give it a fuller pop. We intentionally do NOT set
+  // `disableForReducedMotion` here: the unlock moment is a deliberate
+  // celebratory animation we always want to play (consistent with the lock
+  // animation, which is also not reduced-motion-gated).
   useEffect(() => {
     const fire = (particleCount: number, opts: confetti.Options) =>
       confetti({
         particleCount,
         colors: CONFETTI_PURPLES,
         origin: { x: 0.5, y: 0.5 },
-        disableForReducedMotion: true,
         ...opts,
       });
     const t1 = setTimeout(() => {
