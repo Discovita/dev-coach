@@ -34,6 +34,7 @@ def process_message(
     message: Optional[str],
     request_component_actions: Optional[List],
     model: AIModel,
+    prompt_versions: Optional[Dict[str, int]] = None,
 ) -> Tuple[bool, Dict[str, Any], str]:
     """
     Process a user's message and generate a coach response.
@@ -62,6 +63,10 @@ def process_message(
         request_component_actions: Optional list of component actions from the
             request.
         model: The AI model to use for generation.
+        prompt_versions: Optional map of coaching-phase value -> prompt version
+            to pin for that phase (defaults to the latest active prompt). Passed
+            through to `build_coach_prompt`; used by the eval harness for
+            before/after prompt comparisons. `None` preserves normal behavior.
 
     Returns:
         Tuple of (success: bool, response_data: Dict, error_message: str)
@@ -133,7 +138,7 @@ def process_message(
             )
             return True, response_data, None
 
-        coach_prompt, response_format = build_coach_prompt(user, model)
+        coach_prompt, response_format = build_coach_prompt(user, model, prompt_versions)
 
         # NOTE: Chat history is not passed separately — it is embedded directly
         # in the prompt by the PromptManager to include action context between messages.

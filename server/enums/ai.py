@@ -45,6 +45,7 @@ class AIModel(models.TextChoices):
 
     # OpenAI GPT-5 model (reasoning-capable; structured outputs supported)
     GPT_5_4 = "gpt-5.4", "GPT-5.4"
+    GPT_5_4_MINI = "gpt-5.4-mini", "GPT-5.4 Mini"
 
     # OpenAI GPT models
     GPT_4_1 = "gpt-4.1", "GPT-4.1"
@@ -73,6 +74,7 @@ class AIModel(models.TextChoices):
 
         openai_models = [
             cls.GPT_5_4,
+            cls.GPT_5_4_MINI,
             cls.GPT_4_1,
             cls.GPT_4_5_PREVIEW,
             cls.O3_MINI,
@@ -201,6 +203,7 @@ class AIModel(models.TextChoices):
 # Used in: AIModel.supports_structured_outputs
 STRUCTURED_OUTPUT_MODELS: Set[str] = {
     "gpt-5.4",
+    "gpt-5.4-mini",
     "gpt-4.1",
     "gpt-4.5-preview",
     "o1",
@@ -230,6 +233,7 @@ COMPLETION_TOKEN_MODELS: Set[str] = {
 DEFAULT_TOKEN_LIMITS: Dict[str, int] = {
     # GPT-5.4 supports up to 128k output tokens (1.05M context window).
     "gpt-5.4": 128000,
+    "gpt-5.4-mini": 16384,
     "gpt-4.1": 32768,
     "gpt-4.5-preview": 16384,
     "o3-mini": 100000,
