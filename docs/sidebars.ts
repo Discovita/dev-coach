@@ -225,6 +225,18 @@ const sidebars: SidebarsConfig = {
         "testing/overview",
         "testing/scenario-management",
         "testing/coach-state-visualization",
+        {
+          type: "category",
+          label: "Automated Eval Harness",
+          items: [
+            "testing/eval-harness/overview",
+            "testing/eval-harness/personas",
+            "testing/eval-harness/scenario-chain",
+            "testing/eval-harness/running-evals",
+            "testing/eval-harness/prompt-versioning",
+            "testing/eval-harness/roadmap",
+          ],
+        },
       ],
     },
     {
