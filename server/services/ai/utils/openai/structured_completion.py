@@ -12,7 +12,9 @@ Retry behaviour:
     family misclassification.
 """
 
+import json
 import logging
+from types import SimpleNamespace
 from typing import List, Optional, Type
 
 from openai.types.chat import ChatCompletionMessageParam, ParsedChatCompletion
@@ -27,30 +29,93 @@ log = logging.getLogger(__name__)
 _NO_TEMPERATURE_TAGS = ("o1", "o3", "o4-mini", "gpt-5")
 
 
-def _log_malformed_structured_output(exc: Exception, model_str: str) -> None:
-    """Capture the FULL raw LLM output when structured-output parsing fails.
+def _recover_raw_content(exc: ValidationError) -> Optional[str]:
+    """Pull the FULL raw model output out of a parse ValidationError.
 
-    The model very occasionally returns content that fails schema validation
-    (e.g. the intermittent 'trailing characters' malformed-JSON glitch). When
-    that happens `.parse()` raises a pydantic ``ValidationError`` and the raw
-    model output is otherwise lost — the exception's string repr truncates it.
-
-    The complete content is still available in ``ValidationError.errors()[*]
-    ['input']`` (the repr truncates; the structured errors retain the whole
-    string), so we recover and log it at ERROR with a stable, greppable marker
-    (``MALFORMED_STRUCTURED_OUTPUT``). This is intentionally capture-only — it
-    does not retry or recover — so the next occurrence is fully diagnosable.
+    `.parse()` raises before returning, so the raw content is otherwise lost —
+    but the structured errors retain the whole string (the exception's repr
+    truncates it) under ``errors()[*]['input']``. Returns it, or None.
     """
-    if not isinstance(exc, ValidationError):
-        return
-
-    raw = None
     try:
         for err in exc.errors():
             candidate = err.get("input")
             if isinstance(candidate, str):
-                raw = candidate
-                break
+                return candidate
+    except Exception:  # never let recovery mask the real error
+        return None
+    return None
+
+
+def _salvage_structured_output(
+    exc: Exception, response_format: Type[BaseModel], model_str: str
+):
+    """Recover from the duplicated-JSON glitch, returning a completion-shaped
+    object or None if unrecoverable.
+
+    Some models (observed intermittently on gpt-5.4, ~13% of action-bearing
+    turns) emit the SAME valid JSON object TWICE, newline-separated:
+
+        {"message":"...","update_asked_questions":{...}}
+        {"message":"...","update_asked_questions":{...}}
+
+    `.parse()` then fails with "trailing characters at line 2 column 1" and
+    discards the result, even though the FIRST object is a complete, schema-valid
+    answer (``finish_reason=stop`` — not a truncation). This is a model output
+    quirk, not a real failure, so we decode just the first JSON value and
+    re-validate it against the response_format. The returned shim only needs to
+    satisfy ``completion.choices[0].message.parsed`` — the single field every
+    caller reads.
+    """
+    if not isinstance(exc, ValidationError):
+        return None
+    raw = _recover_raw_content(exc)
+    if not raw:
+        return None
+    try:
+        obj, end = json.JSONDecoder().raw_decode(raw.strip())
+    except (json.JSONDecodeError, ValueError):
+        return None
+    try:
+        parsed = response_format.model_validate(obj)
+    except ValidationError:
+        return None  # first object isn't schema-valid — genuinely malformed
+
+    trailing = raw.strip()[end:].strip()
+    is_duplicate = False
+    if trailing:
+        try:
+            dup, _ = json.JSONDecoder().raw_decode(trailing)
+            is_duplicate = dup == obj
+        except (json.JSONDecodeError, ValueError):
+            is_duplicate = False
+
+    log.warning(
+        "RECOVERED_STRUCTURED_OUTPUT model=%s salvaged the first JSON object "
+        "from a malformed structured response (duplicate=%s, trailing_len=%s). "
+        "Output quirk, not a coaching failure.",
+        model_str,
+        is_duplicate,
+        len(trailing),
+    )
+    message = SimpleNamespace(parsed=parsed, content=raw, refusal=None)
+    choice = SimpleNamespace(message=message, finish_reason="stop", index=0)
+    return SimpleNamespace(choices=[choice])
+
+
+def _log_malformed_structured_output(exc: Exception, model_str: str) -> None:
+    """Capture the FULL raw LLM output when structured-output parsing fails AND
+    could not be salvaged.
+
+    The complete content is recovered from the ValidationError (see
+    ``_recover_raw_content``) and logged at ERROR with a stable, greppable marker
+    (``MALFORMED_STRUCTURED_OUTPUT``) so a genuinely unrecoverable occurrence is
+    fully diagnosable.
+    """
+    if not isinstance(exc, ValidationError):
+        return
+
+    raw = _recover_raw_content(exc)
+    try:
         first_msg = exc.errors()[0].get("msg") if exc.errors() else str(exc)
     except Exception:  # never let diagnostic logging mask the real error
         first_msg = str(exc)
@@ -144,10 +209,20 @@ def structured_completion(
             try:
                 return client.beta.chat.completions.parse(**params)
             except Exception as retry_exc:
+                salvaged = _salvage_structured_output(
+                    retry_exc, response_format, model_str
+                )
+                if salvaged is not None:
+                    return salvaged
                 _log_malformed_structured_output(retry_exc, model_str)
                 raise
-        # Capture the full raw LLM output on schema-validation failures (the
-        # intermittent malformed-JSON glitch) before re-raising, so we can
-        # diagnose it the next time it happens.
+        # The duplicated-JSON glitch: the model emitted a valid object twice, so
+        # .parse() raised on the trailing copy. Salvage the first (correct) one
+        # rather than failing the turn.
+        salvaged = _salvage_structured_output(e, response_format, model_str)
+        if salvaged is not None:
+            return salvaged
+        # Otherwise capture the full raw output before re-raising so a genuinely
+        # malformed response is diagnosable next time.
         _log_malformed_structured_output(e, model_str)
         raise
