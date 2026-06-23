@@ -9,6 +9,7 @@ The harness drives the REAL coach pipeline via `process_message`, so it exercise
 whatever prompts are currently active in the database.
 """
 
+import json
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -262,6 +263,21 @@ def load_targeted_checks(
     if extra:
         checks.extend(c.strip() for c in extra if c and c.strip())
     return checks
+
+
+def save_eval_run(path: str, data: dict) -> None:
+    """Persist an eval run artifact (the report plus its `user_turns`) as JSON.
+
+    The artifact doubles as the replay source: `load_eval_run` reads it back and
+    the eval re-runs the recorded user turns (see run_coach_eval_spike --replay),
+    so the only thing that changes is the prompt/model under test.
+    """
+    Path(path).write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def load_eval_run(path: str) -> dict:
+    """Load an eval run artifact written by `save_eval_run`."""
+    return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
 def collect_new_actions(user, seen_ids: set) -> list:

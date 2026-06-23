@@ -2,12 +2,14 @@
 Tests for apps/coach/eval/harness.py (the pure helpers).
 """
 
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
 
 from django.test import SimpleTestCase
 
 from apps.coach.eval import harness
-from apps.coach.eval.harness import load_targeted_checks
+from apps.coach.eval.harness import load_eval_run, load_targeted_checks, save_eval_run
 
 
 class TestLoadTargetedChecks(SimpleTestCase):
@@ -49,3 +51,20 @@ class TestLoadTargetedChecks(SimpleTestCase):
         ):
             checks = load_targeted_checks("anything")
         self.assertEqual(checks, ["first check", "second check", "third check"])
+
+
+class TestEvalRunArtifact(SimpleTestCase):
+    """save_eval_run / load_eval_run round-trip the replay artifact."""
+
+    def test_round_trip(self):
+        data = {
+            "persona": "casey",
+            "scenario_seed": "[Auto] Casey @ get_to_know_you",
+            "coach_model": "gpt-4o",
+            "prompt_version": 6,
+            "user_turns": ["hi", "I'm Casey", "grew up in Norcross"],
+        }
+        with tempfile.TemporaryDirectory() as d:
+            path = str(Path(d) / "run.json")
+            save_eval_run(path, data)
+            self.assertEqual(load_eval_run(path), data)

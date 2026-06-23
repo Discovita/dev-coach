@@ -44,13 +44,18 @@ The core loop and the scenario-building tooling are in place.
   (explicit pass/fail assertions in `apps/coach/eval/checks/<phase>.md`, plus
   `--check` flags) reported as their own outcome. See
   [Running Evals → Rubric & targeted checks](/docs/testing/eval-harness/running-evals#rubric--targeted-checks).
+- **Replay mode** — `--save-run PATH` records a run's exact user turns (+ report)
+  to a JSON artifact; `--replay PATH` re-runs those turns instead of the user-bot,
+  so the prompt/model is the only variable. The artifact's persona/scenario/
+  coach-model/version are replay defaults; override with the flags (typically a new
+  `--prompt-version`). See
+  [Running Evals → Replay](/docs/testing/eval-harness/running-evals#replay-a-run).
 
 ## Planned
 
-- **Baseline ↔ candidate diff** — run two prompt versions and report the delta
-  (deterministic outcome + per-criterion rubric scores).
-- **Replay mode** — reuse a baseline run's exact user turns against the candidate
-  prompt, so the only variable is the prompt (removes user-bot variance).
+- **Baseline ↔ candidate diff** — run two prompt versions over the *same* (replayed)
+  user turns and report the delta (progression, targeted checks, per-version rubric
+  scores, pairwise preference).
 - **Transcript caching** — persist baseline transcripts keyed on
   `(phase, prompt_version, model, scenario, user_turns)` — *not* on the rubric — so
   a baseline is generated once and re-judged cheaply when requirements change. See

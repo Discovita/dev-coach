@@ -31,12 +31,21 @@ TestScenario (real prior history, built via build_eval_scenario) and pick the
 eval up from that scenario's phase. Either way the throwaway user is deleted on
 exit unless --keep is passed.
 
+Replay: --save-run PATH writes the run (user turns + report) to a JSON artifact;
+--replay PATH re-runs those exact user turns instead of generating new ones with
+the user-bot. Combined with a different --prompt-version, replay removes user-bot
+variance so the prompt is the only thing that changed — the basis for a fair
+before/after. The artifact's persona/scenario/coach-model/version are used as
+defaults on replay; pass the flags to override (e.g. a new --prompt-version).
+
 Usage:
     python manage.py run_coach_eval_spike
     python manage.py run_coach_eval_spike --persona casey --max-turns 10 --keep
     python manage.py run_coach_eval_spike --coach-model gpt-4o --prompt-version 10
     python manage.py run_coach_eval_spike --from-scenario "[Auto] Casey @ start of get_to_know_you"
     python manage.py run_coach_eval_spike --check "Never asks more than one question per message"
+    python manage.py run_coach_eval_spike --prompt-version 11 --save-run /tmp/v11.json
+    python manage.py run_coach_eval_spike --replay /tmp/v11.json --prompt-version 12
 """
 
 import json
@@ -53,12 +62,14 @@ from apps.coach.eval.harness import (
     chat_history_transcript,
     coach_state_snapshot,
     collect_new_actions,
+    load_eval_run,
     load_persona,
     load_phase_prompt_body,
     load_targeted_checks,
     pending_component,
     primary_button_actions,
     render_transcript,
+    save_eval_run,
     user_bot_reply,
 )
 from apps.coach.functions.public.process_message import process_message
@@ -180,6 +191,28 @@ class Command(BaseCommand):
             ),
         )
         parser.add_argument(
+            "--save-run",
+            type=str,
+            default=None,
+            metavar="PATH",
+            help=(
+                "Write the run (recorded user turns + full report) to a JSON "
+                "artifact at PATH, for later --replay or inspection."
+            ),
+        )
+        parser.add_argument(
+            "--replay",
+            type=str,
+            default=None,
+            metavar="PATH",
+            help=(
+                "Replay the user turns from a saved-run artifact instead of "
+                "generating new ones with the user-bot. Persona / scenario / "
+                "coach-model / prompt-version default from the artifact; pass the "
+                "flags to override (e.g. --prompt-version to test a new version)."
+            ),
+        )
+        parser.add_argument(
             "--keep",
             action="store_true",
             help="Keep the throwaway test user instead of deleting it on exit.",
@@ -265,6 +298,25 @@ class Command(BaseCommand):
 
     # --- orchestration --------------------------------------------------------
     def handle(self, *args, **options):
+        # Replay: load the saved run's user turns and let its recorded
+        # persona / scenario / coach-model / version stand in as defaults, so the
+        # only thing that changes is whatever you override on the CLI (typically
+        # --prompt-version). Explicit flags always win.
+        replay_turns = None
+        if options["replay"]:
+            artifact = load_eval_run(options["replay"])
+            replay_turns = artifact.get("user_turns") or []
+            for key in ("coach_model", "prompt_version"):
+                if options[key] is None and artifact.get(key) is not None:
+                    options[key] = artifact[key]
+            if options["from_scenario"] is None and artifact.get("scenario_seed"):
+                options["from_scenario"] = artifact["scenario_seed"]
+            if artifact.get("persona"):
+                options["persona"] = artifact["persona"]
+            self.stdout.write(self.style.HTTP_INFO(
+                f"[replay: {len(replay_turns)} user turns from {options['replay']}]"
+            ))
+
         max_turns = options["max_turns"]
         coach_model = AIModel.get_or_default(options["coach_model"])
         persona = load_persona(options["persona"])
@@ -326,6 +378,7 @@ class Command(BaseCommand):
         ))
 
         transcript: Transcript = []
+        replay_idx = 0
         # Prior-history actions exist on the hydrated user; record their ids so
         # collect_new_actions only reports what the coach does DURING this eval.
         seen_action_ids: set = set(
@@ -349,9 +402,20 @@ class Command(BaseCommand):
                         user, None, actions, coach_model, prompt_versions
                     )
                 else:
-                    user_msg = user_bot_reply(
-                        harness_client, DEFAULT_USER_BOT_MODEL, persona, prior + transcript
-                    )
+                    if replay_turns is not None:
+                        # Replay the recorded user turns verbatim (no user-bot),
+                        # so the only variable vs the saved run is the prompt/model.
+                        if replay_idx >= len(replay_turns):
+                            self.stdout.write(self.style.HTTP_INFO(
+                                f"\n[replay exhausted after {replay_idx} user turns]"
+                            ))
+                            break
+                        user_msg = replay_turns[replay_idx]
+                        replay_idx += 1
+                    else:
+                        user_msg = user_bot_reply(
+                            harness_client, DEFAULT_USER_BOT_MODEL, persona, prior + transcript
+                        )
                     transcript.append(("user", user_msg))
                     self.stdout.write(self.style.WARNING(f"\nCLIENT: {user_msg}"))
                     ok, data, err = process_message(
@@ -400,6 +464,18 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.MIGRATE_HEADING("EVAL REPORT"))
                 self.stdout.write(json.dumps(report, indent=2))
                 self.stdout.write("=" * 70)
+                if options["save_run"]:
+                    # The report plus the recorded user turns + seed IS the replay
+                    # artifact: --replay reads these back to re-run the same turns.
+                    save_eval_run(options["save_run"], {
+                        **report,
+                        "scenario_seed": scenario_name,
+                        "user_turns": [t[1] for t in transcript if t[0] == "user"],
+                        "transcript": [{"role": r, "text": t} for r, t in transcript],
+                    })
+                    self.stdout.write(self.style.SUCCESS(
+                        f"(saved run -> {options['save_run']})"
+                    ))
 
             # A pipeline failure (e.g. the coach returning malformed JSON) is an
             # ERROR, not a coaching-quality result. Skip the judge so an infra
