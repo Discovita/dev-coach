@@ -50,12 +50,15 @@ The core loop and the scenario-building tooling are in place.
   coach-model/version are replay defaults; override with the flags (typically a new
   `--prompt-version`). See
   [Running Evals → Replay](/docs/testing/eval-harness/running-evals#replay-a-run).
+- **Baseline ↔ candidate diff** — `run_coach_eval_diff` drives a baseline version
+  with the user-bot, replays the *same* user turns against a candidate version, and
+  reports the delta: per-version quality score, targeted-check changes
+  (fixed/regressed), progression, and a **pairwise** judge that compares the two
+  transcripts directly. See
+  [Running Evals → Diffing two versions](/docs/testing/eval-harness/running-evals#diffing-two-versions).
 
 ## Planned
 
-- **Baseline ↔ candidate diff** — run two prompt versions over the *same* (replayed)
-  user turns and report the delta (progression, targeted checks, per-version rubric
-  scores, pairwise preference).
 - **Transcript caching** — persist baseline transcripts keyed on
   `(phase, prompt_version, model, scenario, user_turns)` — *not* on the rubric — so
   a baseline is generated once and re-judged cheaply when requirements change. See

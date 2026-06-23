@@ -69,7 +69,9 @@ commands wire them together.
 | **User-bot** | An LLM driven by the persona + the running transcript; returns the client's next message. Cheap model. | `harness.user_bot_reply` |
 | **Component driver** | Clicks through gating UI components (session videos, breaks) by replaying their button actions — no per-component hardcoding. | `harness.pending_component`, `primary_button_actions` |
 | **Coach** | The real pipeline: `process_message` → `build_coach_prompt` → `PromptManager` → coach LLM → action handler. | [Prompt Manager](/docs/core-systems/prompt-manager/overview), [Action Handler](/docs/core-systems/action-handler/overview) |
-| **Judge** | Deterministic assertions + an LLM-as-judge scoring the transcript against a rubric. Stronger model. | `run_coach_eval_spike` (`_judge`) |
+| **Drive loop** | Seeds a user, drives (or replays) the conversation, records turns + actions + state. Shared by both commands. | `harness.drive_eval` |
+| **Judge** | An LLM-as-judge scoring the transcript against the phase's derived rubric + targeted checks. Stronger model. | `harness.judge_transcript` |
+| **Diff** | Drives a baseline version, replays the same turns against a candidate, and reports the delta + a pairwise comparison. | `run_coach_eval_diff` command |
 | **Scenario builder** | Drives a persona from the intro phase and (optionally) freezes the end-state as a per-phase starting scenario. | `build_eval_scenario` command |
 
 ### Models used by the harness
@@ -203,9 +205,10 @@ scenarios.
   `build_eval_scenario` chain builder (dry-run by default, opt-in freeze); seeding
   the eval directly from a frozen scenario (`--from-scenario`); rubrics derived
   live from the phase `Prompt.body` + per-phase targeted checks; replay mode
-  (`--save-run` / `--replay`) to re-run the exact user turns against a new prompt.
-- **Planned:** baseline-vs-candidate diffing (over replayed turns) and a
-  `run_coach_eval` MCP tool. See the [Roadmap](/docs/testing/eval-harness/roadmap).
+  (`--save-run` / `--replay`) to re-run the exact user turns against a new prompt;
+  baseline↔candidate diffing (`run_coach_eval_diff`) with a pairwise judge.
+- **Planned:** transcript caching, a `run_coach_eval` MCP tool, and suites /
+  k-run pass rates. See the [Roadmap](/docs/testing/eval-harness/roadmap).
 
 ## Related Documentation
 

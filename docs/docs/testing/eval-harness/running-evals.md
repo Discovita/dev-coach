@@ -190,11 +190,62 @@ the only variable:
      python manage.py run_coach_eval_spike --replay /tmp/v10.json --prompt-version 11
    ```
 4. **Compare the two reports** — quality score + per-criterion reasoning, targeted
-   checks, and progression. (An automated baseline↔candidate *diff* command is the
-   [next roadmap item](/docs/testing/eval-harness/roadmap).)
+   checks, and progression.
+
+For a one-shot, structured comparison, use the [diff command](#diffing-two-versions)
+instead of eyeballing two reports.
 
 The version pin is **phase-scoped** (details:
 [Prompt Version Pinning](/docs/testing/eval-harness/prompt-versioning)).
+
+## Diffing two versions
+
+`run_coach_eval_diff` automates the before/after in one command: it drives the
+**baseline** version with the user-bot, **replays the same user turns** against the
+**candidate** version, then reports the delta.
+
+Versions default the way you'd want: **candidate = the latest active version** (the
+one the coach actually runs), **baseline = the version right before it**. So a bare
+run compares "previous vs latest" — exactly the common case after you publish a new
+version. Override either flag to diff against an older version.
+
+```bash
+# Previous vs latest (the usual case — no version flags needed):
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_diff \
+    --from-scenario "[Auto] Casey @ get_to_know_you" --out /tmp/diff.json
+
+# Or pin specific versions:
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_diff --baseline-version 4 --candidate-version 6
+```
+
+It reports four things:
+
+- **Quality** — each version's judge score against **its own** prompt body (a v11
+  run is judged against v11's instructions). Because the standard differs per
+  version, treat this as "does each version do what it intends?", not a like-for-like
+  number — the pairwise result below is the apples-to-apples call.
+- **Targeted checks** — the same assertions run against both, paired by text and
+  labelled `fixed` / `regressed` / `same` / `new`. These *are* like-for-like (the
+  checks are constant across versions).
+- **Progression** — whether each version transitioned the phase.
+- **Pairwise** — the judge sees **both transcripts over identical client turns**
+  (blind-labelled Coach A / Coach B) and picks the better one, per aspect, with
+  reasoning. This is the most reliable signal — comparing two transcripts directly
+  beats differencing two absolute scores.
+
+Flags: `--candidate-version` (defaults to latest active), `--baseline-version`
+(defaults to the version right before the candidate), `--from-scenario`,
+`--persona`, `--coach-model` (one model for both runs — the prompt is the
+variable), `--check`, `--max-turns`, `--out PATH`, `--keep`. If there's no version
+below the candidate (only one exists), it errors and asks you to pass
+`--baseline-version`.
+
+> **One sample, live coach.** Replay fixes the *user* turns, but the coach is still
+> a live LLM and the pairwise judge has mild position bias — one diff is a single
+> data point. For a decision, run it a few times and weigh the targeted checks
+> (deterministic) alongside the pairwise trend.
 
 ## Reading the report
 

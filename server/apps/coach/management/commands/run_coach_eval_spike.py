@@ -13,7 +13,8 @@ assembly from the DB + real coach LLM):
 
 The persona is loaded from a markdown file (see apps/coach/eval/personas/), and
 the loop is component-aware — it clicks through any video/break gates by
-replaying their button actions. Shared pieces live in apps/coach/eval/harness.py.
+replaying their button actions. The reusable pieces (seeding, the drive loop, the
+judge) live in apps/coach/eval/harness.py and are shared with run_coach_eval_diff.
 
 The rubric is DERIVED LIVE from the phase's coach Prompt.body — the judge is
 asked "did the coach follow these instructions?" — so it tracks the prompt
@@ -49,96 +50,41 @@ Usage:
 """
 
 import json
-from typing import List, Optional, Tuple
 
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from pydantic import BaseModel, Field
 
-from apps.actions.models import Action
 from apps.coach.eval.harness import (
     DEFAULT_JUDGE_MODEL,
     DEFAULT_USER_BOT_MODEL,
     Transcript,
     chat_history_transcript,
-    coach_state_snapshot,
-    collect_new_actions,
+    drive_eval,
+    judge_transcript,
     load_eval_run,
     load_persona,
     load_phase_prompt_body,
     load_targeted_checks,
-    pending_component,
-    primary_button_actions,
-    render_transcript,
     save_eval_run,
-    user_bot_reply,
-)
-from apps.coach.functions.public.process_message import process_message
-from apps.coach_states.models import CoachState
-from apps.test_scenario.functions.admin.instantiate_test_scenario import (
-    instantiate_test_scenario,
+    seed_cold_user,
+    seed_scenario_user,
 )
 from apps.test_scenario.models import TestScenario
-from django.contrib.auth import get_user_model
 from enums.ai import AIModel
 from enums.coaching_phase import CoachingPhase
 from services.ai.ai_service_factory import AIServiceFactory
-from services.ai.utils.openai import structured_completion
 
 User = get_user_model()
 
 SPIKE_EMAIL = "coach-eval-spike@testscenario.com"
 
-# --- The single spike scenario -------------------------------------------------
+# --- The default cold-seed scenario --------------------------------------------
 START_PHASE = CoachingPhase.GET_TO_KNOW_YOU
 # Goal: the get_to_know_you phase should end by transitioning the user onward.
 GOAL_PHASES = {
     CoachingPhase.IDENTITY_WARMUP.value,
     CoachingPhase.IDENTITY_BRAINSTORMING.value,
 }
-
-# How to judge — the WHAT (the criteria) is derived live from the phase's own
-# Prompt.body at runtime; this only frames HOW to apply it.
-JUDGE_FRAMING = (
-    "You are a strict but fair judge evaluating a COACH in an identity coaching "
-    "conversation. Judge ONLY the coach's messages (role=coach).\n\n"
-    "The standard is the coach's OWN phase instructions, shown below. Decide "
-    "whether the coach actually FOLLOWED them in the transcript. Focus on "
-    "behavioral and conversational adherence — IGNORE output formatting, JSON, "
-    "and action/tool mechanics (those are enforced elsewhere and are not your "
-    "concern). Placeholders like {curly_braces} in the instructions are filled "
-    "with live data at runtime; judge the intent behind them, not the literal "
-    "placeholder.\n\n"
-    "Derive the key behavioral expectations from the instructions yourself, score "
-    "the coach on each as a criterion, and give an overall pass/fail + 1-5 score."
-)
-
-
-class CriterionScore(BaseModel):
-    name: str
-    passed: bool
-    note: str
-
-
-class CheckResult(BaseModel):
-    """Verdict on one explicit, hand-authored targeted check."""
-
-    check: str = Field(description="The targeted check being evaluated (echoed).")
-    passed: bool
-    note: str
-
-
-class JudgeVerdict(BaseModel):
-    """LLM-as-judge verdict over the full transcript."""
-
-    passed: bool = Field(description="Overall pass/fail for the coach.")
-    score: int = Field(description="Overall quality score 1-5.")
-    criteria: List[CriterionScore] = Field(
-        description="Criteria derived from the phase instructions, each scored."
-    )
-    targeted_checks: List[CheckResult] = Field(
-        description="One result per supplied targeted check; empty if none given."
-    )
-    reasoning: str
 
 
 class Command(BaseCommand):
@@ -218,83 +164,22 @@ class Command(BaseCommand):
             help="Keep the throwaway test user instead of deleting it on exit.",
         )
 
-    # --- seed -----------------------------------------------------------------
-    def _seed_user(self) -> User:
-        User.objects.filter(email=SPIKE_EMAIL).delete()  # idempotent
-        user = User.objects.create_user(email=SPIKE_EMAIL, password="Coach123!")
-        coach_state = CoachState.objects.get(user=user)  # auto-created by signal
-        coach_state.current_phase = START_PHASE.value
-        coach_state.save(update_fields=["current_phase"])
-        return user
-
-    def _seed_from_scenario(self, name: str) -> Tuple[User, str, str]:
-        """Hydrate a frozen TestScenario and return (user, email, start_phase).
-
-        Full hydration (chat history, identities, coach state, notes, actions,
-        breaks) so the eval resumes from real prior history. The start phase is
-        whatever the scenario's coach state was frozen at. Raises
-        TestScenario.DoesNotExist if no scenario has that exact name.
-        """
-        scenario = TestScenario.objects.get(name=name)
-        result = instantiate_test_scenario(
-            scenario,
-            create_user=True,
-            create_chat_messages=True,
-            create_identities=True,
-            create_coach_state=True,
-            create_user_notes=True,
-            create_actions=True,
-            create_breaks=True,
-        )
-        user = result["user"]
-        start_phase = CoachState.objects.get(user=user).current_phase
-        return user, result["email"], start_phase
-
-    # --- judge ----------------------------------------------------------------
-    def _judge(
-        self,
-        client,
-        *,
-        phase: str,
-        rubric_body: str,
-        transcript: Transcript,
-        targeted_checks: Optional[List[str]] = None,
-        context: Optional[Transcript] = None,
-    ) -> JudgeVerdict:
-        convo = render_transcript(transcript, you_label="CLIENT")
-        context_block = ""
-        if context:
-            ctx = render_transcript(context, you_label="CLIENT")
-            context_block = (
-                "PRIOR CONVERSATION (context only — do NOT score these messages; "
-                "they predate the phase under evaluation. Use them only to know "
-                f"what the client already shared):\n\n{ctx}\n\n"
-            )
-        checks_block = ""
-        if targeted_checks:
-            numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(targeted_checks))
-            checks_block = (
-                "TARGETED CHECKS — in addition to the rubric, evaluate each of "
-                "these explicit requirements as a hard yes/no and return a verdict "
-                "+ note for each in `targeted_checks` (echo the check text "
-                f"verbatim):\n{numbered}\n\n"
-            )
-        system = (
-            f"{JUDGE_FRAMING}\n\n"
-            f"--- BEGIN {phase} PHASE INSTRUCTIONS ---\n{rubric_body}\n"
-            f"--- END {phase} PHASE INSTRUCTIONS ---\n\n"
-            f"{checks_block}{context_block}"
-            f"Transcript to evaluate:\n\n{convo}\n\n"
-            "Return your structured verdict."
-        )
-        completion = structured_completion(
-            client=client,
-            messages=[{"role": "system", "content": system}],
-            model=DEFAULT_JUDGE_MODEL,
-            response_format=JudgeVerdict,
-            temperature=0.0,
-        )
-        return completion.choices[0].message.parsed
+    def _make_emit(self):
+        """Render drive_eval's live progress events with the command's styling."""
+        def emit(kind: str, text: str) -> None:
+            if kind == "gate":
+                self.stdout.write(self.style.HTTP_INFO(f"[click-through: {text}]"))
+            elif kind == "client":
+                self.stdout.write(self.style.WARNING(f"\nCLIENT: {text}"))
+            elif kind == "coach":
+                self.stdout.write(self.style.SUCCESS(f"COACH: {text}"))
+            elif kind == "action":
+                self.stdout.write(self.style.HTTP_INFO(f"  ↳ actions: {text}"))
+            elif kind == "error":
+                self.stderr.write(self.style.ERROR(f"process_message failed: {text}"))
+            else:  # info
+                self.stdout.write(self.style.HTTP_INFO(f"\n[{text}]"))
+        return emit
 
     # --- orchestration --------------------------------------------------------
     def handle(self, *args, **options):
@@ -330,7 +215,7 @@ class Command(BaseCommand):
         prior: Transcript = []
         if scenario_name:
             try:
-                user, cleanup_email, start_phase = self._seed_from_scenario(scenario_name)
+                user, cleanup_email, start_phase = seed_scenario_user(scenario_name)
             except TestScenario.DoesNotExist:
                 names = list(
                     TestScenario.objects.order_by("name").values_list("name", flat=True)
@@ -343,7 +228,7 @@ class Command(BaseCommand):
             prior = chat_history_transcript(user)
             scenario_label = scenario_name
         else:
-            user = self._seed_user()
+            user = seed_cold_user(SPIKE_EMAIL, START_PHASE.value)
             cleanup_email = SPIKE_EMAIL
             start_phase = START_PHASE.value
             scenario_label = "get_to_know_you_spike"
@@ -377,86 +262,29 @@ class Command(BaseCommand):
             f"| user-bot: {DEFAULT_USER_BOT_MODEL.value} | judge: {DEFAULT_JUDGE_MODEL.value}"
         ))
 
-        transcript: Transcript = []
-        replay_idx = 0
-        # Prior-history actions exist on the hydrated user; record their ids so
-        # collect_new_actions only reports what the coach does DURING this eval.
-        seen_action_ids: set = set(
-            Action.objects.filter(user=user).values_list("id", flat=True)
-        )
-        all_actions: list = []
-        transition_reached = False
-        run_error = None
-
         try:
-            for _ in range(max_turns):
-                # Click through any gating component (video/break) before talking.
-                comp = pending_component(user)
-                if comp:
-                    actions = primary_button_actions(comp)
-                    self.stdout.write(self.style.HTTP_INFO(
-                        f"[click-through: {comp.get('component_type')} "
-                        f"-> {[a.get('action') for a in actions]}]"
-                    ))
-                    ok, data, err = process_message(
-                        user, None, actions, coach_model, prompt_versions
-                    )
-                else:
-                    if replay_turns is not None:
-                        # Replay the recorded user turns verbatim (no user-bot),
-                        # so the only variable vs the saved run is the prompt/model.
-                        if replay_idx >= len(replay_turns):
-                            self.stdout.write(self.style.HTTP_INFO(
-                                f"\n[replay exhausted after {replay_idx} user turns]"
-                            ))
-                            break
-                        user_msg = replay_turns[replay_idx]
-                        replay_idx += 1
-                    else:
-                        user_msg = user_bot_reply(
-                            harness_client, DEFAULT_USER_BOT_MODEL, persona, prior + transcript
-                        )
-                    transcript.append(("user", user_msg))
-                    self.stdout.write(self.style.WARNING(f"\nCLIENT: {user_msg}"))
-                    ok, data, err = process_message(
-                        user, user_msg, None, coach_model, prompt_versions
-                    )
+            run = drive_eval(
+                user,
+                coach_model=coach_model,
+                prompt_versions=prompt_versions,
+                start_phase=start_phase,
+                max_turns=max_turns,
+                harness_client=harness_client,
+                persona=None if replay_turns is not None else persona,
+                prior=prior,
+                replay_turns=replay_turns,
+                emit=self._make_emit(),
+            )
 
-                if not ok:
-                    run_error = err
-                    self.stderr.write(self.style.ERROR(f"process_message failed: {err}"))
-                    break
-
-                coach_msg = data.get("message", "")
-                if coach_msg:
-                    transcript.append(("coach", coach_msg))
-                    self.stdout.write(self.style.SUCCESS(f"COACH: {coach_msg}"))
-
-                # Observability: what did the coach actually DO this turn?
-                coach_state = CoachState.objects.get(user=user)
-                acts = collect_new_actions(user, seen_action_ids)
-                all_actions.extend(acts)
-                if acts:
-                    self.stdout.write(self.style.HTTP_INFO(
-                        "  ↳ actions: " + ", ".join(a["action"] for a in acts)
-                    ))
-
-                if coach_state.current_phase != start_phase:
-                    transition_reached = coach_state.current_phase in GOAL_PHASES
-                    self.stdout.write(self.style.HTTP_INFO(
-                        f"\n[phase transitioned to: {coach_state.current_phase}]"
-                    ))
-                    break
-
-            final_coach_state = coach_state_snapshot(CoachState.objects.get(user=user))
-            final_phase = final_coach_state["current_phase"]
+            final_phase = run.final_phase
+            transition_reached = final_phase in GOAL_PHASES
 
             base_report = {
                 "scenario": scenario_label,
                 "persona": persona.persona_id,
                 "coach_model": coach_model.value,
                 "prompt_version": version_label,
-                "turns": len([t for t in transcript if t[0] == "user"]),
+                "turns": len(run.user_turns),
             }
 
             def _emit(report: dict) -> None:
@@ -470,8 +298,8 @@ class Command(BaseCommand):
                     save_eval_run(options["save_run"], {
                         **report,
                         "scenario_seed": scenario_name,
-                        "user_turns": [t[1] for t in transcript if t[0] == "user"],
-                        "transcript": [{"role": r, "text": t} for r, t in transcript],
+                        "user_turns": run.user_turns,
+                        "transcript": [{"role": r, "text": t} for r, t in run.transcript],
                     })
                     self.stdout.write(self.style.SUCCESS(
                         f"(saved run -> {options['save_run']})"
@@ -480,24 +308,24 @@ class Command(BaseCommand):
             # A pipeline failure (e.g. the coach returning malformed JSON) is an
             # ERROR, not a coaching-quality result. Skip the judge so an infra
             # hiccup never gets laundered into a fake low score.
-            if run_error is not None:
+            if run.run_error is not None:
                 _emit({
                     **base_report,
                     "status": "error",
-                    "error": run_error,
-                    "actions": all_actions,
-                    "final_coach_state": final_coach_state,
+                    "error": run.run_error,
+                    "actions": run.actions,
+                    "final_coach_state": run.final_coach_state,
                 })
                 self.stdout.write(self.style.ERROR(
                     "RESULT: ERROR — pipeline failure; judge skipped"
                 ))
                 return
 
-            verdict = self._judge(
+            verdict = judge_transcript(
                 harness_client,
                 phase=start_phase,
                 rubric_body=rubric_body,
-                transcript=transcript,
+                transcript=run.transcript,
                 targeted_checks=targeted_checks,
                 context=prior,
             )
@@ -526,8 +354,8 @@ class Command(BaseCommand):
                     "transitioned": final_phase != start_phase,
                     "reached_goal_phase": transition_reached,
                 },
-                "actions": all_actions,
-                "final_coach_state": final_coach_state,
+                "actions": run.actions,
+                "final_coach_state": run.final_coach_state,
             }
             if targeted_checks:
                 report["targeted_checks"] = [c.model_dump() for c in verdict.targeted_checks]
@@ -545,9 +373,7 @@ class Command(BaseCommand):
                 passed = sum(1 for c in verdict.targeted_checks if c.passed)
                 total = len(verdict.targeted_checks)
                 c_style = self.style.SUCCESS if passed == total else self.style.ERROR
-                self.stdout.write(c_style(
-                    f"CHECKS:      {passed}/{total} passed"
-                ))
+                self.stdout.write(c_style(f"CHECKS:      {passed}/{total} passed"))
                 for c in verdict.targeted_checks:
                     mark = "✓" if c.passed else "✗"
                     self.stdout.write(self.style.HTTP_INFO(f"  {mark} {c.check}"))
