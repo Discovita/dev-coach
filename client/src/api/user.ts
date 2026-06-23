@@ -1,6 +1,7 @@
 import { COACH_BASE_URL } from "@/constants/api";
 import { authFetch } from "@/utils/authFetch";
 import { createLogger, LogLevel } from "@/lib/logger";
+import type { User } from "@/types/user";
 
 const log = createLogger("userApi", LogLevel.DEBUG);
 
@@ -14,6 +15,26 @@ export async function fetchUserProfile() {
   if (!response.ok) throw new Error("Failed to fetch user profile");
   const data = await response.json();
   log.debug("Successfully fetched user profile", data);
+  return data;
+}
+
+/**
+ * Update the current authenticated user's profile (partial).
+ * PATCH /user/me/
+ *
+ * Used for editable profile fields such as first/last name.
+ */
+export async function updateUserProfile(
+  updates: Partial<Pick<User, "first_name" | "last_name">>
+): Promise<User> {
+  log.debug("Updating user profile", updates);
+  const response = await authFetch(`${COACH_BASE_URL}/user/me`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+  if (!response.ok) throw new Error("Failed to update profile");
+  const data = await response.json();
+  log.debug("Successfully updated user profile", data);
   return data;
 }
 
