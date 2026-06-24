@@ -71,7 +71,7 @@ commands wire them together.
 | **Coach** | The real pipeline: `process_message` → `build_coach_prompt` → `PromptManager` → coach LLM → action handler. | [Prompt Manager](/docs/core-systems/prompt-manager/overview), [Action Handler](/docs/core-systems/action-handler/overview) |
 | **Drive loop** | Seeds a user, drives (or replays) the conversation, records turns + actions + state. Shared by both commands. | `harness.drive_eval` |
 | **Judge** | An LLM-as-judge scoring the transcript against the phase's derived rubric + targeted checks. Stronger model. | `harness.judge_transcript` |
-| **Diff** | Drives a baseline version, replays the same turns against a candidate, and reports the delta + a pairwise comparison. | `run_coach_eval_diff` command |
+| **Diff** | Drives a baseline, replays the same turns against a candidate, and reports the delta + a pairwise comparison. The variable can be the prompt version, the coach model, or both. | `run_coach_eval_diff` command |
 | **Scenario builder** | Drives a persona from the intro phase and (optionally) freezes the end-state as a per-phase starting scenario. | `build_eval_scenario` command |
 
 ### Models used by the harness
@@ -147,6 +147,14 @@ prompt) and **after** (new prompt) on the same scenario. The harness supports th
 via [phase-scoped prompt-version pinning](/docs/testing/eval-harness/prompt-versioning):
 run the baseline pinned to the old version, run the candidate pinned to the new
 version, and diff the outcomes.
+
+The same machinery isolates a **model** change too. The replay holds the client
+side fixed, so whatever you choose to vary becomes the only difference between the
+two runs — the prompt version, the coach model, or both. Pin the *same* prompt
+version on both sides and give each a different `--baseline-model` /
+`--candidate-model`, and the diff attributes the behavior change to the model
+rather than the prompt (exactly the question raised by a GPT-4o → GPT-5.4 upgrade).
+See [Diffing two runs](/docs/testing/eval-harness/running-evals#diffing-two-runs).
 
 ### Transcript vs. judgment (the caching model)
 

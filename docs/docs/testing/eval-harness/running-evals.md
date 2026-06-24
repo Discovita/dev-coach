@@ -192,33 +192,62 @@ the only variable:
 4. **Compare the two reports** — quality score + per-criterion reasoning, targeted
    checks, and progression.
 
-For a one-shot, structured comparison, use the [diff command](#diffing-two-versions)
+For a one-shot, structured comparison, use the [diff command](#diffing-two-runs)
 instead of eyeballing two reports.
 
 The version pin is **phase-scoped** (details:
 [Prompt Version Pinning](/docs/testing/eval-harness/prompt-versioning)).
 
-## Diffing two versions
+## Diffing two runs
 
 `run_coach_eval_diff` automates the before/after in one command: it drives the
-**baseline** version with the user-bot, **replays the same user turns** against the
-**candidate** version, then reports the delta.
+**baseline** with the user-bot, **replays the same user turns** against the
+**candidate**, then reports the delta. Because the replay holds the client side
+fixed, whatever you choose to vary is the *only* difference between the two runs.
+
+There are **two independent axes** you can vary:
+
+- **Prompt** — `--baseline-version` / `--candidate-version`.
+- **Model** — `--coach-model` sets the model for **both** sides; `--baseline-model`
+  / `--candidate-model` override a **single** side.
+
+Vary one, the other, or both:
+
+| You want to compare… | How |
+| --- | --- |
+| two prompt versions (same model) | `--baseline-version` / `--candidate-version` |
+| two models (same prompt) | pin the **same** version on both sides + `--baseline-model` / `--candidate-model` |
+| a model **and** a prompt change at once | set both version flags and both model flags |
 
 Versions default the way you'd want: **candidate = the latest active version** (the
 one the coach actually runs), **baseline = the version right before it**. So a bare
 run compares "previous vs latest" — exactly the common case after you publish a new
-version. Override either flag to diff against an older version.
+version. Override either flag to diff against an older version. Models default to the
+configured `DEFAULT_AI_MODEL` on both sides.
 
 ```bash
-# Previous vs latest (the usual case — no version flags needed):
+# Previous vs latest prompt (the usual case — no version flags needed):
 docker exec dev-coach-local-backend-1 \
   python manage.py run_coach_eval_diff \
     --from-scenario "[Auto] Casey @ get_to_know_you" --out /tmp/diff.json
 
-# Or pin specific versions:
+# Or pin specific prompt versions:
 docker exec dev-coach-local-backend-1 \
   python manage.py run_coach_eval_diff --baseline-version 4 --candidate-version 6
+
+# Two models on the SAME prompt — pin the same version on both sides and vary the
+# model. This is how you isolate a model change (e.g. a GPT-4o → GPT-5.4 upgrade)
+# from any prompt difference:
+docker exec dev-coach-local-backend-1 \
+  python manage.py run_coach_eval_diff \
+    --from-scenario "[Auto] Casey @ i_am_statement" \
+    --baseline-version 1 --candidate-version 1 \
+    --baseline-model gpt-4o --candidate-model gpt-5.4
 ```
+
+Each side's prompt version and model are echoed in the run header and the terminal
+`PROMPTS:` / `MODELS:` summary lines, and recorded per-side in the report JSON
+(`baseline.model` / `candidate.model`).
 
 It reports four things:
 
@@ -236,11 +265,13 @@ It reports four things:
   beats differencing two absolute scores.
 
 Flags: `--candidate-version` (defaults to latest active), `--baseline-version`
-(defaults to the version right before the candidate), `--from-scenario`,
-`--persona`, `--coach-model` (one model for both runs — the prompt is the
-variable), `--check`, `--max-turns`, `--out PATH`, `--keep`. If there's no version
-below the candidate (only one exists), it errors and asks you to pass
-`--baseline-version`.
+(defaults to the version right before the candidate), `--coach-model` (model for
+both sides; defaults to `DEFAULT_AI_MODEL`), `--baseline-model` / `--candidate-model`
+(override the model on one side), `--from-scenario`, `--persona`, `--check`,
+`--max-turns`, `--out PATH`, `--keep`. If there's no version below the candidate
+(only one exists) and you haven't pinned `--candidate-version` equal to it, it
+errors and asks you to pass `--baseline-version` — pass the same version to both
+flags when you only want to vary the model.
 
 > **One sample, live coach.** Replay fixes the *user* turns, but the coach is still
 > a live LLM and the pairwise judge has mild position bias — one diff is a single
