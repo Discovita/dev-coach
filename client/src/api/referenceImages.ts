@@ -1,11 +1,11 @@
 import { COACH_BASE_URL } from "@/constants/api";
-import { authFetch } from "@/utils/authFetch";
+import { LogLevel, createLogger } from "@/lib/logger";
 import type {
-  ReferenceImage,
-  CreateReferenceImageRequest,
-  UpdateReferenceImageRequest,
+	CreateReferenceImageRequest,
+	ReferenceImage,
+	UpdateReferenceImageRequest,
 } from "@/types/referenceImage";
-import { createLogger, LogLevel } from "@/lib/logger";
+import { authFetch } from "@/utils/authFetch";
 
 const log = createLogger("referenceImagesApi", LogLevel.DEBUG);
 
@@ -31,21 +31,21 @@ const log = createLogger("referenceImagesApi", LogLevel.DEBUG);
  * @returns Array of ReferenceImage objects.
  */
 export async function listReferenceImages(
-  userId?: string
+	userId?: string,
 ): Promise<ReferenceImage[]> {
-  log.debug("Fetching reference images", { userId });
-  const url = userId
-    ? `${COACH_BASE_URL}/reference-images?user_id=${userId}`
-    : `${COACH_BASE_URL}/reference-images`;
-  const response = await authFetch(url, {
-    method: "GET",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch reference images");
-  }
-  const data = await response.json();
-  log.debug("Successfully fetched reference images", data);
-  return data;
+	log.debug("Fetching reference images", { userId });
+	const url = userId
+		? `${COACH_BASE_URL}/reference-images?user_id=${userId}`
+		: `${COACH_BASE_URL}/reference-images`;
+	const response = await authFetch(url, {
+		method: "GET",
+	});
+	if (!response.ok) {
+		throw new Error("Failed to fetch reference images");
+	}
+	const data = await response.json();
+	log.debug("Successfully fetched reference images", data);
+	return data;
 }
 
 /**
@@ -55,16 +55,16 @@ export async function listReferenceImages(
  * @returns ReferenceImage object.
  */
 export async function getReferenceImage(id: string): Promise<ReferenceImage> {
-  log.debug(`Fetching reference image ${id}`);
-  const response = await authFetch(`${COACH_BASE_URL}/reference-images/${id}`, {
-    method: "GET",
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch reference image ${id}`);
-  }
-  const data = await response.json();
-  log.debug("Successfully fetched reference image", data);
-  return data;
+	log.debug(`Fetching reference image ${id}`);
+	const response = await authFetch(`${COACH_BASE_URL}/reference-images/${id}`, {
+		method: "GET",
+	});
+	if (!response.ok) {
+		throw new Error(`Failed to fetch reference image ${id}`);
+	}
+	const data = await response.json();
+	log.debug("Successfully fetched reference image", data);
+	return data;
 }
 
 /**
@@ -75,28 +75,30 @@ export async function getReferenceImage(id: string): Promise<ReferenceImage> {
  * @returns Created ReferenceImage object.
  */
 export async function createReferenceImage(
-  data: CreateReferenceImageRequest,
-  imageFile?: File
+	data: CreateReferenceImageRequest,
+	imageFile?: File,
 ): Promise<ReferenceImage> {
-  log.debug("Creating reference image", data);
-  const formData = new FormData();
-  
-  if (data.name) formData.append("name", data.name);
-  if (data.order !== undefined) formData.append("order", data.order.toString());
-  if (data.user_id) formData.append("user_id", data.user_id);
-  if (imageFile) formData.append("image", imageFile);
+	log.debug("Creating reference image", data);
+	const formData = new FormData();
 
-  const response = await authFetch(`${COACH_BASE_URL}/reference-images`, {
-    method: "POST",
-    body: formData,
-  });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to create reference image" }));
-    throw new Error(error.error || "Failed to create reference image");
-  }
-  const result = await response.json();
-  log.debug("Successfully created reference image", result);
-  return result;
+	if (data.name) formData.append("name", data.name);
+	if (data.order !== undefined) formData.append("order", data.order.toString());
+	if (data.user_id) formData.append("user_id", data.user_id);
+	if (imageFile) formData.append("image", imageFile);
+
+	const response = await authFetch(`${COACH_BASE_URL}/reference-images`, {
+		method: "POST",
+		body: formData,
+	});
+	if (!response.ok) {
+		const error = await response
+			.json()
+			.catch(() => ({ error: "Failed to create reference image" }));
+		throw new Error(error.error || "Failed to create reference image");
+	}
+	const result = await response.json();
+	log.debug("Successfully created reference image", result);
+	return result;
 }
 
 /**
@@ -107,20 +109,20 @@ export async function createReferenceImage(
  * @returns Updated ReferenceImage object.
  */
 export async function updateReferenceImage(
-  id: string,
-  data: UpdateReferenceImageRequest
+	id: string,
+	data: UpdateReferenceImageRequest,
 ): Promise<ReferenceImage> {
-  log.debug(`Updating reference image ${id}`, data);
-  const response = await authFetch(`${COACH_BASE_URL}/reference-images/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to update reference image ${id}`);
-  }
-  const result = await response.json();
-  log.debug("Successfully updated reference image", result);
-  return result;
+	log.debug(`Updating reference image ${id}`, data);
+	const response = await authFetch(`${COACH_BASE_URL}/reference-images/${id}`, {
+		method: "PATCH",
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
+		throw new Error(`Failed to update reference image ${id}`);
+	}
+	const result = await response.json();
+	log.debug("Successfully updated reference image", result);
+	return result;
 }
 
 /**
@@ -129,14 +131,14 @@ export async function updateReferenceImage(
  * @param id - The UUID of the reference image to delete.
  */
 export async function deleteReferenceImage(id: string): Promise<void> {
-  log.debug(`Deleting reference image ${id}`);
-  const response = await authFetch(`${COACH_BASE_URL}/reference-images/${id}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to delete reference image ${id}`);
-  }
-  log.debug("Successfully deleted reference image");
+	log.debug(`Deleting reference image ${id}`);
+	const response = await authFetch(`${COACH_BASE_URL}/reference-images/${id}`, {
+		method: "DELETE",
+	});
+	if (!response.ok) {
+		throw new Error(`Failed to delete reference image ${id}`);
+	}
+	log.debug("Successfully deleted reference image");
 }
 
 /**
@@ -147,25 +149,27 @@ export async function deleteReferenceImage(id: string): Promise<void> {
  * @returns Updated ReferenceImage object with new image URLs.
  */
 export async function uploadReferenceImage(
-  id: string,
-  imageFile: File
+	id: string,
+	imageFile: File,
 ): Promise<ReferenceImage> {
-  log.debug(`Uploading image for reference image ${id}`);
-  const formData = new FormData();
-  formData.append("image", imageFile);
+	log.debug(`Uploading image for reference image ${id}`);
+	const formData = new FormData();
+	formData.append("image", imageFile);
 
-  const response = await authFetch(
-    `${COACH_BASE_URL}/reference-images/${id}/upload-image`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to upload image" }));
-    throw new Error(error.error || "Failed to upload image");
-  }
-  const result = await response.json();
-  log.debug("Successfully uploaded reference image", result);
-  return result;
+	const response = await authFetch(
+		`${COACH_BASE_URL}/reference-images/${id}/upload-image`,
+		{
+			method: "POST",
+			body: formData,
+		},
+	);
+	if (!response.ok) {
+		const error = await response
+			.json()
+			.catch(() => ({ error: "Failed to upload image" }));
+		throw new Error(error.error || "Failed to upload image");
+	}
+	const result = await response.json();
+	log.debug("Successfully uploaded reference image", result);
+	return result;
 }

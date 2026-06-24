@@ -1,9 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchIdentities } from "@/api/user";
-import { fetchTestScenarioUserIdentities } from "@/api/testScenarioUser";
 import { adminReorderIdentities, reorderIdentities } from "@/api/identities";
+import { fetchTestScenarioUserIdentities } from "@/api/testScenarioUser";
+import { fetchIdentities } from "@/api/user";
 import { useUserTarget } from "@/context/UserTargetContext";
 import type { Identity } from "@/types/identity";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 /**
  * useIdentities hook

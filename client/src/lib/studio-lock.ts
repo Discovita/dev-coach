@@ -15,7 +15,7 @@ export const STUDIO_LOCKED_MESSAGE = "This isn't available yet.";
  * unlocked Studio to a user who hasn't earned it.
  */
 export function isStudioLocked(coachState: CoachState | undefined): boolean {
-  return coachState?.current_phase !== CoachingPhase.IDENTITY_VISUALIZATION;
+	return coachState?.current_phase !== CoachingPhase.IDENTITY_VISUALIZATION;
 }
 
 /**
@@ -39,12 +39,12 @@ export const VISUALIZATION_INTRO_VIDEO_KEY = "visualization_session_intro";
  * "Go to the Studio" chat gate.
  */
 export function isCoachingComplete(
-  coachState: CoachState | undefined,
+	coachState: CoachState | undefined,
 ): boolean {
-  if (coachState?.current_phase !== CoachingPhase.IDENTITY_VISUALIZATION) {
-    return false;
-  }
-  return (coachState.shown_videos ?? []).includes(
-    VISUALIZATION_INTRO_VIDEO_KEY,
-  );
+	if (coachState?.current_phase !== CoachingPhase.IDENTITY_VISUALIZATION) {
+		return false;
+	}
+	return (coachState.shown_videos ?? []).includes(
+		VISUALIZATION_INTRO_VIDEO_KEY,
+	);
 }

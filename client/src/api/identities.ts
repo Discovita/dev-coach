@@ -1,7 +1,7 @@
 import { COACH_BASE_URL } from "@/constants/api";
-import { authFetch } from "@/utils/authFetch";
-import { createLogger, LogLevel } from "@/lib/logger";
+import { LogLevel, createLogger } from "@/lib/logger";
 import type { Identity, UpdateIdentityRequest } from "@/types/identity";
+import { authFetch } from "@/utils/authFetch";
 
 const log = createLogger("identitiesApi", LogLevel.DEBUG);
 

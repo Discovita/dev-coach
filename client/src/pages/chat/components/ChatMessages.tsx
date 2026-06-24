@@ -1,13 +1,13 @@
-import React from "react";
-import { motion } from "framer-motion";
 import { CoachMessage } from "@/pages/chat/components/CoachMessage";
-import { CoachMessageWithComponent } from "@/pages/chat/components/coach-message-with-component/CoachMessageWithComponent.tsx";
-import { UserMessage } from "@/pages/chat/components/UserMessage";
-import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { LoadingBubbles } from "@/pages/chat/components/LoadingBubbles";
-import type { Message } from "@/types/message";
+import { UserMessage } from "@/pages/chat/components/UserMessage";
+import { CoachMessageWithComponent } from "@/pages/chat/components/coach-message-with-component/CoachMessageWithComponent.tsx";
 import type { CoachRequest } from "@/types/coachRequest";
 import type { ComponentConfig } from "@/types/componentConfig";
+import type { Message } from "@/types/message";
+import MarkdownRenderer from "@/utils/MarkdownRenderer";
+import { motion } from "framer-motion";
+import type React from "react";
 
 /**
  * ChatMessages component is used to render the chat messages in both the

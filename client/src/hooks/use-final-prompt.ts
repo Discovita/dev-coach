@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useUserTarget } from "@/context/UserTargetContext";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * useFinalPrompt hook
@@ -16,12 +16,12 @@ import { useUserTarget } from "@/context/UserTargetContext";
  * Used in: Any component that needs to display the latest final prompt from the coach.
  */
 export function useFinalPrompt(): string | undefined {
-  const { queryKeyPrefix } = useUserTarget();
+	const { queryKeyPrefix } = useUserTarget();
 
-  const { data } = useQuery<string | undefined>({
-    queryKey: [...queryKeyPrefix, "finalPrompt"],
-    queryFn: () => undefined,
-    enabled: false,
-  });
-  return data;
+	const { data } = useQuery<string | undefined>({
+		queryKey: [...queryKeyPrefix, "finalPrompt"],
+		queryFn: () => undefined,
+		enabled: false,
+	});
+	return data;
 }

@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useMemo } from "react";
 import {
-  ImpersonationContext,
-  type ImpersonatedUser,
-  type ImpersonationContextValue,
+	type ImpersonatedUser,
+	ImpersonationContext,
+	type ImpersonationContextValue,
 } from "@/context/ImpersonationContext";
+import type React from "react";
+import { useCallback, useMemo, useState } from "react";
 
 /**
  * ImpersonationProvider
@@ -19,31 +20,31 @@ import {
  *   </ImpersonationProvider>
  */
 export const ImpersonationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
+	children,
 }) => {
-  const [impersonatedUser, setImpersonatedUser] =
-    useState<ImpersonatedUser | null>(null);
+	const [impersonatedUser, setImpersonatedUser] =
+		useState<ImpersonatedUser | null>(null);
 
-  const startImpersonating = useCallback((user: ImpersonatedUser) => {
-    setImpersonatedUser(user);
-  }, []);
+	const startImpersonating = useCallback((user: ImpersonatedUser) => {
+		setImpersonatedUser(user);
+	}, []);
 
-  const stopImpersonating = useCallback(() => {
-    setImpersonatedUser(null);
-  }, []);
+	const stopImpersonating = useCallback(() => {
+		setImpersonatedUser(null);
+	}, []);
 
-  const value = useMemo<ImpersonationContextValue>(
-    () => ({
-      impersonatedUser,
-      startImpersonating,
-      stopImpersonating,
-    }),
-    [impersonatedUser, startImpersonating, stopImpersonating]
-  );
+	const value = useMemo<ImpersonationContextValue>(
+		() => ({
+			impersonatedUser,
+			startImpersonating,
+			stopImpersonating,
+		}),
+		[impersonatedUser, startImpersonating, stopImpersonating],
+	);
 
-  return (
-    <ImpersonationContext.Provider value={value}>
-      {children}
-    </ImpersonationContext.Provider>
-  );
+	return (
+		<ImpersonationContext.Provider value={value}>
+			{children}
+		</ImpersonationContext.Provider>
+	);
 };

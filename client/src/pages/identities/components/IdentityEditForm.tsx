@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { adminUpdateIdentity, updateIdentity } from "@/api/identities";
-import { useUserTarget } from "@/context/UserTargetContext";
-import type { Identity, UpdateIdentityRequest } from "@/types/identity";
-import { IdentityCategory } from "@/enums/identityCategory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useUserTarget } from "@/context/UserTargetContext";
+import { IdentityCategory } from "@/enums/identityCategory";
+import type { Identity, UpdateIdentityRequest } from "@/types/identity";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 import { CategoryPill } from "./CategoryPill";
 
 /**

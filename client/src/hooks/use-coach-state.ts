@@ -1,14 +1,14 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
-import { fetchCoachState } from "@/api/user";
 import { fetchTestScenarioUserCoachState } from "@/api/testScenarioUser";
+import { fetchCoachState } from "@/api/user";
 import { useUserTarget } from "@/context/UserTargetContext";
 import type { CoachState } from "@/types/coachState";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
 type UseCoachStateResult = {
-  coachState: CoachState | undefined;
-  isLoading: boolean;
-  isError: boolean;
-  refetchCoachState: UseQueryResult<CoachState, Error>["refetch"];
+	coachState: CoachState | undefined;
+	isLoading: boolean;
+	isError: boolean;
+	refetchCoachState: UseQueryResult<CoachState, Error>["refetch"];
 };
 
 /**
@@ -22,22 +22,22 @@ type UseCoachStateResult = {
  * Used in: Any component that needs to read the coach state.
  */
 export function useCoachState(): UseCoachStateResult {
-  const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
+	const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
 
-  const { data, isLoading, isError, refetch } = useQuery<CoachState, Error>({
-    queryKey: [...queryKeyPrefix, "coachState"],
-    queryFn: isImpersonating
-      ? () => fetchTestScenarioUserCoachState(targetUserId!)
-      : fetchCoachState,
-    enabled: isImpersonating ? !!targetUserId : true,
-    staleTime: 0,
-    retry: false,
-  });
+	const { data, isLoading, isError, refetch } = useQuery<CoachState, Error>({
+		queryKey: [...queryKeyPrefix, "coachState"],
+		queryFn: isImpersonating
+			? () => fetchTestScenarioUserCoachState(targetUserId!)
+			: fetchCoachState,
+		enabled: isImpersonating ? !!targetUserId : true,
+		staleTime: 0,
+		retry: false,
+	});
 
-  return {
-    coachState: data,
-    isLoading,
-    isError,
-    refetchCoachState: refetch,
-  };
+	return {
+		coachState: data,
+		isLoading,
+		isError,
+		refetchCoachState: refetch,
+	};
 }

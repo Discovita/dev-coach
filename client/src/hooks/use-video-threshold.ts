@@ -31,29 +31,29 @@ export const END_THRESHOLD_SECONDS = 20;
 export const SHORT_VIDEO_THRESHOLD_FRACTION = 0.5;
 
 export interface UseVideoThresholdResult {
-  thresholdReached: boolean;
-  onTimeUpdate: (currentTime: number, duration: number) => void;
+	thresholdReached: boolean;
+	onTimeUpdate: (currentTime: number, duration: number) => void;
 }
 
 export function useVideoThreshold(): UseVideoThresholdResult {
-  const [thresholdReached, setThresholdReached] = useState(false);
+	const [thresholdReached, setThresholdReached] = useState(false);
 
-  const onTimeUpdate = useCallback(
-    (currentTime: number, duration: number) => {
-      if (thresholdReached) return;
-      if (!Number.isFinite(duration) || duration <= 0) return;
+	const onTimeUpdate = useCallback(
+		(currentTime: number, duration: number) => {
+			if (thresholdReached) return;
+			if (!Number.isFinite(duration) || duration <= 0) return;
 
-      const thresholdSeconds =
-        duration > SHORT_VIDEO_CUTOFF_SECONDS
-          ? duration - END_THRESHOLD_SECONDS
-          : duration * SHORT_VIDEO_THRESHOLD_FRACTION;
+			const thresholdSeconds =
+				duration > SHORT_VIDEO_CUTOFF_SECONDS
+					? duration - END_THRESHOLD_SECONDS
+					: duration * SHORT_VIDEO_THRESHOLD_FRACTION;
 
-      if (currentTime >= thresholdSeconds) {
-        setThresholdReached(true);
-      }
-    },
-    [thresholdReached]
-  );
+			if (currentTime >= thresholdSeconds) {
+				setThresholdReached(true);
+			}
+		},
+		[thresholdReached],
+	);
 
-  return { thresholdReached, onTimeUpdate };
+	return { thresholdReached, onTimeUpdate };
 }

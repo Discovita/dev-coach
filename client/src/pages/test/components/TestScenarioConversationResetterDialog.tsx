@@ -1,63 +1,66 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 
 interface TestScenarioConversationResetterDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  isResetting: boolean;
+	isOpen: boolean;
+	onClose: () => void;
+	onConfirm: () => void;
+	isResetting: boolean;
 }
 
 export function TestScenarioConversationResetterDialog({
-  isOpen,
-  onClose,
-  onConfirm,
-  isResetting,
+	isOpen,
+	onClose,
+	onConfirm,
+	isResetting,
 }: TestScenarioConversationResetterDialogProps) {
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle className="text-red-700">Reset Test Scenario</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to reset the test state?
-            <br />
-            This will reset the entire chat history, identites, coach state, and user notes to the start of the test scenario,
-            <br />
-            <span className="font-semibold text-red-700">
-              This action cannot be undone.
-            </span>
-          </DialogDescription>
-        </DialogHeader>
-        {isResetting && (
-          <div className="flex items-center gap-2 py-4">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-muted-foreground">
-              Resetting test conversation...
-            </span>
-          </div>
-        )}
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isResetting}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isResetting}
-          >
-            {isResetting ? "Resetting..." : "Reset"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+	return (
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="max-w-[400px]">
+				<DialogHeader>
+					<DialogTitle className="text-red-700">
+						Reset Test Scenario
+					</DialogTitle>
+					<DialogDescription>
+						Are you sure you want to reset the test state?
+						<br />
+						This will reset the entire chat history, identites, coach state, and
+						user notes to the start of the test scenario,
+						<br />
+						<span className="font-semibold text-red-700">
+							This action cannot be undone.
+						</span>
+					</DialogDescription>
+				</DialogHeader>
+				{isResetting && (
+					<div className="flex items-center gap-2 py-4">
+						<Loader2 className="h-4 w-4 animate-spin" />
+						<span className="text-sm text-muted-foreground">
+							Resetting test conversation...
+						</span>
+					</div>
+				)}
+				<DialogFooter>
+					<Button variant="outline" onClick={onClose} disabled={isResetting}>
+						Cancel
+					</Button>
+					<Button
+						variant="destructive"
+						onClick={onConfirm}
+						disabled={isResetting}
+					>
+						{isResetting ? "Resetting..." : "Reset"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
 }

@@ -1,57 +1,57 @@
-import {
-  COACH_BASE_URL,
-  REGISTER,
-  LOGIN,
-  FORGOT_PASSWORD,
-  RESET_PASSWORD,
-  VERIFY_EMAIL,
-  RESEND_VERIFICATION,
-} from "@/constants/api";
-import {
-  type RegisterCredentials,
-  type LoginCredentials,
-  type AuthResponse,
-  type ResetPasswordCredentials,
-} from "@/types/auth";
 import { fetchUserComplete } from "@/api/user";
-import { createLogger, LogLevel } from "@/lib/logger";
+import {
+	COACH_BASE_URL,
+	FORGOT_PASSWORD,
+	LOGIN,
+	REGISTER,
+	RESEND_VERIFICATION,
+	RESET_PASSWORD,
+	VERIFY_EMAIL,
+} from "@/constants/api";
+import { LogLevel, createLogger } from "@/lib/logger";
+import type {
+	AuthResponse,
+	LoginCredentials,
+	RegisterCredentials,
+	ResetPasswordCredentials,
+} from "@/types/auth";
 
 const log = createLogger("auth", LogLevel.DEBUG);
 /**
  * Helper to get a cookie value by name.
  */
 export function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() ?? null;
-  return null;
+	const value = `; ${document.cookie}`;
+	const parts = value.split(`; ${name}=`);
+	if (parts.length === 2) return parts.pop()?.split(";").shift() ?? null;
+	return null;
 }
 
 export function setCookie(
-  name: string,
-  value: string,
-  maxAge: number = 60 * 60 * 24
+	name: string,
+	value: string,
+	maxAge: number = 60 * 60 * 24,
 ) {
-  const cookieOptions = [
-    `${name}=${value}`,
-    "path=/",
-    `max-age=${maxAge}`,
-    "SameSite=Lax",
-  ];
-  if (import.meta.env.MODE === "production") {
-    cookieOptions.push("secure");
-    if (import.meta.env.VITE_COOKIE_DOMAIN) {
-      cookieOptions.push(`domain=${import.meta.env.VITE_COOKIE_DOMAIN}`);
-    }
-  }
-  document.cookie = cookieOptions.join("; ");
+	const cookieOptions = [
+		`${name}=${value}`,
+		"path=/",
+		`max-age=${maxAge}`,
+		"SameSite=Lax",
+	];
+	if (import.meta.env.MODE === "production") {
+		cookieOptions.push("secure");
+		if (import.meta.env.VITE_COOKIE_DOMAIN) {
+			cookieOptions.push(`domain=${import.meta.env.VITE_COOKIE_DOMAIN}`);
+		}
+	}
+	document.cookie = cookieOptions.join("; ");
 }
 
 /**
  * Helper to remove a cookie.
  */
 export function removeCookie(name: string) {
-  setCookie(name, "", -1);
+	setCookie(name, "", -1);
 }
 
 /**
@@ -59,29 +59,29 @@ export function removeCookie(name: string) {
  * Sets cookies if successful, then fetches complete user data.
  */
 export async function login(userData: LoginCredentials): Promise<AuthResponse> {
-  const loginUrl = `${COACH_BASE_URL}${LOGIN}`;
-  log.debug("Login URL:", loginUrl);
-  const response = await fetch(loginUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData),
-  });
-  if (!response.ok) {
-    const errorBody = await response.text();
-    try {
-      return JSON.parse(errorBody) as AuthResponse;
-    } catch {
-      throw new Error(`Login failed with status ${response.status}`);
-    }
-  }
-  const data: AuthResponse = await response.json();
-  if (data.tokens) {
-    setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
-    setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
-    const user = await fetchUserComplete();
-    return { ...data, user };
-  }
-  return data;
+	const loginUrl = `${COACH_BASE_URL}${LOGIN}`;
+	log.debug("Login URL:", loginUrl);
+	const response = await fetch(loginUrl, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(userData),
+	});
+	if (!response.ok) {
+		const errorBody = await response.text();
+		try {
+			return JSON.parse(errorBody) as AuthResponse;
+		} catch {
+			throw new Error(`Login failed with status ${response.status}`);
+		}
+	}
+	const data: AuthResponse = await response.json();
+	if (data.tokens) {
+		setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
+		setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
+		const user = await fetchUserComplete();
+		return { ...data, user };
+	}
+	return data;
 }
 
 /**
@@ -89,58 +89,58 @@ export async function login(userData: LoginCredentials): Promise<AuthResponse> {
  * Sets cookies if successful, then fetches complete user data.
  */
 export async function register(
-  userData: RegisterCredentials
+	userData: RegisterCredentials,
 ): Promise<AuthResponse> {
-  const registerUrl = `${COACH_BASE_URL}${REGISTER}`;
-  const response = await fetch(registerUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData),
-  });
-  if (!response.ok) {
-    const errorBody = await response.text();
-    try {
-      return JSON.parse(errorBody) as AuthResponse;
-    } catch {
-      throw new Error(`Registration failed with status ${response.status}`);
-    }
-  }
-  const data: AuthResponse = await response.json();
-  if (data.tokens) {
-    setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
-    setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
-    const user = await fetchUserComplete();
-    return { ...data, user };
-  }
-  return data;
+	const registerUrl = `${COACH_BASE_URL}${REGISTER}`;
+	const response = await fetch(registerUrl, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(userData),
+	});
+	if (!response.ok) {
+		const errorBody = await response.text();
+		try {
+			return JSON.parse(errorBody) as AuthResponse;
+		} catch {
+			throw new Error(`Registration failed with status ${response.status}`);
+		}
+	}
+	const data: AuthResponse = await response.json();
+	if (data.tokens) {
+		setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
+		setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
+		const user = await fetchUserComplete();
+		return { ...data, user };
+	}
+	return data;
 }
 
 /**
  * Initiate forgot password flow.
  */
 export async function forgotPassword(email: string): Promise<AuthResponse> {
-  const forgotPasswordUrl = `${COACH_BASE_URL}${FORGOT_PASSWORD}`;
-  const response = await fetch(forgotPasswordUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-  });
-  return response.json();
+	const forgotPasswordUrl = `${COACH_BASE_URL}${FORGOT_PASSWORD}`;
+	const response = await fetch(forgotPasswordUrl, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ email }),
+	});
+	return response.json();
 }
 
 /**
  * Reset password with token and new password.
  */
 export async function resetPassword(
-  creds: ResetPasswordCredentials
+	creds: ResetPasswordCredentials,
 ): Promise<AuthResponse> {
-  const resetPasswordUrl = `${COACH_BASE_URL}${RESET_PASSWORD}`;
-  const response = await fetch(resetPasswordUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(creds),
-  });
-  return response.json();
+	const resetPasswordUrl = `${COACH_BASE_URL}${RESET_PASSWORD}`;
+	const response = await fetch(resetPasswordUrl, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(creds),
+	});
+	return response.json();
 }
 
 /**
@@ -148,42 +148,40 @@ export async function resetPassword(
  * On success the backend returns tokens, so we log the user straight in.
  */
 export async function verifyEmail(token: string): Promise<AuthResponse> {
-  const verifyEmailUrl = `${COACH_BASE_URL}${VERIFY_EMAIL}`;
-  const response = await fetch(verifyEmailUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
-  });
-  const data: AuthResponse = await response.json();
-  if (data.tokens) {
-    setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
-    setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
-    const user = await fetchUserComplete();
-    return { ...data, user };
-  }
-  return data;
+	const verifyEmailUrl = `${COACH_BASE_URL}${VERIFY_EMAIL}`;
+	const response = await fetch(verifyEmailUrl, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ token }),
+	});
+	const data: AuthResponse = await response.json();
+	if (data.tokens) {
+		setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
+		setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
+		const user = await fetchUserComplete();
+		return { ...data, user };
+	}
+	return data;
 }
 
 /**
  * Re-send the verification email for an unverified account.
  */
-export async function resendVerification(
-  email: string
-): Promise<AuthResponse> {
-  const resendUrl = `${COACH_BASE_URL}${RESEND_VERIFICATION}`;
-  const response = await fetch(resendUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-  });
-  return response.json();
+export async function resendVerification(email: string): Promise<AuthResponse> {
+	const resendUrl = `${COACH_BASE_URL}${RESEND_VERIFICATION}`;
+	const response = await fetch(resendUrl, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ email }),
+	});
+	return response.json();
 }
 
 /**
  * Log out the user by clearing cookies.
  */
 export async function logout(): Promise<void> {
-  removeCookie("neovita-access-token");
-  removeCookie("neovita-refresh-token");
-  // Optionally, you can also call a backend logout endpoint here.
+	removeCookie("neovita-access-token");
+	removeCookie("neovita-refresh-token");
+	// Optionally, you can also call a backend logout endpoint here.
 }

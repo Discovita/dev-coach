@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
 import { downloadIAmStatementsPdf } from "@/api/identities";
 import { useUserTarget } from "@/context/UserTargetContext";
+import { useMutation } from "@tanstack/react-query";
 
 /**
  * useDownloadIAmPdf hook
@@ -28,32 +28,32 @@ import { useUserTarget } from "@/context/UserTargetContext";
  * Used in: IAmStatementsSummaryComponent.tsx
  */
 export function useDownloadIAmPdf() {
-  const { isImpersonating, targetUserId } = useUserTarget();
-  const mutation = useMutation({
-    mutationFn: async () => {
-      // When impersonating (test scenario or global), hit the admin endpoint
-      // for the targeted user; otherwise download the logged-in user's PDF.
-      const blob = await downloadIAmStatementsPdf(
-        isImpersonating ? (targetUserId ?? undefined) : undefined,
-      );
+	const { isImpersonating, targetUserId } = useUserTarget();
+	const mutation = useMutation({
+		mutationFn: async () => {
+			// When impersonating (test scenario or global), hit the admin endpoint
+			// for the targeted user; otherwise download the logged-in user's PDF.
+			const blob = await downloadIAmStatementsPdf(
+				isImpersonating ? (targetUserId ?? undefined) : undefined,
+			);
 
-      // Create a download link and trigger the download
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "i-am-statements.pdf";
-      document.body.appendChild(a);
-      a.click();
+			// Create a download link and trigger the download
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = "i-am-statements.pdf";
+			document.body.appendChild(a);
+			a.click();
 
-      // Clean up
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    },
-  });
+			// Clean up
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		},
+	});
 
-  return {
-    downloadPdf: mutation.mutate,
-    isDownloading: mutation.isPending,
-    error: mutation.error,
-  };
+	return {
+		downloadPdf: mutation.mutate,
+		isDownloading: mutation.isPending,
+		error: mutation.error,
+	};
 }

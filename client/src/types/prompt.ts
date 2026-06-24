@@ -21,18 +21,18 @@
  * Used by: API calls (fetching, creating, updating prompts), form state, etc.
  */
 export interface Prompt {
-  id: string;
-  coaching_phase: string | null;
-  prompt_type: string;
-  version: number;
-  name?: string | null;
-  description?: string | null;
-  body: string;
-  required_context_keys: string[];
-  allowed_actions: string[];
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+	id: string;
+	coaching_phase: string | null;
+	prompt_type: string;
+	version: number;
+	name?: string | null;
+	description?: string | null;
+	body: string;
+	required_context_keys: string[];
+	allowed_actions: string[];
+	is_active: boolean;
+	created_at: string;
+	updated_at: string;
 }
 
 /**
@@ -43,12 +43,12 @@ export interface Prompt {
  * Used by: NewPromptForm, API calls to create prompts.
  */
 export interface PromptCreate {
-  coaching_phase?: string | null;
-  prompt_type?: string;
-  name?: string | null;
-  description?: string | null;
-  body: string;
-  required_context_keys?: string[];
-  allowed_actions?: string[];
-  is_active?: boolean; // Optional, defaults to true on backend
+	coaching_phase?: string | null;
+	prompt_type?: string;
+	name?: string | null;
+	description?: string | null;
+	body: string;
+	required_context_keys?: string[];
+	allowed_actions?: string[];
+	is_active?: boolean; // Optional, defaults to true on backend
 }

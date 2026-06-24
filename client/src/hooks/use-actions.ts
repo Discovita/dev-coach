@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchActions } from "@/api/user";
 import { fetchTestScenarioUserActions } from "@/api/testScenarioUser";
+import { fetchActions } from "@/api/user";
 import { useUserTarget } from "@/context/UserTargetContext";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 /**
  * useActions hook
@@ -14,39 +14,36 @@ import { useUserTarget } from "@/context/UserTargetContext";
  * Used in: Any component that needs to read the user's actions.
  */
 export function useActions() {
-  const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
-  const queryClient = useQueryClient();
+	const { isImpersonating, targetUserId, queryKeyPrefix } = useUserTarget();
+	const queryClient = useQueryClient();
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: [...queryKeyPrefix, "actions"],
-    queryFn: isImpersonating
-      ? () => fetchTestScenarioUserActions(targetUserId!)
-      : fetchActions,
-    enabled: isImpersonating ? !!targetUserId : true,
-    staleTime: 1000 * 60 * 10,
-    retry: false,
-  });
+	const { data, isLoading, isError, refetch } = useQuery({
+		queryKey: [...queryKeyPrefix, "actions"],
+		queryFn: isImpersonating
+			? () => fetchTestScenarioUserActions(targetUserId!)
+			: fetchActions,
+		enabled: isImpersonating ? !!targetUserId : true,
+		staleTime: 1000 * 60 * 10,
+		retry: false,
+	});
 
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      throw new Error("Update actions not implemented");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...queryKeyPrefix, "actions"] });
-    },
-  });
+	const updateMutation = useMutation({
+		mutationFn: async () => {
+			throw new Error("Update actions not implemented");
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: [...queryKeyPrefix, "actions"],
+			});
+		},
+	});
 
-  return {
-    actions: data || [],
-    isLoading,
-    isError,
-    refetchActions: refetch,
-    updateActions: updateMutation.mutateAsync,
-    updateStatus: updateMutation.status,
-  };
+	return {
+		actions: data || [],
+		isLoading,
+		isError,
+		refetchActions: refetch,
+		updateActions: updateMutation.mutateAsync,
+		updateStatus: updateMutation.status,
+	};
 }

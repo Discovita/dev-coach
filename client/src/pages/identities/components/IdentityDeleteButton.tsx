@@ -1,11 +1,4 @@
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
 import { adminDeleteIdentity, deleteIdentity } from "@/api/identities";
-import { useUserTarget } from "@/context/UserTargetContext";
-import type { Identity } from "@/types/identity";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -16,6 +9,13 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { useUserTarget } from "@/context/UserTargetContext";
+import type { Identity } from "@/types/identity";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 /**
  * Delete affordance for the identity detail page: a destructive trash button

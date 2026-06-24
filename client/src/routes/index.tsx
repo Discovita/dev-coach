@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
 import LandingPage from "@/pages/landing/LandingPage";
+import { createFileRoute } from "@tanstack/react-router";
 
 /**
  * Root route (/) - Public landing page
@@ -7,7 +7,7 @@ import LandingPage from "@/pages/landing/LandingPage";
  * Uses PublicLayout for consistent navbar and footer
  */
 export const Route = createFileRoute("/")({
-  component: function RootLandingPage() {
-    return <LandingPage />;
-  },
+	component: function RootLandingPage() {
+		return <LandingPage />;
+	},
 });

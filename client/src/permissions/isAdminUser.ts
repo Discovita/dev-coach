@@ -11,6 +11,6 @@ import type { User } from "@/types/user";
  * Use this instead of inline is_staff checks everywhere.
  */
 export function isAdminUser(user: User | undefined | null): boolean {
-  if (!user) return false;
-  return Boolean(user.is_staff || user.is_superuser);
+	if (!user) return false;
+	return Boolean(user.is_staff || user.is_superuser);
 }

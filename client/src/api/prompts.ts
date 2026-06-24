@@ -13,7 +13,7 @@
  * - deletePrompt:           DELETE /api/prompts/{id}/
  */
 import { COACH_BASE_URL } from "@/constants/api";
-import { type Prompt, type PromptCreate } from "@/types/prompt";
+import type { Prompt, PromptCreate } from "@/types/prompt";
 import { authFetch } from "@/utils/authFetch";
 
 /**
@@ -23,12 +23,12 @@ import { authFetch } from "@/utils/authFetch";
  * Used by: usePrompts hook, PromptsTabs, etc.
  */
 export async function fetchAllPrompts(): Promise<Prompt[]> {
-  const url = `${COACH_BASE_URL}/prompts`;
-  const response = await authFetch(url);
-  if (!response.ok) {
-    throw new Error("Failed to fetch prompts");
-  }
-  return response.json();
+	const url = `${COACH_BASE_URL}/prompts`;
+	const response = await authFetch(url);
+	if (!response.ok) {
+		throw new Error("Failed to fetch prompts");
+	}
+	return response.json();
 }
 
 /**
@@ -38,12 +38,12 @@ export async function fetchAllPrompts(): Promise<Prompt[]> {
  * Returns: Prompt object.
  */
 export async function fetchPromptById(id: string): Promise<Prompt> {
-  const url = `${COACH_BASE_URL}/prompts/${id}`;
-  const response = await authFetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch prompt with id ${id}`);
-  }
-  return response.json();
+	const url = `${COACH_BASE_URL}/prompts/${id}`;
+	const response = await authFetch(url);
+	if (!response.ok) {
+		throw new Error(`Failed to fetch prompt with id ${id}`);
+	}
+	return response.json();
 }
 
 /**
@@ -53,15 +53,15 @@ export async function fetchPromptById(id: string): Promise<Prompt> {
  * Returns: Created Prompt object.
  */
 export async function createPrompt(data: PromptCreate): Promise<Prompt> {
-  const url = `${COACH_BASE_URL}/prompts`;
-  const response = await authFetch(url, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to create prompt");
-  }
-  return response.json();
+	const url = `${COACH_BASE_URL}/prompts`;
+	const response = await authFetch(url, {
+		method: "POST",
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
+		throw new Error("Failed to create prompt");
+	}
+	return response.json();
 }
 
 /**
@@ -72,15 +72,15 @@ export async function createPrompt(data: PromptCreate): Promise<Prompt> {
  * Returns: Updated Prompt object.
  */
 export async function updatePrompt(id: string, data: Prompt): Promise<Prompt> {
-  const url = `${COACH_BASE_URL}/prompts/${id}`;
-  const response = await authFetch(url, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to update prompt with id ${id}`);
-  }
-  return response.json();
+	const url = `${COACH_BASE_URL}/prompts/${id}`;
+	const response = await authFetch(url, {
+		method: "PUT",
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
+		throw new Error(`Failed to update prompt with id ${id}`);
+	}
+	return response.json();
 }
 
 /**
@@ -91,18 +91,18 @@ export async function updatePrompt(id: string, data: Prompt): Promise<Prompt> {
  * Returns: Updated Prompt object.
  */
 export async function partialUpdatePrompt(
-  id: string,
-  data: Partial<Prompt>
+	id: string,
+	data: Partial<Prompt>,
 ): Promise<Prompt> {
-  const url = `${COACH_BASE_URL}/prompts/${id}`;
-  const response = await authFetch(url, {
-    method: "PATCH",
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to partially update prompt with id ${id}`);
-  }
-  return response.json();
+	const url = `${COACH_BASE_URL}/prompts/${id}`;
+	const response = await authFetch(url, {
+		method: "PATCH",
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
+		throw new Error(`Failed to partially update prompt with id ${id}`);
+	}
+	return response.json();
 }
 
 /**
@@ -112,11 +112,11 @@ export async function partialUpdatePrompt(
  * Returns: void (throws on error)
  */
 export async function deletePrompt(id: string): Promise<void> {
-  const url = `${COACH_BASE_URL}/prompts/${id}`;
-  const response = await authFetch(url, { method: "DELETE" });
-  if (!response.ok) {
-    throw new Error(`Failed to delete prompt with id ${id}`);
-  }
+	const url = `${COACH_BASE_URL}/prompts/${id}`;
+	const response = await authFetch(url, { method: "DELETE" });
+	if (!response.ok) {
+		throw new Error(`Failed to delete prompt with id ${id}`);
+	}
 }
 
 /**
@@ -126,10 +126,10 @@ export async function deletePrompt(id: string): Promise<void> {
  * Returns: Updated Prompt object with is_active: false.
  */
 export async function softDeletePrompt(id: string): Promise<Prompt> {
-  const url = `${COACH_BASE_URL}/prompts/${id}/soft_delete`;
-  const response = await authFetch(url, { method: "POST" });
-  if (!response.ok) {
-    throw new Error(`Failed to soft delete prompt with id ${id}`);
-  }
-  return response.json();
+	const url = `${COACH_BASE_URL}/prompts/${id}/soft_delete`;
+	const response = await authFetch(url, { method: "POST" });
+	if (!response.ok) {
+		throw new Error(`Failed to soft delete prompt with id ${id}`);
+	}
+	return response.json();
 }

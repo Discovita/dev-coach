@@ -13,31 +13,31 @@ import { createContext, useContext } from "react";
  */
 
 export interface ImpersonatedUser {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
+	id: string;
+	email: string;
+	first_name: string;
+	last_name: string;
 }
 
 export interface ImpersonationContextValue {
-  impersonatedUser: ImpersonatedUser | null;
-  startImpersonating: (user: ImpersonatedUser) => void;
-  stopImpersonating: () => void;
+	impersonatedUser: ImpersonatedUser | null;
+	startImpersonating: (user: ImpersonatedUser) => void;
+	stopImpersonating: () => void;
 }
 
 const defaultValue: ImpersonationContextValue = {
-  impersonatedUser: null,
-  startImpersonating: () => {},
-  stopImpersonating: () => {},
+	impersonatedUser: null,
+	startImpersonating: () => {},
+	stopImpersonating: () => {},
 };
 
 export const ImpersonationContext =
-  createContext<ImpersonationContextValue>(defaultValue);
+	createContext<ImpersonationContextValue>(defaultValue);
 
 /**
  * Hook to consume the ImpersonationContext.
  * Safe to call outside a provider — returns default (no impersonation) value.
  */
 export function useImpersonation(): ImpersonationContextValue {
-  return useContext(ImpersonationContext);
+	return useContext(ImpersonationContext);
 }

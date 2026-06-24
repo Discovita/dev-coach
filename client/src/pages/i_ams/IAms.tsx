@@ -1,17 +1,14 @@
-import { useEffect, useState } from "react";
 import { useIdentities } from "@/hooks/use-identities";
 import type { Identity } from "@/types/identity";
-import { Link } from "@tanstack/react-router";
 import { getArticle } from "@/utils/getArticle";
-import { GripVertical } from "lucide-react";
 import {
 	DndContext,
+	type DragEndEvent,
 	KeyboardSensor,
 	PointerSensor,
 	closestCenter,
 	useSensor,
 	useSensors,
-	type DragEndEvent,
 } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -21,6 +18,9 @@ import {
 	useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Link } from "@tanstack/react-router";
+import { GripVertical } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /**
  * I Am's Page

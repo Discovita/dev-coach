@@ -1,22 +1,22 @@
-import { useState, useEffect, useMemo } from "react";
-import type { SceneInputs as SceneInputsType } from "@/types/sceneInputs";
-import { ClothingInput, MoodInput, SettingInput } from "./scene";
 import { Button } from "@/components/ui/button";
-import { Info, Save, Check, AlertCircle } from "lucide-react";
+import type { SceneInputs as SceneInputsType } from "@/types/sceneInputs";
+import { AlertCircle, Check, Info, Save } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ClothingInput, MoodInput, SettingInput } from "./scene";
 
 interface SceneInputsProps {
-  /** Current local values (for editing) */
-  values: SceneInputsType;
-  /** Values currently saved on the identity */
-  savedValues: SceneInputsType;
-  /** Callback when values change */
-  onChange: (values: SceneInputsType) => void;
-  /** Callback to save changes to identity */
-  onSave: () => Promise<void>;
-  /** Whether a save operation is in progress */
-  isSaving?: boolean;
-  /** Whether inputs should be disabled */
-  disabled?: boolean;
+	/** Current local values (for editing) */
+	values: SceneInputsType;
+	/** Values currently saved on the identity */
+	savedValues: SceneInputsType;
+	/** Callback when values change */
+	onChange: (values: SceneInputsType) => void;
+	/** Callback to save changes to identity */
+	onSave: () => Promise<void>;
+	/** Whether a save operation is in progress */
+	isSaving?: boolean;
+	/** Whether inputs should be disabled */
+	disabled?: boolean;
 }
 
 /**
@@ -28,37 +28,34 @@ const SCENE_FIELDS: (keyof SceneInputsType)[] = ["clothing", "mood", "setting"];
  * Human-readable labels for each scene field.
  */
 const FIELD_LABELS: Record<keyof SceneInputsType, string> = {
-  clothing: "Clothing",
-  mood: "Mood",
-  setting: "Setting",
+	clothing: "Clothing",
+	mood: "Mood",
+	setting: "Setting",
 };
 
 /**
  * Normalizes a value to a string for comparison (handles null/undefined/empty).
  */
 function normalizeValue(value: string | null | undefined): string {
-  return (value || "").trim();
+	return (value || "").trim();
 }
 
 /**
  * Checks if two scene input objects are equal (for dirty state detection).
  */
-function sceneInputsEquals(
-  a: SceneInputsType,
-  b: SceneInputsType
-): boolean {
-  return SCENE_FIELDS.every(
-    (field) => normalizeValue(a[field]) === normalizeValue(b[field])
-  );
+function sceneInputsEquals(a: SceneInputsType, b: SceneInputsType): boolean {
+	return SCENE_FIELDS.every(
+		(field) => normalizeValue(a[field]) === normalizeValue(b[field]),
+	);
 }
 
 /**
  * Gets the list of empty field labels.
  */
 function getEmptyFields(values: SceneInputsType): string[] {
-  return SCENE_FIELDS.filter(
-    (field) => !normalizeValue(values[field])
-  ).map((f) => FIELD_LABELS[f]);
+	return SCENE_FIELDS.filter((field) => !normalizeValue(values[field])).map(
+		(f) => FIELD_LABELS[f],
+	);
 }
 
 /**
@@ -66,7 +63,7 @@ function getEmptyFields(values: SceneInputsType): string[] {
  * ---------------------
  * Container component for scene-specific inputs (clothing, mood, setting).
  * These fields are saved to the Identity model and vary per identity.
- * 
+ *
  * Features:
  * - Local state for unsaved changes
  * - Explicit "Save Scene Details" button
@@ -75,147 +72,145 @@ function getEmptyFields(values: SceneInputsType): string[] {
  * - Success feedback after saving
  */
 export function SceneInputs({
-  values,
-  savedValues,
-  onChange,
-  onSave,
-  isSaving = false,
-  disabled = false,
+	values,
+	savedValues,
+	onChange,
+	onSave,
+	isSaving = false,
+	disabled = false,
 }: SceneInputsProps) {
-  // Track if save was recently successful (for showing success indicator)
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+	// Track if save was recently successful (for showing success indicator)
+	const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  // Calculate derived state
-  const isDirty = useMemo(
-    () => !sceneInputsEquals(values, savedValues),
-    [values, savedValues]
-  );
-  const emptyFields = useMemo(() => getEmptyFields(values), [values]);
-  const hasAllFields = emptyFields.length === 0;
+	// Calculate derived state
+	const isDirty = useMemo(
+		() => !sceneInputsEquals(values, savedValues),
+		[values, savedValues],
+	);
+	const emptyFields = useMemo(() => getEmptyFields(values), [values]);
+	const hasAllFields = emptyFields.length === 0;
 
-  // Clear success indicator when values change
-  useEffect(() => {
-    if (isDirty) {
-      setShowSaveSuccess(false);
-    }
-  }, [isDirty]);
+	// Clear success indicator when values change
+	useEffect(() => {
+		if (isDirty) {
+			setShowSaveSuccess(false);
+		}
+	}, [isDirty]);
 
-  const handleChange = <K extends keyof SceneInputsType>(
-    field: K,
-    value: SceneInputsType[K]
-  ) => {
-    onChange({
-      ...values,
-      [field]: value,
-    });
-  };
+	const handleChange = <K extends keyof SceneInputsType>(
+		field: K,
+		value: SceneInputsType[K],
+	) => {
+		onChange({
+			...values,
+			[field]: value,
+		});
+	};
 
-  // Handle save button click
-  const handleSave = async () => {
-    try {
-      await onSave();
-      setShowSaveSuccess(true);
-      // Hide success indicator after 3 seconds
-      setTimeout(() => setShowSaveSuccess(false), 3000);
-    } catch {
-      // Error handling is done in the parent component
-    }
-  };
+	// Handle save button click
+	const handleSave = async () => {
+		try {
+			await onSave();
+			setShowSaveSuccess(true);
+			// Hide success indicator after 3 seconds
+			setTimeout(() => setShowSaveSuccess(false), 3000);
+		} catch {
+			// Error handling is done in the parent component
+		}
+	};
 
-  return (
-    <div className="space-y-6 p-4 border rounded-lg bg-[var(--nv-pale-lavender)]/30">
-      {/* Header */}
-      <div className="flex items-start gap-2">
-        <h2 className="text-lg font-semibold text-[var(--nv-indigo)]">
-          Scene Details for this Identity
-        </h2>
-        <Info className="size-4 text-[var(--nv-royal-purple)]/60 mt-0.5" />
-      </div>
-      <p className="text-xs text-[var(--nv-royal-purple)]/60 -mt-4">
-        These are saved to the identity
-      </p>
+	return (
+		<div className="space-y-6 p-4 border rounded-lg bg-[var(--nv-pale-lavender)]/30">
+			{/* Header */}
+			<div className="flex items-start gap-2">
+				<h2 className="text-lg font-semibold text-[var(--nv-indigo)]">
+					Scene Details for this Identity
+				</h2>
+				<Info className="size-4 text-[var(--nv-royal-purple)]/60 mt-0.5" />
+			</div>
+			<p className="text-xs text-[var(--nv-royal-purple)]/60 -mt-4">
+				These are saved to the identity
+			</p>
 
-      {/* Validation Warning */}
-      {!hasAllFields && (
-        <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <AlertCircle className="size-4 text-amber-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-amber-800">
-            <p className="font-medium">
-              Fill in all scene details for best results
-            </p>
-            <p className="text-xs mt-1 text-amber-700">
-              Missing: {emptyFields.join(", ")}
-            </p>
-          </div>
-        </div>
-      )}
+			{/* Validation Warning */}
+			{!hasAllFields && (
+				<div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+					<AlertCircle className="size-4 text-amber-600 mt-0.5 flex-shrink-0" />
+					<div className="text-sm text-amber-800">
+						<p className="font-medium">
+							Fill in all scene details for best results
+						</p>
+						<p className="text-xs mt-1 text-amber-700">
+							Missing: {emptyFields.join(", ")}
+						</p>
+					</div>
+				</div>
+			)}
 
-      {/* Inputs */}
-      <div className="space-y-4">
-        <ClothingInput
-          value={values.clothing}
-          onChange={(value) => handleChange("clothing", value)}
-          disabled={disabled}
-        />
+			{/* Inputs */}
+			<div className="space-y-4">
+				<ClothingInput
+					value={values.clothing}
+					onChange={(value) => handleChange("clothing", value)}
+					disabled={disabled}
+				/>
 
-        <MoodInput
-          value={values.mood}
-          onChange={(value) => handleChange("mood", value)}
-          disabled={disabled}
-        />
+				<MoodInput
+					value={values.mood}
+					onChange={(value) => handleChange("mood", value)}
+					disabled={disabled}
+				/>
 
-        <SettingInput
-          value={values.setting}
-          onChange={(value) => handleChange("setting", value)}
-          disabled={disabled}
-        />
-      </div>
+				<SettingInput
+					value={values.setting}
+					onChange={(value) => handleChange("setting", value)}
+					disabled={disabled}
+				/>
+			</div>
 
-      {/* Footer with status and save button */}
-      <div className="flex items-center justify-between pt-4 border-t border-[var(--nv-royal-purple)]/20">
-        {/* Status indicator */}
-        <div className="flex items-center gap-2">
-          {isDirty ? (
-            <span className="text-sm text-amber-600">
-              Unsaved changes
-            </span>
-          ) : (
-            <span className="text-sm text-green-600 flex items-center gap-1">
-              <Check className="size-4" />
-              All changes saved
-            </span>
-          )}
-        </div>
+			{/* Footer with status and save button */}
+			<div className="flex items-center justify-between pt-4 border-t border-[var(--nv-royal-purple)]/20">
+				{/* Status indicator */}
+				<div className="flex items-center gap-2">
+					{isDirty ? (
+						<span className="text-sm text-amber-600">Unsaved changes</span>
+					) : (
+						<span className="text-sm text-green-600 flex items-center gap-1">
+							<Check className="size-4" />
+							All changes saved
+						</span>
+					)}
+				</div>
 
-        {/* Save button */}
-        <div className="flex items-center gap-2">
-          {showSaveSuccess && (
-            <span className="text-sm text-green-600 flex items-center gap-1">
-              <Check className="size-4" />
-              Saved!
-            </span>
-          )}
-          <Button
-            type="button"
-            variant="default"
-            onClick={handleSave}
-            disabled={!isDirty || isSaving || disabled}
-            className="gap-2 bg-[var(--nv-royal-purple)] hover:bg-[var(--nv-royal-purple)]/90"
-          >
-            {isSaving ? (
-              <>
-                <Save className="size-4 animate-pulse" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="size-4" />
-                Save Scene Details
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+				{/* Save button */}
+				<div className="flex items-center gap-2">
+					{showSaveSuccess && (
+						<span className="text-sm text-green-600 flex items-center gap-1">
+							<Check className="size-4" />
+							Saved!
+						</span>
+					)}
+					<Button
+						type="button"
+						variant="default"
+						onClick={handleSave}
+						disabled={!isDirty || isSaving || disabled}
+						className="gap-2 bg-[var(--nv-royal-purple)] hover:bg-[var(--nv-royal-purple)]/90"
+					>
+						{isSaving ? (
+							<>
+								<Save className="size-4 animate-pulse" />
+								Saving...
+							</>
+						) : (
+							<>
+								<Save className="size-4" />
+								Save Scene Details
+							</>
+						)}
+					</Button>
+				</div>
+			</div>
+		</div>
+	);
 }

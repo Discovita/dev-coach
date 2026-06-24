@@ -1,7 +1,7 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { ImpersonationTargetBridge } from "@/components/ImpersonationTargetBridge";
 import AuthLayout from "@/layout/AuthLayout.tsx";
 import { ImpersonationProvider } from "@/providers/ImpersonationProvider";
-import { ImpersonationTargetBridge } from "@/components/ImpersonationTargetBridge";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 
 /**
  * Pathless layout route for authenticated pages.
@@ -11,17 +11,15 @@ import { ImpersonationTargetBridge } from "@/components/ImpersonationTargetBridg
  * - ImpersonationTargetBridge bridges ImpersonationContext → UserTargetProvider
  */
 export const Route = createFileRoute("/_authenticated")({
-  component: function AuthenticatedLayout() {
-    return (
-      <ImpersonationProvider>
-        <AuthLayout>
-          <ImpersonationTargetBridge>
-            <Outlet />
-          </ImpersonationTargetBridge>
-        </AuthLayout>
-      </ImpersonationProvider>
-    );
-  },
+	component: function AuthenticatedLayout() {
+		return (
+			<ImpersonationProvider>
+				<AuthLayout>
+					<ImpersonationTargetBridge>
+						<Outlet />
+					</ImpersonationTargetBridge>
+				</AuthLayout>
+			</ImpersonationProvider>
+		);
+	},
 });
-
-
