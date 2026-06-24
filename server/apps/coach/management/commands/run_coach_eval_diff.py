@@ -15,12 +15,21 @@ Runs the SAME conversation against two prompt versions and reports the delta:
         -> report the delta (quality score, targeted checks, progression,
            pairwise preference)
 
-Replay holds the user side fixed, so the prompt version is the only thing that
-differs between the two runs. Each run's quality rubric is still derived from its
-OWN prompt body (a v11 run is judged against v11's instructions); the targeted
-checks are constant across versions, so they give a clean apples-to-apples delta.
-The pairwise judge compares the two transcripts directly (more reliable than
-differencing two absolute scores).
+Replay holds the user side fixed, so what differs between the two runs is
+whatever axis you choose to vary — the prompt version, the coach model, or both.
+Each run's quality rubric is still derived from its OWN prompt body (a v11 run is
+judged against v11's instructions); the targeted checks are constant across
+versions, so they give a clean apples-to-apples delta. The pairwise judge
+compares the two transcripts directly (more reliable than differencing two
+absolute scores).
+
+Two independent axes:
+  - PROMPT:  --baseline-version / --candidate-version
+  - MODEL:   --coach-model sets BOTH sides; --baseline-model / --candidate-model
+             override a single side. So you can hold the prompt fixed and vary
+             only the model (same version on both sides + different models), vary
+             only the prompt (one model, two versions — the original behavior),
+             or vary both at once.
 
 Shares all the machinery (seeding, drive loop, judge) with run_coach_eval_spike
 via apps/coach/eval/harness.py.
@@ -34,6 +43,12 @@ Usage:
     python manage.py run_coach_eval_diff                          # latest-1 vs latest
     python manage.py run_coach_eval_diff --baseline-version 4     # v4 vs latest
     python manage.py run_coach_eval_diff --baseline-version 10 --candidate-version 11
+    # Same prompt, two models (pin one version on both sides, vary the model):
+    python manage.py run_coach_eval_diff --baseline-version 6 --candidate-version 6 \
+        --baseline-model gpt-4o --candidate-model gpt-5.4
+    # Two models AND two prompts at once:
+    python manage.py run_coach_eval_diff --baseline-version 6 --candidate-version 7 \
+        --baseline-model gpt-4o --candidate-model gpt-5.4
     python manage.py run_coach_eval_diff --from-scenario "[Auto] Casey @ get_to_know_you" \
         --out /tmp/diff.json
 """
@@ -103,7 +118,26 @@ class Command(BaseCommand):
             "--coach-model",
             type=str,
             default=None,
-            help="Coach model for BOTH runs (the variable is the prompt, not the model).",
+            help=(
+                "Coach model for BOTH sides. Defaults to the configured "
+                "DEFAULT_AI_MODEL. Override a single side with --baseline-model / "
+                "--candidate-model."
+            ),
+        )
+        parser.add_argument(
+            "--baseline-model",
+            type=str,
+            default=None,
+            help=(
+                "Coach model for the BASELINE side only (overrides --coach-model). "
+                "Pin the same prompt version on both sides to vary only the model."
+            ),
+        )
+        parser.add_argument(
+            "--candidate-model",
+            type=str,
+            default=None,
+            help="Coach model for the CANDIDATE side only (overrides --coach-model).",
         )
         parser.add_argument(
             "--baseline-version",
@@ -195,6 +229,18 @@ class Command(BaseCommand):
             return None
         return lower[0], candidate_v  # lower[0] is the largest below candidate
 
+    def _resolve_models(self, coach_model, baseline_model, candidate_model):
+        """Resolve per-side coach models to concrete AIModels.
+
+        --coach-model sets both sides; --baseline-model / --candidate-model
+        override a single side. Any side left unset falls back to --coach-model,
+        which itself falls back to the configured DEFAULT_AI_MODEL. Returns
+        (baseline_model, candidate_model).
+        """
+        baseline = AIModel.get_or_default(baseline_model or coach_model)
+        candidate = AIModel.get_or_default(candidate_model or coach_model)
+        return baseline, candidate
+
     def _make_emit(self, label):
         def emit(kind: str, text: str) -> None:
             if kind == "client":
@@ -279,7 +325,9 @@ class Command(BaseCommand):
 
     # --- orchestration --------------------------------------------------------
     def handle(self, *args, **options):
-        coach_model = AIModel.get_or_default(options["coach_model"])
+        baseline_model, candidate_model = self._resolve_models(
+            options["coach_model"], options["baseline_model"], options["candidate_model"]
+        )
         persona = load_persona(options["persona"])
         harness_client = AIServiceFactory.create(DEFAULT_USER_BOT_MODEL).client
         scenario_name = options["from_scenario"]
@@ -319,8 +367,14 @@ class Command(BaseCommand):
                 ))
             targeted_checks = load_targeted_checks(start_phase, options["check"])
 
+            if baseline_model == candidate_model:
+                model_desc = f"coach: {candidate_model.value}"
+            else:
+                model_desc = (
+                    f"coach: {baseline_model.value} -> {candidate_model.value}"
+                )
             self.stdout.write(self.style.HTTP_INFO(
-                f"Diff | persona: {persona.name} | coach: {coach_model.value} "
+                f"Diff | persona: {persona.name} | {model_desc} "
                 f"| phase: {start_phase} | seed: {scenario_name or 'cold get_to_know_you'} "
                 f"| baseline v{baseline_v} vs candidate v{candidate_v} "
                 f"| checks: {len(targeted_checks)}"
@@ -328,7 +382,7 @@ class Command(BaseCommand):
 
             baseline = self._run_side(
                 label="baseline", version=baseline_v, user=user,
-                start_phase=start_phase, prior=prior, coach_model=coach_model,
+                start_phase=start_phase, prior=prior, coach_model=baseline_model,
                 max_turns=max_turns, harness_client=harness_client,
                 targeted_checks=targeted_checks, persona=persona, replay_turns=None,
             )
@@ -341,7 +395,7 @@ class Command(BaseCommand):
             cleanup_emails.add(email)
             candidate = self._run_side(
                 label="candidate", version=candidate_v, user=user,
-                start_phase=start_phase, prior=prior, coach_model=coach_model,
+                start_phase=start_phase, prior=prior, coach_model=candidate_model,
                 max_turns=max_turns, harness_client=harness_client,
                 targeted_checks=targeted_checks, persona=None, replay_turns=user_turns,
             )
@@ -362,7 +416,8 @@ class Command(BaseCommand):
                 start_phase=start_phase,
                 scenario_name=scenario_name,
                 persona=persona,
-                coach_model=coach_model,
+                baseline_model=baseline_model,
+                candidate_model=candidate_model,
                 user_turns=user_turns,
                 targeted_checks=targeted_checks,
                 baseline=baseline,
@@ -401,8 +456,9 @@ class Command(BaseCommand):
             })
         return out
 
-    def _report(self, *, start_phase, scenario_name, persona, coach_model,
-                user_turns, targeted_checks, baseline, candidate, pairwise, out_path):
+    def _report(self, *, start_phase, scenario_name, persona, baseline_model,
+                candidate_model, user_turns, targeted_checks, baseline, candidate,
+                pairwise, out_path):
         bv, cv = baseline["verdict"], candidate["verdict"]
         b_phase = baseline["run"].final_phase
         c_phase = candidate["run"].final_phase
@@ -413,16 +469,17 @@ class Command(BaseCommand):
             "phase": start_phase,
             "scenario": scenario_name or "cold get_to_know_you",
             "persona": persona.persona_id,
-            "coach_model": coach_model.value,
             "user_turns": user_turns,
             "baseline": {
                 "prompt_version": baseline["prompt_version"],
+                "model": baseline_model.value,
                 "quality": {"passed": bv.passed, "score": bv.score},
                 "final_phase": b_phase,
                 "transitioned": b_phase != start_phase,
             },
             "candidate": {
                 "prompt_version": candidate["prompt_version"],
+                "model": candidate_model.value,
                 "quality": {"passed": cv.passed, "score": cv.score},
                 "final_phase": c_phase,
                 "transitioned": c_phase != start_phase,
@@ -453,6 +510,10 @@ class Command(BaseCommand):
         bvers, cvers = baseline["prompt_version"], candidate["prompt_version"]
         self.stdout.write(self.style.HTTP_INFO(
             f"\nPROMPTS:  baseline v{bvers}  vs  candidate v{cvers}"
+        ))
+        self.stdout.write(self.style.HTTP_INFO(
+            f"MODELS:   baseline {baseline_model.value}  vs  "
+            f"candidate {candidate_model.value}"
         ))
         delta = cv.score - bv.score
         arrow = "▲" if delta > 0 else ("▼" if delta < 0 else "=")

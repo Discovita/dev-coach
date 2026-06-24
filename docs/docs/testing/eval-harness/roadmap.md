@@ -50,12 +50,13 @@ The core loop and the scenario-building tooling are in place.
   coach-model/version are replay defaults; override with the flags (typically a new
   `--prompt-version`). See
   [Running Evals → Replay](/docs/testing/eval-harness/running-evals#replay-a-run).
-- **Baseline ↔ candidate diff** — `run_coach_eval_diff` drives a baseline version
-  with the user-bot, replays the *same* user turns against a candidate version, and
-  reports the delta: per-version quality score, targeted-check changes
-  (fixed/regressed), progression, and a **pairwise** judge that compares the two
-  transcripts directly. See
-  [Running Evals → Diffing two versions](/docs/testing/eval-harness/running-evals#diffing-two-versions).
+- **Baseline ↔ candidate diff** — `run_coach_eval_diff` drives a baseline with the
+  user-bot, replays the *same* user turns against a candidate, and reports the
+  delta: per-side quality score, targeted-check changes (fixed/regressed),
+  progression, and a **pairwise** judge that compares the two transcripts directly.
+  The variable can be the prompt version, the coach model (`--baseline-model` /
+  `--candidate-model`), or both. See
+  [Running Evals → Diffing two runs](/docs/testing/eval-harness/running-evals#diffing-two-runs).
 - **`run_coach_eval` MCP tool** — the `dev-coach-docs` MCP server exposes a
   `run_coach_eval` tool that POSTs to a new `POST /api/v1/eval/run` backend
   endpoint, so the edit-prompt → eval → iterate loop runs without shelling into

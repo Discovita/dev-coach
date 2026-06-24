@@ -10,6 +10,7 @@ from django.test import SimpleTestCase
 from apps.coach.eval.harness import CheckResult
 from apps.coach.management.commands import run_coach_eval_diff
 from apps.coach.management.commands.run_coach_eval_diff import Command
+from enums.ai import AIModel
 
 
 def _verdict(checks):
@@ -47,6 +48,41 @@ class TestCheckDeltas(SimpleTestCase):
         rows = self.cmd._check_deltas(baseline, candidate)
         self.assertEqual([r["check"] for r in rows], ["a"])
         self.assertEqual(rows[0]["change"], "regressed")
+
+
+class TestResolveModels(SimpleTestCase):
+    """--coach-model sets both sides; --baseline/--candidate-model override one."""
+
+    def setUp(self):
+        self.cmd = Command()
+
+    def test_all_unset_defaults_both_sides(self):
+        default = AIModel.get_or_default(None)
+        self.assertEqual(self.cmd._resolve_models(None, None, None), (default, default))
+
+    def test_coach_model_sets_both_sides(self):
+        self.assertEqual(
+            self.cmd._resolve_models("gpt-4o", None, None),
+            (AIModel.GPT_4O, AIModel.GPT_4O),
+        )
+
+    def test_per_side_overrides_coach_model(self):
+        self.assertEqual(
+            self.cmd._resolve_models("gpt-4o", "gpt-5.4", None),
+            (AIModel.GPT_5_4, AIModel.GPT_4O),
+        )
+
+    def test_both_sides_explicit(self):
+        self.assertEqual(
+            self.cmd._resolve_models(None, "gpt-4o", "gpt-5.4"),
+            (AIModel.GPT_4O, AIModel.GPT_5_4),
+        )
+
+    def test_candidate_override_only_baseline_falls_back(self):
+        self.assertEqual(
+            self.cmd._resolve_models("gpt-4o", None, "gpt-5.4"),
+            (AIModel.GPT_4O, AIModel.GPT_5_4),
+        )
 
 
 class TestResolveVersions(SimpleTestCase):
