@@ -94,6 +94,33 @@ database — chat history, identities, who-you-are, and Sentinel notes. The scen
 plumbing in those old scenarios has drifted (actions/breaks/videos changed), but
 the *persona content* is still valid, which is why it was extracted into a file.
 
+## The `casey_critical` persona
+
+`casey_critical.md` is the **same person as `casey`** (same background, values, and
+identities, so it stays consistent when seeded from the `Casey - * Testing`
+scenarios) with **one behavioral change**: he is a discerning, hard-to-please
+editor of whatever the coach proposes. He rejects the first draft, says
+*specifically* what's off, engages with the coach's follow-ups, and only accepts
+once it genuinely lands.
+
+**Why it exists.** The default `casey` is a *compliant* client — he accepts first
+drafts. That's a realistic happy path, but it means any coach branch that only
+fires when the user **pushes back** is never exercised in an eval (a compliant bot
+clicks "I love it" and you never see how the coach handles "no, that's not
+right"). `casey_critical` forces those branches.
+
+**When to use it.** Any flow whose "needs work / refine / push-back" path a
+compliant persona would skip. It was built (2026-06-24) to validate I Am Statement
+prompt **v21**, which deliberately moves the deep exploration *out* of up-front
+questioning and *into* the on-demand "This needs more work" button: `casey`
+confirms the happy path is fast, `casey_critical` confirms the refinement loop
+actually works and produces good statements. You need **both** to evaluate that
+kind of change — run them as a pair.
+
+> The name describes *how* he behaves, not *what he's for*; it may be renamed to
+> something more self-explanatory later. The full rationale also lives in the
+> file's frontmatter comment.
+
 ## Adding a new persona
 
 1. Create `server/apps/coach/eval/personas/<id>.md` with frontmatter + body.
