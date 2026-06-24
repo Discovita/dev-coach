@@ -16,13 +16,11 @@ export interface CoachMessageWithComponentProps {
   componentConfig: ComponentConfig;
   onSendUserMessageToCoach: (request: CoachRequest) => void;
   disabled: boolean;
-  /** Optional user ID for test scenarios (enables admin endpoints) */
-  testUserId?: string;
 }
 
 export const CoachMessageWithComponent: React.FC<
   CoachMessageWithComponentProps
-> = ({ children, componentConfig, onSendUserMessageToCoach, disabled, testUserId }) => {
+> = ({ children, componentConfig, onSendUserMessageToCoach, disabled }) => {
   switch (componentConfig.component_type) {
     case ComponentType.INTRO_CANNED_RESPONSE:
       return (
@@ -76,7 +74,6 @@ export const CoachMessageWithComponent: React.FC<
           config={componentConfig}
           onSendUserMessageToCoach={onSendUserMessageToCoach}
           disabled={disabled}
-          testUserId={testUserId}
         />
       );
     case ComponentType.SESSION_VIDEO:

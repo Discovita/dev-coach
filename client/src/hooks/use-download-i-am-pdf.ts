@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { downloadIAmStatementsPdf } from "@/api/identities";
+import { useUserTarget } from "@/context/UserTargetContext";
 
 /**
  * useDownloadIAmPdf hook
@@ -7,33 +8,34 @@ import { downloadIAmStatementsPdf } from "@/api/identities";
  * Handles downloading the I Am Statements PDF.
  * Uses TanStack Query's useMutation for managing loading state and errors.
  *
+ * Resolves "whose PDF?" from UserTargetContext — the same source every
+ * other data hook uses — so it works under both test scenarios and
+ * global impersonation. When impersonating, it hits the admin endpoint
+ * for the targeted user; otherwise the logged-in user's own endpoint.
+ *
  * Step-by-step:
- * 1. Calls the downloadIAmStatementsPdf API function (with optional userId for admin)
+ * 1. Calls the downloadIAmStatementsPdf API function (admin endpoint when impersonating)
  * 2. Creates a Blob URL from the response
  * 3. Triggers browser download via hidden anchor element
  * 4. Cleans up the Blob URL after download
  *
  * Usage:
- *   // For authenticated user's own PDF:
  *   const { downloadPdf, isDownloading, error } = useDownloadIAmPdf();
  *   <button onClick={() => downloadPdf()} disabled={isDownloading}>
- *     {isDownloading ? "Downloading..." : "Download PDF"}
- *   </button>
- *
- *   // For admin downloading a specific user's PDF (test scenarios):
- *   const { downloadPdf, isDownloading, error } = useDownloadIAmPdf();
- *   <button onClick={() => downloadPdf(testUserId)} disabled={isDownloading}>
  *     {isDownloading ? "Downloading..." : "Download PDF"}
  *   </button>
  *
  * Used in: IAmStatementsSummaryComponent.tsx
  */
 export function useDownloadIAmPdf() {
+  const { isImpersonating, targetUserId } = useUserTarget();
   const mutation = useMutation({
-    mutationFn: async (userId?: string) => {
-      // Fetch the PDF blob from the API
-      // If userId is provided, uses admin endpoint for that specific user
-      const blob = await downloadIAmStatementsPdf(userId);
+    mutationFn: async () => {
+      // When impersonating (test scenario or global), hit the admin endpoint
+      // for the targeted user; otherwise download the logged-in user's PDF.
+      const blob = await downloadIAmStatementsPdf(
+        isImpersonating ? (targetUserId ?? undefined) : undefined,
+      );
 
       // Create a download link and trigger the download
       const url = URL.createObjectURL(blob);
