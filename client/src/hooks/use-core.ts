@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { fetchEnums } from "@/api/core";
 import type { CoreEnumsResponse } from "@/types/coreEnums";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * useCoreEnums hook
@@ -14,10 +14,10 @@ import type { CoreEnumsResponse } from "@/types/coreEnums";
  *   // data?.coaching_phases, data?.allowed_actions, data?.context_keys, data?.prompt_types, data?.appearance
  */
 export function useCoreEnums() {
-  return useQuery<CoreEnumsResponse>({
-    queryKey: ["core", "enums"],
-    queryFn: fetchEnums,
-    staleTime: 1000 * 60 * 60,
-    retry: false,
-  });
+	return useQuery<CoreEnumsResponse>({
+		queryKey: ["core", "enums"],
+		queryFn: fetchEnums,
+		staleTime: 1000 * 60 * 60,
+		retry: false,
+	});
 }

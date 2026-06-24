@@ -13,25 +13,25 @@
 const KEY_PREFIX = "studio-unlock-seen:";
 
 function key(userId: string): string {
-  return `${KEY_PREFIX}${userId}`;
+	return `${KEY_PREFIX}${userId}`;
 }
 
 export function hasSeenStudioUnlock(userId: string | null): boolean {
-  if (!userId) return true; // no identity → don't show the takeover
-  try {
-    return localStorage.getItem(key(userId)) === "1";
-  } catch {
-    // localStorage unavailable (privacy mode, SSR) → treat as seen so we
-    // never get stuck replaying it.
-    return true;
-  }
+	if (!userId) return true; // no identity → don't show the takeover
+	try {
+		return localStorage.getItem(key(userId)) === "1";
+	} catch {
+		// localStorage unavailable (privacy mode, SSR) → treat as seen so we
+		// never get stuck replaying it.
+		return true;
+	}
 }
 
 export function markStudioUnlockSeen(userId: string | null): void {
-  if (!userId) return;
-  try {
-    localStorage.setItem(key(userId), "1");
-  } catch {
-    // Best-effort; if we can't persist, the worst case is it replays.
-  }
+	if (!userId) return;
+	try {
+		localStorage.setItem(key(userId), "1");
+	} catch {
+		// Best-effort; if we can't persist, the worst case is it replays.
+	}
 }

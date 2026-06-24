@@ -1,6 +1,6 @@
-import type React from "react";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import { UserTargetProvider } from "@/providers/UserTargetProvider";
+import type React from "react";
 
 /**
  * ImpersonationTargetBridge
@@ -17,20 +17,20 @@ import { UserTargetProvider } from "@/providers/UserTargetProvider";
  * this one (React context nesting), so test scenarios work independently.
  */
 export const ImpersonationTargetBridge: React.FC<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }> = ({ children }) => {
-  const { impersonatedUser } = useImpersonation();
+	const { impersonatedUser } = useImpersonation();
 
-  if (impersonatedUser) {
-    return (
-      <UserTargetProvider
-        targetUserId={impersonatedUser.id}
-        scenarioId={undefined}
-      >
-        {children}
-      </UserTargetProvider>
-    );
-  }
+	if (impersonatedUser) {
+		return (
+			<UserTargetProvider
+				targetUserId={impersonatedUser.id}
+				scenarioId={undefined}
+			>
+				{children}
+			</UserTargetProvider>
+		);
+	}
 
-  return <>{children}</>;
+	return <>{children}</>;
 };

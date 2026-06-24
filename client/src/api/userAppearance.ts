@@ -1,7 +1,7 @@
 import { COACH_BASE_URL } from "@/constants/api";
-import { authFetch } from "@/utils/authFetch";
+import { LogLevel, createLogger } from "@/lib/logger";
 import type { UserAppearance } from "@/types/userAppearance";
-import { createLogger, LogLevel } from "@/lib/logger";
+import { authFetch } from "@/utils/authFetch";
 
 const log = createLogger("userAppearanceApi", LogLevel.DEBUG);
 
@@ -19,15 +19,15 @@ const log = createLogger("userAppearanceApi", LogLevel.DEBUG);
  */
 
 function extractAppearance(data: Record<string, unknown>): UserAppearance {
-  return {
-    gender: (data.gender as UserAppearance["gender"]) || null,
-    skin_tone: (data.skin_tone as UserAppearance["skin_tone"]) || null,
-    hair_color: (data.hair_color as UserAppearance["hair_color"]) || null,
-    eye_color: (data.eye_color as UserAppearance["eye_color"]) || null,
-    height: (data.height as UserAppearance["height"]) || null,
-    build: (data.build as UserAppearance["build"]) || null,
-    age_range: (data.age_range as UserAppearance["age_range"]) || null,
-  };
+	return {
+		gender: (data.gender as UserAppearance["gender"]) || null,
+		skin_tone: (data.skin_tone as UserAppearance["skin_tone"]) || null,
+		hair_color: (data.hair_color as UserAppearance["hair_color"]) || null,
+		eye_color: (data.eye_color as UserAppearance["eye_color"]) || null,
+		height: (data.height as UserAppearance["height"]) || null,
+		build: (data.build as UserAppearance["build"]) || null,
+		age_range: (data.age_range as UserAppearance["age_range"]) || null,
+	};
 }
 
 /**
@@ -36,12 +36,12 @@ function extractAppearance(data: Record<string, unknown>): UserAppearance {
  * @returns UserAppearance from user profile
  */
 export async function getUserAppearance(): Promise<UserAppearance> {
-  log.debug("Fetching user appearance");
-  const response = await authFetch(`${COACH_BASE_URL}/user/me`, {});
-  if (!response.ok) throw new Error("Failed to fetch user appearance");
-  const data = await response.json();
-  log.debug("Successfully fetched user appearance", data);
-  return extractAppearance(data);
+	log.debug("Fetching user appearance");
+	const response = await authFetch(`${COACH_BASE_URL}/user/me`, {});
+	if (!response.ok) throw new Error("Failed to fetch user appearance");
+	const data = await response.json();
+	log.debug("Successfully fetched user appearance", data);
+	return extractAppearance(data);
 }
 
 /**
@@ -51,20 +51,22 @@ export async function getUserAppearance(): Promise<UserAppearance> {
  * @returns Updated UserAppearance
  */
 export async function updateUserAppearance(
-  appearance: Partial<UserAppearance>
+	appearance: Partial<UserAppearance>,
 ): Promise<UserAppearance> {
-  log.debug("Updating user appearance", appearance);
-  const response = await authFetch(`${COACH_BASE_URL}/user/me`, {
-    method: "PATCH",
-    body: JSON.stringify(appearance),
-  });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to update user appearance" }));
-    throw new Error(error.error || "Failed to update user appearance");
-  }
-  const data = await response.json();
-  log.debug("Successfully updated user appearance", data);
-  return extractAppearance(data);
+	log.debug("Updating user appearance", appearance);
+	const response = await authFetch(`${COACH_BASE_URL}/user/me`, {
+		method: "PATCH",
+		body: JSON.stringify(appearance),
+	});
+	if (!response.ok) {
+		const error = await response
+			.json()
+			.catch(() => ({ error: "Failed to update user appearance" }));
+		throw new Error(error.error || "Failed to update user appearance");
+	}
+	const data = await response.json();
+	log.debug("Successfully updated user appearance", data);
+	return extractAppearance(data);
 }
 
 /**
@@ -73,13 +75,18 @@ export async function updateUserAppearance(
  * @param userId - UUID of the user
  * @returns UserAppearance from user profile
  */
-export async function getTestUserAppearance(userId: string): Promise<UserAppearance> {
-  log.debug(`Fetching test user appearance for ${userId}`);
-  const response = await authFetch(`${COACH_BASE_URL}/admin/test-user/${userId}/profile`, {});
-  if (!response.ok) throw new Error("Failed to fetch test user appearance");
-  const data = await response.json();
-  log.debug("Successfully fetched test user appearance", data);
-  return extractAppearance(data);
+export async function getTestUserAppearance(
+	userId: string,
+): Promise<UserAppearance> {
+	log.debug(`Fetching test user appearance for ${userId}`);
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/test-user/${userId}/profile`,
+		{},
+	);
+	if (!response.ok) throw new Error("Failed to fetch test user appearance");
+	const data = await response.json();
+	log.debug("Successfully fetched test user appearance", data);
+	return extractAppearance(data);
 }
 
 /**
@@ -90,19 +97,24 @@ export async function getTestUserAppearance(userId: string): Promise<UserAppeara
  * @returns Updated UserAppearance
  */
 export async function updateTestUserAppearance(
-  userId: string,
-  appearance: Partial<UserAppearance>
+	userId: string,
+	appearance: Partial<UserAppearance>,
 ): Promise<UserAppearance> {
-  log.debug(`Updating test user appearance for ${userId}`, appearance);
-  const response = await authFetch(`${COACH_BASE_URL}/admin/test-user/${userId}/update-profile`, {
-    method: "PATCH",
-    body: JSON.stringify(appearance),
-  });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to update test user appearance" }));
-    throw new Error(error.error || "Failed to update test user appearance");
-  }
-  const data = await response.json();
-  log.debug("Successfully updated test user appearance", data);
-  return extractAppearance(data);
+	log.debug(`Updating test user appearance for ${userId}`, appearance);
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/test-user/${userId}/update-profile`,
+		{
+			method: "PATCH",
+			body: JSON.stringify(appearance),
+		},
+	);
+	if (!response.ok) {
+		const error = await response
+			.json()
+			.catch(() => ({ error: "Failed to update test user appearance" }));
+		throw new Error(error.error || "Failed to update test user appearance");
+	}
+	const data = await response.json();
+	log.debug("Successfully updated test user appearance", data);
+	return extractAppearance(data);
 }

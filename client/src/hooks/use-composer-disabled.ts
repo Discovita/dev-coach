@@ -1,6 +1,6 @@
-import { useCoachState } from "@/hooks/use-coach-state";
-import { useChatMessages } from "@/hooks/use-chat-messages";
 import { ComponentType } from "@/enums/componentType";
+import { useChatMessages } from "@/hooks/use-chat-messages";
+import { useCoachState } from "@/hooks/use-coach-state";
 
 /**
  * Coaching Phase Videos — composer-disable rule (PR 15 + PR 18).
@@ -19,31 +19,31 @@ import { ComponentType } from "@/enums/componentType";
  * coach intentionally injected.
  */
 export function useComposerDisabled(isProcessingMessage: boolean): boolean {
-  const { coachState } = useCoachState();
-  const { chatMessages } = useChatMessages();
+	const { coachState } = useCoachState();
+	const { chatMessages } = useChatMessages();
 
-  if (isProcessingMessage) return true;
-  if (coachState?.on_break === true) return true;
+	if (isProcessingMessage) return true;
+	if (coachState?.on_break === true) return true;
 
-  // Find the most recent coach message — the only one whose component
-  // can gate the composer. Historical SESSION_VIDEO cards further up in
-  // history don't block input; only the latest one does.
-  const messages = chatMessages ?? [];
-  let latestCoach = null;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role === "coach") {
-      latestCoach = messages[i];
-      break;
-    }
-  }
-  if (!latestCoach) return false;
+	// Find the most recent coach message — the only one whose component
+	// can gate the composer. Historical SESSION_VIDEO cards further up in
+	// history don't block input; only the latest one does.
+	const messages = chatMessages ?? [];
+	let latestCoach = null;
+	for (let i = messages.length - 1; i >= 0; i--) {
+		if (messages[i].role === "coach") {
+			latestCoach = messages[i];
+			break;
+		}
+	}
+	if (!latestCoach) return false;
 
-  const cfg = latestCoach.component_config;
-  if (cfg?.component_type !== ComponentType.SESSION_VIDEO) return false;
+	const cfg = latestCoach.component_config;
+	if (cfg?.component_type !== ComponentType.SESSION_VIDEO) return false;
 
-  const videoKey = cfg.video_key;
-  if (videoKey === undefined) return false;
+	const videoKey = cfg.video_key;
+	if (videoKey === undefined) return false;
 
-  const shownVideos = coachState?.shown_videos ?? [];
-  return !shownVideos.includes(videoKey);
+	const shownVideos = coachState?.shown_videos ?? [];
+	return !shownVideos.includes(videoKey);
 }

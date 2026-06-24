@@ -12,24 +12,24 @@ import { authFetch } from "@/utils/authFetch";
  */
 
 export interface AdminUserListItem {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  is_active: boolean;
-  is_staff: boolean;
-  is_superuser: boolean;
-  last_login: string | null;
-  created_at: string | null;
-  coaching_phase: string | null;
-  is_test_user: boolean;
-  test_scenario_name: string | null;
+	id: string;
+	email: string;
+	first_name: string;
+	last_name: string;
+	is_active: boolean;
+	is_staff: boolean;
+	is_superuser: boolean;
+	last_login: string | null;
+	created_at: string | null;
+	coaching_phase: string | null;
+	is_test_user: boolean;
+	test_scenario_name: string | null;
 }
 
 export async function fetchAllUsers(): Promise<AdminUserListItem[]> {
-  const response = await authFetch(`${COACH_BASE_URL}/admin/test-user/all`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch users list");
-  }
-  return response.json();
+	const response = await authFetch(`${COACH_BASE_URL}/admin/test-user/all`);
+	if (!response.ok) {
+		throw new Error("Failed to fetch users list");
+	}
+	return response.json();
 }

@@ -4,28 +4,28 @@ import type { ComponentAction } from "./componentConfig";
  * Request model for coach API.
  */
 export interface CoachRequest {
-  /**
-   * User's message.
-   *
-   * Coaching Phase Videos (PR 10 backend / PR 17 FE): `null` is the
-   * programmatic-only contract — no user `ChatMessage` is saved, but the
-   * supplied `actions` still apply. Used by the video modal's Continue
-   * button which dispatches `{message: null, actions: [ACK(video_key)]}`
-   * (or with `START_BREAK` for outros). `""` is still treated as a real
-   * (empty) user message.
-   */
-  message: string | null;
-  /**
-   * Optional model name. If not provided, uses default.
-   */
-  model_name?: string;
-  /**
-   * Optional user ID (UUID) to act as (admin only). If not provided, uses request.user.
-   */
-  user_id?: string;
-  /**
-   * List of actions to execute in order. Each item should be an object
-   * with 'action' (str) and 'params' (object). Can be sent alongside message.
-   */
-  actions?: ComponentAction[];
+	/**
+	 * User's message.
+	 *
+	 * Coaching Phase Videos (PR 10 backend / PR 17 FE): `null` is the
+	 * programmatic-only contract — no user `ChatMessage` is saved, but the
+	 * supplied `actions` still apply. Used by the video modal's Continue
+	 * button which dispatches `{message: null, actions: [ACK(video_key)]}`
+	 * (or with `START_BREAK` for outros). `""` is still treated as a real
+	 * (empty) user message.
+	 */
+	message: string | null;
+	/**
+	 * Optional model name. If not provided, uses default.
+	 */
+	model_name?: string;
+	/**
+	 * Optional user ID (UUID) to act as (admin only). If not provided, uses request.user.
+	 */
+	user_id?: string;
+	/**
+	 * List of actions to execute in order. Each item should be an object
+	 * with 'action' (str) and 'params' (object). Can be sent alongside message.
+	 */
+	actions?: ComponentAction[];
 }

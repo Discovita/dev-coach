@@ -1,131 +1,133 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { CoachingPhase } from "@/enums/coachingPhase";
 import { useCoachState } from "@/hooks/use-coach-state";
 import { createQueryWrapper } from "@/tests/query-wrapper";
-import { CoachingPhase } from "@/enums/coachingPhase";
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/api/user", () => ({
-  fetchCoachState: vi.fn(),
+	fetchCoachState: vi.fn(),
 }));
 
 vi.mock("@/api/testScenarioUser", () => ({
-  fetchTestScenarioUserCoachState: vi.fn(),
+	fetchTestScenarioUserCoachState: vi.fn(),
 }));
 
 vi.mock("@/context/UserTargetContext", () => ({
-  useUserTarget: vi.fn().mockReturnValue({
-    isImpersonating: false,
-    targetUserId: null,
-    scenarioId: null,
-    queryKeyPrefix: ["user"],
-  }),
+	useUserTarget: vi.fn().mockReturnValue({
+		isImpersonating: false,
+		targetUserId: null,
+		scenarioId: null,
+		queryKeyPrefix: ["user"],
+	}),
 }));
 
+import { fetchTestScenarioUserCoachState } from "@/api/testScenarioUser";
 import { fetchCoachState } from "@/api/user";
 import { useUserTarget } from "@/context/UserTargetContext";
-import { fetchTestScenarioUserCoachState } from "@/api/testScenarioUser";
 
 const mockCoachState = {
-  id: "cs-1",
-  user: "user-1",
-  current_phase: CoachingPhase.INTRODUCTION,
-  who_you_are: null,
-  who_you_want_to_be: null,
-  asked_questions: null,
-  updated_at: "2025-01-01",
+	id: "cs-1",
+	user: "user-1",
+	current_phase: CoachingPhase.INTRODUCTION,
+	who_you_are: null,
+	who_you_want_to_be: null,
+	asked_questions: null,
+	updated_at: "2025-01-01",
 };
 
 describe("useCoachState", () => {
-  beforeEach(() => {
-    vi.mocked(fetchCoachState).mockReset();
-    vi.mocked(fetchTestScenarioUserCoachState).mockReset();
-    vi.mocked(useUserTarget).mockReturnValue({
-      isImpersonating: false,
-      targetUserId: null,
-      scenarioId: null,
-      queryKeyPrefix: ["user"],
-    });
-  });
+	beforeEach(() => {
+		vi.mocked(fetchCoachState).mockReset();
+		vi.mocked(fetchTestScenarioUserCoachState).mockReset();
+		vi.mocked(useUserTarget).mockReturnValue({
+			isImpersonating: false,
+			targetUserId: null,
+			scenarioId: null,
+			queryKeyPrefix: ["user"],
+		});
+	});
 
-  it("fetches coach state for the logged-in user", async () => {
-    vi.mocked(fetchCoachState).mockResolvedValue(mockCoachState);
-    const { wrapper } = createQueryWrapper();
+	it("fetches coach state for the logged-in user", async () => {
+		vi.mocked(fetchCoachState).mockResolvedValue(mockCoachState);
+		const { wrapper } = createQueryWrapper();
 
-    const { result } = renderHook(() => useCoachState(), { wrapper });
+		const { result } = renderHook(() => useCoachState(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+		await waitFor(() => {
+			expect(result.current.isLoading).toBe(false);
+		});
 
-    expect(result.current.coachState).toEqual(mockCoachState);
-  });
+		expect(result.current.coachState).toEqual(mockCoachState);
+	});
 
-  it("fetches from admin endpoint when impersonating", async () => {
-    vi.mocked(useUserTarget).mockReturnValue({
-      isImpersonating: true,
-      targetUserId: "target-1",
-      scenarioId: "s-1",
-      queryKeyPrefix: ["testScenarioUser", "target-1"],
-    });
-    vi.mocked(fetchTestScenarioUserCoachState).mockResolvedValue(mockCoachState);
-    const { wrapper } = createQueryWrapper();
+	it("fetches from admin endpoint when impersonating", async () => {
+		vi.mocked(useUserTarget).mockReturnValue({
+			isImpersonating: true,
+			targetUserId: "target-1",
+			scenarioId: "s-1",
+			queryKeyPrefix: ["testScenarioUser", "target-1"],
+		});
+		vi.mocked(fetchTestScenarioUserCoachState).mockResolvedValue(
+			mockCoachState,
+		);
+		const { wrapper } = createQueryWrapper();
 
-    const { result } = renderHook(() => useCoachState(), { wrapper });
+		const { result } = renderHook(() => useCoachState(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+		await waitFor(() => {
+			expect(result.current.isLoading).toBe(false);
+		});
 
-    expect(fetchTestScenarioUserCoachState).toHaveBeenCalledWith("target-1");
-    expect(fetchCoachState).not.toHaveBeenCalled();
-  });
+		expect(fetchTestScenarioUserCoachState).toHaveBeenCalledWith("target-1");
+		expect(fetchCoachState).not.toHaveBeenCalled();
+	});
 
-  it("handles fetch errors", async () => {
-    vi.mocked(fetchCoachState).mockRejectedValue(new Error("fail"));
-    const { wrapper } = createQueryWrapper();
+	it("handles fetch errors", async () => {
+		vi.mocked(fetchCoachState).mockRejectedValue(new Error("fail"));
+		const { wrapper } = createQueryWrapper();
 
-    const { result } = renderHook(() => useCoachState(), { wrapper });
+		const { result } = renderHook(() => useCoachState(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
+		await waitFor(() => {
+			expect(result.current.isError).toBe(true);
+		});
 
-    expect(result.current.coachState).toBeUndefined();
-  });
+		expect(result.current.coachState).toBeUndefined();
+	});
 
-  // ---------------------------------------------------------------------
-  // PR 15 — Coaching Phase Videos: on_break exposure
-  // ---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
+	// PR 15 — Coaching Phase Videos: on_break exposure
+	// ---------------------------------------------------------------------
 
-  it("exposes on_break from the coach-state response", async () => {
-    vi.mocked(fetchCoachState).mockResolvedValue({
-      ...mockCoachState,
-      on_break: true,
-    });
-    const { wrapper } = createQueryWrapper();
+	it("exposes on_break from the coach-state response", async () => {
+		vi.mocked(fetchCoachState).mockResolvedValue({
+			...mockCoachState,
+			on_break: true,
+		});
+		const { wrapper } = createQueryWrapper();
 
-    const { result } = renderHook(() => useCoachState(), { wrapper });
+		const { result } = renderHook(() => useCoachState(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+		await waitFor(() => {
+			expect(result.current.isLoading).toBe(false);
+		});
 
-    expect(result.current.coachState?.on_break).toBe(true);
-  });
+		expect(result.current.coachState?.on_break).toBe(true);
+	});
 
-  it("exposes on_break=false when the backend reports no open break", async () => {
-    vi.mocked(fetchCoachState).mockResolvedValue({
-      ...mockCoachState,
-      on_break: false,
-    });
-    const { wrapper } = createQueryWrapper();
+	it("exposes on_break=false when the backend reports no open break", async () => {
+		vi.mocked(fetchCoachState).mockResolvedValue({
+			...mockCoachState,
+			on_break: false,
+		});
+		const { wrapper } = createQueryWrapper();
 
-    const { result } = renderHook(() => useCoachState(), { wrapper });
+		const { result } = renderHook(() => useCoachState(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+		await waitFor(() => {
+			expect(result.current.isLoading).toBe(false);
+		});
 
-    expect(result.current.coachState?.on_break).toBe(false);
-  });
+		expect(result.current.coachState?.on_break).toBe(false);
+	});
 });

@@ -1,18 +1,18 @@
 import { COACH_BASE_URL } from "@/constants/api";
-import { authFetch } from "@/utils/authFetch";
+import { LogLevel, createLogger } from "@/lib/logger";
 import type {
-  GenerateImageRequest,
-  GenerateImageResponse,
-  StartImageChatRequest,
-  StartImageChatResponse,
-  ContinueImageChatRequest,
-  ContinueImageChatResponse,
-  SaveImageRequest,
-  SaveImageResponse,
-  ImageGenerationErrorResponse,
+	ContinueImageChatRequest,
+	ContinueImageChatResponse,
+	GenerateImageRequest,
+	GenerateImageResponse,
+	ImageGenerationErrorResponse,
+	SaveImageRequest,
+	SaveImageResponse,
+	StartImageChatRequest,
+	StartImageChatResponse,
 } from "@/types/imageGeneration";
 import { ImageGenerationError } from "@/types/imageGeneration";
-import { createLogger, LogLevel } from "@/lib/logger";
+import { authFetch } from "@/utils/authFetch";
 
 const log = createLogger("imageGenerationApi", LogLevel.DEBUG);
 
@@ -37,23 +37,27 @@ const log = createLogger("imageGenerationApi", LogLevel.DEBUG);
  * POST /api/v1/admin/identities/generate-image/
  */
 export async function generateIdentityImage(
-  request: GenerateImageRequest
+	request: GenerateImageRequest,
 ): Promise<GenerateImageResponse> {
-  log.debug("Generating identity image (admin)", request);
-  const response = await authFetch(
-    `${COACH_BASE_URL}/admin/identities/generate-image`,
-    {
-      method: "POST",
-      body: JSON.stringify(request),
-    }
-  );
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to generate image" }));
-    throw new Error(error.error || "Failed to generate image");
-  }
-  const data = await response.json();
-  log.debug("Successfully generated identity image", { identity_id: data.identity?.id });
-  return data;
+	log.debug("Generating identity image (admin)", request);
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/identities/generate-image`,
+		{
+			method: "POST",
+			body: JSON.stringify(request),
+		},
+	);
+	if (!response.ok) {
+		const error = await response
+			.json()
+			.catch(() => ({ error: "Failed to generate image" }));
+		throw new Error(error.error || "Failed to generate image");
+	}
+	const data = await response.json();
+	log.debug("Successfully generated identity image", {
+		identity_id: data.identity?.id,
+	});
+	return data;
 }
 
 /**
@@ -64,33 +68,32 @@ export async function generateIdentityImage(
  * @throws ImageGenerationError with detailed error info if generation fails
  */
 export async function startImageChat(
-  request: StartImageChatRequest
+	request: StartImageChatRequest,
 ): Promise<StartImageChatResponse> {
-  log.debug("Starting image chat", request);
-  const endpoint = request.user_id
-    ? `${COACH_BASE_URL}/admin/identity-image-chat/start`
-    : `${COACH_BASE_URL}/identity-image-chat/start`;
-  const response = await authFetch(
-    endpoint,
-    {
-      method: "POST",
-      body: JSON.stringify(request),
-    }
-  );
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ 
-      error: "Failed to start image chat",
-      error_code: "UNKNOWN",
-      details: null,
-    })) as ImageGenerationErrorResponse;
-    
-    log.error("Image chat start failed", errorData);
-    throw new ImageGenerationError(errorData);
-  }
-  const data = await response.json();
-  log.debug("Successfully started image chat", { identity_id: data.identity_id });
-  return data;
+	log.debug("Starting image chat", request);
+	const endpoint = request.user_id
+		? `${COACH_BASE_URL}/admin/identity-image-chat/start`
+		: `${COACH_BASE_URL}/identity-image-chat/start`;
+	const response = await authFetch(endpoint, {
+		method: "POST",
+		body: JSON.stringify(request),
+	});
+
+	if (!response.ok) {
+		const errorData = (await response.json().catch(() => ({
+			error: "Failed to start image chat",
+			error_code: "UNKNOWN",
+			details: null,
+		}))) as ImageGenerationErrorResponse;
+
+		log.error("Image chat start failed", errorData);
+		throw new ImageGenerationError(errorData);
+	}
+	const data = await response.json();
+	log.debug("Successfully started image chat", {
+		identity_id: data.identity_id,
+	});
+	return data;
 }
 
 /**
@@ -101,33 +104,32 @@ export async function startImageChat(
  * @throws ImageGenerationError with detailed error info if edit fails
  */
 export async function continueImageChat(
-  request: ContinueImageChatRequest
+	request: ContinueImageChatRequest,
 ): Promise<ContinueImageChatResponse> {
-  log.debug("Continuing image chat", request);
-  const endpoint = request.user_id
-    ? `${COACH_BASE_URL}/admin/identity-image-chat/continue`
-    : `${COACH_BASE_URL}/identity-image-chat/continue`;
-  const response = await authFetch(
-    endpoint,
-    {
-      method: "POST",
-      body: JSON.stringify(request),
-    }
-  );
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ 
-      error: "Failed to continue image chat",
-      error_code: "UNKNOWN",
-      details: null,
-    })) as ImageGenerationErrorResponse;
-    
-    log.error("Image chat continue failed", errorData);
-    throw new ImageGenerationError(errorData);
-  }
-  const data = await response.json();
-  log.debug("Successfully continued image chat", { identity_id: data.identity_id });
-  return data;
+	log.debug("Continuing image chat", request);
+	const endpoint = request.user_id
+		? `${COACH_BASE_URL}/admin/identity-image-chat/continue`
+		: `${COACH_BASE_URL}/identity-image-chat/continue`;
+	const response = await authFetch(endpoint, {
+		method: "POST",
+		body: JSON.stringify(request),
+	});
+
+	if (!response.ok) {
+		const errorData = (await response.json().catch(() => ({
+			error: "Failed to continue image chat",
+			error_code: "UNKNOWN",
+			details: null,
+		}))) as ImageGenerationErrorResponse;
+
+		log.error("Image chat continue failed", errorData);
+		throw new ImageGenerationError(errorData);
+	}
+	const data = await response.json();
+	log.debug("Successfully continued image chat", {
+		identity_id: data.identity_id,
+	});
+	return data;
 }
 
 /**
@@ -138,40 +140,45 @@ export async function continueImageChat(
  * @returns SaveImageResponse with updated identity
  */
 export async function saveGeneratedImage(
-  request: SaveImageRequest
+	request: SaveImageRequest,
 ): Promise<SaveImageResponse> {
-  log.debug("Saving generated image", { identity_id: request.identity_id });
-  
-  const base64Data = request.image_base64.replace(/^data:image\/\w+;base64,/, "");
-  const byteCharacters = atob(base64Data);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-  const blob = new Blob([byteArray], { type: "image/png" });
-  
-  const formData = new FormData();
-  formData.append("image", blob, "generated-image.png");
-  
-  const response = await authFetch(
-    `${COACH_BASE_URL}/identities/${request.identity_id}/upload-image`,
-    {
-      method: "PATCH",
-      body: formData,
-    }
-  );
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to save image" }));
-    throw new Error(error.error || "Failed to save image");
-  }
-  const identity = await response.json();
-  log.debug("Successfully saved generated image", { identity_id: identity.id });
-  return {
-    success: true,
-    identity,
-  };
+	log.debug("Saving generated image", { identity_id: request.identity_id });
+
+	const base64Data = request.image_base64.replace(
+		/^data:image\/\w+;base64,/,
+		"",
+	);
+	const byteCharacters = atob(base64Data);
+	const byteNumbers = new Array(byteCharacters.length);
+	for (let i = 0; i < byteCharacters.length; i++) {
+		byteNumbers[i] = byteCharacters.charCodeAt(i);
+	}
+	const byteArray = new Uint8Array(byteNumbers);
+	const blob = new Blob([byteArray], { type: "image/png" });
+
+	const formData = new FormData();
+	formData.append("image", blob, "generated-image.png");
+
+	const response = await authFetch(
+		`${COACH_BASE_URL}/identities/${request.identity_id}/upload-image`,
+		{
+			method: "PATCH",
+			body: formData,
+		},
+	);
+
+	if (!response.ok) {
+		const error = await response
+			.json()
+			.catch(() => ({ error: "Failed to save image" }));
+		throw new Error(error.error || "Failed to save image");
+	}
+	const identity = await response.json();
+	log.debug("Successfully saved generated image", { identity_id: identity.id });
+	return {
+		success: true,
+		identity,
+	};
 }
 
 /**
@@ -183,19 +190,23 @@ export async function saveGeneratedImage(
  * @returns SaveImageResponse with updated identity
  */
 export async function adminSaveGeneratedImage(
-  request: SaveImageRequest
+	request: SaveImageRequest,
 ): Promise<SaveImageResponse> {
-  log.debug("Saving generated image (admin)", { identity_id: request.identity_id });
-  const response = await authFetch(
-    `${COACH_BASE_URL}/admin/identities/save-generated-image`,
-    {
-      method: "POST",
-      body: JSON.stringify(request),
-    }
-  );
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to save image" }));
-    throw new Error(error.error || "Failed to save image");
-  }
-  return response.json();
+	log.debug("Saving generated image (admin)", {
+		identity_id: request.identity_id,
+	});
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/identities/save-generated-image`,
+		{
+			method: "POST",
+			body: JSON.stringify(request),
+		},
+	);
+	if (!response.ok) {
+		const error = await response
+			.json()
+			.catch(() => ({ error: "Failed to save image" }));
+		throw new Error(error.error || "Failed to save image");
+	}
+	return response.json();
 }

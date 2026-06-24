@@ -17,30 +17,30 @@ import { createContext, useContext } from "react";
  * Ported from: dev-coach/client/src/context/UserTargetContext.ts
  */
 export interface UserTargetContextValue {
-  /** Whether we are impersonating a test scenario user */
-  isImpersonating: boolean;
-  /** The ID of the user we're acting as (null = logged-in user) */
-  targetUserId: string | null;
-  /** The ID of the test scenario (null = no scenario context) */
-  scenarioId: string | null;
-  /** Query key prefix: ["user"] or ["testScenarioUser", userId] */
-  queryKeyPrefix: readonly string[];
+	/** Whether we are impersonating a test scenario user */
+	isImpersonating: boolean;
+	/** The ID of the user we're acting as (null = logged-in user) */
+	targetUserId: string | null;
+	/** The ID of the test scenario (null = no scenario context) */
+	scenarioId: string | null;
+	/** Query key prefix: ["user"] or ["testScenarioUser", userId] */
+	queryKeyPrefix: readonly string[];
 }
 
 const defaultValue: UserTargetContextValue = {
-  isImpersonating: false,
-  targetUserId: null,
-  scenarioId: null,
-  queryKeyPrefix: ["user"],
+	isImpersonating: false,
+	targetUserId: null,
+	scenarioId: null,
+	queryKeyPrefix: ["user"],
 };
 
 export const UserTargetContext =
-  createContext<UserTargetContextValue>(defaultValue);
+	createContext<UserTargetContextValue>(defaultValue);
 
 /**
  * Hook to consume the UserTargetContext.
  * Safe to call outside a provider — returns default (non-impersonating) value.
  */
 export function useUserTarget(): UserTargetContextValue {
-  return useContext(UserTargetContext);
+	return useContext(UserTargetContext);
 }

@@ -1,6 +1,6 @@
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 
 /**
  * MarkdownRenderer
@@ -13,16 +13,18 @@ import rehypeSanitize from 'rehype-sanitize';
  * Used in: coach-state-visualizer/utils/renderUtils.tsx (for prompt rendering)
  */
 interface MarkdownRendererProps {
-  content: string;
-  className?: string;
+	content: string;
+	className?: string;
 }
 
 const MarkdownRenderer = ({ content, className }: MarkdownRendererProps) => {
-  return (
-    <div className={className}>
-      <ReactMarkdown rehypePlugins={[rehypeRaw, rehypeSanitize]}>{content}</ReactMarkdown>
-    </div>
-  );
+	return (
+		<div className={className}>
+			<ReactMarkdown rehypePlugins={[rehypeRaw, rehypeSanitize]}>
+				{content}
+			</ReactMarkdown>
+		</div>
+	);
 };
 
 export default MarkdownRenderer;

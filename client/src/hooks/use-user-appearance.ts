@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getUserAppearance,
-  updateUserAppearance,
-  getTestUserAppearance,
-  updateTestUserAppearance,
+	getTestUserAppearance,
+	getUserAppearance,
+	updateTestUserAppearance,
+	updateUserAppearance,
 } from "@/api/userAppearance";
 import type { UserAppearance } from "@/types/userAppearance";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useProfile } from "./use-profile";
 
 /**
@@ -22,56 +22,60 @@ import { useProfile } from "./use-profile";
  * Used in: Images page for appearance customization
  */
 export function useUserAppearance(userId: string | null) {
-  const queryClient = useQueryClient();
-  const { profile } = useProfile();
-  const isCurrentUser = profile && userId === profile.id;
+	const queryClient = useQueryClient();
+	const { profile } = useProfile();
+	const isCurrentUser = profile && userId === profile.id;
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery<UserAppearance | null, Error>({
-    queryKey: ["user", userId, "appearance"],
-    queryFn: async () => {
-      if (!userId) return null;
-      if (isCurrentUser) {
-        return getUserAppearance();
-      } else {
-        return getTestUserAppearance(userId);
-      }
-    },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 10,
-    retry: false,
-  });
+	const { data, isLoading, isError, refetch } = useQuery<
+		UserAppearance | null,
+		Error
+	>({
+		queryKey: ["user", userId, "appearance"],
+		queryFn: async () => {
+			if (!userId) return null;
+			if (isCurrentUser) {
+				return getUserAppearance();
+			}
+			return getTestUserAppearance(userId);
+		},
+		enabled: !!userId,
+		staleTime: 1000 * 60 * 10,
+		retry: false,
+	});
 
-  const updateMutation = useMutation<UserAppearance, Error, Partial<UserAppearance>>({
-    mutationFn: async (appearance: Partial<UserAppearance>) => {
-      if (!userId) throw new Error("User ID is required");
-      if (isCurrentUser) {
-        return updateUserAppearance(appearance);
-      } else {
-        return updateTestUserAppearance(userId, appearance);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", userId, "appearance"] });
-      if (isCurrentUser) {
-        queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["testScenarioUser", userId] });
-      }
-    },
-  });
+	const updateMutation = useMutation<
+		UserAppearance,
+		Error,
+		Partial<UserAppearance>
+	>({
+		mutationFn: async (appearance: Partial<UserAppearance>) => {
+			if (!userId) throw new Error("User ID is required");
+			if (isCurrentUser) {
+				return updateUserAppearance(appearance);
+			}
+			return updateTestUserAppearance(userId, appearance);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["user", userId, "appearance"],
+			});
+			if (isCurrentUser) {
+				queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
+			} else {
+				queryClient.invalidateQueries({
+					queryKey: ["testScenarioUser", userId],
+				});
+			}
+		},
+	});
 
-  return {
-    appearance: data || null,
-    isLoading,
-    isError,
-    refetchAppearance: refetch,
-    updateAppearance: updateMutation.mutateAsync,
-    isUpdating: updateMutation.isPending,
-    updateError: updateMutation.error,
-  };
+	return {
+		appearance: data || null,
+		isLoading,
+		isError,
+		refetchAppearance: refetch,
+		updateAppearance: updateMutation.mutateAsync,
+		isUpdating: updateMutation.isPending,
+		updateError: updateMutation.error,
+	};
 }

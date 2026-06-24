@@ -1,14 +1,14 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { fetchUserProfile } from "@/api/user";
-import type { User } from "@/types/user";
 import { isAdminUser } from "@/permissions/isAdminUser";
+import type { User } from "@/types/user";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
 type UseProfileResult = {
-  profile: User | undefined;
-  isAdmin: boolean | undefined;
-  isLoading: boolean;
-  isError: boolean;
-  refetchProfile: UseQueryResult<User, Error>["refetch"];
+	profile: User | undefined;
+	isAdmin: boolean | undefined;
+	isLoading: boolean;
+	isError: boolean;
+	refetchProfile: UseQueryResult<User, Error>["refetch"];
 };
 
 /**
@@ -25,21 +25,20 @@ type UseProfileResult = {
  * Used in: Any component that needs to read the user's profile.
  */
 export function useProfile(): UseProfileResult {
-  const { data, isLoading, isError, refetch } = useQuery<User, Error>({
-    queryKey: ["user", "profile"],
-    queryFn: fetchUserProfile,
-    staleTime: 1000 * 60 * 10, // 10 minutes
-    retry: false,
-  });
+	const { data, isLoading, isError, refetch } = useQuery<User, Error>({
+		queryKey: ["user", "profile"],
+		queryFn: fetchUserProfile,
+		staleTime: 1000 * 60 * 10, // 10 minutes
+		retry: false,
+	});
 
-  const isAdmin = data ? isAdminUser(data) : undefined;
+	const isAdmin = data ? isAdminUser(data) : undefined;
 
-  return {
-    profile: data,
-    isAdmin,
-    isLoading,
-    isError,
-    refetchProfile: refetch,
-  };
+	return {
+		profile: data,
+		isAdmin,
+		isLoading,
+		isError,
+		refetchProfile: refetch,
+	};
 }
-

@@ -6,20 +6,18 @@ import type { ReactNode } from "react";
  * Disables retries and logging to keep tests fast and clean.
  */
 export function createQueryWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: Infinity },
-      mutations: { retry: false },
-    },
-  });
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: { retry: false, gcTime: Number.POSITIVE_INFINITY },
+			mutations: { retry: false },
+		},
+	});
 
-  function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
-  }
+	function Wrapper({ children }: { children: ReactNode }) {
+		return (
+			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+		);
+	}
 
-  return { queryClient, wrapper: Wrapper };
+	return { queryClient, wrapper: Wrapper };
 }

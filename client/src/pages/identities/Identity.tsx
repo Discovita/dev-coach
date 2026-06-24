@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { IdentityState } from "@/enums/identityState";
 import { useIdentities } from "@/hooks/use-identities";
+import type { Identity } from "@/types/identity";
 import { Link, useParams } from "@tanstack/react-router";
 import { Pencil } from "lucide-react";
-import type { IdentityState } from "@/enums/identityState";
-import type { Identity } from "@/types/identity";
-import { Button } from "@/components/ui/button";
-import { IdentityEditForm } from "./components/IdentityEditForm";
-import { IdentityDeleteButton } from "./components/IdentityDeleteButton";
+import { useState } from "react";
 import { CategoryPill } from "./components/CategoryPill";
+import { IdentityDeleteButton } from "./components/IdentityDeleteButton";
+import { IdentityEditForm } from "./components/IdentityEditForm";
 
 /**
  * Single Identity Page
@@ -17,7 +17,7 @@ import { CategoryPill } from "./components/CategoryPill";
  * - Shows large image, title, I AM statement, state, and metadata
  * - Matches Figma design with card-based layout
  */
-export default function Identity() {
+export default function IdentityPage() {
 	const { identityId } = useParams({
 		from: "/_authenticated/identities/$identityId",
 	});

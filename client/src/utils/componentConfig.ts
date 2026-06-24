@@ -5,12 +5,12 @@ import type { ComponentConfig } from "@/types/componentConfig";
  * Used for optimistic updates to preserve component UI after user interaction.
  */
 export function makeComponentDisplayOnly(
-  config: ComponentConfig | null | undefined
+	config: ComponentConfig | null | undefined,
 ): ComponentConfig | null {
-  if (!config) return null;
+	if (!config) return null;
 
-  return {
-    ...config,
-    buttons: undefined, // Remove buttons to make display-only
-  };
+	return {
+		...config,
+		buttons: undefined, // Remove buttons to make display-only
+	};
 }
