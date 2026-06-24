@@ -109,9 +109,7 @@ export const IAmStatementsSummaryComponent: React.FC<{
   config: ComponentConfig;
   onSendUserMessageToCoach: (request: CoachRequest) => void;
   disabled: boolean;
-  /** Optional user ID for test scenarios (enables admin endpoint for PDF download) */
-  testUserId?: string;
-}> = ({ coachMessage, config, onSendUserMessageToCoach, disabled, testUserId }) => {
+}> = ({ coachMessage, config, onSendUserMessageToCoach, disabled }) => {
   const identities = (config.identities || []) as ComponentIdentity[];
   const hasButtons = config.buttons && config.buttons.length > 0;
   const { downloadPdf, isDownloading } = useDownloadIAmPdf();
@@ -144,9 +142,10 @@ export const IAmStatementsSummaryComponent: React.FC<{
         {/* Download PDF button */}
         <button
           onClick={() => {
-            log.debug("Download PDF button clicked", { testUserId });
-            // Pass testUserId to use admin endpoint for test scenarios
-            downloadPdf(testUserId);
+            log.debug("Download PDF button clicked");
+            // The hook resolves the target user from UserTargetContext,
+            // so this works under impersonation/test scenarios too.
+            downloadPdf();
           }}
           disabled={disabled || isDownloading}
           className="px-4 py-2 text-sm font-medium rounded-md bg-white/50 hover:bg-white/70 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 transition-colors cursor-pointer flex items-center gap-2"
