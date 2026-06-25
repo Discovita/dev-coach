@@ -21,11 +21,11 @@ log = configure_logging(__name__, log_level="INFO")
 
 # Transient-failure retry policy.
 #
-# Gemini's preview image model intermittently returns 404 NOT_FOUND
-# ("Requested entity was not found") and 5xx/UNAVAILABLE under capacity
-# pressure — non-deterministic, Google-side blips, NOT bad input. A short
-# retry with backoff recovers most of them. The gunicorn worker timeout is
-# 600s and each attempt is ~40s, so up to 3 attempts is safe.
+# Gemini's image model can intermittently return 404 NOT_FOUND ("Requested
+# entity was not found") and 5xx/UNAVAILABLE under capacity pressure —
+# non-deterministic, Google-side blips, NOT bad input. A short retry with
+# backoff recovers most of them. The gunicorn worker timeout is 600s and each
+# attempt is ~40s, so up to 3 attempts is safe.
 MAX_GENERATION_ATTEMPTS = 3
 # Seconds to wait before attempts 2 and 3 (last value reused if more attempts).
 RETRY_BACKOFF_SECONDS = (2, 5)
@@ -150,9 +150,9 @@ class ImageGenerationError(Exception):
         error_str = str(e).lower()
         raw = str(e)
 
-        # Transient Google-side blips: preview-model 404 NOT_FOUND, 5xx /
-        # UNAVAILABLE, dropped connections. These are retried upstream; if one
-        # still reaches here, tell the user it's a temporary overload.
+        # Transient Google-side blips: 404 NOT_FOUND, 5xx / UNAVAILABLE,
+        # dropped connections. These are retried upstream; if one still reaches
+        # here, tell the user it's a temporary overload.
         if is_transient_error(e):
             return cls(
                 message=(
@@ -195,8 +195,8 @@ class GeminiImageService:
     Prompt construction is handled by PromptManager.
     """
 
-    # Gemini model for image generation
-    MODEL = "gemini-3-pro-image-preview"
+    # Gemini model for image generation (GA, not the -preview alias).
+    MODEL = "gemini-3-pro-image"
 
     # Default image configuration
     DEFAULT_ASPECT_RATIO = "16:9"
