@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import { useAuth } from "@/hooks/use-auth";
+import { useCoachState } from "@/hooks/use-coach-state";
 import { useProfile } from "@/hooks/use-profile";
 import { useUpdateProfile } from "@/hooks/use-update-profile";
 import { useUserAppearance } from "@/hooks/use-user-appearance";
@@ -12,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AccountInformation } from "./components/AccountInformation";
 import { ReferenceImageManager } from "./components/ReferenceImageManager";
+import { StudioAccessControl } from "./components/StudioAccessControl";
 import { AppearanceSelector } from "./components/appearance";
 
 /**
@@ -50,6 +52,14 @@ export default function Account() {
 		: (profile?.id ?? null);
 
 	const viewedProfile = isImpersonating ? impersonatedProfile : profile;
+
+	// Studio access override is a super-admin capability — gate on the
+	// logged-in admin's `is_superuser` (NOT the viewed user) so the control
+	// stays available while impersonating. The control acts on the viewed
+	// user's coach state, which `useCoachState` resolves via the
+	// impersonation bridge.
+	const isSuperAdmin = !!profile?.is_superuser;
+	const { coachState } = useCoachState();
 
 	const { appearance, updateAppearance, isUpdating } =
 		useUserAppearance(viewedUserId);
@@ -98,6 +108,14 @@ export default function Account() {
 									}
 						}
 					/>
+
+					{/* Studio Access — super-admin only, controls the viewed user */}
+					{isSuperAdmin && viewedUserId && (
+						<StudioAccessControl
+							userId={viewedUserId}
+							override={coachState?.studio_access_override}
+						/>
+					)}
 
 					{/* Logout Section — hidden when impersonating */}
 					{!isImpersonating && (

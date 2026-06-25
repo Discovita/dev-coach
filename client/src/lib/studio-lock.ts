@@ -13,8 +13,15 @@ export const STUDIO_LOCKED_MESSAGE = "This isn't available yet.";
  * phase. Any earlier phase — or an as-yet-unknown coach state (still
  * loading / failed to load) — is treated as locked, so we never flash an
  * unlocked Studio to a user who hasn't earned it.
+ *
+ * A super admin can override the phase-based behavior per user via
+ * `studio_access_override` (set on the Account page): `true` forces the
+ * Studio open and `false` forces it locked, regardless of phase. `null` /
+ * `undefined` keeps the default phase-based unlock.
  */
 export function isStudioLocked(coachState: CoachState | undefined): boolean {
+	if (coachState?.studio_access_override === true) return false;
+	if (coachState?.studio_access_override === false) return true;
 	return coachState?.current_phase !== CoachingPhase.IDENTITY_VISUALIZATION;
 }
 

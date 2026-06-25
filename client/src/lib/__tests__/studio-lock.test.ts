@@ -47,6 +47,32 @@ describe("isStudioLocked", () => {
 	it("exposes a stable user-facing message", () => {
 		expect(STUDIO_LOCKED_MESSAGE).toBe("This isn't available yet.");
 	});
+
+	describe("studio_access_override", () => {
+		it("force-unlocks an early phase when override is true", () => {
+			const state = coachStateInPhase(CoachingPhase.INTRODUCTION);
+			state.studio_access_override = true;
+			expect(isStudioLocked(state)).toBe(false);
+		});
+
+		it("force-locks the visualization phase when override is false", () => {
+			const state = coachStateInPhase(CoachingPhase.IDENTITY_VISUALIZATION);
+			state.studio_access_override = false;
+			expect(isStudioLocked(state)).toBe(true);
+		});
+
+		it("falls back to phase-based behavior when override is null", () => {
+			const visualization = coachStateInPhase(
+				CoachingPhase.IDENTITY_VISUALIZATION,
+			);
+			visualization.studio_access_override = null;
+			expect(isStudioLocked(visualization)).toBe(false);
+
+			const early = coachStateInPhase(CoachingPhase.INTRODUCTION);
+			early.studio_access_override = null;
+			expect(isStudioLocked(early)).toBe(true);
+		});
+	});
 });
 
 describe("isCoachingComplete", () => {

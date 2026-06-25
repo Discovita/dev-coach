@@ -53,6 +53,29 @@ export async function fetchTestScenarioUserCoachState(userId: string) {
 }
 
 /**
+ * Set the tri-state Studio access override for a user (super-admin only).
+ * PATCH /api/v1/admin/test-user/{userId}/studio-access
+ *
+ * `override`: `true` forces the Studio unlocked, `false` forces it locked,
+ * `null` restores the default phase-based unlock. Returns the updated
+ * coach-state payload.
+ */
+export async function setStudioAccessOverride(
+	userId: string,
+	override: boolean | null,
+) {
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/test-user/${userId}/studio-access`,
+		{
+			method: "PATCH",
+			body: JSON.stringify({ studio_access_override: override }),
+		},
+	);
+	if (!response.ok) throw new Error("Failed to update Studio access");
+	return response.json();
+}
+
+/**
  * Fetch identities for a test scenario user (admin only).
  * GET /api/v1/admin/test-user/{userId}/identities/
  */
