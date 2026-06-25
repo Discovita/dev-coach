@@ -24,6 +24,7 @@ from apps.identities.views import (
     IdentityImageChatViewSet,
     IdentityViewSet,
 )
+from apps.meditations.views import AdminMeditationViewSet
 from apps.prompts.views import PromptViewSet
 from apps.reference_images.views import ReferenceImageViewSet
 from apps.test_scenario.views import AdminTestScenarioViewSet
@@ -73,6 +74,9 @@ admin_router.register(
     basename="admin-identity-image-chat",
 )
 admin_router.register(r"test-user", AdminTestUserViewSet, basename="admin-test-user")
+admin_router.register(
+    r"meditations", AdminMeditationViewSet, basename="admin-meditations"
+)
 
 # JWT token URLs
 jwt_patterns = [
