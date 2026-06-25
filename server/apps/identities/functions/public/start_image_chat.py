@@ -82,10 +82,11 @@ def start_image_chat(
             status=status.HTTP_400_BAD_REQUEST,
         )
     except Exception as e:
+        # Never surface the raw error to the user — log it, show a friendly line.
         log.error(f"Image generation failed: {e}", exc_info=True)
         return Response(
             {
-                "error": f"Image generation failed: {str(e)}",
+                "error": "Something went wrong while generating your image. Please try again.",
                 "error_code": "UNKNOWN",
                 "details": None,
             },

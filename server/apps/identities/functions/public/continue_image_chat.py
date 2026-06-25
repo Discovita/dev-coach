@@ -62,10 +62,11 @@ def continue_image_chat(
             status=status.HTTP_400_BAD_REQUEST,
         )
     except Exception as e:
+        # Never surface the raw error to the user — log it, show a friendly line.
         log.error(f"Image edit failed: {e}", exc_info=True)
         return Response(
             {
-                "error": f"Image edit failed: {str(e)}",
+                "error": "Something went wrong while editing your image. Please try again.",
                 "error_code": "UNKNOWN",
                 "details": None,
             },

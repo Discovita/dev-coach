@@ -285,6 +285,46 @@ class ContinueImageChatAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("image_base64", response.data)
 
+    @patch("services.image_generation.orchestration.GeminiImageService")
+    @patch(
+        "services.image_generation.utils.chat_history_serializer.deserialize_chat_history"
+    )
+    def test_admin_continue_chat_overload_returns_friendly_error(
+        self, mock_deserialize, mock_service_class
+    ):
+        """
+        A transient Gemini failure on the ADMIN path must surface as the
+        structured {error, error_code, details} shape with a human-readable
+        message — NOT a raw {"detail": ...} blob.
+        """
+        from services.image_generation import ImageGenerationError
+
+        self.client.force_authenticate(user=self.admin_user)
+        mock_deserialize.return_value = [
+            {"role": "user", "parts": [{"text": "Initial prompt"}]}
+        ]
+        mock_service = MagicMock()
+        mock_service.create_chat.return_value = MagicMock()
+        mock_service.send_chat_message.side_effect = ImageGenerationError(
+            message="The image service is temporarily overloaded. Please wait a moment and try again.",
+            error_code=ImageGenerationError.MODEL_OVERLOADED,
+            details="404 NOT_FOUND. {'error': {'code': 404}}",
+        )
+        mock_service_class.return_value = mock_service
+
+        response = self.client.post(
+            self.admin_url,
+            {"user_id": str(self.user.id), "edit_prompt": "make it warmer"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error_code"], "MODEL_OVERLOADED")
+        self.assertIn("overloaded", response.data["error"].lower())
+        # The user-facing error must not be the raw provider JSON.
+        self.assertNotIn("404", response.data["error"])
+        self.assertNotIn("detail", response.data)
+
     def test_continue_chat_requires_auth(self):
         """Test that public endpoint requires authentication."""
         response = self.client.post(
