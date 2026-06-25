@@ -61,6 +61,7 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "who_you_want_to_be",  # List of 'who you want to be' identities
             "asked_questions",  # List of questions asked during Get To Know You phase
             "shown_videos",  # List of session video keys the user has acknowledged
+            "studio_access_override",  # Super-admin Studio access override (tri-state)
             "on_break",  # Derived: open Break row exists for this user
             "updated_at",  # Timestamp of last update
         )
@@ -69,6 +70,7 @@ class CoachStateSerializer(serializers.ModelSerializer):
             "user",
             "current_identity",
             "proposed_identity",
+            "studio_access_override",
             "on_break",
             "updated_at",
         )

@@ -30,6 +30,13 @@ export interface CoachState {
 	};
 	updated_at: string;
 	/**
+	 * Super-admin Studio access override (tri-state). `null`/`undefined` =
+	 * default phase-based unlock (Studio opens at the identity_visualization
+	 * phase); `true` = force unlocked; `false` = force locked. Set via the
+	 * super-admin-only toggle on the Account page. Read by `isStudioLocked`.
+	 */
+	studio_access_override?: boolean | null;
+	/**
 	 * Coaching Phase Videos (PR 9): true while the user has an open `Break`
 	 * row (between-session pause). Backend-derived from
 	 * `Break.objects.filter(user=u, ended_at__isnull=True).exists()`. The

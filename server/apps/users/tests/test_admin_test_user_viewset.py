@@ -51,3 +51,98 @@ class AdminTestUserViewSetOnBreakTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["on_break"])
+
+
+class AdminTestUserStudioAccessTests(APITestCase):
+    """Super-admin-only tri-state Studio access override endpoint."""
+
+    def setUp(self):
+        self.superuser = User.objects.create_superuser(
+            email="super@example.com",
+            password="superpass123",
+        )
+        self.staff = User.objects.create_user(
+            email="staff@example.com",
+            password="staffpass123",
+            is_staff=True,
+        )
+        self.target_user = User.objects.create_user(
+            email="target@example.com",
+            password="testpass123",
+        )
+
+    def _url(self, user: User) -> str:
+        return f"/api/v1/admin/test-user/{user.pk}/studio-access"
+
+    def test_superuser_can_force_unlock(self):
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.patch(
+            self._url(self.target_user),
+            {"studio_access_override": True},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["studio_access_override"])
+        self.target_user.coach_state.refresh_from_db()
+        self.assertTrue(self.target_user.coach_state.studio_access_override)
+
+    def test_superuser_can_force_lock(self):
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.patch(
+            self._url(self.target_user),
+            {"studio_access_override": False},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data["studio_access_override"])
+        self.target_user.coach_state.refresh_from_db()
+        self.assertFalse(self.target_user.coach_state.studio_access_override)
+
+    def test_superuser_can_reset_to_default(self):
+        self.target_user.coach_state.studio_access_override = True
+        self.target_user.coach_state.save(update_fields=["studio_access_override"])
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.patch(
+            self._url(self.target_user),
+            {"studio_access_override": None},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data["studio_access_override"])
+        self.target_user.coach_state.refresh_from_db()
+        self.assertIsNone(self.target_user.coach_state.studio_access_override)
+
+    def test_missing_field_is_rejected(self):
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.patch(self._url(self.target_user), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_invalid_value_is_rejected(self):
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.patch(
+            self._url(self.target_user),
+            {"studio_access_override": "maybe"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_staff_admin_is_forbidden(self):
+        """is_staff alone is not enough — this is a super-admin capability."""
+        self.client.force_authenticate(user=self.staff)
+        response = self.client.patch(
+            self._url(self.target_user),
+            {"studio_access_override": True},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_anonymous_is_forbidden(self):
+        response = self.client.patch(
+            self._url(self.target_user),
+            {"studio_access_override": True},
+            format="json",
+        )
+        self.assertIn(
+            response.status_code,
+            (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN),
+        )

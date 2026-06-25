@@ -87,6 +87,16 @@ class CoachState(models.Model):
         blank=True,
         help_text="List of session video keys the user has acknowledged.",
     )
+    studio_access_override = models.BooleanField(
+        null=True,
+        blank=True,
+        default=None,
+        help_text=(
+            "Super-admin override for Studio access. None = default "
+            "(phase-based: unlocked at the identity_visualization phase); "
+            "True = force unlocked; False = force locked."
+        ),
+    )
     metadata = models.JSONField(
         default=dict,
         null=True,

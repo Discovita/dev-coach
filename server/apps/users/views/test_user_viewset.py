@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from apps.chat_messages.utils import ensure_initial_message_exists
 from apps.users.functions import get_user_chat_messages, get_user_identities
 from apps.users.models import User
-from permissions import IsAdminUser
+from permissions import IsAdminUser, IsSuperUser
 
 
 class AdminTestUserViewSet(viewsets.GenericViewSet):
@@ -102,6 +102,44 @@ class AdminTestUserViewSet(viewsets.GenericViewSet):
         user = get_object_or_404(User, pk=pk)
         coach_state = get_object_or_404(CoachState, user=user)
         return Response(CoachStateSerializer(coach_state).data)
+
+    @decorators.action(
+        detail=True,
+        methods=["patch"],
+        url_path="studio-access",
+        permission_classes=[IsSuperUser],
+    )
+    def studio_access(self, request, pk=None):
+        """
+        PATCH /api/v1/admin/test-user/{id}/studio-access — super-admin only.
+
+        Sets the tri-state Studio access override on the target user's
+        CoachState. Body: ``{"studio_access_override": true | false | null}``
+        where None restores the default phase-based unlock, True forces the
+        Studio open, and False forces it locked.
+        """
+        from apps.coach_states.models import CoachState
+        from apps.coach_states.serializers import CoachStateSerializer
+
+        if "studio_access_override" not in request.data:
+            return Response(
+                {"detail": "studio_access_override is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        override = request.data.get("studio_access_override")
+        if override not in (True, False, None):
+            return Response(
+                {"detail": "studio_access_override must be true, false, or null."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(User, pk=pk)
+        coach_state = get_object_or_404(CoachState, user=user)
+        coach_state.studio_access_override = override
+        coach_state.save(update_fields=["studio_access_override", "updated_at"])
+        return Response(
+            CoachStateSerializer(coach_state).data, status=status.HTTP_200_OK
+        )
 
     @decorators.action(detail=True, methods=["get"], url_path="identities")
     def identities(self, request, pk=None):
