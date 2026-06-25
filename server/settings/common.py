@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "apps.test_scenario",
     "apps.actions",
     "apps.reference_images",
+    "apps.meditations",
     # Third-party apps...
     "rest_framework",
     "rest_framework_api_key",
@@ -316,6 +317,16 @@ CELERY_WORKER_MAX_MEMORY_PER_CHILD = 400000  # recycle if RSS exceeds ~400 MB (K
 # COACHING_PHASE_VIDEOS_ENABLED is the feature flag — flip it to control
 # visibility without an env-var change. Flipping is a code change + deploy.
 COACHING_PHASE_VIDEOS_ENABLED = True
+
+#########################################
+# Config for the Meditations feature (admin-only AI meditation generation +
+# QC). Served publicly to the frontend via GET /api/v1/core/public/meditations
+# so the UI can decide whether to show the meditations surface.
+#
+# MEDITATIONS_ENABLED is ENV-DRIVEN (unlike COACHING_PHASE_VIDEOS_ENABLED) —
+# flip it by setting the MEDITATIONS_ENABLED env var on the service, no code
+# change. Defaults OFF so the feature stays dark until explicitly enabled.
+MEDITATIONS_ENABLED = env.bool("MEDITATIONS_ENABLED", default=False)
 
 #########################################
 # COACH AI MODEL
