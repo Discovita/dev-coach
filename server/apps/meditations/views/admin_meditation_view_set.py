@@ -17,10 +17,15 @@ from rest_framework.response import Response
 
 from apps.meditations.models import Meditation, MeditationAsset, MeditationSegment
 from apps.meditations.serializers import (
+    MeditationAssetSerializer,
     MeditationDetailSerializer,
     MeditationListSerializer,
 )
-from apps.meditations.services import create_meditation_for_user, set_active_asset
+from apps.meditations.services import (
+    create_meditation_for_user,
+    create_pending_asset,
+    set_active_asset,
+)
 from apps.meditations.tasks import generate_segment_part_task
 from apps.users.models import User
 from enums.meditation import MeditationAssetKind
@@ -79,11 +84,13 @@ class AdminMeditationViewSet(
                 {"detail": f"kind must be one of {MeditationAssetKind.values}."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Validate the segment exists (404 otherwise).
-        get_object_or_404(MeditationSegment, id=segment_id)
-        generate_segment_part_task.delay_on_commit(str(segment_id), kind)
+        segment = get_object_or_404(MeditationSegment, id=segment_id)
+        # Create the QUEUED asset now so the UI sees it and starts polling
+        # immediately; the task fills it in.
+        asset = create_pending_asset(segment, kind)
+        generate_segment_part_task.delay_on_commit(str(asset.id))
         return Response(
-            {"status": "queued", "segment_id": str(segment_id), "kind": kind},
+            MeditationAssetSerializer(asset).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
