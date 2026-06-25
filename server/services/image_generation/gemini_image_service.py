@@ -6,7 +6,8 @@ Used for generating identity images from reference photos and prompts.
 """
 
 import os
-from typing import List, Optional, Tuple
+import time
+from typing import Callable, List, Optional, Tuple
 
 from google import genai
 from google.genai import types
@@ -17,6 +18,80 @@ from PIL import Image
 from services.logger import configure_logging
 
 log = configure_logging(__name__, log_level="INFO")
+
+# Transient-failure retry policy.
+#
+# Gemini's preview image model intermittently returns 404 NOT_FOUND
+# ("Requested entity was not found") and 5xx/UNAVAILABLE under capacity
+# pressure — non-deterministic, Google-side blips, NOT bad input. A short
+# retry with backoff recovers most of them. The gunicorn worker timeout is
+# 600s and each attempt is ~40s, so up to 3 attempts is safe.
+MAX_GENERATION_ATTEMPTS = 3
+# Seconds to wait before attempts 2 and 3 (last value reused if more attempts).
+RETRY_BACKOFF_SECONDS = (2, 5)
+
+# HTTP status codes we treat as transient and retry. 429 (rate limit) is
+# deliberately excluded — retrying it synchronously just makes things worse.
+_TRANSIENT_STATUS_CODES = {404, 500, 502, 503, 504}
+# Substrings (lowercased) that mark a transient failure when no status code is
+# available (e.g. dropped connections / SSL resets / timeouts).
+_TRANSIENT_MARKERS = (
+    "not_found",
+    "requested entity was not found",
+    "unavailable",
+    "overloaded",
+    "internal error",
+    "connection",
+    "ssl",
+    "timeout",
+    "timed out",
+    "deadline",
+)
+
+
+def _status_code(e: Exception) -> Optional[int]:
+    """Best-effort HTTP status code from a google-genai error (or None)."""
+    code = getattr(e, "code", None) or getattr(e, "status_code", None)
+    return code if isinstance(code, int) else None
+
+
+def is_transient_error(e: Exception) -> bool:
+    """
+    True if the error looks like a transient Google-side blip worth retrying
+    (preview-model 404s, 5xx/UNAVAILABLE, dropped connections), as opposed to a
+    deterministic failure (safety block, rate limit, bad input).
+    """
+    if _status_code(e) in _TRANSIENT_STATUS_CODES:
+        return True
+    s = str(e).lower()
+    return any(marker in s for marker in _TRANSIENT_MARKERS)
+
+
+def _call_with_retries(call: Callable, label: str):
+    """
+    Run ``call`` (a no-arg image-generation call), retrying transient failures
+    with backoff. Every attempt is logged with the raw error so prod logs show
+    exactly what is happening and how often. Re-raises the last exception when
+    retries are exhausted or the error is not transient.
+    """
+    for attempt in range(1, MAX_GENERATION_ATTEMPTS + 1):
+        try:
+            return call()
+        except Exception as e:
+            transient = is_transient_error(e)
+            log.warning(
+                f"{label}: attempt {attempt}/{MAX_GENERATION_ATTEMPTS} failed "
+                f"(status={_status_code(e)}, transient={transient}): {e}"
+            )
+            if not transient or attempt == MAX_GENERATION_ATTEMPTS:
+                if transient:
+                    log.error(f"{label}: giving up after {attempt} transient failures")
+                raise
+            backoff = RETRY_BACKOFF_SECONDS[
+                min(attempt - 1, len(RETRY_BACKOFF_SECONDS) - 1)
+            ]
+            log.info(f"{label}: retrying in {backoff}s")
+            time.sleep(backoff)
 
 
 class ImageGenerationError(Exception):
@@ -65,38 +140,50 @@ class ImageGenerationError(Exception):
 
         Returns:
             ImageGenerationError with appropriate error code and message
+
+        Note:
+            The raw provider error (which may be raw JSON like
+            ``404 NOT_FOUND. {...}``) is NEVER put in ``message`` — it goes only
+            in ``details`` and the logs. ``message`` is always a short,
+            human-readable sentence safe to show a user.
         """
         error_str = str(e).lower()
+        raw = str(e)
 
-        # Check for model overloaded (503 UNAVAILABLE)
-        if "503" in str(e) or "unavailable" in error_str or "overloaded" in error_str:
+        # Transient Google-side blips: preview-model 404 NOT_FOUND, 5xx /
+        # UNAVAILABLE, dropped connections. These are retried upstream; if one
+        # still reaches here, tell the user it's a temporary overload.
+        if is_transient_error(e):
             return cls(
-                message="The AI model is currently overloaded. Please wait a moment and try again.",
+                message=(
+                    "The image service is temporarily overloaded. "
+                    "Please wait a moment and try again."
+                ),
                 error_code=cls.MODEL_OVERLOADED,
-                details=str(e),
+                details=raw,
             )
 
-        # Check for rate limiting (429)
-        if "429" in str(e) or "rate limit" in error_str or "quota" in error_str:
+        # Rate limiting (429).
+        if _status_code(e) == 429 or "rate limit" in error_str or "quota" in error_str:
             return cls(
-                message="Too many requests. Please wait a moment before trying again.",
+                message="Too many requests right now. Please wait a moment before trying again.",
                 error_code=cls.RATE_LIMITED,
-                details=str(e),
+                details=raw,
             )
 
-        # Check for safety blocks
+        # Safety blocks.
         if "safety" in error_str or "blocked" in error_str:
             return cls(
                 message="Your request was blocked by safety filters. Please modify your prompt and try again.",
                 error_code=cls.SAFETY_BLOCK,
-                details=str(e),
+                details=raw,
             )
 
-        # Default unknown error
+        # Anything else: generic, human-readable message. Raw stays in details.
         return cls(
-            message=f"Image generation failed: {str(e)}",
+            message="Something went wrong while generating your image. Please try again.",
             error_code=cls.UNKNOWN,
-            details=str(e),
+            details=raw,
         )
 
 
@@ -165,16 +252,19 @@ class GeminiImageService:
         contents = [prompt] + reference_images
 
         try:
-            response = self.client.models.generate_content(
-                model=self.MODEL,
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    response_modalities=["TEXT", "IMAGE"],
-                    image_config=types.ImageConfig(
-                        aspect_ratio=aspect_ratio,
-                        image_size=resolution,
+            response = _call_with_retries(
+                lambda: self.client.models.generate_content(
+                    model=self.MODEL,
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["TEXT", "IMAGE"],
+                        image_config=types.ImageConfig(
+                            aspect_ratio=aspect_ratio,
+                            image_size=resolution,
+                        ),
                     ),
                 ),
+                label="generate_image",
             )
 
             # Extract image from response
@@ -190,8 +280,10 @@ class GeminiImageService:
             return None
 
         except Exception as e:
+            # Convert to ImageGenerationError so callers surface a friendly,
+            # human-readable message instead of a raw provider error.
             log.error(f"Gemini image generation failed: {str(e)}", exc_info=True)
-            raise
+            raise ImageGenerationError.from_exception(e)
 
     def generate_image_bytes(
         self,
@@ -291,7 +383,10 @@ class GeminiImageService:
         log.debug(f"Message: {message[:200]}...")
 
         try:
-            response = chat.send_message(contents)
+            response = _call_with_retries(
+                lambda: chat.send_message(contents),
+                label="send_chat_message",
+            )
         except Exception as e:
             # Convert API exceptions to ImageGenerationError with proper error codes
             log.error(f"Gemini API error: {e}", exc_info=True)
