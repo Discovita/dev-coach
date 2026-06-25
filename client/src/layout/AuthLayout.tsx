@@ -2,12 +2,20 @@ import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import MobileAuthFooter from "@/components/mobile/MobileAuthFooter";
 import MobileAuthHeader from "@/components/mobile/MobileAuthHeader";
 import { useCoachState } from "@/hooks/use-coach-state";
+import { useMeditations } from "@/hooks/use-meditations";
 import { useProfile } from "@/hooks/use-profile";
 import { STUDIO_LOCKED_MESSAGE, isStudioLocked } from "@/lib/studio-lock";
 import type { NavItem } from "@/types/navItem";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { FlaskConical, Lock, ScrollText, Shield, Users } from "lucide-react";
+import {
+	Clapperboard,
+	FlaskConical,
+	Lock,
+	ScrollText,
+	Shield,
+	Users,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -63,6 +71,17 @@ function SidebarContent({
 	bottomItems,
 	isAdmin,
 }: SidebarContentProps) {
+	const { enabled: meditationsEnabled } = useMeditations();
+	const visibleAdminItems = meditationsEnabled
+		? [
+				...adminNavItems,
+				{
+					to: "/admin/meditations",
+					label: "Meditations",
+					Icon: Clapperboard,
+				},
+			]
+		: adminNavItems;
 	return (
 		<div className="flex flex-col h-full justify-between py-6">
 			<div className="px-3 flex flex-col gap-3 pb-4">
@@ -166,7 +185,7 @@ function SidebarContent({
 							)}
 						</AnimatePresence>
 					</div>
-					{adminNavItems.map(({ to, label, Icon }) => {
+					{visibleAdminItems.map(({ to, label, Icon }) => {
 						const isActive = pathname === to || pathname.startsWith(`${to}/`);
 						return (
 							<button

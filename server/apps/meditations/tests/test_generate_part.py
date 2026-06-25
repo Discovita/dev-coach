@@ -1,7 +1,8 @@
 """
-Tests for generate_segment_part: versioned asset creation, S3 upload, active
-promotion/demotion, and failure handling. The provider call and storage are
-mocked (the providers themselves are covered in services/media tests).
+Tests for the two-step generation flow: create_pending_asset (synchronous,
+QUEUED) and generate_asset (the task body — provider → S3 → READY/FAILED). The
+provider call and storage are mocked (providers are covered in services/media
+tests).
 """
 
 from unittest.mock import patch
@@ -9,7 +10,7 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from apps.meditations.models import Meditation, MeditationAsset, MeditationSegment
-from apps.meditations.services import generate_segment_part
+from apps.meditations.services import create_pending_asset, generate_asset
 from conftest import create_test_identity, create_test_user
 from enums.meditation import (
     MeditationAssetKind,
@@ -28,7 +29,7 @@ def _result(kind="video"):
     )
 
 
-class GenerateSegmentPartTests(TestCase):
+class GenerationFlowTests(TestCase):
     def setUp(self):
         self.user = create_test_user(email="gen@example.com")
         self.identity = create_test_identity(
@@ -43,31 +44,33 @@ class GenerateSegmentPartTests(TestCase):
             current_audio_script="I am calm.",
         )
 
+    def test_create_pending_asset(self):
+        asset = create_pending_asset(self.segment, MeditationAssetKind.VIDEO)
+        self.assertEqual(asset.status, MeditationAssetStatus.QUEUED)
+        self.assertEqual(asset.version, 1)
+        self.assertEqual(asset.prompt_snapshot, "serene push-in")
+        self.assertFalse(asset.is_active)
+        self.med.refresh_from_db()
+        self.assertEqual(self.med.status, MeditationStatus.GENERATING_PARTS)
+
+    def test_create_pending_audio_uses_script(self):
+        asset = create_pending_asset(self.segment, MeditationAssetKind.AUDIO)
+        self.assertEqual(asset.prompt_snapshot, "I am calm.")
+
     @patch("apps.meditations.services.generate_part.default_storage")
     @patch("apps.meditations.services.generate_part._run_provider")
-    def test_video_success(self, mock_run, mock_storage):
+    def test_generate_asset_success(self, mock_run, mock_storage):
         mock_run.return_value = _result("video")
         mock_storage.save.return_value = "meditations/k/video_v1.mp4"
+        pending = create_pending_asset(self.segment, MeditationAssetKind.VIDEO)
 
-        asset = generate_segment_part(str(self.segment.id), MeditationAssetKind.VIDEO)
+        asset = generate_asset(str(pending.id))
 
         self.assertEqual(asset.status, MeditationAssetStatus.READY)
         self.assertEqual(asset.s3_key, "meditations/k/video_v1.mp4")
         self.assertTrue(asset.is_active)
-        self.assertEqual(asset.version, 1)
-        self.assertEqual(asset.prompt_snapshot, "serene push-in")
-        self.med.refresh_from_db()
-        self.assertEqual(self.med.status, MeditationStatus.GENERATING_PARTS)
-
-    @patch("apps.meditations.services.generate_part.default_storage")
-    @patch("apps.meditations.services.generate_part._run_provider")
-    def test_audio_uses_script_snapshot(self, mock_run, mock_storage):
-        mock_run.return_value = _result("audio")
-        mock_storage.save.return_value = "meditations/k/audio_v1.wav"
-
-        asset = generate_segment_part(str(self.segment.id), MeditationAssetKind.AUDIO)
-        self.assertEqual(asset.prompt_snapshot, "I am calm.")
-        self.assertEqual(asset.kind, MeditationAssetKind.AUDIO)
+        # The provider is called with the snapshotted prompt.
+        self.assertEqual(mock_run.call_args.args[2], "serene push-in")
 
     @patch("apps.meditations.services.generate_part.default_storage")
     @patch("apps.meditations.services.generate_part._run_provider")
@@ -75,14 +78,17 @@ class GenerateSegmentPartTests(TestCase):
         mock_run.return_value = _result("video")
         mock_storage.save.side_effect = ["k/v1.mp4", "k/v2.mp4"]
 
-        first = generate_segment_part(str(self.segment.id), MeditationAssetKind.VIDEO)
-        second = generate_segment_part(str(self.segment.id), MeditationAssetKind.VIDEO)
+        first = generate_asset(
+            str(create_pending_asset(self.segment, MeditationAssetKind.VIDEO).id)
+        )
+        second = generate_asset(
+            str(create_pending_asset(self.segment, MeditationAssetKind.VIDEO).id)
+        )
 
         first.refresh_from_db()
         self.assertFalse(first.is_active)
         self.assertTrue(second.is_active)
         self.assertEqual(second.version, 2)
-        # Exactly one active video asset.
         active = MeditationAsset.objects.filter(
             segment=self.segment, kind=MeditationAssetKind.VIDEO, is_active=True
         )
@@ -90,12 +96,13 @@ class GenerateSegmentPartTests(TestCase):
 
     @patch("apps.meditations.services.generate_part.default_storage")
     @patch("apps.meditations.services.generate_part._run_provider")
-    def test_provider_failure_marks_asset_failed(self, mock_run, mock_storage):
+    def test_provider_failure_marks_failed(self, mock_run, mock_storage):
         mock_run.side_effect = MediaGenerationError(
             "blocked", MediaGenerationError.SAFETY_BLOCK
         )
+        pending = create_pending_asset(self.segment, MeditationAssetKind.VIDEO)
 
-        asset = generate_segment_part(str(self.segment.id), MeditationAssetKind.VIDEO)
+        asset = generate_asset(str(pending.id))
 
         self.assertEqual(asset.status, MeditationAssetStatus.FAILED)
         self.assertEqual(asset.error_code, MediaGenerationError.SAFETY_BLOCK)

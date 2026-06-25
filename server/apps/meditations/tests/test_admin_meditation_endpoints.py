@@ -69,7 +69,7 @@ class AdminMeditationEndpointTests(TestCase):
     @patch(
         "apps.meditations.views.admin_meditation_view_set.generate_segment_part_task"
     )
-    def test_generate_part_enqueues_task(self, mock_task):
+    def test_generate_part_creates_queued_asset_and_enqueues(self, mock_task):
         med = Meditation.objects.create(user=self.target)
         segment = MeditationSegment.objects.create(
             meditation=med, identity=self.identity, order=0
@@ -80,9 +80,12 @@ class AdminMeditationEndpointTests(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-        mock_task.delay_on_commit.assert_called_once_with(
-            str(segment.id), MeditationAssetKind.VIDEO
-        )
+        # A QUEUED asset is created synchronously and returned.
+        self.assertEqual(response.data["status"], "QUEUED")
+        asset = MeditationAsset.objects.get(segment=segment)
+        self.assertEqual(str(asset.id), response.data["id"])
+        # The task is enqueued by the new asset's id.
+        mock_task.delay_on_commit.assert_called_once_with(str(asset.id))
 
     def test_generate_part_rejects_bad_kind(self):
         med = Meditation.objects.create(user=self.target)

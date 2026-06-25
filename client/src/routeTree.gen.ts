@@ -33,6 +33,7 @@ import { Route as AuthenticatedIdentitiesIdentityIdRouteImport } from './routes/
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminTestRouteImport } from './routes/_authenticated/admin/test'
 import { Route as AuthenticatedAdminPromptsRouteImport } from './routes/_authenticated/admin/prompts'
+import { Route as AuthenticatedAdminMeditationsRouteImport } from './routes/_authenticated/admin/meditations'
 
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
@@ -160,6 +161,12 @@ const AuthenticatedAdminPromptsRoute =
     path: '/prompts',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminMeditationsRoute =
+  AuthenticatedAdminMeditationsRouteImport.update({
+    id: '/meditations',
+    path: '/meditations',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordIndexRoute
   '/signup': typeof SignupIndexRoute
   '/verify-email': typeof VerifyEmailIndexRoute
+  '/admin/meditations': typeof AuthenticatedAdminMeditationsRoute
   '/admin/prompts': typeof AuthenticatedAdminPromptsRoute
   '/admin/test': typeof AuthenticatedAdminTestRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -195,6 +203,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordIndexRoute
   '/signup': typeof SignupIndexRoute
   '/verify-email': typeof VerifyEmailIndexRoute
+  '/admin/meditations': typeof AuthenticatedAdminMeditationsRoute
   '/admin/prompts': typeof AuthenticatedAdminPromptsRoute
   '/admin/test': typeof AuthenticatedAdminTestRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -222,6 +231,7 @@ export interface FileRoutesById {
   '/reset-password/': typeof ResetPasswordIndexRoute
   '/signup/': typeof SignupIndexRoute
   '/verify-email/': typeof VerifyEmailIndexRoute
+  '/_authenticated/admin/meditations': typeof AuthenticatedAdminMeditationsRoute
   '/_authenticated/admin/prompts': typeof AuthenticatedAdminPromptsRoute
   '/_authenticated/admin/test': typeof AuthenticatedAdminTestRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/admin/meditations'
     | '/admin/prompts'
     | '/admin/test'
     | '/admin/users'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/admin/meditations'
     | '/admin/prompts'
     | '/admin/test'
     | '/admin/users'
@@ -298,6 +310,7 @@ export interface FileRouteTypes {
     | '/reset-password/'
     | '/signup/'
     | '/verify-email/'
+    | '/_authenticated/admin/meditations'
     | '/_authenticated/admin/prompts'
     | '/_authenticated/admin/test'
     | '/_authenticated/admin/users'
@@ -496,10 +509,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPromptsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/meditations': {
+      id: '/_authenticated/admin/meditations'
+      path: '/meditations'
+      fullPath: '/admin/meditations'
+      preLoaderRoute: typeof AuthenticatedAdminMeditationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminMeditationsRoute: typeof AuthenticatedAdminMeditationsRoute
   AuthenticatedAdminPromptsRoute: typeof AuthenticatedAdminPromptsRoute
   AuthenticatedAdminTestRoute: typeof AuthenticatedAdminTestRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -507,6 +528,7 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminMeditationsRoute: AuthenticatedAdminMeditationsRoute,
     AuthenticatedAdminPromptsRoute: AuthenticatedAdminPromptsRoute,
     AuthenticatedAdminTestRoute: AuthenticatedAdminTestRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
