@@ -13,7 +13,11 @@ from apps.authentication.views import AuthViewSet
 
 # Local Modules - Admin Viewsets
 from apps.coach.views import AdminCoachViewSet, CoachViewSet, EvalViewSet
-from apps.core.views import CoachingPhaseVideosViewSet, CoreViewSet
+from apps.core.views import (
+    CoachingPhaseVideosViewSet,
+    CoreViewSet,
+    MeditationsViewSet,
+)
 from apps.identities.views import (
     AdminIdentityImageChatViewSet,
     AdminIdentityViewSet,
@@ -40,6 +44,11 @@ default_router.register(
     CoachingPhaseVideosViewSet,
     basename="core-public-coaching-phase-videos",
 )  # Public Coaching Phase Videos config (feature flag)
+default_router.register(
+    r"core/public/meditations",
+    MeditationsViewSet,
+    basename="core-public-meditations",
+)  # Public Meditations config (feature flag)
 default_router.register(r"coach", CoachViewSet, basename="coach")
 default_router.register(r"eval", EvalViewSet, basename="eval")
 default_router.register(r"user", UserViewSet, basename="user")
