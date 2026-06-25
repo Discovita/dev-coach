@@ -203,3 +203,58 @@ class PromptManager:
         log.debug(f"Formatted image generation prompt: {formatted_prompt}")
 
         return formatted_prompt
+
+    def create_video_generation_prompt(
+        self,
+        identity: Identity,
+        additional_prompt: str = "",
+    ) -> str:
+        """
+        Create a prompt for identity video generation (Veo first-frame
+        image-to-video).
+
+        Mirrors create_image_generation_prompt: fetches the latest active
+        VIDEO_GENERATION prompt and formats it with the identity + scene
+        context. The identity's saved image is the first frame (passed
+        separately to the video provider), so this prompt describes the motion
+        and mood rather than the appearance.
+
+        Args:
+            identity: The Identity to generate a video for
+            additional_prompt: Optional extra direction from admin
+
+        Returns:
+            Formatted prompt string for the video provider
+        """
+        from services.prompt_manager.utils.context.func import (
+            get_identity_context_for_image,
+            get_scene_context,
+        )
+
+        prompt = (
+            Prompt.objects.filter(
+                prompt_type=PromptType.VIDEO_GENERATION,
+                is_active=True,
+            )
+            .order_by("-version")
+            .first()
+        )
+
+        if not prompt:
+            raise ValueError("No active video generation prompt found in the database.")
+
+        log.info(f"Using Video Generation Prompt version: {prompt.version}")
+
+        identity_context = get_identity_context_for_image(identity)
+        scene_context = get_scene_context(identity)
+
+        # The prompt body should have placeholders: {identity_context},
+        # {scene_context}, and {additional_prompt}
+        formatted_prompt = prompt.body.format(
+            identity_context=identity_context,
+            scene_context=scene_context or "None provided",
+            additional_prompt=additional_prompt or "None provided",
+        )
+        log.debug(f"Formatted video generation prompt: {formatted_prompt}")
+
+        return formatted_prompt
