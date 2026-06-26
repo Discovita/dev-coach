@@ -25,15 +25,9 @@ export default function PublicNavbar() {
 					<div className="flex items-center space-x-4">
 						<Link
 							to="/login"
-							className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-						>
-							Sign In
-						</Link>
-						<Link
-							to="/signup"
 							className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30"
 						>
-							Get Started
+							Sign In
 						</Link>
 					</div>
 				</div>

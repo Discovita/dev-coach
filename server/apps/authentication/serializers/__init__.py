@@ -4,6 +4,11 @@ Authentication serializers.
 Input validation for registration, login, and LTI launch requests.
 """
 
+from apps.authentication.serializers.invite_serializer import (
+    CreateInviteSerializer,
+    InviteSerializer,
+    RegisterViaInviteSerializer,
+)
 from apps.authentication.serializers.login_serializer import LoginSerializer
 from apps.authentication.serializers.register_serializer import RegisterSerializer
 from apps.authentication.serializers.resource_link_serializer import (
@@ -11,7 +16,10 @@ from apps.authentication.serializers.resource_link_serializer import (
 )
 
 __all__ = [
+    "CreateInviteSerializer",
+    "InviteSerializer",
     "LoginSerializer",
     "RegisterSerializer",
+    "RegisterViaInviteSerializer",
     "ResourceLinkSerializer",
 ]

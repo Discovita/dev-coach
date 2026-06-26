@@ -1,0 +1,12 @@
+You're invited — NeoVita
+
+You've been invited to join NeoVita. Use the link below to create your account
+and start your journey.
+
+Accept your invitation:
+{{ invite_url }}
+
+This invitation expires in {{ expiry_days }} days. If you weren't expecting it,
+you can safely ignore this email.
+
+— NeoVita

@@ -9,7 +9,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 # Local Modules - Regular Viewsets
-from apps.authentication.views import AuthViewSet
+from apps.authentication.views import AdminInviteViewSet, AuthViewSet
 
 # Local Modules - Admin Viewsets
 from apps.coach.views import AdminCoachViewSet, CoachViewSet, EvalViewSet
@@ -77,6 +77,7 @@ admin_router.register(r"test-user", AdminTestUserViewSet, basename="admin-test-u
 admin_router.register(
     r"meditations", AdminMeditationViewSet, basename="admin-meditations"
 )
+admin_router.register(r"invites", AdminInviteViewSet, basename="admin-invites")
 
 # JWT token URLs
 jwt_patterns = [

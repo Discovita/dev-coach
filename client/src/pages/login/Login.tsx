@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useForm } from "@tanstack/react-form";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 // import { FaGoogle, FaApple } from "react-icons/fa";
 import { useEffect, useState } from "react";
@@ -274,16 +274,6 @@ export default function LoginPage() {
                 <span className="nv-gradient-text">Continue with Apple</span>
               </Button>
             </div> */}
-
-						<p className="mt-8 text-center text-sm text-foreground">
-							Don’t have an account?{" "}
-							<Link
-								to="/signup"
-								className="text-[color:var(--nv-violet-blue)] underline"
-							>
-								Sign up.
-							</Link>
-						</p>
 					</div>
 				</div>
 			</div>

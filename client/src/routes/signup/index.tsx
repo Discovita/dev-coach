@@ -1,9 +1,12 @@
-import Signup from "@/pages/signup/Signup.tsx";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /**
- * /signup index page under pathless _public layout.
+ * /signup — public self-service registration is disabled (invite-only).
+ * Anyone hitting this route is redirected to login; accounts are created
+ * only by accepting an invite link (/invite/:token).
  */
 export const Route = createFileRoute("/signup/")({
-	component: Signup,
+	beforeLoad: () => {
+		throw redirect({ to: "/login" });
+	},
 });

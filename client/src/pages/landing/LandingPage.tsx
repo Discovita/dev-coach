@@ -15,7 +15,7 @@
  * - Question: "Do you know who you want to be?"
  * - Identity strip (right aligned)
  * - Statement: "NeoVita guides you step by step to your future self."
- * - Signup section with form and social login options
+ * - Closing call-to-action (invite-only: log in / use your invite link)
  */
 
 import LandingHero from "@/pages/landing/components/LandingHero";
@@ -116,7 +116,7 @@ export default function LandingPage() {
 				<LandingStatementSection text="NeoVita guides you step by step to your future self." />
 			</motion.div>
 
-			{/* Signup Section */}
+			{/* Closing CTA (invite-only) */}
 			<motion.div
 				initial={{ y: 32, opacity: 0 }}
 				animate={{ y: 0, opacity: 1 }}

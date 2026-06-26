@@ -19,6 +19,7 @@ import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
 import { Route as CheckEmailIndexRouteImport } from './routes/check-email/index'
+import { Route as InviteTokenRouteImport } from './routes/invite/$token'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedStudioIndexRouteImport } from './routes/_authenticated/studio/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
@@ -81,6 +82,11 @@ const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
 const CheckEmailIndexRoute = CheckEmailIndexRouteImport.update({
   id: '/check-email/',
   path: '/check-email/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
@@ -171,6 +177,7 @@ const AuthenticatedAdminMeditationsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/check-email': typeof CheckEmailIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
   '/login': typeof LoginIndexRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/check-email': typeof CheckEmailIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
   '/login': typeof LoginIndexRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_public': typeof PublicRouteRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/check-email/': typeof CheckEmailIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/invite/$token'
     | '/check-email'
     | '/forgot-password'
     | '/login'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/invite/$token'
     | '/check-email'
     | '/forgot-password'
     | '/login'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/_public'
     | '/_authenticated/admin'
+    | '/invite/$token'
     | '/check-email/'
     | '/forgot-password/'
     | '/login/'
@@ -330,6 +342,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   PublicRouteRoute: typeof PublicRouteRoute
+  InviteTokenRoute: typeof InviteTokenRoute
   CheckEmailIndexRoute: typeof CheckEmailIndexRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/check-email'
       fullPath: '/check-email'
       preLoaderRoute: typeof CheckEmailIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -575,6 +595,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   PublicRouteRoute: PublicRouteRoute,
+  InviteTokenRoute: InviteTokenRoute,
   CheckEmailIndexRoute: CheckEmailIndexRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   LoginIndexRoute: LoginIndexRoute,

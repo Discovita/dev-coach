@@ -12,20 +12,29 @@ from rest_framework.response import Response
 from apps.authentication.functions.public import (
     forgot_password,
     login_user,
-    register_user,
+    register_via_invite,
     resend_verification,
     reset_password,
+    validate_invite,
     verify_email,
 )
 from apps.authentication.functions.public.reset_password import (
     TokenExpiredError,
     TokenInvalidError,
 )
+from apps.authentication.functions.public.validate_invite import (
+    InviteAcceptedError,
+    InviteExpiredError,
+    InviteInvalidError,
+)
 from apps.authentication.functions.public.verify_email import (
     VerificationExpiredError,
     VerificationInvalidError,
 )
-from apps.authentication.serializers import LoginSerializer, RegisterSerializer
+from apps.authentication.serializers import (
+    LoginSerializer,
+    RegisterViaInviteSerializer,
+)
 from apps.authentication.utils import (
     AuthErrorMessages,
     error_response,
@@ -59,26 +68,18 @@ class AuthViewSet(viewsets.GenericViewSet):
         permission_classes=[AllowAny],
     )
     def register(self, request: Request) -> Response:
-        """POST /api/v1/auth/register/  — Create a new user account."""
-        serializer = RegisterSerializer(data=request.data)
-        if not serializer.is_valid():
-            error_msg = serializer.errors.get("error", serializer.errors)
-            if isinstance(error_msg, list):
-                error_msg = error_msg[0]
-            return error_response(error_msg)
+        """
+        POST /api/v1/auth/register/  — disabled (registration is invite-only).
 
-        try:
-            result = register_user(
-                email=serializer.validated_data["email"],
-                password=serializer.validated_data["password"],
-            )
-            return Response({"success": True, **result})
-        except Exception as e:
-            log.error("Registration failed for %s: %s", request.data.get("email"), e)
-            return error_response(
-                AuthErrorMessages.UNEXPECTED_ERROR,
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        Public self-service registration is closed: accounts can only be created
+        by accepting an emailed invite (see ``register_via_invite``). This keeps
+        the endpoint present (so the route doesn't 404) but refuses to create
+        users, closing the door that hiding the UI form alone would leave open.
+        """
+        return error_response(
+            "Registration is invite-only. Please use your invitation link.",
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
 
     # ------------------------------------------------------------------
     # POST /api/v1/auth/login/
@@ -206,4 +207,54 @@ class AuthViewSet(viewsets.GenericViewSet):
             )
         except Exception:
             log.exception("Unexpected error in resend-verification for %s", email)
+            return error_response(AuthErrorMessages.UNEXPECTED_ERROR)
+
+    # ------------------------------------------------------------------
+    # GET /api/v1/auth/invites/{token}
+    # ------------------------------------------------------------------
+    @decorators.action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[AllowAny],
+        url_path=r"invites/(?P<token>[^/.]+)",
+    )
+    def validate_invite(self, request: Request, token: str = "") -> Response:
+        """GET /api/v1/auth/invites/{token} — validate + return the locked email."""
+        try:
+            result = validate_invite(token)
+            return success_response(result)
+        except (InviteInvalidError, InviteExpiredError, InviteAcceptedError) as e:
+            return error_response(str(e))
+        except Exception:
+            log.exception("Unexpected error validating invite")
+            return error_response(AuthErrorMessages.UNEXPECTED_ERROR)
+
+    # ------------------------------------------------------------------
+    # POST /api/v1/auth/register-via-invite/
+    # ------------------------------------------------------------------
+    @decorators.action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[AllowAny],
+        url_path="register-via-invite",
+    )
+    def register_via_invite(self, request: Request) -> Response:
+        """POST /api/v1/auth/register-via-invite — accept an invite + log in."""
+        serializer = RegisterViaInviteSerializer(data=request.data)
+        if not serializer.is_valid():
+            error_msg = serializer.errors.get("password", serializer.errors)
+            if isinstance(error_msg, list):
+                error_msg = error_msg[0]
+            return error_response(error_msg)
+
+        try:
+            result = register_via_invite(
+                token=serializer.validated_data["token"],
+                password=serializer.validated_data["password"],
+            )
+            return Response({"success": True, **result})
+        except (InviteInvalidError, InviteExpiredError, InviteAcceptedError) as e:
+            return error_response(str(e))
+        except Exception:
+            log.exception("Unexpected error in register-via-invite")
             return error_response(AuthErrorMessages.UNEXPECTED_ERROR)

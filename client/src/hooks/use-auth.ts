@@ -3,6 +3,7 @@ import {
 	login as loginApi,
 	logout as logoutApi,
 	register as registerApi,
+	registerViaInvite as registerViaInviteApi,
 	resendVerification as resendVerificationApi,
 	resetPassword as resetPasswordApi,
 	verifyEmail as verifyEmailApi,
@@ -12,6 +13,7 @@ import type {
 	AuthResponse,
 	LoginCredentials,
 	RegisterCredentials,
+	RegisterViaInviteCredentials,
 	ResetPasswordCredentials,
 } from "@/types/auth";
 import type { User } from "@/types/user";
@@ -77,6 +79,20 @@ export function useAuth() {
 		},
 	});
 
+	// Register-via-invite mutation — accepting an invite logs the user in.
+	const registerViaInviteMutation = useMutation<
+		AuthResponse,
+		unknown,
+		RegisterViaInviteCredentials
+	>({
+		mutationFn: registerViaInviteApi,
+		onSuccess: (data) => {
+			if (data?.user) {
+				setUserDataInCache(data.user);
+			}
+		},
+	});
+
 	// Forgot password mutation
 	const forgotPasswordMutation = useMutation<AuthResponse, unknown, string>({
 		mutationFn: forgotPasswordApi,
@@ -122,6 +138,8 @@ export function useAuth() {
 		loginStatus: loginMutation.status,
 		register: registerMutation.mutateAsync,
 		registerStatus: registerMutation.status,
+		registerViaInvite: registerViaInviteMutation.mutateAsync,
+		registerViaInviteStatus: registerViaInviteMutation.status,
 		forgotPassword: forgotPasswordMutation.mutateAsync,
 		forgotPasswordStatus: forgotPasswordMutation.status,
 		resetPassword: resetPasswordMutation.mutateAsync,
