@@ -11,6 +11,16 @@ import { makeComponentDisplayOnly } from "@/utils/componentConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 /**
+ * Monotonic id for client-created (optimistic/synthetic) messages. Stable
+ * within a session and unique against server UUIDs, so a message row keeps the
+ * same React key from its optimistic render through commit and never remounts
+ * (a remount re-runs the row's entrance animation and makes the list flicker).
+ * Resetting on reload is fine — keys only need to be unique within the live list.
+ */
+let clientMessageSeq = 0;
+const nextClientMessageId = () => `client-${(clientMessageSeq += 1)}`;
+
+/**
  * useChatMessages hook
  * Handles fetching and updating chat messages using TanStack Query.
  *
@@ -62,11 +72,17 @@ export function useChatMessages() {
 			}
 			return apiClient.sendMessage(request);
 		},
-		onMutate: async () => {
+		onMutate: async (request: CoachRequest) => {
 			await queryClient.cancelQueries({ queryKey: chatMessagesKey });
 
-			const componentConfigFromCache =
+			// Snapshot the pre-mutation cache so onError can fully roll back the
+			// optimistic writes below (the user bubble and the display-only freeze).
+			const previousMessages =
+				queryClient.getQueryData<Message[]>(chatMessagesKey);
+			const previousComponentConfig =
 				queryClient.getQueryData<ComponentConfig | null>(componentConfigKey);
+
+			const componentConfigFromCache = previousComponentConfig;
 
 			if (componentConfigFromCache) {
 				queryClient.setQueryData<Message[] | undefined>(
@@ -96,6 +112,39 @@ export function useChatMessages() {
 				);
 				queryClient.setQueryData(componentConfigKey, null);
 			}
+
+			// Optimistically append the user's message with a STABLE client id, so
+			// the bubble keeps the same React key from this paint through commit
+			// (onSuccess keeps this same object — see `hasUserAlready` below).
+			// `message: null` is a programmatic-only dispatch (e.g. the video
+			// Continue button); the backend saves no user ChatMessage, so neither
+			// do we.
+			if (request.message !== null) {
+				const optimisticUser: Message = {
+					id: nextClientMessageId(),
+					role: "user",
+					content: request.message,
+					timestamp: new Date().toISOString(),
+				};
+				queryClient.setQueryData<Message[] | undefined>(
+					chatMessagesKey,
+					(old) => [...(old ?? []), optimisticUser],
+				);
+			}
+
+			return { previousMessages, previousComponentConfig };
+		},
+		onError: (_error, _variables, context) => {
+			// Roll the optimistic writes back to the pre-mutation snapshot so a
+			// failed send doesn't leave a stranded user bubble or a prematurely
+			// frozen (display-only) card.
+			if (context) {
+				queryClient.setQueryData(chatMessagesKey, context.previousMessages);
+				queryClient.setQueryData(
+					componentConfigKey,
+					context.previousComponentConfig,
+				);
+			}
 		},
 		onSuccess: (response: CoachResponse, variables) => {
 			queryClient.cancelQueries({ queryKey: chatMessagesKey });
@@ -111,12 +160,14 @@ export function useChatMessages() {
 						variables.message === null
 							? null
 							: {
+									id: nextClientMessageId(),
 									role: "user",
 									content: variables.message,
 									timestamp: new Date().toISOString(),
 								};
 					const coachMsg: Message | null = response.message
 						? {
+								id: nextClientMessageId(),
 								role: "coach",
 								content: response.message,
 								timestamp: new Date().toISOString(),

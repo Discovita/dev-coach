@@ -57,7 +57,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 	return (
 		<div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto sm:p-6 bg-gold-50  dark:bg-[#333333]">
 			{messages.map((message: Message, index: number) => (
-				<motion.div key={`${message.timestamp}-${message.role}`} {...rowMotion}>
+				<motion.div
+					key={message.id ?? `${message.timestamp}-${message.role}`}
+					{...rowMotion}
+				>
 					{message.role === "coach" ? (
 						(() => {
 							const isLastCoachMessage = index === messages.length - 1;
