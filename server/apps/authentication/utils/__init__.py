@@ -11,6 +11,7 @@ from apps.authentication.utils.response_helpers import (
     error_response,
     success_response,
 )
+from apps.authentication.utils.send_invite_email import send_invite_email
 from apps.authentication.utils.send_password_reset_email import (
     send_password_reset_email,
 )
@@ -29,6 +30,7 @@ __all__ = [
     "error_response",
     "generate_verification_token",
     "is_token_expired",
+    "send_invite_email",
     "send_password_reset_email",
     "send_verification_email",
     "success_response",

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import { useAdminUsers } from "@/hooks/use-admin-users";
 import { useProfile } from "@/hooks/use-profile";
+import InvitesPanel from "@/pages/admin-users/components/InvitesPanel";
 import { useNavigate } from "@tanstack/react-router";
 import { Eye, FlaskConical, Loader2, Search } from "lucide-react";
 import { useState } from "react";
@@ -78,6 +79,9 @@ export default function AdminUsers() {
 					</p>
 				</div>
 			</div>
+
+			{/* Invites — super-admin only (backend also enforces IsSuperUser) */}
+			{profile?.is_superuser && <InvitesPanel />}
 
 			{/* Search */}
 			<div className="relative mb-4">

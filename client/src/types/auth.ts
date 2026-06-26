@@ -22,6 +22,17 @@ export interface ResetPasswordCredentials {
 	password: string;
 }
 
+export interface RegisterViaInviteCredentials {
+	token: string;
+	password: string;
+}
+
+export interface ValidateInviteResponse {
+	success: boolean;
+	email?: string;
+	error?: string;
+}
+
 export interface AuthResponse {
 	success: boolean;
 	message?: string;

@@ -4,8 +4,10 @@ import {
 	FORGOT_PASSWORD,
 	LOGIN,
 	REGISTER,
+	REGISTER_VIA_INVITE,
 	RESEND_VERIFICATION,
 	RESET_PASSWORD,
+	VALIDATE_INVITE,
 	VERIFY_EMAIL,
 } from "@/constants/api";
 import { LogLevel, createLogger } from "@/lib/logger";
@@ -13,7 +15,9 @@ import type {
 	AuthResponse,
 	LoginCredentials,
 	RegisterCredentials,
+	RegisterViaInviteCredentials,
 	ResetPasswordCredentials,
+	ValidateInviteResponse,
 } from "@/types/auth";
 
 const log = createLogger("auth", LogLevel.DEBUG);
@@ -153,6 +157,40 @@ export async function verifyEmail(token: string): Promise<AuthResponse> {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ token }),
+	});
+	const data: AuthResponse = await response.json();
+	if (data.tokens) {
+		setCookie("neovita-access-token", data.tokens.access, 60 * 60 * 24);
+		setCookie("neovita-refresh-token", data.tokens.refresh, 60 * 60 * 24 * 30);
+		const user = await fetchUserComplete();
+		return { ...data, user };
+	}
+	return data;
+}
+
+/**
+ * Validate an invite token and fetch the locked email for the register form.
+ */
+export async function validateInvite(
+	token: string,
+): Promise<ValidateInviteResponse> {
+	const url = `${COACH_BASE_URL}${VALIDATE_INVITE}/${token}`;
+	const response = await fetch(url);
+	return response.json();
+}
+
+/**
+ * Accept an invite: create the account and log in.
+ * On success the backend returns tokens, so we store them like verifyEmail.
+ */
+export async function registerViaInvite(
+	creds: RegisterViaInviteCredentials,
+): Promise<AuthResponse> {
+	const url = `${COACH_BASE_URL}${REGISTER_VIA_INVITE}`;
+	const response = await fetch(url, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(creds),
 	});
 	const data: AuthResponse = await response.json();
 	if (data.tokens) {

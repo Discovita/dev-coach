@@ -2,8 +2,6 @@
 Endpoint tests for POST /api/v1/auth/register/.
 """
 
-from unittest.mock import patch
-
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -69,7 +67,14 @@ class RegisterSerializerTests(TestCase):
 
 
 class RegisterEndpointTests(APITestCase):
-    """Tests for the POST /api/v1/auth/register/ endpoint."""
+    """
+    The public self-service register endpoint is disabled (invite-only).
+
+    Accounts can only be created by accepting an invite via
+    ``/auth/register-via-invite`` (see test_invites.py). The endpoint stays
+    mounted but refuses to create users, so the gate can't be bypassed by
+    POSTing directly to the API even though the UI form is hidden.
+    """
 
     def setUp(self):
         self.url = "/api/v1/auth/register"
@@ -77,46 +82,17 @@ class RegisterEndpointTests(APITestCase):
             "email": "new@example.com",
             "password": "TestPass1!",
         }
-        # Registration sends a verification email via SES; mock the seam.
-        patcher = patch(
-            "apps.authentication.functions.public.register_user"
-            ".send_verification_email",
-            return_value=True,
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
 
-    def test_successful_registration(self):
-        """Valid payload creates an unverified user and does NOT log them in."""
+    def test_register_is_disabled(self):
+        """A valid payload is refused with 403 and creates no user."""
         response = self.client.post(self.url, self.valid_payload, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data["success"])
-        self.assertNotIn("tokens", response.data)
-        self.assertIn("user_id", response.data)
-        user = User.objects.get(email="new@example.com")
-        self.assertFalse(user.is_email_verified)
-
-    def test_duplicate_email_returns_400(self):
-        """Existing email should return 400."""
-        User.objects.create_user(email="new@example.com", password="Pass1!")
-
-        response = self.client.post(self.url, self.valid_payload, format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.data["success"])
-
-    def test_weak_password_returns_400(self):
-        """Weak password should return 400."""
-        payload = {"email": "new@example.com", "password": "weak"}
-
-        response = self.client.post(self.url, payload, format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertFalse(response.data["success"])
         self.assertEqual(User.objects.count(), 0)
 
-    def test_missing_fields_returns_400(self):
-        """Empty body should return 400."""
+    def test_register_disabled_even_with_empty_body(self):
+        """The endpoint refuses regardless of payload."""
         response = self.client.post(self.url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(User.objects.count(), 0)
