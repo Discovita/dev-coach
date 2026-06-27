@@ -15,6 +15,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    // Docker bind-mounts on macOS/Windows don't deliver native filesystem
+    // events into the container, so Vite never sees host edits and HMR appears
+    // dead (you have to rebuild to pick up changes). Polling restores live
+    // reload inside the container. Harmless when running on the host.
+    watch: { usePolling: true },
+  },
   test: {
     globals: true,
     environment: "jsdom",
