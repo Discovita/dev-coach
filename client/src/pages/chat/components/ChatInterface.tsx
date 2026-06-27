@@ -93,28 +93,45 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 			);
 	}, [chatMessages]);
 
-	// Keep the view pinned to the latest message. Use an INSTANT jump, not a
-	// smooth scroll: a single message turn fires several rapid updates
-	// (optimistic user message → loading bubble → the response, which can
-	// collapse a card and add a new one), and an animated scroll chasing a list
-	// whose height is changing under it is what made the chat feel jerky. A
-	// single instant pin is stable. `displayedMessages` already derives from
-	// `chatMessages`, so one effect covers both; `isProcessingMessage` re-pins
-	// when the loading bubble appears/disappears.
-	// Scroll the messages container fully to the bottom by setting scrollTop to
-	// scrollHeight directly. `scrollIntoView({ block: "end" })` would stop once
-	// the (zero-height) anchor was *barely* visible, leaving the last message
-	// partly cut off behind the composer. The anchor's parent IS the scroll
-	// container (the overflow-y-auto _ChatMessages div), so going to its
-	// scrollHeight always lands all the way down.
-	const scrollToBottom = useCallback(() => {
-		const container = messagesEndRef.current?.parentElement;
-		if (container) container.scrollTop = container.scrollHeight;
-	}, []);
-
+	// Keep the view pinned to the bottom as the list grows. A single scroll on
+	// each message change isn't enough: the list keeps changing height for up to
+	// ~1s afterward (the dots bubble appears on a delay, the dots→response
+	// crossfade mounts the reply a beat later, and the canned options fade and
+	// slide). A ResizeObserver on the content wrapper follows EVERY height change
+	// and re-pins to the very bottom (scrollTop = scrollHeight). We only auto-pin
+	// when the user is already near the bottom — tracked on scroll — so we never
+	// yank them while they're reading history.
 	useEffect(() => {
-		scrollToBottom();
-	}, [displayedMessages, updateStatus, scrollToBottom]);
+		if (isLoading || isError) return;
+		// messagesEndRef sits inside the content wrapper, whose parent is the
+		// scrollable _ChatMessages container.
+		const content = messagesEndRef.current?.parentElement;
+		const container = content?.parentElement;
+		if (!content || !container) return;
+
+		const STICK_THRESHOLD_PX = 80;
+		let stuckToBottom = true;
+
+		const onScroll = () => {
+			stuckToBottom =
+				container.scrollHeight - container.scrollTop - container.clientHeight <=
+				STICK_THRESHOLD_PX;
+		};
+		container.addEventListener("scroll", onScroll, { passive: true });
+
+		const observer = new ResizeObserver(() => {
+			if (stuckToBottom) container.scrollTop = container.scrollHeight;
+		});
+		observer.observe(content);
+
+		// Pin once on setup (e.g. when history first loads).
+		container.scrollTop = container.scrollHeight;
+
+		return () => {
+			container.removeEventListener("scroll", onScroll);
+			observer.disconnect();
+		};
+	}, [isLoading, isError]);
 
 	// Handler for sending a message.
 	//

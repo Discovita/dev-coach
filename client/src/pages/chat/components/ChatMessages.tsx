@@ -77,82 +77,88 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
 	return (
 		<div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto sm:p-6 bg-gold-50  dark:bg-[#333333]">
-			<AnimatePresence initial={false}>
-				{messages.map((message: Message, index: number) => {
-					// A chosen canned option already animated itself into the reply
-					// position (the option bubble slides there in ChoiceButtons), so the
-					// real user message that replaces it appears with NO entrance — it
-					// just takes over the spot. Everything else fades in normally.
-					const fromChoice =
-						message.role === "user" && message.fromChoice === true;
-					return (
-						<motion.div
-							key={message.id ?? `${message.timestamp}-${message.role}`}
-							initial={fromChoice ? false : rowMotion.initial}
-							animate={rowMotion.animate}
-							exit={rowMotion.exit}
-							transition={rowMotion.transition}
-						>
-							{message.role === "coach" ? (
-								// One persistent bubble: the dots crossfade to the response
-								// (mode="wait" → dots fully fade before content fades in).
-								<AnimatePresence mode="wait" initial={false}>
-									{message.pending ? (
-										<motion.div
-											key="dots"
-											initial={{ opacity: 0 }}
-											animate={{ opacity: 1 }}
-											exit={{ opacity: 0 }}
-											transition={{ duration: 0.2 }}
-										>
-											<CoachMessage>
-												<LoadingBubbles />
-											</CoachMessage>
-										</motion.div>
-									) : (
-										<motion.div
-											key="content"
-											initial={{ opacity: 0 }}
-											animate={{ opacity: 1 }}
-											transition={{ duration: 0.3, ease: SMOOTH_EASE }}
-										>
-											{(() => {
-												const isLastCoachMessage =
-													index === messages.length - 1;
-												const componentToRender = resolveCoachComponent(
-													message,
-													isLastCoachMessage,
-												);
-												return componentToRender ? (
-													<CoachMessageWithComponent
-														componentConfig={componentToRender}
-														onSendUserMessageToCoach={onSendUserMessageToCoach}
-														disabled={isProcessingMessage}
-													>
-														<MarkdownRenderer content={message.content} />
-													</CoachMessageWithComponent>
-												) : (
-													<CoachMessage>
-														<MarkdownRenderer content={message.content} />
-													</CoachMessage>
-												);
-											})()}
-										</motion.div>
-									)}
-								</AnimatePresence>
-							) : message.role === "user" ? (
-								<UserMessage>{message.content}</UserMessage>
-							) : (
-								<div className="mb-4 p-3.5 pr-4 pl-4 rounded-[18px] max-w-[85%] leading-[1.5] shadow-sm break-words mx-auto bg-red-500/70 text-center font-medium">
-									{message.content}
-								</div>
-							)}
-						</motion.div>
-					);
-				})}
-			</AnimatePresence>
-			{/* Dummy div to scroll to bottom */}
-			<div ref={messagesEndRef} />
+			{/* Single wrapper around all content so a ResizeObserver in
+			    ChatInterface can watch the list's height and keep it pinned. */}
+			<div className="_ChatMessagesContent">
+				<AnimatePresence initial={false}>
+					{messages.map((message: Message, index: number) => {
+						// A chosen canned option already animated itself into the reply
+						// position (the option bubble slides there in ChoiceButtons), so the
+						// real user message that replaces it appears with NO entrance — it
+						// just takes over the spot. Everything else fades in normally.
+						const fromChoice =
+							message.role === "user" && message.fromChoice === true;
+						return (
+							<motion.div
+								key={message.id ?? `${message.timestamp}-${message.role}`}
+								initial={fromChoice ? false : rowMotion.initial}
+								animate={rowMotion.animate}
+								exit={rowMotion.exit}
+								transition={rowMotion.transition}
+							>
+								{message.role === "coach" ? (
+									// One persistent bubble: the dots crossfade to the response
+									// (mode="wait" → dots fully fade before content fades in).
+									<AnimatePresence mode="wait" initial={false}>
+										{message.pending ? (
+											<motion.div
+												key="dots"
+												initial={{ opacity: 0 }}
+												animate={{ opacity: 1 }}
+												exit={{ opacity: 0 }}
+												transition={{ duration: 0.2 }}
+											>
+												<CoachMessage>
+													<LoadingBubbles />
+												</CoachMessage>
+											</motion.div>
+										) : (
+											<motion.div
+												key="content"
+												initial={{ opacity: 0 }}
+												animate={{ opacity: 1 }}
+												transition={{ duration: 0.3, ease: SMOOTH_EASE }}
+											>
+												{(() => {
+													const isLastCoachMessage =
+														index === messages.length - 1;
+													const componentToRender = resolveCoachComponent(
+														message,
+														isLastCoachMessage,
+													);
+													return componentToRender ? (
+														<CoachMessageWithComponent
+															componentConfig={componentToRender}
+															onSendUserMessageToCoach={
+																onSendUserMessageToCoach
+															}
+															disabled={isProcessingMessage}
+														>
+															<MarkdownRenderer content={message.content} />
+														</CoachMessageWithComponent>
+													) : (
+														<CoachMessage>
+															<MarkdownRenderer content={message.content} />
+														</CoachMessage>
+													);
+												})()}
+											</motion.div>
+										)}
+									</AnimatePresence>
+								) : message.role === "user" ? (
+									<UserMessage>{message.content}</UserMessage>
+								) : (
+									<div className="mb-4 p-3.5 pr-4 pl-4 rounded-[18px] max-w-[85%] leading-[1.5] shadow-sm break-words mx-auto bg-red-500/70 text-center font-medium">
+										{message.content}
+									</div>
+								)}
+							</motion.div>
+						);
+					})}
+				</AnimatePresence>
+				{/* Dummy div to scroll to bottom */}
+				<div ref={messagesEndRef} />
+			</div>
 		</div>
 	);
 };
