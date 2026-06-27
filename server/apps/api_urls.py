@@ -80,9 +80,11 @@ admin_router.register(
 admin_router.register(r"invites", AdminInviteViewSet, basename="admin-invites")
 
 # JWT token URLs
+# No trailing slash to match the DRF routers (trailing_slash=False) and the client,
+# which calls /token and /token/refresh without a trailing slash.
 jwt_patterns = [
-    path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("token", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
 ]
 
 auth_paths = [
@@ -100,6 +102,7 @@ docs_paths = [
 urlpatterns = (
     default_router.urls
     + [path("admin/", include(admin_router.urls))]
+    + jwt_patterns
     + auth_paths
     + docs_paths
 )
