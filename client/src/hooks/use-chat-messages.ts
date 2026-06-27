@@ -18,7 +18,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
  * Resetting on reload is fine — keys only need to be unique within the live list.
  */
 let clientMessageSeq = 0;
-const nextClientMessageId = () => `client-${(clientMessageSeq += 1)}`;
+const nextClientMessageId = () => {
+	clientMessageSeq += 1;
+	return `client-${clientMessageSeq}`;
+};
 
 /**
  * useChatMessages hook
@@ -191,7 +194,19 @@ export function useChatMessages() {
 			);
 
 			if (response.component) {
-				queryClient.invalidateQueries({ queryKey: chatMessagesKey });
+				// Mark stale WITHOUT an active refetch (`refetchType: "none"`). The
+				// component for this turn is already in `response.component` (the
+				// backend always returns it — see process_message), and we set it
+				// on `componentConfigKey` below, so the card renders without the
+				// round-trip. Actively refetching here replaced the whole message
+				// list with fresh server objects mid-turn, remounting every row
+				// (new keys) and flashing the just-rendered card. Server truth
+				// (DB ids, persisted component_config) reconciles on the next
+				// natural mount instead.
+				queryClient.invalidateQueries({
+					queryKey: chatMessagesKey,
+					refetchType: "none",
+				});
 			}
 
 			if (response.final_prompt !== undefined) {
@@ -206,7 +221,7 @@ export function useChatMessages() {
 			// Coaching Phase Videos (PR 15): mirror on_break from the coach
 			// response into the coachState cache immediately so the composer
 			// disables/enables this paint, not on the next refetch. The
-			// invalidation below still triggers a refetch as confirmation.
+			// coachState invalidation below refetches separately to confirm.
 			if (response.on_break !== undefined) {
 				queryClient.setQueryData<CoachState | undefined>(
 					[...queryKeyPrefix, "coachState"],
