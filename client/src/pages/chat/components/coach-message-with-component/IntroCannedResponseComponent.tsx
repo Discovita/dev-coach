@@ -1,6 +1,7 @@
 import type { CoachRequest } from "@/types/coachRequest";
 import type { ComponentConfig } from "@/types/componentConfig";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
 export const IntroCannedResponseComponent: React.FC<{
@@ -29,38 +30,50 @@ export const IntroCannedResponseComponent: React.FC<{
 				)}
 			</div>
 
-			{config.buttons && config.buttons.length > 0 && (
-				<div className="mt-3 flex flex-wrap gap-2 justify-end">
-					{config.buttons.map((button, index) => (
-						<button
-							type="button"
-							key={index}
-							onClick={() =>
-								onSendUserMessageToCoach({
-									message: button.label,
-									actions: button.actions,
-								})
-							}
-							disabled={disabled}
-							className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
-							style={{
-								backgroundColor: "var(--nv-royal-purple, #531e96)",
-								color: "white",
-							}}
-							onMouseEnter={(e) => {
-								e.currentTarget.style.backgroundColor =
-									"var(--nv-violet-blue, #6a5ffb)";
-							}}
-							onMouseLeave={(e) => {
-								e.currentTarget.style.backgroundColor =
-									"var(--nv-royal-purple, #531e96)";
-							}}
-						>
-							{button.label}
-						</button>
-					))}
-				</div>
-			)}
+			{/* Fade the buttons out (rather than vanish) when the card flips to
+			    display-only after the user picks an option. The card's own height
+			    then settles via the `layout` animation on the message row. */}
+			<AnimatePresence>
+				{hasButtons && (
+					<motion.div
+						key="buttons"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.2, ease: "easeInOut" }}
+						className="mt-3 flex flex-wrap gap-2 justify-end"
+					>
+						{config.buttons?.map((button, index) => (
+							<button
+								type="button"
+								key={index}
+								onClick={() =>
+									onSendUserMessageToCoach({
+										message: button.label,
+										actions: button.actions,
+									})
+								}
+								disabled={disabled}
+								className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
+								style={{
+									backgroundColor: "var(--nv-royal-purple, #531e96)",
+									color: "white",
+								}}
+								onMouseEnter={(e) => {
+									e.currentTarget.style.backgroundColor =
+										"var(--nv-violet-blue, #6a5ffb)";
+								}}
+								onMouseLeave={(e) => {
+									e.currentTarget.style.backgroundColor =
+										"var(--nv-royal-purple, #531e96)";
+								}}
+							>
+								{button.label}
+							</button>
+						))}
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };
