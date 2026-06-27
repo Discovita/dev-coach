@@ -16,4 +16,12 @@ export interface Message {
 	content: string;
 	timestamp: string;
 	component_config?: ComponentConfig;
+	/**
+	 * True while this is a placeholder coach message awaiting the server
+	 * response. The bubble shows the loading dots; when the response lands the
+	 * SAME message is finalized in place (content filled, `pending` cleared) so
+	 * the dots crossfade into the response inside one persistent bubble instead
+	 * of a separate loading bubble unmounting (which made the dots "fall").
+	 */
+	pending?: boolean;
 }

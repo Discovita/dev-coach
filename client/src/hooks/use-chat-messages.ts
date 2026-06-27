@@ -122,12 +122,13 @@ export function useChatMessages() {
 			// `message: null` is a programmatic-only dispatch (e.g. the video
 			// Continue button); the backend saves no user ChatMessage, so neither
 			// do we.
+			const now = Date.now();
 			if (request.message !== null) {
 				const optimisticUser: Message = {
 					id: nextClientMessageId(),
 					role: "user",
 					content: request.message,
-					timestamp: new Date().toISOString(),
+					timestamp: new Date(now).toISOString(),
 				};
 				queryClient.setQueryData<Message[] | undefined>(
 					chatMessagesKey,
@@ -135,7 +136,27 @@ export function useChatMessages() {
 				);
 			}
 
-			return { previousMessages, previousComponentConfig };
+			// Append a PENDING coach placeholder — this is the loading-dots bubble.
+			// onSuccess finalizes this exact message in place (same id), so the dots
+			// crossfade into the response within one bubble rather than a separate
+			// loading bubble unmounting. Timestamp is nudged +1ms so it always sorts
+			// after the user message it answers.
+			const pendingCoachId = nextClientMessageId();
+			queryClient.setQueryData<Message[] | undefined>(
+				chatMessagesKey,
+				(old) => [
+					...(old ?? []),
+					{
+						id: pendingCoachId,
+						role: "coach",
+						content: "",
+						timestamp: new Date(now + 1).toISOString(),
+						pending: true,
+					},
+				],
+			);
+
+			return { previousMessages, previousComponentConfig, pendingCoachId };
 		},
 		onError: (_error, _variables, context) => {
 			// Roll the optimistic writes back to the pre-mutation snapshot so a
@@ -149,47 +170,47 @@ export function useChatMessages() {
 				);
 			}
 		},
-		onSuccess: (response: CoachResponse, variables) => {
+		onSuccess: (response: CoachResponse, _variables, context) => {
 			queryClient.cancelQueries({ queryKey: chatMessagesKey });
 
 			queryClient.setQueryData<Message[] | undefined>(
 				chatMessagesKey,
 				(old) => {
 					const current = old ?? [];
-					// PR 17: when `message: null` (programmatic-only dispatch from
-					// the video modal's Continue button), the backend skips saving a
-					// user ChatMessage. Mirror that here — no optimistic user bubble.
-					const userMsg: Message | null =
-						variables.message === null
-							? null
-							: {
-									id: nextClientMessageId(),
-									role: "user",
-									content: variables.message,
-									timestamp: new Date().toISOString(),
-								};
-					const coachMsg: Message | null = response.message
-						? {
-								id: nextClientMessageId(),
-								role: "coach",
-								content: response.message,
-								timestamp: new Date().toISOString(),
-							}
-						: null;
+					const pendingId = context?.pendingCoachId;
+					const hasText = !!response.message;
+					// The component (if any) renders via `componentConfigKey` below,
+					// so a component-only turn still has visible coach output.
+					const hasComponent = !!response.component;
 
-					const last = current[current.length - 1];
-					const hasUserAlready =
-						!!last &&
-						userMsg !== null &&
-						last.role === "user" &&
-						last.content === userMsg.content;
+					// Finalize the pending coach placeholder IN PLACE (same id → same
+					// React key) so the dots crossfade into the response within one
+					// bubble. No new coach row is appended, nothing unmounts.
+					if (pendingId) {
+						if (!hasText && !hasComponent) {
+							// No coach output this turn (e.g. the Identity Visualization
+							// no-op phase) — drop the placeholder so there's no empty bubble.
+							return current.filter((m) => m.id !== pendingId);
+						}
+						return current.map((m) =>
+							m.id === pendingId
+								? { ...m, content: response.message ?? "", pending: false }
+								: m,
+						);
+					}
 
-					const next: Message[] =
-						hasUserAlready || userMsg === null
-							? [...current]
-							: [...current, userMsg];
-
-					return coachMsg ? [...next, coachMsg] : next;
+					// Fallback (no placeholder in context — shouldn't happen): append a
+					// finalized coach message if there's output, otherwise leave as-is.
+					if (!hasText && !hasComponent) return current;
+					return [
+						...current,
+						{
+							id: nextClientMessageId(),
+							role: "coach",
+							content: response.message ?? "",
+							timestamp: new Date().toISOString(),
+						},
+					];
 				},
 			);
 
