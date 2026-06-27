@@ -67,9 +67,9 @@ export const SuggestIAmStatementComponent: React.FC<{
 
 	return (
 		<div
-			className={`_SuggestIAmStatementComponent mb-4 p-4 rounded-xl ${
-				hasButtons ? "w-fit max-w-[100%]" : "w-fit max-w-[75%]"
-			} leading-[1.5] shadow-sm animate-fadeIn break-words mr-auto bg-gold-200 dark:bg-transparent dark:border dark:border-gold-600 dark:text-gold-200`}
+			// Fixed width (no hasButtons swap) so the card doesn't snap narrower
+			// when it flips from the editable prompt to the submitted statement.
+			className="_SuggestIAmStatementComponent mb-4 p-4 rounded-xl w-fit max-w-[100%] leading-[1.5] shadow-sm break-words mr-auto bg-gold-200 dark:bg-transparent dark:border dark:border-gold-600 dark:text-gold-200"
 		>
 			<div className="mb-3">
 				{React.isValidElement(coachMessage) ? (
