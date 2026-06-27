@@ -10,6 +10,7 @@ import type {
 	ComponentIdentity,
 } from "@/types/componentConfig";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { AiOutlineSun } from "react-icons/ai";
 import { BsStars } from "react-icons/bs";
@@ -122,13 +123,11 @@ export const CombineIdentitiesConfirmation: React.FC<{
 	const identityA = identities[0] || null;
 	const identityB = identities[1] || null;
 
-	const hasButtons = config.buttons && config.buttons.length > 0;
-
 	return (
 		<div
-			className={`_CombineIdentitiesConfirmation mb-4 p-4 rounded-xl ${
-				hasButtons ? "w-fit max-w-[100%]" : "w-fit max-w-[75%]"
-			} shadow-sm animate-fadeIn break-words mr-auto text-[18px] font-medium leading-[1.5] text-black`}
+			// Width is fixed (not swapped on hasButtons) so the card never resizes
+			// when it flips to display-only — answering only fades the buttons out.
+			className="_CombineIdentitiesConfirmation mb-4 p-4 rounded-xl w-fit max-w-[100%] shadow-sm break-words mr-auto text-[18px] font-medium leading-[1.5] text-black"
 			style={{
 				fontFamily: "'Montserrat', sans-serif",
 				backgroundColor: "var(--nv-pale-lavender, #eae6fb)",
@@ -238,55 +237,64 @@ export const CombineIdentitiesConfirmation: React.FC<{
 				})()}
 			</div>
 
-			{config.buttons && config.buttons.length > 0 && (
-				<div className="_CombineIdentitiesConfirmationButtons mt-4 flex flex-wrap gap-2 justify-end">
-					{config.buttons.map((button, index) => (
-						<button
-							type="button"
-							key={index}
-							onClick={() => {
-								log.debug(`Button '${button.label}' was clicked`);
-								onSendUserMessageToCoach({
-									message: button.label,
-									actions: button.actions,
-								});
-							}}
-							disabled={disabled}
-							className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
-							style={{
-								backgroundColor:
-									button.label.toLowerCase() === "yes"
-										? "var(--nv-royal-purple, #531e96)"
-										: "var(--nv-pale-lavender, #eae6fb)",
-								color:
-									button.label.toLowerCase() === "yes"
-										? "white"
-										: "var(--nv-indigo, #0b1c4a)",
-							}}
-							onMouseEnter={(e) => {
-								if (button.label.toLowerCase() === "yes") {
-									e.currentTarget.style.backgroundColor =
-										"var(--nv-violet-blue, #6a5ffb)";
-								} else {
-									e.currentTarget.style.backgroundColor =
-										"var(--nv-lilac-white, #f7f5ff)";
-								}
-							}}
-							onMouseLeave={(e) => {
-								if (button.label.toLowerCase() === "yes") {
-									e.currentTarget.style.backgroundColor =
-										"var(--nv-royal-purple, #531e96)";
-								} else {
-									e.currentTarget.style.backgroundColor =
-										"var(--nv-pale-lavender, #eae6fb)";
-								}
-							}}
-						>
-							{button.label}
-						</button>
-					))}
-				</div>
-			)}
+			<AnimatePresence>
+				{config.buttons && config.buttons.length > 0 && (
+					<motion.div
+						key="buttons"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.3 }}
+						className="_CombineIdentitiesConfirmationButtons mt-4 flex flex-wrap gap-2 justify-end"
+					>
+						{config.buttons.map((button, index) => (
+							<button
+								type="button"
+								key={index}
+								onClick={() => {
+									log.debug(`Button '${button.label}' was clicked`);
+									onSendUserMessageToCoach({
+										message: button.label,
+										actions: button.actions,
+									});
+								}}
+								disabled={disabled}
+								className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer"
+								style={{
+									backgroundColor:
+										button.label.toLowerCase() === "yes"
+											? "var(--nv-royal-purple, #531e96)"
+											: "var(--nv-pale-lavender, #eae6fb)",
+									color:
+										button.label.toLowerCase() === "yes"
+											? "white"
+											: "var(--nv-indigo, #0b1c4a)",
+								}}
+								onMouseEnter={(e) => {
+									if (button.label.toLowerCase() === "yes") {
+										e.currentTarget.style.backgroundColor =
+											"var(--nv-violet-blue, #6a5ffb)";
+									} else {
+										e.currentTarget.style.backgroundColor =
+											"var(--nv-lilac-white, #f7f5ff)";
+									}
+								}}
+								onMouseLeave={(e) => {
+									if (button.label.toLowerCase() === "yes") {
+										e.currentTarget.style.backgroundColor =
+											"var(--nv-royal-purple, #531e96)";
+									} else {
+										e.currentTarget.style.backgroundColor =
+											"var(--nv-pale-lavender, #eae6fb)";
+									}
+								}}
+							>
+								{button.label}
+							</button>
+						))}
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };

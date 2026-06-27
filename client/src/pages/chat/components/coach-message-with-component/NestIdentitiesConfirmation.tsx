@@ -11,6 +11,7 @@ import type {
 } from "@/types/componentConfig";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
 import { getIdentityCategoryIcon } from "@/utils/getIdentityCategoryIcon";
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 const log = createLogger("NestIdentitiesConfirmation", LogLevel.DEBUG);
 
@@ -136,13 +137,11 @@ export const NestIdentitiesConfirmation: React.FC<{
 	const nestedIdentity = identities[0] || null;
 	const parentIdentity = identities[1] || null;
 
-	const hasButtons = config.buttons && config.buttons.length > 0;
-
 	return (
 		<div
-			className={`_NestIdentitiesConfirmation mb-4 p-3 rounded-xl ${
-				hasButtons ? "w-fit max-w-[100%]" : "w-fit max-w-[75%]"
-			} leading-[1.5] shadow-sm animate-fadeIn break-words mr-auto bg-gold-200`}
+			// Fixed width (no hasButtons swap) so the card never resizes when it
+			// flips to display-only — answering only fades the buttons out.
+			className="_NestIdentitiesConfirmation mb-4 p-3 rounded-xl w-fit max-w-[100%] leading-[1.5] shadow-sm break-words mr-auto bg-gold-200"
 		>
 			<div className="mb-3">
 				{React.isValidElement(coachMessage) ? (
@@ -180,31 +179,40 @@ export const NestIdentitiesConfirmation: React.FC<{
 				/>
 			</div>
 
-			{config.buttons && config.buttons.length > 0 && (
-				<div className="_NestIdentitiesConfirmationButtons mt-4 flex flex-wrap gap-2 justify-end">
-					{config.buttons.map((button, index) => (
-						<button
-							type="button"
-							key={index}
-							onClick={() => {
-								log.debug(`Button '${button.label}' was clicked`);
-								onSendUserMessageToCoach({
-									message: button.label,
-									actions: button.actions,
-								});
-							}}
-							disabled={disabled}
-							className={`${
-								button.label.toLowerCase() === "yes"
-									? "bg-gold-500 hover:bg-gold-600 text-black"
-									: "bg-gold-300 hover:bg-gold-400 text-black dark:bg-gold-100 dark:hover:bg-gold-200 dark:text-gold-100"
-							} px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer`}
-						>
-							{button.label}
-						</button>
-					))}
-				</div>
-			)}
+			<AnimatePresence>
+				{config.buttons && config.buttons.length > 0 && (
+					<motion.div
+						key="buttons"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.3 }}
+						className="_NestIdentitiesConfirmationButtons mt-4 flex flex-wrap gap-2 justify-end"
+					>
+						{config.buttons.map((button, index) => (
+							<button
+								type="button"
+								key={index}
+								onClick={() => {
+									log.debug(`Button '${button.label}' was clicked`);
+									onSendUserMessageToCoach({
+										message: button.label,
+										actions: button.actions,
+									});
+								}}
+								disabled={disabled}
+								className={`${
+									button.label.toLowerCase() === "yes"
+										? "bg-gold-500 hover:bg-gold-600 text-black"
+										: "bg-gold-300 hover:bg-gold-400 text-black dark:bg-gold-100 dark:hover:bg-gold-200 dark:text-gold-100"
+								} px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer`}
+							>
+								{button.label}
+							</button>
+						))}
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };
