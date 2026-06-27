@@ -152,6 +152,9 @@ export function useChatMessages() {
 					role: "user",
 					content: request.message,
 					timestamp: new Date(now).toISOString(),
+					// Choice clicks always carry `actions`; typed sends never do. Only
+					// choices get the slide-over entrance in ChatMessages.
+					fromChoice: request.actions !== undefined,
 				};
 				queryClient.setQueryData<Message[] | undefined>(
 					chatMessagesKey,

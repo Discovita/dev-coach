@@ -24,4 +24,10 @@ export interface Message {
 	 * of a separate loading bubble unmounting (which made the dots "fall").
 	 */
 	pending?: boolean;
+	/**
+	 * Client-only: true when this user message came from clicking a canned
+	 * option (not typed). ChatMessages gives only these the slide-over entrance,
+	 * so ordinary typed messages just fade in. Not persisted by the server.
+	 */
+	fromChoice?: boolean;
 }

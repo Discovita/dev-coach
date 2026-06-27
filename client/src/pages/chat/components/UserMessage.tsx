@@ -15,7 +15,7 @@ export const UserMessage: React.FC<
 	React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>
 > = ({ children, ...props }) => (
 	<div
-		className="_UserMessage mb-4 px-8 py-4 rounded-tl-[20px] rounded-tr-[20px] rounded-bl-[20px] rounded-br-[2px] w-fit max-w-[75%] animate-fadeIn break-words ml-auto text-white text-[18px] font-medium leading-[1.5] shadow-sm"
+		className="_UserMessage mb-4 py-3.5 px-4 rounded-tl-[20px] rounded-tr-[20px] rounded-bl-[20px] rounded-br-[2px] w-fit max-w-[75%] animate-fadeIn break-words ml-auto text-white text-[18px] font-medium leading-[1.5] shadow-sm"
 		style={{
 			fontFamily: "'Montserrat', sans-serif",
 			background:
