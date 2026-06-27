@@ -21,7 +21,7 @@ export const IntroCannedResponseComponent: React.FC<{
 				backgroundColor: "var(--nv-pale-lavender, #eae6fb)",
 			}}
 		>
-			<div className="max-w-[75%]">
+			<div>
 				{React.isValidElement(coachMessage) ? (
 					coachMessage
 				) : (
