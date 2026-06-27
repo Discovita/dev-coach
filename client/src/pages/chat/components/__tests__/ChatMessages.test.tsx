@@ -107,18 +107,26 @@ describe("ChatMessages", () => {
 		expect(screen.getAllByTestId("coach-message")).toHaveLength(1);
 	});
 
-	it("shows loading bubbles when processing", () => {
-		renderChatMessages(
-			[{ role: "user", content: "Hello", timestamp: "2025-01-01T00:00:00Z" }],
-			{ isProcessingMessage: true },
-		);
+	it("shows loading bubbles for a pending coach message", () => {
+		// Loading is now modeled as a `pending` coach placeholder (the dots and
+		// the eventual response share one bubble), not a separate element driven
+		// by isProcessingMessage.
+		renderChatMessages([
+			{ role: "user", content: "Hello", timestamp: "2025-01-01T00:00:00Z" },
+			{
+				role: "coach",
+				content: "",
+				timestamp: "2025-01-01T00:00:01Z",
+				pending: true,
+			},
+		]);
 		expect(screen.getByTestId("loading-bubbles")).toBeInTheDocument();
 	});
 
-	it("does not show loading bubbles when not processing", () => {
+	it("does not show loading bubbles when there is no pending message", () => {
 		renderChatMessages(
 			[{ role: "user", content: "Hello", timestamp: "2025-01-01T00:00:00Z" }],
-			{ isProcessingMessage: false },
+			{ isProcessingMessage: true },
 		);
 		expect(screen.queryByTestId("loading-bubbles")).not.toBeInTheDocument();
 	});
@@ -210,11 +218,10 @@ describe("ChatMessages", () => {
 			).not.toBeInTheDocument();
 		});
 
-		it("keeps server-seeded component visible during processing (no blink on Continue click)", () => {
+		it("keeps server-seeded component visible while the pending bubble loads (no blink on Continue click)", () => {
 			// The welcome SESSION_VIDEO card is persisted on the message row.
-			// While the ACK click is in flight, the card must stay visible —
-			// blanking it makes the UI flicker as it disappears + reappears
-			// around the refetch. LoadingBubbles still appears beneath.
+			// While the ACK click is in flight, the card must stay visible — the
+			// pending coach bubble (dots) sits beneath it as its own message.
 			renderChatMessages(
 				[
 					{
@@ -223,6 +230,12 @@ describe("ChatMessages", () => {
 						timestamp: "2025-01-01T00:00:00Z",
 						component_config: sessionVideoConfig,
 					},
+					{
+						role: "coach",
+						content: "",
+						timestamp: "2025-01-01T00:00:01Z",
+						pending: true,
+					},
 				],
 				{ isProcessingMessage: true },
 			);
@@ -230,17 +243,24 @@ describe("ChatMessages", () => {
 			expect(screen.getByTestId("loading-bubbles")).toBeInTheDocument();
 		});
 
-		it("suppresses cache-only component while processing (legacy SHOW_XXX behavior)", () => {
-			// No message.component_config; component came from in-memory
-			// cache only (legacy SHOW_COMBINE_IDENTITIES-style flow). While
-			// a POST is in flight, blank it so it's clear the previous
-			// interactive choice is being processed.
+		it("suppresses cache-only component on an older coach message while a newer bubble loads", () => {
+			// No message.component_config; the component came from the in-memory
+			// cache only (legacy SHOW_COMBINE_IDENTITIES-style flow). Once a pending
+			// coach bubble is appended, the older "Pick one" message is no longer
+			// the last coach message, so the cache componentConfig no longer applies
+			// to it and it renders as plain text. Dots come from the pending bubble.
 			renderChatMessages(
 				[
 					{
 						role: "coach",
 						content: "Pick one",
 						timestamp: "2025-01-01T00:00:00Z",
+					},
+					{
+						role: "coach",
+						content: "",
+						timestamp: "2025-01-01T00:00:01Z",
+						pending: true,
 					},
 				],
 				{

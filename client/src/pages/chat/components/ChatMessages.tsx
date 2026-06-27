@@ -6,45 +6,45 @@ import type { CoachRequest } from "@/types/coachRequest";
 import type { ComponentConfig } from "@/types/componentConfig";
 import type { Message } from "@/types/message";
 import MarkdownRenderer from "@/utils/MarkdownRenderer";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 
 /**
- * ChatMessages component is used to render the chat messages in both the
+ * ChatMessages renders the conversation. See ChatInterface.tsx for the data
+ * flow; loading state is represented as a `pending` coach message (the dots
+ * bubble) rather than a separate element, so the dots and the eventual
+ * response are ONE bubble whose content swaps in place.
  *
- */
-
-/**
- * Props for ChatMessages
- * ---------------------
- * - messages: The full chat message history to render (array of Message objects)
- * - isProcessingMessage: Whether a message is being sent (shows loading bubbles)
- * - coachState: The current coach state (for proposed identity)
- * - handleIdentityChoice: Handler for when a user selects an identity
- * - messagesEndRef: Ref to scroll to the bottom of the messages
- *
- * Used by: ChatInterface.tsx
+ * Props:
+ * - messages: full chat history to render (includes the optimistic user
+ *   message and the pending coach placeholder during a send)
+ * - isProcessingMessage: whether a send is in flight (disables interactive cards)
+ * - messagesEndRef: scroll anchor pinned to the bottom
+ * - componentConfig: latest in-memory component for the newest coach message
+ * - onSendUserMessageToCoach: handler for component button selection
  */
 interface ChatMessagesProps {
 	messages: Message[];
 	isProcessingMessage: boolean;
 	messagesEndRef: React.RefObject<HTMLDivElement | null>;
-	/** Latest component config to render for the newest coach message (or null) */
 	componentConfig?: ComponentConfig | null;
-	/** Handler for component button selection (sends a CoachRequest) */
 	onSendUserMessageToCoach: (request: CoachRequest) => void;
 }
 
-// New chat rows fade in on mount. Deliberately opacity-only and with NO
-// `layout` or exit animation: animating row positions/heights made the whole
-// list shove around to make room for incoming content and then snap back as
-// the loading bubble's space was reclaimed. A plain fade gives a calm,
-// predictable entrance with zero reflow thrash. Existing rows keep stable keys
-// so they never re-animate; the loading bubble simply unmounts when done.
+// A soft ease-out that decelerates into place (easeOutExpo-ish).
+const SMOOTH_EASE = [0.22, 1, 0.36, 1] as const;
+
+// Each row fades in on mount and fades out on unmount — opacity only, NO
+// `layout` animation. (We tried `layout`: animating a bubble's size by scaling
+// it visibly distorts the text as it grows and, under popLayout, made the
+// loading dots "fall" onto the composer. A plain opacity crossfade is calmer.)
+// AnimatePresence uses the default in-flow mode so any rare exit fades in place.
+// Stable keys mean existing rows never re-mount, so they never re-animate.
 const rowMotion = {
 	initial: { opacity: 0 },
 	animate: { opacity: 1 },
-	transition: { duration: 0.25, ease: "easeOut" },
+	exit: { opacity: 0, transition: { duration: 0.2, ease: "easeIn" } },
+	transition: { duration: 0.4, ease: SMOOTH_EASE },
 } as const;
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -54,64 +54,111 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 	componentConfig,
 	onSendUserMessageToCoach,
 }) => {
+	// Picks the component (if any) to render for a non-pending coach message.
+	const resolveCoachComponent = (
+		message: Message,
+		isLastCoachMessage: boolean,
+	): ComponentConfig | null => {
+		if (isLastCoachMessage) {
+			// Prefer the in-memory cache when not processing (freshest server
+			// response). Fall through to `message.component_config` for
+			// server-seeded cards (welcome SESSION_VIDEO, post-END_BREAK intros) —
+			// those represent persisted history and stay visible even during
+			// in-flight requests, so clicking Continue doesn't blink the card out.
+			return (
+				(!isProcessingMessage && componentConfig) ||
+				message.component_config ||
+				null
+			);
+		}
+		// All other coach messages: ONLY their own persisted component_config.
+		return message.component_config || null;
+	};
+
 	return (
 		<div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto sm:p-6 bg-gold-50  dark:bg-[#333333]">
-			{messages.map((message: Message, index: number) => (
-				<motion.div key={`${message.timestamp}-${message.role}`} {...rowMotion}>
-					{message.role === "coach" ? (
-						(() => {
-							const isLastCoachMessage = index === messages.length - 1;
-							let componentToRender = null;
-
-							if (isLastCoachMessage) {
-								// Prefer the in-memory cache when not processing (freshest
-								// server response). Fall through to `message.component_config`
-								// for server-seeded cards (welcome SESSION_VIDEO,
-								// post-END_BREAK intros) — those represent persisted
-								// history and stay visible even during in-flight requests,
-								// so clicking Continue doesn't blink the card out while
-								// we wait for the response.
-								componentToRender =
-									(!isProcessingMessage && componentConfig) ||
-									message.component_config ||
-									null;
-							} else {
-								// For all other coach messages, ONLY check message.component_config
-								componentToRender = message.component_config || null;
-							}
-
-							return componentToRender ? (
-								<CoachMessageWithComponent
-									componentConfig={componentToRender}
-									onSendUserMessageToCoach={onSendUserMessageToCoach}
-									disabled={isProcessingMessage}
-								>
-									<MarkdownRenderer content={message.content} />
-								</CoachMessageWithComponent>
-							) : (
-								<CoachMessage>
-									<MarkdownRenderer content={message.content} />
-								</CoachMessage>
-							);
-						})()
-					) : message.role === "user" ? (
-						<UserMessage>{message.content}</UserMessage>
-					) : (
-						<div className="mb-4 p-3.5 pr-4 pl-4 rounded-[18px] max-w-[85%] leading-[1.5] shadow-sm break-words mx-auto bg-red-500/70 text-center font-medium">
-							{message.content}
-						</div>
-					)}
-				</motion.div>
-			))}
-			{isProcessingMessage && (
-				<motion.div key="loading-bubbles" {...rowMotion}>
-					<CoachMessage>
-						<LoadingBubbles />
-					</CoachMessage>
-				</motion.div>
-			)}
-			{/* Dummy div to scroll to bottom */}
-			<div ref={messagesEndRef} />
+			{/* Single wrapper around all content so a ResizeObserver in
+			    ChatInterface can watch the list's height and keep it pinned. */}
+			<div className="_ChatMessagesContent">
+				<AnimatePresence initial={false}>
+					{messages.map((message: Message, index: number) => {
+						// A chosen canned option already animated itself into the reply
+						// position (the option bubble slides there in ChoiceButtons), so the
+						// real user message that replaces it appears with NO entrance — it
+						// just takes over the spot. Everything else fades in normally.
+						const fromChoice =
+							message.role === "user" && message.fromChoice === true;
+						return (
+							<motion.div
+								key={message.id ?? `${message.timestamp}-${message.role}`}
+								initial={fromChoice ? false : rowMotion.initial}
+								animate={rowMotion.animate}
+								exit={rowMotion.exit}
+								transition={rowMotion.transition}
+							>
+								{message.role === "coach" ? (
+									// One persistent bubble: the dots crossfade to the response
+									// (mode="wait" → dots fully fade before content fades in).
+									<AnimatePresence mode="wait" initial={false}>
+										{message.pending ? (
+											<motion.div
+												key="dots"
+												initial={{ opacity: 0 }}
+												animate={{ opacity: 1 }}
+												exit={{ opacity: 0 }}
+												transition={{ duration: 0.2 }}
+											>
+												<CoachMessage>
+													<LoadingBubbles />
+												</CoachMessage>
+											</motion.div>
+										) : (
+											<motion.div
+												key="content"
+												initial={{ opacity: 0 }}
+												animate={{ opacity: 1 }}
+												transition={{ duration: 0.3, ease: SMOOTH_EASE }}
+											>
+												{(() => {
+													const isLastCoachMessage =
+														index === messages.length - 1;
+													const componentToRender = resolveCoachComponent(
+														message,
+														isLastCoachMessage,
+													);
+													return componentToRender ? (
+														<CoachMessageWithComponent
+															componentConfig={componentToRender}
+															onSendUserMessageToCoach={
+																onSendUserMessageToCoach
+															}
+															disabled={isProcessingMessage}
+														>
+															<MarkdownRenderer content={message.content} />
+														</CoachMessageWithComponent>
+													) : (
+														<CoachMessage>
+															<MarkdownRenderer content={message.content} />
+														</CoachMessage>
+													);
+												})()}
+											</motion.div>
+										)}
+									</AnimatePresence>
+								) : message.role === "user" ? (
+									<UserMessage>{message.content}</UserMessage>
+								) : (
+									<div className="mb-4 p-3.5 pr-4 pl-4 rounded-[18px] max-w-[85%] leading-[1.5] shadow-sm break-words mx-auto bg-red-500/70 text-center font-medium">
+										{message.content}
+									</div>
+								)}
+							</motion.div>
+						);
+					})}
+				</AnimatePresence>
+				{/* Dummy div to scroll to bottom */}
+				<div ref={messagesEndRef} />
+			</div>
 		</div>
 	);
 };
