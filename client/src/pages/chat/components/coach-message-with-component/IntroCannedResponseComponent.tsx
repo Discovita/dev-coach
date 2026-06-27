@@ -54,7 +54,7 @@ const ChoiceButtons: React.FC<{
 	};
 
 	return (
-		<div className="mb-4 flex flex-col items-end gap-2">
+		<div className="mb-4 flex flex-wrap items-center justify-end gap-2">
 			{buttons.map((button, index) => {
 				const isChosen = index === chosenIndex;
 				// Drop the un-chosen options only once they've finished fading, so the
