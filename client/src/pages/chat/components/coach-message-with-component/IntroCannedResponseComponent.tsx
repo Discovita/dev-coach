@@ -11,7 +11,7 @@ type ChoiceButton = NonNullable<ComponentConfig["buttons"]>[number];
 //   2. once they're gone, the chosen option slides into the reply position
 //   3. then we dispatch (the real user message takes its place + the coach replies)
 const FADE_MS = 1000; // step 1: slow fade of the un-chosen options
-const SLIDE_MS = 800; // step 2: chosen option slides into place
+const SLIDE_MS = 2000; // step 2: chosen option slides into place
 
 // The chosen option is styled to MATCH a real user message so that when it
 // slides into the reply position it already looks like the message it becomes.
