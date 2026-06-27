@@ -34,6 +34,12 @@ interface ChatMessagesProps {
 // A soft ease-out that decelerates into place (easeOutExpo-ish).
 const SMOOTH_EASE = [0.22, 1, 0.36, 1] as const;
 
+// User-message slide-in (e.g. a chosen canned option sliding over to become the
+// user's message). Deliberately slow for now so the motion is easy to see —
+// tune these down once the feel is dialed in.
+const USER_SLIDE_DISTANCE = 80;
+const USER_SLIDE_DURATION = 2;
+
 // Each row fades in on mount and fades out on unmount — opacity only, NO
 // `layout` animation. (We tried `layout`: animating a bubble's size by scaling
 // it visibly distorts the text as it grows and, under popLayout, made the
@@ -86,10 +92,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 					return (
 						<motion.div
 							key={message.id ?? `${message.timestamp}-${message.role}`}
-							initial={{ opacity: 0, x: isUser ? 28 : 0 }}
+							initial={{ opacity: 0, x: isUser ? USER_SLIDE_DISTANCE : 0 }}
 							animate={{ opacity: 1, x: 0 }}
 							exit={rowMotion.exit}
-							transition={rowMotion.transition}
+							transition={
+								isUser
+									? { duration: USER_SLIDE_DURATION, ease: SMOOTH_EASE }
+									: rowMotion.transition
+							}
 						>
 							{message.role === "coach" ? (
 								// One persistent bubble: the dots crossfade to the response

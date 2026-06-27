@@ -101,8 +101,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 	// single instant pin is stable. `displayedMessages` already derives from
 	// `chatMessages`, so one effect covers both; `isProcessingMessage` re-pins
 	// when the loading bubble appears/disappears.
+	// Scroll the messages container fully to the bottom by setting scrollTop to
+	// scrollHeight directly. `scrollIntoView({ block: "end" })` would stop once
+	// the (zero-height) anchor was *barely* visible, leaving the last message
+	// partly cut off behind the composer. The anchor's parent IS the scroll
+	// container (the overflow-y-auto _ChatMessages div), so going to its
+	// scrollHeight always lands all the way down.
 	const scrollToBottom = useCallback(() => {
-		messagesEndRef.current?.scrollIntoView({ block: "end" });
+		const container = messagesEndRef.current?.parentElement;
+		if (container) container.scrollTop = container.scrollHeight;
 	}, []);
 
 	useEffect(() => {
