@@ -24,6 +24,16 @@ const nextClientMessageId = () => {
 };
 
 /**
+ * Deliberate minimum "thinking" time before the coach's reply lands. The coach
+ * dots show during this beat. Without it, canned-response turns (which skip the
+ * LLM on the backend and return almost instantly) snap the reply in the same
+ * breath as the user's message and feel robotic. Padding only affects fast
+ * turns — slower LLM turns already exceed this.
+ */
+const MIN_THINKING_MS = 900;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
  * useChatMessages hook
  * Handles fetching and updating chat messages using TanStack Query.
  *
@@ -67,13 +77,17 @@ export function useChatMessages() {
 	 */
 	const updateMutation = useMutation({
 		mutationFn: async (request: CoachRequest) => {
-			if (isImpersonating) {
-				return apiClient.sendTestScenarioMessage({
-					...request,
-					user_id: targetUserId!,
-				});
-			}
-			return apiClient.sendMessage(request);
+			const send = isImpersonating
+				? apiClient.sendTestScenarioMessage({
+						...request,
+						user_id: targetUserId!,
+					})
+				: apiClient.sendMessage(request);
+			// Hold a deliberate beat so the reply lands after the user's message,
+			// not in the same instant. Promise.all resolves on the SLOWER of the
+			// two, so this pads fast (canned) turns without delaying slow ones.
+			const [response] = await Promise.all([send, sleep(MIN_THINKING_MS)]);
+			return response;
 		},
 		onMutate: async (request: CoachRequest) => {
 			await queryClient.cancelQueries({ queryKey: chatMessagesKey });

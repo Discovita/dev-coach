@@ -31,28 +31,20 @@ interface ChatMessagesProps {
 	onSendUserMessageToCoach: (request: CoachRequest) => void;
 }
 
-// A soft ease-out that decelerates into place (easeOutExpo-ish) — used for
-// entrances and for the `layout` resize tweens so size changes glide.
+// A soft ease-out that decelerates into place (easeOutExpo-ish).
 const SMOOTH_EASE = [0.22, 1, 0.36, 1] as const;
 
-// Each row fades in on mount, fades out on unmount, and — via the `layout`
-// prop on the motion.div — smoothly tweens its own size/position changes
-// rather than popping. Two places this matters: (1) an interactive card
-// collapsing to its display-only form after the user answers, and (2) the
-// pending coach bubble growing from the loading dots to the full response as
-// its inner content swaps. Stable keys mean existing rows never re-mount, so
-// `layout` only ever animates real size changes. AnimatePresence here uses the
-// default (in-flow) mode — NOT popLayout — so a rare exit fades in place
-// instead of being absolutely positioned and "falling" over the composer.
+// Each row fades in on mount and fades out on unmount — opacity only, NO
+// `layout` animation. (We tried `layout`: animating a bubble's size by scaling
+// it visibly distorts the text as it grows and, under popLayout, made the
+// loading dots "fall" onto the composer. A plain opacity crossfade is calmer.)
+// AnimatePresence uses the default in-flow mode so any rare exit fades in place.
+// Stable keys mean existing rows never re-mount, so they never re-animate.
 const rowMotion = {
 	initial: { opacity: 0 },
 	animate: { opacity: 1 },
 	exit: { opacity: 0, transition: { duration: 0.2, ease: "easeIn" } },
-	transition: {
-		duration: 0.4,
-		ease: SMOOTH_EASE,
-		layout: { duration: 0.4, ease: SMOOTH_EASE },
-	},
+	transition: { duration: 0.4, ease: SMOOTH_EASE },
 } as const;
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -87,28 +79,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 		<div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto sm:p-6 bg-gold-50  dark:bg-[#333333]">
 			<AnimatePresence initial={false}>
 				{messages.map((message: Message, index: number) => {
-					const isPendingCoach =
-						message.role === "coach" && message.pending === true;
-
 					return (
 						<motion.div
-							layout
 							key={message.id ?? `${message.timestamp}-${message.role}`}
-							initial={rowMotion.initial}
-							animate={rowMotion.animate}
-							exit={rowMotion.exit}
-							// Stagger the dots in slightly behind the user's message so the
-							// pair doesn't appear in the same jarring instant.
-							transition={
-								isPendingCoach
-									? { ...rowMotion.transition, delay: 0.15 }
-									: rowMotion.transition
-							}
+							{...rowMotion}
 						>
 							{message.role === "coach" ? (
 								// One persistent bubble: the dots crossfade to the response
-								// (mode="wait" → dots fully fade before content fades in) while
-								// the row's `layout` animates the height growth.
+								// (mode="wait" → dots fully fade before content fades in).
 								<AnimatePresence mode="wait" initial={false}>
 									{message.pending ? (
 										<motion.div
