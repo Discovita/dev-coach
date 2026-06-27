@@ -34,14 +34,6 @@ interface ChatMessagesProps {
 // A soft ease-out that decelerates into place (easeOutExpo-ish).
 const SMOOTH_EASE = [0.22, 1, 0.36, 1] as const;
 
-// Slide-over entrance for a chosen canned option becoming the user's message.
-// It starts to the LEFT of its final (right-aligned) spot and slides RIGHT into
-// place at a constant (linear) pace, so it never passes the target and slides
-// back. Deliberately slow (2s) for now so the motion is easy to see — tune down
-// once the feel is dialed in. Only choice messages use this (see `fromChoice`).
-const CHOICE_SLIDE_DISTANCE = 80;
-const CHOICE_SLIDE_DURATION = 2;
-
 // Each row fades in on mount and fades out on unmount — opacity only, NO
 // `layout` animation. (We tried `layout`: animating a bubble's size by scaling
 // it visibly distorts the text as it grows and, under popLayout, made the
@@ -87,22 +79,19 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 		<div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto sm:p-6 bg-gold-50  dark:bg-[#333333]">
 			<AnimatePresence initial={false}>
 				{messages.map((message: Message, index: number) => {
-					// Only a freshly-chosen canned option slides over to become the
-					// user's message; everything else (typed messages, coach messages)
-					// just fades in.
-					const slidesOver =
+					// A chosen canned option already animated itself into the reply
+					// position (the option bubble slides there in ChoiceButtons), so the
+					// real user message that replaces it appears with NO entrance — it
+					// just takes over the spot. Everything else fades in normally.
+					const fromChoice =
 						message.role === "user" && message.fromChoice === true;
 					return (
 						<motion.div
 							key={message.id ?? `${message.timestamp}-${message.role}`}
-							initial={{ opacity: 0, x: slidesOver ? -CHOICE_SLIDE_DISTANCE : 0 }}
-							animate={{ opacity: 1, x: 0 }}
+							initial={fromChoice ? false : rowMotion.initial}
+							animate={rowMotion.animate}
 							exit={rowMotion.exit}
-							transition={
-								slidesOver
-									? { duration: CHOICE_SLIDE_DURATION, ease: "linear" }
-									: rowMotion.transition
-							}
+							transition={rowMotion.transition}
 						>
 							{message.role === "coach" ? (
 								// One persistent bubble: the dots crossfade to the response
