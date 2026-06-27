@@ -79,10 +79,17 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 		<div className="_ChatMessages scrollbar not-last:flex-grow overflow-y-auto sm:p-6 bg-gold-50  dark:bg-[#333333]">
 			<AnimatePresence initial={false}>
 				{messages.map((message: Message, index: number) => {
+					// User messages slide in from the right (the side they live on) so a
+					// freshly-chosen canned option reads as sliding over to become the
+					// user's message. Coach messages just fade.
+					const isUser = message.role === "user";
 					return (
 						<motion.div
 							key={message.id ?? `${message.timestamp}-${message.role}`}
-							{...rowMotion}
+							initial={{ opacity: 0, x: isUser ? 28 : 0 }}
+							animate={{ opacity: 1, x: 0 }}
+							exit={rowMotion.exit}
+							transition={rowMotion.transition}
 						>
 							{message.role === "coach" ? (
 								// One persistent bubble: the dots crossfade to the response

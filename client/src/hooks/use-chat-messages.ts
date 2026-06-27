@@ -34,6 +34,15 @@ const MIN_THINKING_MS = 900;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
+ * Delay before the pending coach "dots" bubble appears after the user's
+ * message. Lets the user's message land and settle first, so the coach's reply
+ * reads as a turn-taking beat rather than everything popping in at once. Must
+ * stay below MIN_THINKING_MS so the placeholder always exists before onSuccess
+ * finalizes it.
+ */
+const DOTS_DELAY_MS = 400;
+
+/**
  * useChatMessages hook
  * Handles fetching and updating chat messages using TanStack Query.
  *
@@ -150,39 +159,53 @@ export function useChatMessages() {
 				);
 			}
 
-			// Append a PENDING coach placeholder — this is the loading-dots bubble.
-			// onSuccess finalizes this exact message in place (same id), so the dots
-			// crossfade into the response within one bubble rather than a separate
-			// loading bubble unmounting. Timestamp is nudged +1ms so it always sorts
-			// after the user message it answers.
+			// Append the PENDING coach placeholder — the loading-dots bubble —
+			// after a short beat, so the dots arrive once the user's message has
+			// landed instead of in the same instant. onSuccess finalizes this exact
+			// message in place (same id), so the dots crossfade into the response
+			// within one bubble. The timer is cleared on error/settle so a failed
+			// turn never strands a dots bubble.
 			const pendingCoachId = nextClientMessageId();
-			queryClient.setQueryData<Message[] | undefined>(
-				chatMessagesKey,
-				(old) => [
-					...(old ?? []),
-					{
-						id: pendingCoachId,
-						role: "coach",
-						content: "",
-						timestamp: new Date(now + 1).toISOString(),
-						pending: true,
-					},
-				],
-			);
+			const dotsTimer = setTimeout(() => {
+				queryClient.setQueryData<Message[] | undefined>(
+					chatMessagesKey,
+					(old) => [
+						...(old ?? []),
+						{
+							id: pendingCoachId,
+							role: "coach",
+							content: "",
+							timestamp: new Date(now + DOTS_DELAY_MS).toISOString(),
+							pending: true,
+						},
+					],
+				);
+			}, DOTS_DELAY_MS);
 
-			return { previousMessages, previousComponentConfig, pendingCoachId };
+			return {
+				previousMessages,
+				previousComponentConfig,
+				pendingCoachId,
+				dotsTimer,
+			};
 		},
 		onError: (_error, _variables, context) => {
 			// Roll the optimistic writes back to the pre-mutation snapshot so a
 			// failed send doesn't leave a stranded user bubble or a prematurely
 			// frozen (display-only) card.
 			if (context) {
+				clearTimeout(context.dotsTimer);
 				queryClient.setQueryData(chatMessagesKey, context.previousMessages);
 				queryClient.setQueryData(
 					componentConfigKey,
 					context.previousComponentConfig,
 				);
 			}
+		},
+		onSettled: (_data, _error, _variables, context) => {
+			// Safety net: ensure the deferred dots timer can never fire after the
+			// turn has resolved (it normally fires well before onSuccess).
+			if (context) clearTimeout(context.dotsTimer);
 		},
 		onSuccess: (response: CoachResponse, _variables, context) => {
 			queryClient.cancelQueries({ queryKey: chatMessagesKey });
