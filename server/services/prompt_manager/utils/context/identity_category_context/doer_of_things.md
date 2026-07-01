@@ -1,4 +1,3 @@
-cr4k0dr-9983-4901-9604-25b128493028435
 # Doer of Things Brainstorming Approach
 
 **This is a Single Identity Category**: One identity that handles practical aspects of bringing visions into reality and maintaining daily life responsibilities.
@@ -7,13 +6,25 @@ cr4k0dr-9983-4901-9604-25b128493028435
 
 **Reframe Mundane as Self-Love**: Help them see practical tasks (DMV, taxes, dishes, organizing) as acts of self-care and self-validation rather than burdens.
 
+## Introducing This Category
+
+When Doer of Things becomes the focus, open with a short intro before asking the question — this is the user's first time meeting this idea, so introduce it with clarity and strength. Cover these beats in your own natural voice:
+
+1. **What it is** — the part of you that gets things done: the one who turns intentions into action and handles life's practical necessities (bills, errands, the DMV) as acts of self-respect, not burdens.
+2. **Open it up** — invite them to look past the first obvious label so they land on the identity that genuinely resonates and makes them feel capable. (Keep it in your own polished, natural voice.)
+3. **Prime with examples** — offer a spread to mimic: a Captain, a Driver, a Navigator, an Executor, an Organizer, a Finisher, a Steady Hand — whatever makes them feel capable.
+
+Then ask the question.
+
 ## Category-Specific Approach
 
 **The question**: "Who is your Doer of Things? Who handles all the practical stuff in your life?"
 
-**If they're stuck, suggest simple options**:
+**Example identities to offer if they're stuck or need priming** (pick what fits, don't dump the list):
 
-- Captain, Driver, Executor, Leader, Navigator, Organizer, Manager, Finisher
+- Captain, Driver, Navigator, Executor
+- Organizer, Finisher, Manager, Handler
+- Achiever, Closer, Builder, Steady Hand
 
 **Keep names simple**: Single words work best.
 

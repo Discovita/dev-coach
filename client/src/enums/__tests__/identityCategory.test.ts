@@ -2,6 +2,7 @@ import {
 	IdentityCategory,
 	getIdentityCategoryColor,
 	getIdentityCategoryDarkColor,
+	getIdentityCategoryDescription,
 	getIdentityCategoryDisplayName,
 	getIdentityCategoryIcon,
 	getIdentityCategoryLightColor,
@@ -100,5 +101,34 @@ describe("getIdentityCategoryIcon", () => {
 		const Icon = getIdentityCategoryIcon("PASSIONS_AND_TALENTS");
 		expect(Icon).toBeDefined();
 		expect(Icon).not.toBe(FaUser);
+	});
+});
+
+describe("getIdentityCategoryDescription", () => {
+	it("returns a description for every category", () => {
+		for (const category of Object.values(IdentityCategory)) {
+			const description = getIdentityCategoryDescription(category);
+			expect(description).toBeTruthy();
+		}
+	});
+
+	it("returns the expected description for a specific category", () => {
+		expect(getIdentityCategoryDescription("maker_of_money")).toContain(
+			"generate income",
+		);
+	});
+
+	it("handles case-insensitive matching", () => {
+		expect(getIdentityCategoryDescription("PASSIONS_AND_TALENTS")).toBe(
+			getIdentityCategoryDescription("passions_and_talents"),
+		);
+	});
+
+	it("returns empty string for unknown category", () => {
+		expect(getIdentityCategoryDescription("totally_new")).toBe("");
+	});
+
+	it("returns empty string for empty input", () => {
+		expect(getIdentityCategoryDescription("")).toBe("");
 	});
 });

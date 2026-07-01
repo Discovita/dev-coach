@@ -16,7 +16,7 @@ CATEGORY_CONTEXT_FILES = {
     IdentityCategory.APPEARANCE: "services/prompt_manager/utils/context/identity_category_context/personal_appearance.md",
     IdentityCategory.HEALTH: "services/prompt_manager/utils/context/identity_category_context/physical_expression.md",
     IdentityCategory.FAMILY: "services/prompt_manager/utils/context/identity_category_context/familial_relations.md",
-    IdentityCategory.ROMANTIC: "services/prompt_manager/utils/context/identity_category_context/romantic_relation.md",
+    IdentityCategory.ROMANTIC: "services/prompt_manager/utils/context/identity_category_context/romantic_relations.md",
     IdentityCategory.ACTION: "services/prompt_manager/utils/context/identity_category_context/doer_of_things.md",
 }
 

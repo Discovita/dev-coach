@@ -6,12 +6,24 @@
 
 **Self-Worth Indicator**: This category often reveals how clients value themselves. Resistance is common, but enthusiasm suggests natural strength and joy.
 
+## Introducing This Category
+
+When Personal Appearance becomes the focus, open with a short intro before asking the question — this is the user's first time meeting this idea, so introduce it with clarity and strength. Cover these beats in your own natural voice:
+
+1. **What it is** — how you show up and present to the world: your style and presence, what people take in when you walk into a room.
+2. **Open it up** — invite them to look past the first obvious label so they land on the identity that genuinely resonates with how they want to land. (Keep it in your own polished, natural voice.)
+3. **Prime with examples** — offer a spread to mimic: Natural, Polished, Classic, Elegant, Bold, Timeless, Magnetic, Effortless — whatever captures how they want to show up.
+
+Then ask the question.
+
 ## Category-Specific Approach
 
 **The question**: "How do you want to show up in the world? What do you want people to take in when you walk into a room?"
 
-**If they're stuck, suggest simple options**:
-- Natural, Polished, Classic, Elegant, Casual, Bold, Authentic, Refined
+**Example identities to offer if they're stuck or need priming** (pick what fits, don't dump the list):
+- Natural, Polished, Classic, Elegant
+- Bold, Striking, Refined, Timeless
+- Authentic, Effortless, Magnetic, Curated
 
 **Keep names simple**: Single words work best.
 
@@ -26,17 +38,8 @@
 **"I can't afford to focus on appearance"**:
 - "This is about intention, not expense. How can you honor yourself within your means?"
 
-## Transitioning to Physical Expression & Health
+## Closing Out This Category
 
-**Create a custom transition** that clearly distinguishes appearance (presentation) from physical care (relationship with body). Use their specific situation and newly identified Personal Appearance identity.
+When they're complete here, close the category out warmly and personally — reflect back the identity they captured and what it says about them, in your own words, so it feels earned rather than canned. Don't fall back on a stock line like "This looks great" every time. Then ask whether they feel good and are ready to move on.
 
-**Examples of Leigh Ann's natural conversation flow for inspiration only** (don't use as templates):
-- Distinguishing the categories: *"This next one is different than personal appearance. Personal appearance is how you show up in the world—this is how you care for your physical self."*
-- Using the vessel metaphor: *"This is your relationship with your body, which is your vehicle. This is your suit for while you're here—how do you tend to it?"*
-- Acknowledging different approaches: *"Everyone has their own lane here. Some are athletic, others focus on supplements and nutrition. What's your brand of caring for your vessel?"*
-
-**Your transition should:**
-- Clearly distinguish between presentation to world vs. body care
-- Use the "vessel" or "vehicle" metaphor for the body
-- Acknowledge that everyone has different approaches to physical health
-- Reference their Personal Appearance identity while moving to body relationship
+Do NOT name, preview, or introduce the next category, and do NOT bridge into it in this message. Once they confirm, the focus switches and you'll introduce the next category fresh in a separate message.
