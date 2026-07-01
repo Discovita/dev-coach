@@ -6,12 +6,24 @@
 
 **Paradigm-Shifting Concept**: Many clients have never considered separating these functions. Just the idea that this is a separate identity can be a breakthrough.
 
+## Introducing This Category
+
+When Keeper of Money becomes the focus, open with a short intro before asking the question — this is the user's first time meeting this idea, so introduce it with clarity and strength. Cover these beats in your own natural voice:
+
+1. **What it is** — the part of you that keeps, manages, and grows money: a completely different energy from making it (budgeting, investing, stewarding what comes in).
+2. **Open it up** — invite them to look past the first obvious label so they land on the identity that genuinely resonates. (Keep it in your own polished, natural voice.)
+3. **Prime with examples** — offer a spread to mimic: a Steward, a Guardian, an Architect, a Planner, an Abundant King or Queen, an Investor, a Gardener who grows what they have.
+
+Then ask the question.
+
 ## Category-Specific Approach
 
 **The question**: "Who sits down and handles the budgeting, investing, moving money around? Who manages your money?"
 
-**If they're stuck, suggest simple options**:
-- Architect, Steward, Builder, Guardian, Optimizer, Planner, Manager
+**Example identities to offer if they're stuck or need priming** (pick what fits, don't dump the list):
+- Steward, Guardian, Architect, Planner, Optimizer
+- Abundant King, Abundant Queen, Provider, Protector
+- Investor, Strategist, Builder, Gardener
 
 **Keep names simple**: Single words work best.
 
@@ -26,15 +38,8 @@
 **"This feels too fancy/luxurious"**:
 - "What kind of financial life do YOU actually want? Let's honor what's true for you."
 
-## Transitioning to Spiritual Identity
+## Closing Out This Category
 
-**Create a custom transition** that flows naturally from money management to spiritual connection. Use their specific situation and newly identified Keeper of Money.
+When they're complete here, close the category out warmly and personally — reflect back the identity they captured and what it says about them, in your own words, so it feels earned rather than canned. Don't fall back on a stock line like "This looks great" every time. Then ask whether they feel good and are ready to move on.
 
-**Examples of Leigh Ann's natural conversation flow for inspiration only** (don't use as templates):
-- Moving from material to spiritual: *"Beautiful! Your [Keeper identity] has such clear values. Now let's explore another foundational part of who you are..."*
-- Natural progression: *"We've looked at how you generate and manage resources. Let's shift to how you connect with something larger than yourself..."*
-
-**Your transition should:**
-- Feel like a natural flow from financial stewardship to spiritual connection
-- Reference their specific Keeper of Money identity
-- Set up the spiritual category as another foundational aspect of identity
+Do NOT name, preview, or introduce the next category, and do NOT bridge into it in this message. Once they confirm, the focus switches and you'll introduce the next category fresh in a separate message.
