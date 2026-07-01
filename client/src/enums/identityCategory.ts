@@ -45,6 +45,34 @@ export const IDENTITY_CATEGORY_DISPLAY_NAMES: Record<IdentityCategory, string> =
 	};
 
 /**
+ * Maps identity category values to a short description of what the category is.
+ * Rendered in the brainstorming bulletin above the composer; sourced from the
+ * coach docs (coach/identity-categories.md). Descriptive, not addressed to the
+ * user.
+ */
+export const IDENTITY_CATEGORY_DESCRIPTIONS: Record<IdentityCategory, string> =
+	{
+		[IdentityCategory.PASSIONS_AND_TALENTS]:
+			"The foundational traits, skills, and interests that make a person uniquely themselves — their personality and gifts, like Musician, Designer, or Meticulous Executor. The one category that can hold several identities.",
+		[IdentityCategory.MAKER_OF_MONEY]:
+			"The identity a person channels energy through to generate income — money being a necessity, not a career. About who actually earns, which is often different from the passion or the job title.",
+		[IdentityCategory.KEEPER_OF_MONEY]:
+			"A separate energy from earning — the identity that keeps, manages, and grows money and defines the kind of financial life a person wants. Empowered and expansive (Wise Steward, Empire Builder), not fearful bean-counting.",
+		[IdentityCategory.SPIRITUAL]:
+			"A person's relationship to something greater than themselves — transcendence, meaning, and connection. Not limited to religion; it can be philosophical, ancient, meditative, or wholly their own (Universe's Child, Mystical Healer).",
+		[IdentityCategory.PERSONAL_APPEARANCE]:
+			"How a person presents to the world — style, grooming, home environment, and overall aesthetic presence. A reflection of self-worth and self-care, not vanity.",
+		[IdentityCategory.PHYSICAL_EXPRESSION]:
+			"A person's relationship with their body — the vessel they live in — and how they tend its vitality through movement, fuel, and care. Distinct from appearance, which is presentation.",
+		[IdentityCategory.FAMILIAL_RELATIONS]:
+			"How a person shows up across their family — biological, chosen, or symbolic. Can be literal (Mother, Brother) or archetypal (Family Anchor, Generational Healer), and one energy or several.",
+		[IdentityCategory.ROMANTIC_RELATION]:
+			"The identity for intimate partnership, sexuality, and romantic energy — how a person aspires to show up in love, at any relationship status. Aspirational, not a description of current behavior.",
+		[IdentityCategory.DOER_OF_THINGS]:
+			'The identity behind executive function — bringing visions into reality and handling life\'s necessities as self-affirming action rather than burdens. An elevating name like Captain of My Life, not "the dishwasher."',
+	};
+
+/**
  * Maps identity category values to their color classes for badges
  */
 export const IDENTITY_CATEGORY_COLORS: Record<IdentityCategory, string> = {
@@ -132,6 +160,30 @@ export const getIdentityCategoryDisplayName = (category: string): string => {
 
 	// Fallback to original value
 	return category;
+};
+
+/**
+ * Helper function to get the short description for an identity category
+ */
+export const getIdentityCategoryDescription = (category: string): string => {
+	if (!category) return "";
+
+	// Try exact match first
+	if (IDENTITY_CATEGORY_DESCRIPTIONS[category as IdentityCategory]) {
+		return IDENTITY_CATEGORY_DESCRIPTIONS[category as IdentityCategory];
+	}
+
+	// Try case-insensitive match
+	const normalizedCategory = category.toLowerCase();
+	for (const [key, description] of Object.entries(
+		IDENTITY_CATEGORY_DESCRIPTIONS,
+	)) {
+		if (key.toLowerCase() === normalizedCategory) {
+			return description;
+		}
+	}
+
+	return "";
 };
 
 /**
