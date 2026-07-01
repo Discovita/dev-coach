@@ -167,9 +167,57 @@ def process_message(
 
         coach_message = add_chat_message(user, coach_response.message, MessageRole.COACH)
 
+        # Capture the focused identity category BEFORE applying actions so we can
+        # detect a category hand-off (select_identity_focus) below.
+        pre_action_focus = coach_state.identity_focus
+
         updated_coach_state, component_config = apply_coach_response_actions(
             coach_state, coach_response, coach_message
         )
+
+        # Brainstorming category hand-off (auto second pass):
+        # When the coach advances to a NEW identity category, the message it just
+        # wrote was generated with the PREVIOUS category's context — so it can't
+        # properly introduce the new one (each category's intro text and examples
+        # are injected per-focus at prompt-build time, and the focus only just
+        # changed). Regenerate ONCE now that identity_focus has moved: the fresh
+        # prompt carries the new category's context, so the coach produces that
+        # category's intro. We overwrite the switch-turn message IN PLACE (same
+        # ChatMessage row) so the client shows a single bubble — the intro — with
+        # no leftover empty "switch" message, and the select_identity_focus action
+        # logged above stays attached to it. Capped at one extra pass and scoped
+        # to staying within brainstorming (a phase transition is not a hand-off).
+        category_changed = (
+            updated_coach_state.current_phase
+            == CoachingPhase.IDENTITY_BRAINSTORMING.value
+            and updated_coach_state.identity_focus != pre_action_focus
+        )
+        if category_changed:
+            log.debug(
+                f"Category hand-off: focus '{pre_action_focus}' -> "
+                f"'{updated_coach_state.identity_focus}'; regenerating with the "
+                f"new category context so the coach introduces it."
+            )
+            intro_prompt, intro_format = build_coach_prompt(
+                user, model, prompt_versions
+            )
+            intro_response = generate_coach_ai_response(
+                intro_prompt,
+                get_recent_chat_messages_for_prompt(user),
+                intro_format,
+                model,
+            )
+            # Overwrite the switch-turn message in place with the new category's
+            # intro (one bubble, correct context).
+            coach_message.content = intro_response.message
+            coach_message.save(update_fields=["content"])
+            updated_coach_state, intro_component = apply_coach_response_actions(
+                updated_coach_state, intro_response, coach_message
+            )
+            coach_response = intro_response
+            coach_prompt = intro_prompt
+            if intro_component is not None:
+                component_config = intro_component
 
         log.debug(f"Updated Coach State: {updated_coach_state}")
         log.debug(f"Component Config: {component_config}")
