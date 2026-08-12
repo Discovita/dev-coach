@@ -274,21 +274,20 @@ There is no pull request template in this repository.
 - `server/db.sqlite3` exists in the tree but the project runs on Postgres in
   every environment.
 
-## Known-stale sources
+## Cursor rules
 
-`.cursor/rules/` predates parts of the current setup. Two rules in
-`project-rules.mdc` are **wrong** and should not be followed:
+`.cursor/rules/` holds 30 rule files: project conventions, coaching-domain
+context, and step-by-step how-to guides (adding an app, a viewset, a coaching
+phase, an action, a context key). `index.mdc` indexes all of them by category
+and is the fastest way to find the right one.
 
-- It says to activate a virtualenv at `.venv` before every command. The project
-  runs in Docker; the repo-root `.venv` is a leftover.
-- It gives the test command as
-  `python manage.py test ... --settings=server.settings.test`. Both halves are
-  wrong: the suite runs under **pytest**, and the settings module is
-  `settings.test` — `server.settings.test` does not exist.
+A few are vendored upstream references rather than project rules —
+`celery-django-docs.mdc` and `s3_django_storage.mdc` are third-party
+documentation, so treat them as background, not as conventions for this
+codebase.
 
-`.cursor/rules/index.mdc` is still titled "Inbox Zero AI - Master Rule Index",
-carried over from another project, and has duplicated frontmatter. The rules it
-indexes are otherwise a useful map of the how-to guides.
-
-Treat the rest of `.cursor/rules/` as helpful but verify against code before
-relying on any specific command or path.
+These rules are hand-maintained and can drift from the code. `project-rules.mdc`
+previously carried two incorrect instructions (a host virtualenv, and a
+`manage.py test --settings=server.settings.test` invocation that names a
+non-existent module); both are corrected. If you find another rule contradicting
+the code, trust the code and fix the rule.
