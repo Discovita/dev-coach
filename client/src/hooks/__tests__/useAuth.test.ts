@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/api/auth", () => ({
 	login: vi.fn(),
 	register: vi.fn(),
+	registerViaInvite: vi.fn(),
 	forgotPassword: vi.fn(),
 	resetPassword: vi.fn(),
 	verifyEmail: vi.fn(),

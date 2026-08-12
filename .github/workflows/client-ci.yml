@@ -1,0 +1,47 @@
+name: Client CI
+
+# Lint, type-check, and test the React client on every PR and on pushes to
+# main. Scoped to client/** so server- or docs-only changes don't trigger it.
+# This is the gate that keeps the biome backlog from regrowing.
+
+on:
+  pull_request:
+    paths:
+      - "client/**"
+      - ".github/workflows/client-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "client/**"
+      - ".github/workflows/client-ci.yml"
+
+defaults:
+  run:
+    working-directory: client
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Biome lint + format. Errors fail the build; warnings (the deferred
+      # a11y / hook-deps backlog) are surfaced but non-blocking.
+      - name: Lint & format (biome)
+        run: npm run check
+
+      # vite build also runs tsc, so this covers type-checking.
+      - name: Build (vite + tsc)
+        run: npm run build
+
+      - name: Test (vitest)
+        run: npm run test
