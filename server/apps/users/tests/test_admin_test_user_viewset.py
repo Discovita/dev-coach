@@ -4,13 +4,15 @@ Endpoint tests for `AdminTestUserViewSet`.
 Covers the admin parity of derived user-state fields — in particular
 that `on_break` is exposed on `/api/v1/admin/test-user/{pk}/coach-state`
 so admin impersonation sees the same shape as the regular user-state
-endpoints.
+endpoints — plus the super-admin-only Studio access override and user
+deletion endpoints.
 """
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from apps.coach_states.models import Break
+from apps.chat_messages.models import ChatMessage
+from apps.coach_states.models import Break, CoachState
 from apps.users.models import User
 
 
@@ -146,3 +148,95 @@ class AdminTestUserStudioAccessTests(APITestCase):
             response.status_code,
             (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN),
         )
+
+
+class AdminTestUserDeleteTests(APITestCase):
+    """Super-admin-only permanent user deletion."""
+
+    def setUp(self):
+        self.superuser = User.objects.create_superuser(
+            email="super@example.com",
+            password="superpass123",
+        )
+        self.staff = User.objects.create_user(
+            email="staff@example.com",
+            password="staffpass123",
+            is_staff=True,
+        )
+        self.target_user = User.objects.create_user(
+            email="target@example.com",
+            password="testpass123",
+        )
+
+    def _url(self, user: User) -> str:
+        return f"/api/v1/admin/test-user/{user.pk}/delete"
+
+    def test_superuser_can_delete_a_user(self):
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.delete(self._url(self.target_user))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(User.objects.filter(pk=self.target_user.pk).exists())
+
+    def test_delete_cascades_to_the_users_data(self):
+        """Rows hanging off the user go with them; other users are untouched."""
+        ChatMessage.objects.create(
+            user=self.target_user,
+            role="user",
+            content="Hello",
+        )
+        Break.objects.create(
+            user=self.target_user,
+            triggered_by_session="get_to_know_session",
+        )
+        survivor = User.objects.create_user(
+            email="survivor@example.com",
+            password="testpass123",
+        )
+        ChatMessage.objects.create(user=survivor, role="user", content="Still here")
+
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.delete(self._url(self.target_user))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            ChatMessage.objects.filter(user_id=self.target_user.pk).exists()
+        )
+        self.assertFalse(Break.objects.filter(user_id=self.target_user.pk).exists())
+        self.assertFalse(
+            CoachState.objects.filter(user_id=self.target_user.pk).exists()
+        )
+        self.assertTrue(User.objects.filter(pk=survivor.pk).exists())
+        self.assertEqual(ChatMessage.objects.filter(user=survivor).count(), 1)
+
+    def test_superuser_cannot_delete_themselves(self):
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.delete(self._url(self.superuser))
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(User.objects.filter(pk=self.superuser.pk).exists())
+
+    def test_staff_admin_is_forbidden(self):
+        """is_staff alone is not enough — this is a super-admin capability."""
+        self.client.force_authenticate(user=self.staff)
+        response = self.client.delete(self._url(self.target_user))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(User.objects.filter(pk=self.target_user.pk).exists())
+
+    def test_anonymous_is_forbidden(self):
+        response = self.client.delete(self._url(self.target_user))
+
+        self.assertIn(
+            response.status_code,
+            (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN),
+        )
+        self.assertTrue(User.objects.filter(pk=self.target_user.pk).exists())
+
+    def test_unknown_user_returns_404(self):
+        self.client.force_authenticate(user=self.superuser)
+        response = self.client.delete(
+            "/api/v1/admin/test-user/00000000-0000-0000-0000-000000000000/delete"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
