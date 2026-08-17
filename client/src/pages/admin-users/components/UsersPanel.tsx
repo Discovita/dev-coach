@@ -9,8 +9,9 @@ import {
 	type CoachingPhase,
 	getCoachingPhaseDisplayName,
 } from "@/enums/coachingPhase";
-import { useAdminUsers } from "@/hooks/use-admin-users";
+import { useAdminUsers, useDeleteUser } from "@/hooks/use-admin-users";
 import { useProfile } from "@/hooks/use-profile";
+import { DeleteUserDialog } from "@/pages/admin-users/components/DeleteUserDialog";
 import {
 	type PhaseSort,
 	filterUsers,
@@ -26,6 +27,7 @@ import {
 	FlaskConical,
 	Loader2,
 	Search,
+	Trash2,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -40,12 +42,21 @@ import { useState } from "react";
  */
 export default function UsersPanel() {
 	const { data: users, isLoading, isError } = useAdminUsers();
-	const { startImpersonating, impersonatedUser } = useImpersonation();
+	const { startImpersonating, stopImpersonating, impersonatedUser } =
+		useImpersonation();
 	const { profile } = useProfile();
 	const navigate = useNavigate();
+	const deleteUser = useDeleteUser();
 	const [search, setSearch] = useState("");
 	const [showTestUsers, setShowTestUsers] = useState(false);
 	const [phaseSort, setPhaseSort] = useState<PhaseSort>(null);
+	const [userToDelete, setUserToDelete] = useState<AdminUserListItem | null>(
+		null,
+	);
+
+	// Deleting is destructive and irreversible, so it follows the same
+	// super-admin gate as invites and the Studio access override.
+	const canDelete = profile?.is_superuser ?? false;
 
 	const allUsers = users ?? [];
 	const visibleUsers = sortUsersByPhase(
@@ -64,6 +75,24 @@ export default function UsersPanel() {
 			last_name: user.last_name,
 		});
 		navigate({ to: "/chat" });
+	};
+
+	const handleConfirmDelete = async () => {
+		if (!userToDelete) return;
+		const deletedId = userToDelete.id;
+		try {
+			await deleteUser.mutateAsync(deletedId);
+			// Never leave the admin impersonating an account that no longer exists.
+			if (impersonatedUser?.id === deletedId) stopImpersonating();
+			setUserToDelete(null);
+		} catch {
+			// The dialog surfaces the mutation error and stays open.
+		}
+	};
+
+	const handleCloseDeleteDialog = () => {
+		deleteUser.reset();
+		setUserToDelete(null);
 	};
 
 	const PhaseSortIcon =
@@ -225,23 +254,36 @@ export default function UsersPanel() {
 										)}
 									</td>
 									<td className="px-4 py-3 text-right">
-										{isCurrentUser ? (
-											<span className="text-xs text-muted-foreground">—</span>
-										) : isCurrentlyImpersonating ? (
-											<Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700">
-												Viewing
-											</Badge>
-										) : (
-											<Button
-												variant="ghost"
-												size="sm"
-												onClick={() => handleViewAs(user)}
-												className="gap-1.5"
-											>
-												<Eye className="w-3.5 h-3.5" />
-												View As
-											</Button>
-										)}
+										<div className="flex items-center justify-end gap-1">
+											{isCurrentUser ? (
+												<span className="text-xs text-muted-foreground">—</span>
+											) : isCurrentlyImpersonating ? (
+												<Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700">
+													Viewing
+												</Badge>
+											) : (
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => handleViewAs(user)}
+													className="gap-1.5"
+												>
+													<Eye className="w-3.5 h-3.5" />
+													View As
+												</Button>
+											)}
+											{canDelete && !isCurrentUser && (
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => setUserToDelete(user)}
+													className="text-muted-foreground hover:text-destructive"
+													aria-label={`Delete ${user.email}`}
+												>
+													<Trash2 className="w-3.5 h-3.5" />
+												</Button>
+											)}
+										</div>
 									</td>
 								</tr>
 							);
@@ -259,6 +301,14 @@ export default function UsersPanel() {
 					</tbody>
 				</table>
 			</div>
+
+			<DeleteUserDialog
+				user={userToDelete}
+				onClose={handleCloseDeleteDialog}
+				onConfirm={handleConfirmDelete}
+				isDeleting={deleteUser.isPending}
+				error={deleteUser.error as Error | null}
+			/>
 		</div>
 	);
 }
