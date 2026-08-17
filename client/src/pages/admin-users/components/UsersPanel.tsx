@@ -2,19 +2,41 @@ import type { AdminUserListItem } from "@/api/adminUsers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useImpersonation } from "@/context/ImpersonationContext";
+import {
+	type CoachingPhase,
+	getCoachingPhaseDisplayName,
+} from "@/enums/coachingPhase";
 import { useAdminUsers } from "@/hooks/use-admin-users";
 import { useProfile } from "@/hooks/use-profile";
+import {
+	type PhaseSort,
+	filterUsers,
+	nextPhaseSort,
+	sortUsersByPhase,
+} from "@/pages/admin-users/user-list-helpers";
 import { useNavigate } from "@tanstack/react-router";
-import { Eye, FlaskConical, Loader2, Search } from "lucide-react";
+import {
+	ArrowDown,
+	ArrowUp,
+	ArrowUpDown,
+	Eye,
+	FlaskConical,
+	Loader2,
+	Search,
+} from "lucide-react";
 import { useState } from "react";
 
 /**
  * UsersPanel
  *
- * Searchable list of every user in the system. Admins can click "View As" to
- * start impersonating a user, which switches all data hooks to fetch that
- * user's data via admin endpoints.
+ * Searchable list of every user in the system. Test users are hidden until
+ * the "Show test users" toggle is switched on, and the Phase column sorts by
+ * coaching progression. Admins can click "View As" to start impersonating a
+ * user, which switches all data hooks to fetch that user's data via admin
+ * endpoints.
  */
 export default function UsersPanel() {
 	const { data: users, isLoading, isError } = useAdminUsers();
@@ -22,18 +44,17 @@ export default function UsersPanel() {
 	const { profile } = useProfile();
 	const navigate = useNavigate();
 	const [search, setSearch] = useState("");
+	const [showTestUsers, setShowTestUsers] = useState(false);
+	const [phaseSort, setPhaseSort] = useState<PhaseSort>(null);
 
-	const filteredUsers = (users ?? []).filter((user) => {
-		if (!search) return true;
-		const term = search.toLowerCase();
-		return (
-			user.email.toLowerCase().includes(term) ||
-			(user.first_name ?? "").toLowerCase().includes(term) ||
-			(user.last_name ?? "").toLowerCase().includes(term) ||
-			(user.coaching_phase ?? "").toLowerCase().includes(term) ||
-			(user.test_scenario_name ?? "").toLowerCase().includes(term)
-		);
-	});
+	const allUsers = users ?? [];
+	const visibleUsers = sortUsersByPhase(
+		filterUsers(allUsers, { search, showTestUsers }),
+		phaseSort,
+	);
+	const hiddenTestUserCount = showTestUsers
+		? 0
+		: allUsers.filter((user) => user.is_test_user).length;
 
 	const handleViewAs = (user: AdminUserListItem) => {
 		startImpersonating({
@@ -45,10 +66,12 @@ export default function UsersPanel() {
 		navigate({ to: "/chat" });
 	};
 
-	const formatPhase = (phase: string | null) => {
-		if (!phase) return null;
-		return phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-	};
+	const PhaseSortIcon =
+		phaseSort === "asc"
+			? ArrowUp
+			: phaseSort === "desc"
+				? ArrowDown
+				: ArrowUpDown;
 
 	if (isLoading) {
 		return (
@@ -68,9 +91,29 @@ export default function UsersPanel() {
 
 	return (
 		<div>
-			<p className="text-sm text-muted-foreground mb-4">
-				{users?.length ?? 0} total users
-			</p>
+			<div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+				<p className="text-sm text-muted-foreground">
+					{visibleUsers.length} {visibleUsers.length === 1 ? "user" : "users"}
+					{hiddenTestUserCount > 0 &&
+						` · ${hiddenTestUserCount} test ${
+							hiddenTestUserCount === 1 ? "user" : "users"
+						} hidden`}
+				</p>
+
+				<div className="flex items-center gap-2">
+					<Switch
+						id="show-test-users"
+						checked={showTestUsers}
+						onCheckedChange={setShowTestUsers}
+					/>
+					<Label
+						htmlFor="show-test-users"
+						className="text-sm text-muted-foreground font-normal"
+					>
+						Show test users
+					</Label>
+				</div>
+			</div>
 
 			{/* Search */}
 			<div className="relative mb-4">
@@ -93,13 +136,31 @@ export default function UsersPanel() {
 								Type
 							</th>
 							<th className="text-left font-medium px-4 py-3 hidden md:table-cell">
-								Phase
+								<button
+									type="button"
+									onClick={() => setPhaseSort(nextPhaseSort(phaseSort))}
+									className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+									aria-label={
+										phaseSort === "asc"
+											? "Sort phase descending"
+											: phaseSort === "desc"
+												? "Clear phase sorting"
+												: "Sort phase ascending"
+									}
+								>
+									Phase
+									<PhaseSortIcon
+										className={`w-3.5 h-3.5 ${
+											phaseSort ? "text-foreground" : "text-muted-foreground"
+										}`}
+									/>
+								</button>
 							</th>
 							<th className="text-right font-medium px-4 py-3">Actions</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-border">
-						{filteredUsers.map((user) => {
+						{visibleUsers.map((user) => {
 							const isCurrentUser = user.id === profile?.id;
 							const isCurrentlyImpersonating = impersonatedUser?.id === user.id;
 							const displayName =
@@ -155,7 +216,9 @@ export default function UsersPanel() {
 									<td className="px-4 py-3 hidden md:table-cell">
 										{user.coaching_phase ? (
 											<Badge variant="outline" className="text-xs font-normal">
-												{formatPhase(user.coaching_phase)}
+												{getCoachingPhaseDisplayName(
+													user.coaching_phase as CoachingPhase,
+												)}
 											</Badge>
 										) : (
 											<span className="text-muted-foreground text-xs">—</span>
@@ -183,7 +246,7 @@ export default function UsersPanel() {
 								</tr>
 							);
 						})}
-						{filteredUsers.length === 0 && (
+						{visibleUsers.length === 0 && (
 							<tr>
 								<td
 									colSpan={4}
