@@ -12,7 +12,11 @@ from rest_framework import decorators, status, viewsets
 from rest_framework.response import Response
 
 from apps.chat_messages.utils import ensure_initial_message_exists
-from apps.users.functions import get_user_chat_messages, get_user_identities
+from apps.users.functions import (
+    delete_user_account,
+    get_user_chat_messages,
+    get_user_identities,
+)
 from apps.users.models import User
 from permissions import IsAdminUser, IsSuperUser
 
@@ -38,7 +42,9 @@ class AdminTestUserViewSet(viewsets.GenericViewSet):
         """
         from apps.coach_states.models import CoachState
 
-        users = User.objects.select_related("test_scenario").all().order_by("-last_login")
+        users = (
+            User.objects.select_related("test_scenario").all().order_by("-last_login")
+        )
         coach_states = {
             cs.user_id: cs.current_phase
             for cs in CoachState.objects.select_related("user").all()
@@ -140,6 +146,30 @@ class AdminTestUserViewSet(viewsets.GenericViewSet):
         return Response(
             CoachStateSerializer(coach_state).data, status=status.HTTP_200_OK
         )
+
+    @decorators.action(
+        detail=True,
+        methods=["delete"],
+        url_path="delete",
+        permission_classes=[IsSuperUser],
+    )
+    def delete_user(self, request, pk=None):
+        """
+        DELETE /api/v1/admin/test-user/{id}/delete — super-admin only.
+
+        Permanently deletes the target user and cascades to all of their
+        data. There is no undo. Deleting yourself is rejected so a super
+        admin cannot remove the account they are acting with.
+        """
+        user = get_object_or_404(User, pk=pk)
+        if user.pk == request.user.pk:
+            return Response(
+                {"detail": "You cannot delete your own account."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        delete_user_account(user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @decorators.action(detail=True, methods=["get"], url_path="identities")
     def identities(self, request, pk=None):

@@ -33,3 +33,23 @@ export async function fetchAllUsers(): Promise<AdminUserListItem[]> {
 	}
 	return response.json();
 }
+
+/**
+ * Permanently delete a user and cascade to all of their data.
+ *
+ * Endpoint: DELETE /api/v1/admin/test-user/{id}/delete
+ * Permission: IsSuperUser
+ */
+export async function deleteUser(userId: string): Promise<void> {
+	const response = await authFetch(
+		`${COACH_BASE_URL}/admin/test-user/${userId}/delete`,
+		{ method: "DELETE" },
+	);
+	if (!response.ok) {
+		const detail = await response
+			.json()
+			.then((body) => body?.detail)
+			.catch(() => null);
+		throw new Error(detail ?? "Failed to delete user");
+	}
+}

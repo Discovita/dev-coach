@@ -1,5 +1,9 @@
-import { type AdminUserListItem, fetchAllUsers } from "@/api/adminUsers";
-import { useQuery } from "@tanstack/react-query";
+import {
+	type AdminUserListItem,
+	deleteUser,
+	fetchAllUsers,
+} from "@/api/adminUsers";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 /**
  * useAdminUsers hook
@@ -15,5 +19,24 @@ export function useAdminUsers() {
 		queryFn: fetchAllUsers,
 		staleTime: 1000 * 60 * 5,
 		retry: false,
+	});
+}
+
+/**
+ * useDeleteUser hook
+ *
+ * Permanently deletes a user, then refetches the admin user list so the
+ * table reflects the deletion right away. Super-admin only (backend
+ * enforces IsSuperUser).
+ *
+ * Used in: UsersPanel
+ */
+export function useDeleteUser() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: deleteUser,
+		onSuccess: () =>
+			queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
 	});
 }
