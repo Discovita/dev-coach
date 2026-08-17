@@ -9,9 +9,9 @@ import { useState } from "react";
 /**
  * InvitesPanel
  *
- * Super-admin-only UI to send and manage email-bound invites. Rendered on the
- * admin Users page, gated on the logged-in admin's is_superuser flag (the
- * backend also enforces IsSuperUser on every endpoint).
+ * Super-admin-only UI to send and manage email-bound invites. Rendered as the
+ * Invites tab of the admin Users page, gated on the logged-in admin's
+ * is_superuser flag (the backend also enforces IsSuperUser on every endpoint).
  */
 
 const STATUS_STYLES: Record<InviteStatus, string> = {
@@ -67,10 +67,9 @@ export default function InvitesPanel() {
 		iso ? new Date(iso).toLocaleDateString() : "—";
 
 	return (
-		<div className="rounded-lg border border-border mb-8">
+		<div className="rounded-lg border border-border">
 			<div className="px-4 py-3 border-b border-border flex items-center gap-2">
 				<Mail className="w-4 h-4 text-muted-foreground" />
-				<h2 className="font-semibold">Invites</h2>
 				<span className="text-xs text-muted-foreground">
 					Registration is invite-only
 				</span>
